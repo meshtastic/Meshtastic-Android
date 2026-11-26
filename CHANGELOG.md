@@ -8,19 +8,7 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
-### Closed Beta (v2.8.5-closed.3)
-Changes since [`v2.8.5-open.1`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.5-open.1):
-
-#### 🏗️ Features
-* feat(settings): manage contacts and favorites on a remote node by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8251
-#### 🖥️ Desktop
-* fix(desktop): address Linux serial radios by their /dev/serial/by-id link by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8250
-#### 🛠️ Fixes
-* fix(messaging): show the relay on packets that crossed MQTT but arrived over LoRa by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8252
-* fix(nodes): stop offering nodes the radio no longer holds as unheard by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8248
-* fix(node): stop the neighbor info log crashing on duplicate rows and chart x-values by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8266
-
-### Open Beta (v2.8.5-open.1)
+### Open Beta (v2.8.5-open.2)
 Changes since [`v2.8.4`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.4):
 
 #### 🏗️ Features
@@ -55,6 +43,7 @@ Changes since [`v2.8.4`](https://github.com/meshtastic/Meshtastic-Android/releas
 * feat(location): take fixes from Play services' fused provider on google by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8143
 * fix(desktop): open the no-op or mock transport for no-device, replay and unknown addresses by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8196
 * feat(messaging): show the relaying node on received messages and on reactions by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8210
+* feat(settings): manage contacts and favorites on a remote node by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8251
 #### 🖥️ Desktop
 * fix(desktop): let the JVM size the heap from available RAM by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8015
 * fix(resources): keep suspending string lookups off the main dispatcher by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8050
@@ -63,6 +52,7 @@ Changes since [`v2.8.4`](https://github.com/meshtastic/Meshtastic-Android/releas
 * refactor(map): share the traceroute adapter across MapLibre hosts by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8186
 * refactor(network): install the API client's plugins from one place by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8187
 * fix(desktop): keep the data directory owner-only and read the agent port from a JVM property by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8213
+* fix(desktop): address Linux serial radios by their /dev/serial/by-id link by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8250
 #### 🛠️ Fixes
 * fix(widget): compose the picker preview without a glance id by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7934
 * fix(map): download regional terrain from every z6 archive a region touches by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7943
@@ -134,6 +124,9 @@ Changes since [`v2.8.4`](https://github.com/meshtastic/Meshtastic-Android/releas
 * fix(data): amortize node index eviction with a low-water mark by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8236
 * fix(takserver): dedupe mesh CoT on the wire payload by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8240
 * fix(ble): adopt Kable 0.46 GATT cache refresh and desktop MTU by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8239
+* fix(messaging): show the relay on packets that crossed MQTT but arrived over LoRa by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8252
+* fix(nodes): stop offering nodes the radio no longer holds as unheard by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8248
+* fix(node): stop the neighbor info log crashing on duplicate rows and chart x-values by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8266
 #### 📝 Other Changes
 * fix(obtainium): percent-encode the scheme in redirect links by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7983
 * feat(connections): move connect-code scan to the import FAB by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8083
