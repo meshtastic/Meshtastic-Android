@@ -238,6 +238,8 @@
     <string name="radio_setup_name_headline">Назва</string>
     <string name="reboot">Перазагрузіць</string>
     <!-- REMOTE -->
+    <string name="remote_contacts_ignore">Ігнараваць</string>
+    <string name="remote_contacts_remove">Прыбраць</string>
     <string name="remote_shell_send">Адправіць</string>
     <string name="remote_shell_status_not_connected">Не злучана</string>
     <!-- REMOVE -->

@@ -910,6 +910,8 @@
     <string name="remote">Fjärr</string>
     <string name="remote_admin">Fjärradministration</string>
     <string name="remote_admin_unreachable">Kunde inte nå noden — försök igen eller flytta dig närmare.</string>
+    <string name="remote_contacts_ignore">Ignorera</string>
+    <string name="remote_contacts_remove">Ta bort</string>
     <string name="remote_hardware">Fjärrstyrd hårdvara</string>
     <string name="remote_hardware_config">Konfiguration av fjärrhårdvara</string>
     <string name="remote_hardware_enabled">Fjärrhårdvara aktiverad</string>

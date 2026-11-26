@@ -1410,6 +1410,8 @@
     <string name="remote">Etäyhteys</string>
     <string name="remote_admin">Etähallinta</string>
     <string name="remote_admin_unreachable">Yhteyttä radioon ei saatu — yritä uudelleen tai siirry lähemmäksi.</string>
+    <string name="remote_contacts_ignore">Jätä huomiotta</string>
+    <string name="remote_contacts_remove">Poista</string>
     <string name="remote_hardware">Etälaitteisto</string>
     <string name="remote_hardware_config">Etälaitteen asetukset</string>
     <string name="remote_hardware_enabled">Etälaitteen ohjaus käytössä</string>

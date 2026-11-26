@@ -566,6 +566,8 @@
     <string name="reload">Odśwież</string>
     <!-- REMOTE -->
     <string name="remote_admin">Zdalne zarządzanie</string>
+    <string name="remote_contacts_ignore">Zignoruj</string>
+    <string name="remote_contacts_remove">Usuń</string>
     <string name="remote_shell_modifier_locked">Zablokowany</string>
     <string name="remote_shell_send">Wyślij</string>
     <string name="remote_shell_status_not_connected">Rozłączony</string>

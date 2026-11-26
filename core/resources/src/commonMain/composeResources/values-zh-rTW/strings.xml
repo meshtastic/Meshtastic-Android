@@ -1062,6 +1062,8 @@ You can find detailed instructions and documentation on the official Meshtastic 
     <string name="remote">遠端</string>
     <string name="remote_admin">遠端管理</string>
     <string name="remote_admin_unreachable">無法連線至節點，請再試一次或靠近裝置。</string>
+    <string name="remote_contacts_ignore">忽略</string>
+    <string name="remote_contacts_remove">移除</string>
     <string name="remote_hardware">遠程硬件</string>
     <string name="remote_hardware_config">遠端硬體設定</string>
     <string name="remote_hardware_enabled">啟動遠端硬體</string>

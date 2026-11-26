@@ -1104,6 +1104,8 @@
     <string name="remote">Distant</string>
     <string name="remote_admin">Administration à distance</string>
     <string name="remote_admin_unreachable">Impossible d'atteindre le nœud — essayez à nouveau ou approchez-le.</string>
+    <string name="remote_contacts_ignore">Ignorer</string>
+    <string name="remote_contacts_remove">Supprimer</string>
     <string name="remote_hardware">Matériel télécommande</string>
     <string name="remote_hardware_config">Configuration du matériel distant</string>
     <string name="remote_hardware_enabled">Matériel distant activé</string>

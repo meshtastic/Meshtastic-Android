@@ -580,6 +580,8 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <!-- REMOTE -->
     <string name="remote">Remoto</string>
     <string name="remote_admin">Administración remota</string>
+    <string name="remote_contacts_ignore">Ignorar</string>
+    <string name="remote_contacts_remove">Quitar</string>
     <string name="remote_hardware">Hardware Remoto</string>
     <string name="remote_hardware_config">Configuración del hardware remotamente</string>
     <string name="remote_hardware_enabled">Hardware remoto activado</string>

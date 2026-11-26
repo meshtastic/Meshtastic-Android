@@ -1243,6 +1243,8 @@
     <string name="remote">远程</string>
     <string name="remote_admin">远程管理</string>
     <string name="remote_admin_unreachable">无法连接节点 — 再试一次或移动更近。</string>
+    <string name="remote_contacts_ignore">忽略</string>
+    <string name="remote_contacts_remove">移除</string>
     <string name="remote_hardware">远程硬件</string>
     <string name="remote_hardware_config">远程硬件设置</string>
     <string name="remote_hardware_enabled">启用远程硬件</string>
