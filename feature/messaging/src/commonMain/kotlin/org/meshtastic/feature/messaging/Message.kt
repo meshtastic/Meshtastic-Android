@@ -62,6 +62,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.isShiftPressed
@@ -102,6 +103,7 @@ import org.meshtastic.core.model.util.getChannel
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.archived_channel_read_only
 import org.meshtastic.core.resources.send
+import org.meshtastic.core.resources.transparent_mode_send_blocked
 import org.meshtastic.core.resources.type_a_message
 import org.meshtastic.core.resources.unknown_channel
 import org.meshtastic.core.ui.component.InlineStyle
@@ -110,6 +112,7 @@ import org.meshtastic.core.ui.component.smartScrollToIndex
 import org.meshtastic.core.ui.icon.History
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Send
+import org.meshtastic.core.ui.icon.Warning
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.createClipEntry
 import org.meshtastic.core.ui.util.isFromSoftKeyboard
@@ -171,6 +174,7 @@ fun MessageScreen(
     }
     val ourNode by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
+    val sendBlockedByTransparentMode by viewModel.sendBlockedByTransparentMode.collectAsStateWithLifecycle()
     val channels by viewModel.channels.collectAsStateWithLifecycle()
     val quickChatActions by viewModel.quickChatActions.collectAsStateWithLifecycle(initialValue = emptyList())
     val pagedMessages = viewModel.getMessagesFromPaged(contactKey).collectAsLazyPagingItems()
@@ -482,6 +486,8 @@ fun MessageScreen(
             // row are replaced outright rather than merely disabled.
             if (isRetiredChannel) {
                 RetiredChannelNotice()
+            } else if (sendBlockedByTransparentMode) {
+                TransparentModeSendNotice()
             } else {
                 Column {
                     AnimatedVisibility(visible = showQuickChat) {
@@ -537,8 +543,8 @@ fun MessageScreen(
                     searchQuery = if (isSearchActive) searchQuery else "",
                     translationAvailable = translationAvailable,
                     showFullMessageTimestamps = showFullMessageTimestamps,
-                    canReact = !isRetiredChannel,
-                    canSend = !isRetiredChannel,
+                    canReact = !isRetiredChannel && !sendBlockedByTransparentMode,
+                    canSend = !isRetiredChannel && !sendBlockedByTransparentMode,
                 ),
                 handlers =
                 MessageListHandlers(
@@ -788,19 +794,37 @@ private fun mentionOutputTransformation(candidatesById: () -> Map<String, Mentio
  */
 @Composable
 internal fun RetiredChannelNotice(modifier: Modifier = Modifier) {
+    ComposerNotice(
+        icon = MeshtasticIcons.History,
+        text = stringResource(Res.string.archived_channel_read_only),
+        modifier = modifier,
+    )
+}
+
+/**
+ * Replaces the composer while the connected node is in transparent mode: the node drops whatever the app sends, so the
+ * affordance is removed and the reason takes its place.
+ */
+@Composable
+internal fun TransparentModeSendNotice(modifier: Modifier = Modifier) {
+    ComposerNotice(
+        icon = MeshtasticIcons.Warning,
+        text = stringResource(Res.string.transparent_mode_send_blocked),
+        modifier = modifier,
+    )
+}
+
+@Composable
+private fun ComposerNotice(icon: ImageVector, text: String, modifier: Modifier = Modifier) {
     Surface(modifier = modifier.fillMaxWidth(), color = MaterialTheme.colorScheme.surfaceContainerHigh) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Icon(
-                imageVector = MeshtasticIcons.History,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            Icon(imageVector = icon, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
             Text(
-                text = stringResource(Res.string.archived_channel_read_only),
+                text = text,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

@@ -31,7 +31,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
@@ -41,6 +43,7 @@ import kotlinx.coroutines.withContext
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.currentLocaleCode
 import org.meshtastic.core.common.util.ioDispatcher
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.ContactSettings
 import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.Node
@@ -63,6 +66,7 @@ import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.translation_failed
 import org.meshtastic.core.resources.translation_model_download_failed
 import org.meshtastic.core.resources.translation_not_required
+import org.meshtastic.core.resources.transparent_mode_send_blocked
 import org.meshtastic.core.ui.util.SnackbarManager
 import org.meshtastic.core.ui.viewmodel.errorEventFlow
 import org.meshtastic.core.ui.viewmodel.safeLaunch
@@ -183,6 +187,21 @@ class MessageViewModel(
     val ourNodeInfo = nodeRepository.ourNodeInfo
 
     val connectionState = connectionStateProvider.connectionState
+
+    private val transparentMode: Flow<Boolean> =
+        combine(connectionStateProvider.connectionState, radioConfigRepository.localConfigFlow) { state, config ->
+            state == ConnectionState.Connected && config.lora?.transparent_mode == true
+        }
+            .distinctUntilChanged()
+
+    /** The connected node is a raw LoRa modem (transparent mode) and drops whatever this app sends through it. */
+    val sendBlockedByTransparentMode: StateFlow<Boolean> = transparentMode.stateInWhileSubscribed(initialValue = false)
+
+    private suspend fun refusedByTransparentMode(): Boolean {
+        if (transparentMode.firstOrNull() != true) return false
+        sendErrorEvents.tryEmit(UiText.Resource(Res.string.transparent_mode_send_blocked))
+        return true
+    }
 
     val nodeList: StateFlow<List<Node>> = nodeRepository.getNodes().stateInWhileSubscribed(initialValue = emptyList())
 
@@ -400,12 +419,15 @@ class MessageViewModel(
      */
     fun sendMessage(str: String, contactKey: String = "0${NodeAddress.ID_BROADCAST}", replyId: Int? = null) {
         safeLaunch(errorEvents = sendErrorEvents, tag = "sendMessage") {
+            if (refusedByTransparentMode()) return@safeLaunch
             sendMessageUseCase.invoke(str, contactKey, replyId)
         }
     }
 
-    fun sendReaction(emoji: String, replyId: Int, contactKey: String) =
-        safeLaunch(tag = "sendReaction") { messagingController.sendReaction(emoji, replyId, contactKey) }
+    fun sendReaction(emoji: String, replyId: Int, contactKey: String) = safeLaunch(tag = "sendReaction") {
+        if (refusedByTransparentMode()) return@safeLaunch
+        messagingController.sendReaction(emoji, replyId, contactKey)
+    }
 
     fun deleteMessages(uuidList: List<Long>) =
         safeLaunch(context = ioDispatcher, tag = "deleteMessages") { packetRepository.deleteMessages(uuidList) }
@@ -416,6 +438,7 @@ class MessageViewModel(
      */
     fun resendMessage(uuid: Long, contactKey: String) {
         safeLaunch(errorEvents = sendErrorEvents, tag = "resendMessage") {
+            if (refusedByTransparentMode()) return@safeLaunch
             sendMessageUseCase.resend(uuid, contactKey)
         }
     }

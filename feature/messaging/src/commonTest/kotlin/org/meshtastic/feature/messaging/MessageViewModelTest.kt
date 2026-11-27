@@ -50,12 +50,16 @@ import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.repository.usecase.SendMessageOutcome
 import org.meshtastic.core.repository.usecase.SendMessageUseCase
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.UiText
+import org.meshtastic.core.resources.transparent_mode_send_blocked
 import org.meshtastic.core.testing.FakeFilterPrefs
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.TestDataFactory
 import org.meshtastic.core.ui.util.SnackbarManager
 import org.meshtastic.feature.messaging.translation.MessageTranslationService
 import org.meshtastic.proto.ChannelSet
+import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceProfile
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
@@ -94,6 +98,7 @@ class MessageViewModelTest {
     private val testDispatcher = StandardTestDispatcher()
 
     private val connectionStateFlow = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
+    private val localConfigFlow = MutableStateFlow(LocalConfig.Builder().build())
     private val showQuickChatFlow = MutableStateFlow(false)
     private val showFullMessageTimestampsFlow = MutableStateFlow(false)
     private val customEmojiFrequencyFlow = MutableStateFlow<String?>(null)
@@ -114,7 +119,8 @@ class MessageViewModelTest {
 
         // Core flows - MUST be separate every blocks
         every { radioConfigRepository.channelSetFlow } returns MutableStateFlow(ChannelSet.Builder().build())
-        every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(LocalConfig.Builder().build())
+        localConfigFlow.value = LocalConfig.Builder().build()
+        every { radioConfigRepository.localConfigFlow } returns localConfigFlow
         every { radioConfigRepository.moduleConfigFlow } returns MutableStateFlow(LocalModuleConfig.Builder().build())
         every { radioConfigRepository.deviceProfileFlow } returns MutableStateFlow(DeviceProfile.Builder().build())
 
@@ -342,6 +348,80 @@ class MessageViewModelTest {
         eventually { verifySuspend { sendMessageUseCase.invoke("Hello", "0!12345678", null) } }
     }
 
+    private fun connectToTransparentNode() {
+        val lora =
+            Config.LoRaConfig.Builder()
+                .also { wb ->
+                    wb.tx_enabled = true
+                    wb.transparent_mode = true
+                }
+                .build()
+        localConfigFlow.value = LocalConfig.Builder().also { wb -> wb.lora = lora }.build()
+        connectionStateFlow.value = ConnectionState.Connected
+    }
+
+    private suspend fun withTransparentModeReason(block: suspend () -> Unit) {
+        val previous = MessagingUiTextResolver.resolve
+        MessagingUiTextResolver.resolve = { text ->
+            if (text == UiText.Resource(Res.string.transparent_mode_send_blocked)) TRANSPARENT_REASON else "other"
+        }
+        try {
+            block()
+        } finally {
+            MessagingUiTextResolver.resolve = previous
+        }
+    }
+
+    @Test
+    fun `a send to a node in transparent mode is refused and names transparent mode`() = runTest {
+        connectToTransparentNode()
+
+        withTransparentModeReason {
+            snackbarManager.events.test {
+                viewModel.sendMessage("Hello", "0!12345678", null)
+                advanceUntilIdle()
+
+                assertEquals(TRANSPARENT_REASON, awaitItem().message)
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+        verifySuspend(VerifyMode.exactly(0)) { sendMessageUseCase.invoke(any(), any(), any()) }
+    }
+
+    @Test
+    fun `a resend and a reaction to a node in transparent mode are refused`() = runTest {
+        connectToTransparentNode()
+
+        withTransparentModeReason {
+            snackbarManager.events.test {
+                viewModel.resendMessage(7L, "0!12345678")
+                advanceUntilIdle()
+                assertEquals(TRANSPARENT_REASON, awaitItem().message)
+
+                viewModel.sendReaction("❤️", 123, "0!12345678")
+                advanceUntilIdle()
+                assertEquals(TRANSPARENT_REASON, awaitItem().message)
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+        verifySuspend(VerifyMode.exactly(0)) { sendMessageUseCase.resend(any(), any()) }
+        verifySuspend(VerifyMode.exactly(0)) { messagingController.sendReaction(any(), any(), any()) }
+    }
+
+    @Test
+    fun `a message written while disconnected from a transparent node is still queued`() = runTest {
+        connectToTransparentNode()
+        connectionStateFlow.value = ConnectionState.Disconnected
+        everySuspend { sendMessageUseCase.invoke(any(), any(), any()) } returns SendMessageOutcome.Queued(1)
+
+        viewModel.sendMessage("Hello", "0!12345678", null)
+        advanceUntilIdle()
+
+        eventually { verifySuspend { sendMessageUseCase.invoke("Hello", "0!12345678", null) } }
+    }
+
     @Test
     fun testSendReaction() = runTest {
         everySuspend { messagingController.sendReaction(any(), any(), any()) } returns Unit
@@ -437,6 +517,7 @@ class MessageViewModelTest {
     }
 
     private companion object {
+        const val TRANSPARENT_REASON = "transparent mode"
         val POLL_INTERVAL = 10.milliseconds
     }
 }
