@@ -25,9 +25,17 @@ package org.meshtastic.core.repository
  *   none.
  */
 data class OutstandingAdminRequest(val requestId: Int, val destNum: Int, val adminChannelIndex: Int?) {
-    /** True when a response from [from] belongs to this request and, for a remote node, is authenticated. */
-    fun acceptsResponseFrom(from: Int, myNodeNum: Int?, pkiEncrypted: Boolean, channel: Int): Boolean =
-        from == destNum && (destNum == myNodeNum || pkiEncrypted || isOnAdminChannel(channel))
+    /**
+     * True when a response from [from] belongs to this request and, for a remote node, is authenticated: PKI, a
+     * signature the radio verified ([xeddsaSigned], how a licensed target answers), or the admin channel's PSK.
+     */
+    fun acceptsResponseFrom(
+        from: Int,
+        myNodeNum: Int?,
+        pkiEncrypted: Boolean,
+        xeddsaSigned: Boolean,
+        channel: Int,
+    ): Boolean = from == destNum && (destNum == myNodeNum || pkiEncrypted || xeddsaSigned || isOnAdminChannel(channel))
 
     private fun isOnAdminChannel(channel: Int): Boolean = adminChannelIndex != null && channel == adminChannelIndex
 }

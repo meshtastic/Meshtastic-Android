@@ -295,6 +295,39 @@ class CommandSenderImplTest {
         assertEquals(DEST_NODE, adminRequestRegistry.find(packets.single().id)?.destNum)
     }
 
+    // --- admin transport selection ---
+
+    @Test
+    fun sendAdmin_fromALicensedRadio_goesPlaintextOnThePrimaryChannelEvenWithBothKeysAndAnAdminChannel() = runTest {
+        val packet =
+            sendAdminGetterWithAdminChannel(
+                nodes =
+                mapOf(
+                    MY_NODE_NUM to node(MY_NODE_NUM, publicKey = LOCAL_KEY, licensed = true),
+                    DEST_NODE to node(DEST_NODE, publicKey = DEST_KEY),
+                ),
+            )
+
+        assertEquals(0, packet.channel)
+        assertFalse(packet.pki_encrypted)
+        assertEquals(ByteString.EMPTY, packet.public_key)
+    }
+
+    @Test
+    fun sendAdmin_toALicensedNodeFromAnUnlicensedRadio_staysOnPki() = runTest {
+        val packet =
+            sendAdminGetterWithAdminChannel(
+                nodes =
+                mapOf(
+                    MY_NODE_NUM to node(MY_NODE_NUM, publicKey = LOCAL_KEY),
+                    DEST_NODE to node(DEST_NODE, publicKey = DEST_KEY, licensed = true),
+                ),
+            )
+
+        assertTrue(packet.pki_encrypted)
+        assertEquals(DEST_KEY, packet.public_key)
+    }
+
     @Test
     fun sendAdminImmediate_recordsTheAdminIndexOfTheChannelItChose() {
         fun channelsWithAdminAt(adminIndex: Int) = ChannelSet.Builder()
@@ -807,9 +840,63 @@ class CommandSenderImplTest {
         }
     }
 
+    /** Sends a getter to [DEST_NODE] from a sender whose channel set carries the legacy admin channel. */
+    private suspend fun sendAdminGetterWithAdminChannel(nodes: Map<Int, Node>): MeshPacket {
+        every { nodeManager.nodeDBbyNodeNum } returns nodes
+        every { radioConfigRepository.channelSetFlow } returns
+            flowOf(
+                ChannelSet.Builder()
+                    .also { wb ->
+                        wb.settings =
+                            List(ADMIN_CHANNEL_INDEX + 1) { index ->
+                                ChannelSettings.Builder()
+                                    .also { wb -> wb.name = if (index == ADMIN_CHANNEL_INDEX) "admin" else "ch$index" }
+                                    .build()
+                            }
+                    }
+                    .build(),
+            )
+        val senderScope = TestScope()
+        val sender =
+            CommandSenderImpl(
+                packetHandler = packetHandler,
+                nodeManager = nodeManager,
+                radioConfigRepository = radioConfigRepository,
+                tracerouteHandler = tracerouteHandler,
+                neighborInfoHandler = neighborInfoHandler,
+                sessionManager = sessionManager,
+                adminRequestRegistry = adminRequestRegistry,
+                connectionStateProvider = connectionStateProvider,
+                scope = senderScope.asServiceScope(),
+            )
+        senderScope.testScheduler.advanceUntilIdle()
+        val packets = mutableListOf<MeshPacket>()
+        everySuspend { packetHandler.sendToRadioForConnection(capture(packets), CONNECTION_VERSION) } returns true
+
+        sender.sendAdmin(DEST_NODE, wantResponse = true) {
+            AdminMessage.Builder().also { wb -> wb.get_owner_request = true }.build()
+        }
+
+        return packets.single()
+    }
+
+    private fun node(num: Int, publicKey: ByteString, licensed: Boolean = false) = Node(
+        num = num,
+        user =
+        User.Builder()
+            .also { wb ->
+                wb.public_key = publicKey
+                wb.is_licensed = licensed
+            }
+            .build(),
+    )
+
     companion object {
         private const val MY_NODE_NUM = 100
         private const val DEST_NODE = 200
         private const val CONNECTION_VERSION = 7L
+        private const val ADMIN_CHANNEL_INDEX = 2
+        private val LOCAL_KEY = ByteString.of(*ByteArray(32) { 1 })
+        private val DEST_KEY = ByteString.of(*ByteArray(32) { 2 })
     }
 }

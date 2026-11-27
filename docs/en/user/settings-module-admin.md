@@ -270,6 +270,8 @@ set to **TAK** or **TAK Tracker**. See [TAK Integration](tak) for detailed setup
 
 Remote administration changes another node's settings over the mesh. The target node must list your node's public key as one of its **Admin Key** entries, set on its **Settings → Security** screen.
 
+When your node is licensed, remote administration is sent unencrypted and signed instead, as licensed mode requires, so it works only with a target node that is licensed too.
+
 1. Tap the target node in the node list to open its detail screen.
 2. In the **Administration** card, tap **Remote Administration**. The app first establishes a session with the node, showing *Establishing remote session…*, then opens its **Settings**.
 3. Modify configuration.

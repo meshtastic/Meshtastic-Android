@@ -119,8 +119,8 @@ open class ProcessRadioResponseUseCase {
         adminChannelIndex: Int?,
     ): RadioResponseResult? {
         // `from` and `request_id` travel in the clear, so a remote response is only as trustworthy as its
-        // encryption: PKI, or the admin channel's PSK when the request went out on it. Dropping it, rather than
-        // reporting an error, keeps the request id live for the genuine response.
+        // authentication: PKI, a radio-verified signature, or the admin channel's PSK when the request went out on it.
+        // Dropping it, rather than reporting an error, keeps the request id live for the genuine response.
         val request = OutstandingAdminRequest(data.request_id, destNum, adminChannelIndex)
         return when {
             destNum != packet.from ->
@@ -128,7 +128,13 @@ open class ProcessRadioResponseUseCase {
                     UiText.DynamicString("Unexpected sender: ${packet.from.toUInt()} instead of ${destNum.toUInt()}."),
                 )
 
-            !request.acceptsResponseFrom(packet.from, myNodeNum, packet.pki_encrypted, packet.channel) -> {
+            !request.acceptsResponseFrom(
+                packet.from,
+                myNodeNum,
+                packet.pki_encrypted,
+                packet.xeddsa_signed,
+                packet.channel,
+            ) -> {
                 Logger.w { "Ignored unauthenticated admin response from ${packet.from.toUInt()}" }
                 null
             }

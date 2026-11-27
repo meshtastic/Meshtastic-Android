@@ -31,6 +31,7 @@ import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.TelemetryType
+import org.meshtastic.core.model.isLicensedLocal
 import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.model.util.isWithinSizeLimit
 import org.meshtastic.core.repository.AdminRequestRegistry
@@ -116,6 +117,9 @@ class CommandSenderImpl(
      * is appropriate. Protocol-level requests (traceroute, telemetry, position, nodeinfo, neighborinfo) must NOT use
      * PKI because relay nodes need to read and/or modify the inner payload (e.g. traceroute appends each hop's node
      * number). These requests fall back to the node's heard-on channel.
+     *
+     * A licensed local radio refuses PKI, so its remote admin goes out as plaintext on the primary channel, which the
+     * firmware signs and the target authorizes against its admin keys. Only our own node's license decides this.
      */
     private fun getAdminChannelIndex(toNum: Int, adminChannelIndex: Int?): Int {
         val myNum = nodeManager.myNodeNum.value ?: return 0
@@ -124,6 +128,7 @@ class CommandSenderImpl(
 
         return when {
             myNum == toNum -> 0
+            myNode.isLicensedLocal -> 0
             myNode?.hasPKC == true && destNode?.hasPKC == true -> NodeAddress.PKC_CHANNEL_INDEX
             else -> adminChannelIndex ?: 0
         }
