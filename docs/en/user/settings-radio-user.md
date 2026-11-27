@@ -166,7 +166,7 @@ On **Settings → Device configuration → Display**. These control the **node's
 | Setting | Description | Default |
 |---------|-------------|---------|
 | 12 Hour Clock | Show the node's clock as 12-hour rather than 24-hour | Off |
-| Always point north | Locks the compass rose north-up instead of rotating it with your heading. Independent of **Compass Orientation** — neither replaces the other | Off |
+| Always point north | Shown only for a node on firmware older than 2.7.1, or while the setting is still on. Firmware 2.7.1 and newer ignore it: the compass style is chosen on the node, in its **Compass** menu | Off |
 | Bold Heading | Draw the screen's heading text in bold | Off |
 | Carousel Interval | How often the node moves to its next screen on its own: **Unset** (never), or 15 seconds to 15 minutes | Unset |
 | Compass Orientation | Rotation offset for the compass rose: **0°**, **90°**, **180°** or **270°**, each with an **Inverted** variant | 0° |
