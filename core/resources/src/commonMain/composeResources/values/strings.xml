@@ -2101,6 +2101,8 @@
     <string name="security_ack_proof_no_key_info">A delivery proof arrived, but there was no key to check it against.</string>
     <string name="security_ack_proof_verified">Delivery proven</string>
     <string name="security_ack_proof_verified_info">The node you addressed proved it received this message.</string>
+    <string name="security_channel_key_message">Channel key encryption</string>
+    <string name="security_channel_key_message_info">This message arrived encrypted with the shared channel key, not public key encryption. Anyone with that channel key can read it.</string>
     <string name="security_icon_badge_warning_description">Warning Badge</string>
     <string name="security_icon_description">Security Status</string>
     <string name="security_icon_help_dismiss">Dismiss</string>

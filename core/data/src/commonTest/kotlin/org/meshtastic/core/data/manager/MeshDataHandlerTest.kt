@@ -1497,6 +1497,176 @@ class MeshDataHandlerTest {
         assertEquals(0x5A, assertNotNull(persistedReaction).relayNode)
     }
 
+    private fun keyedNode(num: Int, id: String, withKey: Boolean = true) = Node(
+        num = num,
+        user =
+        User.Builder()
+            .also { wb ->
+                wb.id = id
+                wb.long_name = "Node $id"
+                if (withKey) wb.public_key = ByteArray(32) { 1 }.toByteString()
+            }
+            .build(),
+    )
+
+    /**
+     * Delivers a channel-encrypted text DM from 456 to us (123) and returns the packet and contact key it was stored
+     * as.
+     */
+    private fun TestScope.storeChannelDm(
+        senderHasKey: Boolean,
+        localHasKey: Boolean = true,
+        broadcast: Boolean = false,
+    ): Pair<DataPacket, String>? {
+        val packet =
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.id = 77
+                    wb.from = 456
+                    wb.to = if (broadcast) NodeAddress.NODENUM_BROADCAST else 123
+                    wb.channel = 0
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                wb.payload = "reply".encodeToByteArray().toByteString()
+                            }
+                            .build()
+                }
+                .build()
+        val dataPacket =
+            DataPacket(
+                id = 77,
+                from = "!remote",
+                to = if (broadcast) NodeAddress.ID_BROADCAST else NodeAddress.ID_LOCAL,
+                bytes = "reply".encodeToByteArray().toByteString(),
+                dataType = PortNum.TEXT_MESSAGE_APP.value,
+                channel = 0,
+            )
+        var stored: Pair<DataPacket, String>? = null
+        every { dataMapper.toDataPacket(packet) } returns dataPacket
+        every { nodeManager.nodeDBbyNodeNum } returns
+            mapOf(
+                123 to keyedNode(123, NodeAddress.ID_LOCAL, localHasKey),
+                456 to keyedNode(456, "!remote", senderHasKey),
+            )
+        every { nodeManager.getNodeById("!remote") } returns keyedNode(456, "!remote", senderHasKey)
+        everySuspend { packetRepository.findPacketsWithId(77) } returns emptyList()
+        everySuspend { packetRepository.getContactSettings(any()) } returns ContactSettings(contactKey = "test")
+        every { messageFilter.shouldFilter(any(), any()) } returns false
+        everySuspend { packetRepository.insert(any(), any(), any(), any(), any(), any()) } calls
+            {
+                stored = it.args[0] as DataPacket to it.args[2] as String
+            }
+
+        handler.handleReceivedData(packet, 123)
+        advanceUntilIdle()
+        return stored
+    }
+
+    // Meshtastic-Android#8069: filing a channel-encrypted reply by its channel opened a second chat beside the PKI one
+    // the node list opens.
+    @Test
+    fun `channel-encrypted DM from a keyed node is filed in the PKI conversation`() = testScope.runTest {
+        assertEquals("${NodeAddress.PKC_CHANNEL_INDEX}!remote", storeChannelDm(senderHasKey = true)?.second)
+    }
+
+    @Test
+    fun `channel-encrypted DM from a keyless node stays in its channel conversation`() = testScope.runTest {
+        assertEquals("0!remote", storeChannelDm(senderHasKey = false)?.second)
+    }
+
+    @Test
+    fun `channel-encrypted DM stays in its channel conversation when our node has no key`() = testScope.runTest {
+        assertEquals("0!remote", storeChannelDm(senderHasKey = true, localHasKey = false)?.second)
+    }
+
+    @Test
+    fun `channel-encrypted DM filed in the PKI conversation keeps its own channel`() = testScope.runTest {
+        assertEquals(0, assertNotNull(storeChannelDm(senderHasKey = true)).first.channel)
+    }
+
+    @Test
+    fun `channel-encrypted DM from a keyed node notifies for the PKI conversation`() = testScope.runTest {
+        storeChannelDm(senderHasKey = true)
+
+        verifySuspend {
+            serviceNotifications.updateMessageNotification("8!remote", any(), any(), any(), any(), any())
+        }
+    }
+
+    @Test
+    fun `broadcast from a keyed node stays in its channel`() = testScope.runTest {
+        assertEquals("0${NodeAddress.ID_BROADCAST}", storeChannelDm(senderHasKey = true, broadcast = true)?.second)
+    }
+
+    @Test
+    fun `channel-encrypted reaction to our PKI DM finds its parent in the PKI conversation`() = testScope.runTest {
+        val emoji = "+1"
+        val packet =
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.id = 98
+                    wb.from = 456
+                    wb.to = 123
+                    wb.channel = 0
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                wb.payload = emoji.encodeToByteArray().toByteString()
+                                wb.reply_id = 42
+                                wb.emoji = 1
+                            }
+                            .build()
+                }
+                .build()
+        val dataPacket =
+            DataPacket(
+                id = 98,
+                from = "!remote",
+                to = NodeAddress.ID_LOCAL,
+                bytes = emoji.encodeToByteArray().toByteString(),
+                dataType = PortNum.TEXT_MESSAGE_APP.value,
+                channel = 0,
+            )
+        val parent =
+            DataPacket(
+                id = 42,
+                from = NodeAddress.ID_LOCAL,
+                to = "!remote",
+                bytes = "parent".encodeToByteArray().toByteString(),
+                dataType = PortNum.TEXT_MESSAGE_APP.value,
+                channel = NodeAddress.PKC_CHANNEL_INDEX,
+            )
+        every { dataMapper.toDataPacket(packet) } returns dataPacket
+        every { nodeManager.nodeDBbyNodeNum } returns
+            mapOf(123 to keyedNode(123, NodeAddress.ID_LOCAL), 456 to keyedNode(456, "!remote"))
+        every { nodeManager.toNodeID(456) } returns "!remote"
+        every { nodeManager.toNodeID(123) } returns NodeAddress.ID_LOCAL
+        every { nodeManager.myNodeNum } returns MutableStateFlow(123)
+        every { nodeManager.getNodeById("!remote") } returns keyedNode(456, "!remote")
+        everySuspend { packetRepository.findReactionsWithId(98) } returns emptyList()
+        everySuspend { packetRepository.findPacketsWithId(42) } returns listOf(parent)
+        everySuspend { packetRepository.getContactSettings("8!remote") } returns
+            ContactSettings(contactKey = "8!remote")
+        everySuspend { packetRepository.insertReaction(any(), 123) } returns Unit
+
+        handler.handleReceivedData(packet, 123)
+        advanceUntilIdle()
+
+        verifySuspend {
+            serviceNotifications.updateReactionNotification(
+                contactKey = "8!remote",
+                name = "Node !remote",
+                emoji = emoji,
+                isBroadcast = false,
+                channelName = null,
+                isSilent = false,
+            )
+        }
+    }
+
     @Test
     fun `PKI reaction persists normalized channel and finds its notification parent`() = testScope.runTest {
         val emoji = "+1"
