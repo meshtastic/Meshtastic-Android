@@ -19,6 +19,7 @@ package org.meshtastic.core.ui.label
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,6 +30,8 @@ import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.ble.BleConnectionState
 import org.meshtastic.core.ble.BleDevice
+import org.meshtastic.core.ble.BleScanStartException
+import org.meshtastic.core.ble.BleScanStartFailureReason
 import org.meshtastic.core.ble.niimbot.LabelBitmap
 import org.meshtastic.core.ble.niimbot.NiimbotException
 import org.meshtastic.core.ble.niimbot.NiimbotFault
@@ -44,8 +47,8 @@ sealed interface LabelPrintError {
 
     data object NoResponse : LabelPrintError
 
-    /** Bluetooth is off, unsupported or not permitted, so no printer can be found. */
-    data object Bluetooth : LabelPrintError
+    /** The search for printers could not start. [reason] is null when the platform gave none. */
+    data class Scan(val reason: BleScanStartFailureReason?) : LabelPrintError
 }
 
 enum class LabelPrinterStatus {
@@ -79,12 +82,23 @@ class LabelPrintViewModel(printerFactory: NiimbotPrinterFactory, private val pre
 
     private var search: Job? = null
 
+    /** The connect or print in flight. It is canceled before another starts, so only the latest writes state. */
+    private var work: Job? = null
+
+    /** The disconnect [stop] started, which the next connect waits out. */
+    private var closing: Job? = null
+
+    /**
+     * True once a dropped printer was searched for without the user asking. A second drop then waits for the user: every
+     * search spends one of the few scan starts Android allows the app, which the radio's reconnect needs too.
+     */
+    private var searchedAfterDrop = false
+
     init {
-        // A printer that drops out (auto power-off, out of range) is looked for again and reconnects when seen.
         printer.connectionState
             .onEach { connection ->
                 val inUse = _state.value.status in setOf(LabelPrinterStatus.READY, LabelPrinterStatus.PRINTING)
-                if (connection is BleConnectionState.Disconnected && inUse) startSearch()
+                if (connection is BleConnectionState.Disconnected && inUse) onPrinterDropped()
             }
             .launchIn(viewModelScope)
     }
@@ -93,78 +107,109 @@ class LabelPrintViewModel(printerFactory: NiimbotPrinterFactory, private val pre
 
     /** Starts looking for printers, unless one is already being looked for or in use. */
     fun start() {
-        if (_state.value.status == LabelPrinterStatus.IDLE) startSearch()
+        if (_state.value.status == LabelPrinterStatus.IDLE) {
+            searchedAfterDrop = false
+            startSearch()
+        }
     }
 
-    /** Ends the search and the connection; called when the sheet closes. */
+    /** Ends the search, any connect or print in flight, and the connection; called when the sheet closes. */
     fun stop() {
         search?.cancel()
+        work?.cancel()
         _state.value = LabelPrintState()
-        viewModelScope.launch { printer.disconnect() }
+        closing = viewModelScope.launch { printer.disconnect() }
     }
 
+    /** Connects to the printer the user picked. */
     fun connect(device: BleDevice) {
-        if (_state.value.status != LabelPrinterStatus.SEARCHING && _state.value.status != LabelPrinterStatus.IDLE) {
-            return
-        }
-        search?.cancel()
-        _state.update { it.copy(status = LabelPrinterStatus.CONNECTING, printerName = device.name, error = null) }
-        viewModelScope.launch {
-            safeCatching { printer.connect(device) }
-                .onSuccess { _ ->
-                    prefs.setPrinterAddress(device.address)
-                    _state.update { it.copy(status = LabelPrinterStatus.READY) }
-                }
-                .onFailure { failure ->
-                    _state.update { it.copy(status = LabelPrinterStatus.IDLE, error = failure.toLabelPrintError()) }
-                }
-        }
+        searchedAfterDrop = false
+        connectTo(device)
     }
 
     fun print(bitmap: LabelBitmap) {
         if (_state.value.status != LabelPrinterStatus.READY) return
         _state.update { it.copy(status = LabelPrinterStatus.PRINTING, error = null) }
-        viewModelScope.launch {
-            val result = safeCatching { printer.print(bitmap) }
-            _state.update { state ->
-                // A print that failed because the printer went away has already left PRINTING for a new search.
-                val status = if (state.status == LabelPrinterStatus.PRINTING) LabelPrinterStatus.READY else state.status
-                state.copy(
-                    status = status,
-                    printed = state.printed || result.isSuccess,
-                    error = result.exceptionOrNull()?.toLabelPrintError(),
-                )
+        work =
+            viewModelScope.launch {
+                val result = safeCatching { printer.print(bitmap) }
+                ensureActive()
+                if (result.isSuccess) searchedAfterDrop = false
+                _state.update { state ->
+                    state.copy(
+                        status = LabelPrinterStatus.READY,
+                        printed = state.printed || result.isSuccess,
+                        error = result.exceptionOrNull()?.toLabelPrintError(),
+                    )
+                }
             }
+    }
+
+    private fun connectTo(device: BleDevice) {
+        if (_state.value.status != LabelPrinterStatus.SEARCHING && _state.value.status != LabelPrinterStatus.IDLE) {
+            return
+        }
+        search?.cancel()
+        work?.cancel()
+        _state.update { it.copy(status = LabelPrinterStatus.CONNECTING, printerName = device.name, error = null) }
+        work =
+            viewModelScope.launch {
+                closing?.join()
+                val result = safeCatching { printer.connect(device) }
+                ensureActive()
+                result
+                    .onSuccess { _ ->
+                        prefs.setPrinterAddress(device.address)
+                        _state.update { it.copy(status = LabelPrinterStatus.READY) }
+                    }
+                    .onFailure { failure ->
+                        _state.update { it.copy(status = LabelPrinterStatus.IDLE, error = failure.toLabelPrintError()) }
+                    }
+            }
+    }
+
+    /** The printer went away (auto power-off, out of range): its print is over, and it is looked for once. */
+    private fun onPrinterDropped() {
+        val wasPrinting = _state.value.status == LabelPrinterStatus.PRINTING
+        work?.cancel()
+        if (wasPrinting) _state.update { it.copy(error = LabelPrintError.NoResponse) }
+        if (searchedAfterDrop) {
+            _state.update { it.copy(status = LabelPrinterStatus.IDLE, printerName = null) }
+        } else {
+            searchedAfterDrop = true
+            startSearch()
         }
     }
 
     private fun startSearch() {
         search?.cancel()
         _state.update { it.copy(status = LabelPrinterStatus.SEARCHING, printerName = null, found = emptyList()) }
-        search = viewModelScope.launch {
-            val scan = safeCatching {
-                printer.scan().collect { device ->
-                    _state.update { state ->
-                        if (state.found.any { it.address == device.address }) {
-                            state
-                        } else {
-                            state.copy(found = state.found + device)
+        search =
+            viewModelScope.launch {
+                val scan =
+                    safeCatching {
+                        printer.scan().collect { device ->
+                            _state.update { state ->
+                                if (state.found.any { it.address == device.address }) {
+                                    state
+                                } else {
+                                    state.copy(found = state.found + device)
+                                }
+                            }
+                            if (device.address == prefs.printerAddress.value) connectTo(device)
                         }
                     }
-                    if (device.address == prefs.printerAddress.value) connect(device)
+                _state.update { state ->
+                    if (state.status == LabelPrinterStatus.SEARCHING) {
+                        state.copy(
+                            status = LabelPrinterStatus.IDLE,
+                            error = scan.exceptionOrNull()?.toScanError() ?: state.error,
+                        )
+                    } else {
+                        state
+                    }
                 }
             }
-            _state.update { state ->
-                if (state.status == LabelPrinterStatus.SEARCHING) {
-                    state.copy(
-                        status = LabelPrinterStatus.IDLE,
-                        error = if (scan.isFailure) LabelPrintError.Bluetooth else state.error,
-                    )
-                } else {
-                    state
-                }
-            }
-        }
     }
 }
 
@@ -173,3 +218,5 @@ internal fun Throwable.toLabelPrintError(): LabelPrintError = when (this) {
     is NiimbotException.Unsupported -> LabelPrintError.Unsupported
     else -> LabelPrintError.NoResponse
 }
+
+private fun Throwable.toScanError(): LabelPrintError = LabelPrintError.Scan((this as? BleScanStartException)?.reason)

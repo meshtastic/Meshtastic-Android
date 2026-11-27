@@ -54,9 +54,12 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.ble.BleDevice
+import org.meshtastic.core.ble.BleScanStartFailureReason
 import org.meshtastic.core.ble.niimbot.NiimbotFault
 import org.meshtastic.core.resources.NotoEmoji_Regular
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.bluetooth_scan_location_services_disabled
+import org.meshtastic.core.resources.bluetooth_scan_start_failed
 import org.meshtastic.core.resources.grant_permission
 import org.meshtastic.core.resources.label_print_channel_title
 import org.meshtastic.core.resources.label_print_connecting
@@ -70,6 +73,7 @@ import org.meshtastic.core.resources.label_print_error_low_battery
 import org.meshtastic.core.resources.label_print_error_no_labels
 import org.meshtastic.core.resources.label_print_error_no_response
 import org.meshtastic.core.resources.label_print_error_other
+import org.meshtastic.core.resources.label_print_error_scan_busy
 import org.meshtastic.core.resources.label_print_error_unsupported
 import org.meshtastic.core.resources.label_print_error_wrong_roll
 import org.meshtastic.core.resources.label_print_length
@@ -322,7 +326,18 @@ private fun LabelPrintError.message(): String = when (this) {
 
     LabelPrintError.NoResponse -> stringResource(Res.string.label_print_error_no_response)
 
-    LabelPrintError.Bluetooth -> stringResource(Res.string.label_print_error_bluetooth)
+    is LabelPrintError.Scan ->
+        when (reason) {
+            BleScanStartFailureReason.ScanningTooFrequently -> stringResource(Res.string.label_print_error_scan_busy)
+            BleScanStartFailureReason.BluetoothDisabled -> stringResource(Res.string.label_print_error_bluetooth)
+            // Android 11 and older only scan with location services on.
+            BleScanStartFailureReason.LocationServicesDisabled ->
+                stringResource(Res.string.bluetooth_scan_location_services_disabled)
+            BleScanStartFailureReason.MissingScanPermission -> stringResource(Res.string.label_print_permission)
+            BleScanStartFailureReason.ApplicationRegistrationFailed,
+            null,
+            -> stringResource(Res.string.bluetooth_scan_start_failed)
+        }
 }
 
 private const val HEX = 16

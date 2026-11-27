@@ -1054,6 +1054,7 @@
     <string name="label_print_error_no_labels">The printer stopped: it found no labels.</string>
     <string name="label_print_error_no_response">The printer didn't answer. Check that it's on and nearby.</string>
     <string name="label_print_error_other">The printer stopped with error 0x%1$s.</string>
+    <string name="label_print_error_scan_busy">The phone is limiting Bluetooth searches. Try again in a moment.</string>
     <string name="label_print_error_unsupported">This printer doesn't support printing from Meshtastic.</string>
     <string name="label_print_error_wrong_roll">The printer rejected this label roll.</string>
     <string name="label_print_length">Label length</string>

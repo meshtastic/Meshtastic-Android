@@ -18,13 +18,20 @@ package org.meshtastic.core.ui.label
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.ble.BleCharacteristicInfo
+import org.meshtastic.core.ble.BleDevice
+import org.meshtastic.core.ble.BleScanStartException
+import org.meshtastic.core.ble.BleScanStartFailureReason
+import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.BleServiceInfo
 import org.meshtastic.core.ble.niimbot.LabelBitmap
 import org.meshtastic.core.ble.niimbot.NiimbotFault
@@ -39,6 +46,9 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.Uuid
 
 private class FakeLabelPrintPrefs : LabelPrintPrefs {
@@ -145,5 +155,86 @@ class LabelPrintViewModelTest {
         val state = viewModel.state.value
         assertEquals(LabelPrintError.Fault(NiimbotFault.COVER_OPEN, 0x01), state.error)
         assertEquals(LabelPrinterStatus.READY to false, state.status to state.printed)
+    }
+
+    // The printer here never answers, so a print runs into its reply timeouts: 2 s each for the heartbeat, the status
+    // data and the density request, failing at 6 s unless something ends it first.
+    private fun readyOnSilentPrinter(): LabelPrintViewModel {
+        prefs.printerAddress.value = mine.address
+        scanner.emitDevice(mine)
+        return viewModel().apply { start() }
+    }
+
+    @Test
+    fun `closing the sheet ends a print in flight so it cannot write into the reopened sheet`() = runTest(dispatcher) {
+        val viewModel = readyOnSilentPrinter()
+        viewModel.print(LabelBitmap(width = 96, height = 1))
+
+        viewModel.stop()
+        viewModel.start()
+        advanceTimeBy(10.seconds)
+
+        assertEquals(LabelPrinterStatus.READY to null, viewModel.state.value.status to viewModel.state.value.error)
+    }
+
+    @Test
+    fun `a printer that drops during a print ends the print with an error at once`() = runTest(dispatcher) {
+        val viewModel = readyOnSilentPrinter()
+        viewModel.print(LabelBitmap(width = 96, height = 1))
+
+        connection.simulateRemoteDisconnect()
+
+        val state = viewModel.state.value
+        assertEquals(LabelPrintError.NoResponse to false, state.error to state.printed)
+        assertEquals(false, state.status == LabelPrinterStatus.PRINTING)
+    }
+
+    @Test
+    fun `a print from before a drop cannot end the print started after it`() = runTest(dispatcher) {
+        val viewModel = readyOnSilentPrinter()
+        viewModel.print(LabelBitmap(width = 96, height = 1))
+        advanceTimeBy(3.seconds)
+        connection.simulateRemoteDisconnect()
+
+        viewModel.print(LabelBitmap(width = 96, height = 1))
+        // The first print would have failed 6 s after it started, which is now; the second has 3 s left.
+        advanceTimeBy(3500.milliseconds)
+
+        assertEquals(LabelPrinterStatus.PRINTING to null, viewModel.state.value.status to viewModel.state.value.error)
+    }
+
+    // Each search spends one of the scan starts Android rations, which the radio's reconnect shares.
+    @Test
+    fun `a printer that drops a second time is not searched for again until the user asks`() = runTest(dispatcher) {
+        val viewModel = readyOnSilentPrinter()
+        connection.simulateRemoteDisconnect()
+        assertEquals(2, connection.connectAndAwaitCalls)
+
+        connection.simulateRemoteDisconnect()
+
+        assertEquals(LabelPrinterStatus.IDLE to 2, viewModel.state.value.status to connection.connectAndAwaitCalls)
+        viewModel.start()
+        assertEquals(LabelPrinterStatus.READY, viewModel.state.value.status)
+    }
+
+    @Test
+    fun `a search Android refuses for scanning too often says so rather than blaming Bluetooth`() = runTest(dispatcher) {
+        val refusing =
+            object : BleScanner {
+                override fun scan(timeout: Duration, serviceUuid: Uuid?, address: String?): Flow<BleDevice> = flow {
+                    throw BleScanStartException(
+                        BleScanStartFailureReason.ScanningTooFrequently,
+                        IllegalStateException("quota"),
+                    )
+                }
+            }
+        val viewModel =
+            LabelPrintViewModel(NiimbotPrinterFactory(refusing, FakeBleConnectionFactory(connection)), prefs)
+
+        viewModel.start()
+
+        val state = viewModel.state.value
+        assertEquals(LabelPrintError.Scan(BleScanStartFailureReason.ScanningTooFrequently), state.error)
+        assertEquals(LabelPrinterStatus.IDLE, state.status)
     }
 }

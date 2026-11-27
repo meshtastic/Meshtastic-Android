@@ -1000,6 +1000,7 @@ label_print_error_low_battery
 label_print_error_no_labels
 label_print_error_no_response
 label_print_error_other
+label_print_error_scan_busy
 label_print_error_unsupported
 label_print_error_wrong_roll
 label_print_length
