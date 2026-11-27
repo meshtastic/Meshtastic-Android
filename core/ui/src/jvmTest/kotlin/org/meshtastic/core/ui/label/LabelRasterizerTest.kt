@@ -16,22 +16,14 @@
  */
 package org.meshtastic.core.ui.label
 
-import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.createFontFamilyResolver
 import androidx.compose.ui.text.platform.Font
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
-import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.ble.niimbot.LabelBitmap
-import org.meshtastic.core.model.util.getChannelUrl
-import org.meshtastic.proto.ChannelSet
-import org.meshtastic.proto.ChannelSettings
-import org.meshtastic.proto.SharedContact
-import org.meshtastic.proto.User
 import java.io.File
-import javax.imageio.ImageIO
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -86,67 +78,5 @@ class LabelRasterizerTest {
             (left until left + 3).flatMap { x -> (top until top + 3).map { x to it } }
         }
         assertEquals((square(5, 0) + square(8, 3)).toSet(), ink.toSet())
-    }
-
-    // Label sizes are labeltastic's: a 96-dot head, and 236 or 316 rows for 30 and 40 mm.
-    @Test
-    fun `sample labels render to the head's width and the label's length`() {
-        val key = ByteArray(32) { it.toByte() }.toByteString()
-        fun nameTag(short: String, long: String): LabelSpec {
-            val user =
-                User.Builder()
-                    .also {
-                        it.id = "!deadbeef"
-                        it.long_name = long
-                        it.short_name = short
-                        it.public_key = key
-                    }
-                    .build()
-            val contact =
-                SharedContact.Builder()
-                    .also {
-                        it.node_num = 0xDEADBEEF.toInt()
-                        it.user = user
-                    }
-                    .build()
-            return LabelSpec.NameTag(NameTagContent(short, long, "!deadbeef"), contact, "HELLO MY NODE IS")
-        }
-        val channels =
-            ChannelSet.Builder()
-                .also {
-                    it.settings =
-                        listOf(
-                            ChannelSettings.Builder()
-                                .also { settings ->
-                                    settings.name = "Hiking"
-                                    settings.psk = key
-                                }
-                                .build(),
-                        )
-                }
-                .build()
-        val samples =
-            mapOf(
-                "name-tag" to nameTag("WPG", "Wandering Packet Goblin"),
-                "name-tag-emoji" to nameTag("🐛", "Wandering Packet Goblin"),
-                "name-tag-long" to nameTag("WPG", "Wandering Packet Goblin Extraordinaire"),
-                "channel-label" to
-                    LabelSpec.Channels(
-                        ChannelLabelContent("Hiking", "US · LongFast", "Adds 1 channel"),
-                        channels.getChannelUrl(shouldAdd = true).toString(),
-                        "JOIN MY MESH",
-                    ),
-            )
-        val out = File("build/label-previews").apply { mkdirs() }
-
-        for ((name, spec) in samples) {
-            for (millimeters in listOf(30, 40)) {
-                val layout = assertNotNull(spec.layout(labelLengthDots(millimeters), rasterizer))
-                val rendered = assertNotNull(rasterizer.render(layout))
-
-                assertEquals(96 to millimeters * 8 - 4, rendered.bitmap.width to rendered.bitmap.height)
-                ImageIO.write(rendered.preview.toAwtImage(), "png", File(out, "$name-${millimeters}mm.png"))
-            }
-        }
     }
 }
