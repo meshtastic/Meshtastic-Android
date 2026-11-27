@@ -92,6 +92,30 @@ abstract class CommonChannelViewModelTest {
     }
 
     @Test
+    fun `reset to defaults keeps the transparent mode region and transmit setting of the device`() = runTest {
+        val device =
+            Config.LoRaConfig.Builder()
+                .also { wb ->
+                    wb.region = Config.LoRaConfig.RegionCode.EU_868
+                    wb.tx_enabled = true
+                    wb.hop_limit = 6
+                    wb.transparent_mode = true
+                }
+                .build()
+        every { radioConfigRepository.localConfigFlow } returns
+            MutableStateFlow(LocalConfig.Builder().also { wb -> wb.lora = device }.build())
+        viewModel = ChannelViewModel(radioController, radioConfigRepository, analytics, snackbarManager)
+
+        // Nothing collects viewModel.localConfig here, as nothing does on the channel screen.
+        viewModel.resetToDefaults(regionPresetMap = null)
+
+        val written = radioController.configWrites.single().config.lora
+        assertEquals(true, written?.transparent_mode)
+        assertEquals(Config.LoRaConfig.RegionCode.EU_868, written?.region)
+        assertEquals(true, written?.tx_enabled)
+    }
+
+    @Test
     fun `txEnabled updates config via radioController`() = runTest {
         viewModel.txEnabled = true
         // FakeRadioController doesn't track setLocalConfig calls yet, but it's fine for coverage

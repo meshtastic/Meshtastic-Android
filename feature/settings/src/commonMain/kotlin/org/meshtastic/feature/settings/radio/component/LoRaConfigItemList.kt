@@ -224,12 +224,13 @@ fun LoRaConfigScreen(
         showConnectPrompt = state.connectPromptVisible,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            // Confirming the toggle was the user's choice, so the connect notice does not ask again this session.
-            if (turnsOwnTransparentModeOn(state.isLocal, reported = loraConfig, saved = it)) {
-                transparentModeViewModel.turnedOnByUser()
-            }
-            val config = Config.Builder().also { wb -> wb.lora = it.withCodingRateOverrideFor(capabilities) }.build()
-            viewModel.setConfig(config)
+            saveLora(
+                viewModel = viewModel,
+                transparentMode = transparentModeViewModel,
+                isLocal = state.isLocal,
+                reported = loraConfig,
+                saved = it.withCodingRateOverrideFor(capabilities),
+            )
         },
     ) {
         fieldItem(cards[0]) {

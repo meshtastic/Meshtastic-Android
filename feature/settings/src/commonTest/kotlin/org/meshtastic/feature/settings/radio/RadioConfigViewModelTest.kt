@@ -500,6 +500,24 @@ class RadioConfigViewModelTest {
         .also { createdViewModels += it }
 
     @Test
+    fun `a follow-up to a save runs only after the write was handed to the radio`() = runTest {
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
+        val events = mutableListOf<String>()
+        everySuspend { radioConfigUseCase.setConfig(any(), any(), any()) } calls
+            {
+                events += "write sent"
+                77
+            }
+        viewModel = createViewModel(destNum = 123)
+
+        viewModel.setConfig(Config.Builder().build(), onSent = { events += "follow-up" })
+
+        runCurrent()
+
+        assertEquals(listOf("write sent", "follow-up"), events)
+    }
+
+    @Test
     fun `local save acked by a renumbered radio re-runs the handshake and completes the save`() = runTest {
         val node = Node(num = 123, user = User.Builder().also { wb -> wb.id = "!123" }.build())
         nodeRepository.setNodes(listOf(node))

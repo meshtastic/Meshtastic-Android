@@ -63,8 +63,6 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.model.firstSetupDefaultFor
-import org.meshtastic.core.model.util.keepingTransparentModeOf
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.resources.Res
@@ -102,7 +100,6 @@ import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.feature.settings.radio.component.PacketResponseStateDialog
 import org.meshtastic.proto.ChannelSet
-import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config
 
 /**
@@ -180,18 +177,6 @@ fun ChannelScreen(
     val scope = rememberCoroutineScope()
     val showToast = rememberShowToastResource()
 
-    // The write runs in the view model, which reports a failure itself; a success updates channels and the QR code.
-    fun installSettings(newChannel: ChannelSettings, newLoRaConfig: Config.LoRaConfig) {
-        val newSet =
-            ChannelSet.Builder()
-                .also { wb ->
-                    wb.settings = listOf(newChannel)
-                    wb.lora_config = newLoRaConfig
-                }
-                .build()
-        viewModel.setChannels(newSet)
-    }
-
     if (showResetDialog) {
         MeshtasticDialog(
             onDismiss = {
@@ -202,15 +187,7 @@ fun ChannelScreen(
             messageRes = Res.string.are_you_sure_change_default,
             onConfirm = {
                 Logger.d { "Switching back to default channel" }
-                // The default channel takes the region's first-setup preset (e.g. US -> LongTurbo) so its derived
-                // name, hash, and frequency match what a freshly-set-up node in that region would use.
-                val preset =
-                    radioConfigState.loraRegionPresetMap.firstSetupDefaultFor(viewModel.region)
-                        ?: Channel.default.loraConfig.modem_preset
-                installSettings(
-                    Channel.default.settings,
-                    defaultLoraConfigFor(viewModel.localConfig.value.lora, preset),
-                )
+                viewModel.resetToDefaults(radioConfigState.loraRegionPresetMap)
                 showResetDialog = false
             },
             confirmTextRes = Res.string.apply,
@@ -433,20 +410,3 @@ private fun ModemPresetInfo(modemPresetName: String, onClick: () -> Unit) {
         )
     }
 }
-
-/**
- * The LoRa config "reset to defaults" sends: the app's default with [preset], keeping what a reset must not change on
- * the device - its region, whether it transmits, and transparent mode.
- */
-internal fun defaultLoraConfigFor(
-    current: Config.LoRaConfig?,
-    preset: Config.LoRaConfig.ModemPreset,
-): Config.LoRaConfig = Channel.default.loraConfig
-    .newBuilder()
-    .also { wb ->
-        wb.region = current?.region ?: Config.LoRaConfig.RegionCode.UNSET
-        wb.modem_preset = preset
-        wb.tx_enabled = current?.tx_enabled == true
-    }
-    .build()
-    .keepingTransparentModeOf(current)

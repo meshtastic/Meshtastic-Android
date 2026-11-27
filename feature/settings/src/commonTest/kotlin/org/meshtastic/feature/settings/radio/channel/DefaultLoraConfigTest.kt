@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.settings.radio.channel
 
+import org.meshtastic.feature.settings.channel.defaultLoraConfigFor
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
 import org.meshtastic.proto.Config.LoRaConfig.RegionCode

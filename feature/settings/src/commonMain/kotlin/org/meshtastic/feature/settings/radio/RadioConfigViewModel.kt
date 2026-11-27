@@ -620,7 +620,8 @@ open class RadioConfigViewModel(
         }
     }
 
-    fun setConfig(config: Config) {
+    /** [onSent] runs once the write has been handed to the radio, for a follow-up that must not overtake it. */
+    fun setConfig(config: Config, onSent: () -> Unit = {}) {
         val destNum = destNum ?: destNode.value?.num ?: return
         safeLaunch(tag = "setConfig") {
             _radioConfigState.update { state ->
@@ -647,6 +648,7 @@ open class RadioConfigViewModel(
             }
             expectRestartIfLocal(config.saveRebootBehavior())
             radioConfigUseCase.setConfig(destNum, config, onRequestId = ::registerWriteRequestId)
+            onSent()
         }
     }
 

@@ -193,7 +193,7 @@ When you connect to a node that has transparent mode on, the app shows a notice 
 
 While transparent mode is on, the message composer is replaced by a line saying that sending is off, and a resend or a reaction is refused with the same reason. A reply typed into a message notification is refused too, and a notification says why.
 
-You can also change the setting on **Settings → LoRa**, on the **Advanced** card.
+You can also change the setting on **Settings → LoRa**, on the **Advanced** card. Turning it off there for the node you are connected to is confirmed the same way: the app reads the setting back and reports the result.
 
 ## Live Update
 

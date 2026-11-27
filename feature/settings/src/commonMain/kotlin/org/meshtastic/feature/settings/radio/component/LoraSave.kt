@@ -18,12 +18,44 @@ package org.meshtastic.feature.settings.radio.component
 
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
+import org.meshtastic.core.model.util.keepingTransparentModeOf
 import org.meshtastic.core.ui.component.TransparentModeSetting
+import org.meshtastic.core.ui.viewmodel.TransparentModeViewModel
+import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.Config
 
-/** Whether a LoRa save turns transparent mode on for the node this app is connected to. */
-internal fun turnsOwnTransparentModeOn(isLocal: Boolean, reported: Config.LoRaConfig, saved: Config.LoRaConfig) =
-    isLocal && saved.transparent_mode && !reported.transparent_mode
+/**
+ * How a LoRa save reaches the radio.
+ *
+ * @property config the `set_config` the settings save sends.
+ * @property turnsOn the save turns transparent mode on for the node this app is connected to.
+ * @property turnOffAfter the save turns it off for that node. [config] then still carries the flag on, and the turn-off
+ *   follows through the controller, which reads the node back and reports the result.
+ */
+internal data class LoraSave(val config: Config, val turnsOn: Boolean, val turnOffAfter: Boolean)
+
+internal fun loraSaveFor(isLocal: Boolean, reported: Config.LoRaConfig, saved: Config.LoRaConfig): LoraSave {
+    val turnOffAfter = isLocal && reported.transparent_mode && !saved.transparent_mode
+    val lora = if (turnOffAfter) saved.keepingTransparentModeOf(reported) else saved
+    return LoraSave(
+        config = Config.Builder().also { wb -> wb.lora = lora }.build(),
+        turnsOn = isLocal && saved.transparent_mode && !reported.transparent_mode,
+        turnOffAfter = turnOffAfter,
+    )
+}
+
+internal fun saveLora(
+    viewModel: RadioConfigViewModel,
+    transparentMode: TransparentModeViewModel,
+    isLocal: Boolean,
+    reported: Config.LoRaConfig,
+    saved: Config.LoRaConfig,
+) {
+    val save = loraSaveFor(isLocal, reported, saved)
+    // Confirming the toggle was the user's choice, so the connect notice does not ask again this session.
+    if (save.turnsOn) transparentMode.turnedOnByUser()
+    viewModel.setConfig(save.config, onSent = { if (save.turnOffAfter) transparentMode.turnOff() })
+}
 
 /**
  * Transparent mode drops remote admin, so a remote node that had it turned on could not be brought back: only the local
