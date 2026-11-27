@@ -35,8 +35,8 @@ private const val BAND_DOTS = 22
 private const val BAND_TEXT_SIZE = 21
 private const val MARK_DOTS = 18
 
-/** White kept on each side of the QR's ink, which labeltastic leaves when it crops the code to its width. */
-private const val QR_QUIET_DOTS = 2
+/** White kept on each side of a name tag's QR, which labeltastic leaves when it crops the code to its width. */
+private const val NAME_TAG_QR_QUIET_DOTS = 2
 private const val QR_GAP_DOTS = 6
 
 /** The bare Ms of the M-PWRD mark in meshtastic/design's M-PWRD_BW_Border.svg, in that file's units. */
@@ -70,8 +70,17 @@ data class NameTagContent(val shortName: String, val longName: String, val nodeI
 /** What a channel label says beside its QR. */
 data class ChannelLabelContent(val title: String, val radio: String, val action: String)
 
-/** The parts every label shares: the QR on the left, the band over a wide text column, and the mark. */
-private class LabelBuilder(val length: Int, qr: FittedQr, bandText: String, val type: LabelTypesetter) {
+/**
+ * The parts every label shares: the QR on the left with [quietDots] of white on each side, the band over a wide text
+ * column, and the mark.
+ */
+private class LabelBuilder(
+    val length: Int,
+    qr: FittedQr,
+    quietDots: Int,
+    bandText: String,
+    val type: LabelTypesetter,
+) {
     val ops = mutableListOf<LabelOp>()
     val markWidth = (MARK_UNITS_WIDE / MARK_UNITS_TALL * MARK_DOTS).roundToInt()
     val x: Int
@@ -84,8 +93,8 @@ private class LabelBuilder(val length: Int, qr: FittedQr, bandText: String, val 
 
     init {
         val side = qr.modules.size * qr.dotsPerModule
-        ops += LabelOp.Qr(qr.modules, LABEL_END_DOTS + QR_QUIET_DOTS, (LABEL_HEAD_DOTS - side) / 2, qr.dotsPerModule)
-        x = LABEL_END_DOTS + side + 2 * QR_QUIET_DOTS + QR_GAP_DOTS
+        ops += LabelOp.Qr(qr.modules, LABEL_END_DOTS + quietDots, (LABEL_HEAD_DOTS - side) / 2, qr.dotsPerModule)
+        x = LABEL_END_DOTS + side + 2 * quietDots + QR_GAP_DOTS
         width = length - x - LABEL_END_DOTS
         narrow = width < NARROW_COLUMN_DOTS
         top = if (narrow) LABEL_EDGE_DOTS else LABEL_EDGE_DOTS + BAND_DOTS
@@ -174,7 +183,7 @@ internal fun nameTagLayout(
     bandText: String,
     measurer: LabelTextMeasurer,
 ): LabelLayout {
-    val label = LabelBuilder(lengthDots, qr, bandText, LabelTypesetter(measurer))
+    val label = LabelBuilder(lengthDots, qr, NAME_TAG_QR_QUIET_DOTS, bandText, LabelTypesetter(measurer))
     val short = cleanLabelText(content.shortName)
     val long = cleanLabelText(content.longName).ifEmpty { "?" }
     val emojiOnly = short.isNotEmpty() && short.codePointList().all { isLabelEmoji(it) || it == ' '.code }
@@ -279,7 +288,8 @@ internal fun channelLabelLayout(
     bandText: String,
     measurer: LabelTextMeasurer,
 ): LabelLayout {
-    val label = LabelBuilder(lengthDots, qr, bandText, LabelTypesetter(measurer))
+    // One module of white each side of the code, where the name tag keeps a fixed 2 dots.
+    val label = LabelBuilder(lengthDots, qr, qr.dotsPerModule, bandText, LabelTypesetter(measurer))
     with(label) {
         val title =
             type.fit(cleanLabelText(content.title), width, if (narrow) CHANNEL_TITLE_NARROW else CHANNEL_TITLE_WIDE)

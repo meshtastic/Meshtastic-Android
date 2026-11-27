@@ -31,8 +31,8 @@ internal val FixedWidthMeasurer = LabelTextMeasurer { text, size, emoji ->
 /**
  * Expected name tag positions and sizes are what labeltastic's `render_compact` at meshtastic/labeltastic#38 draws for
  * the same node, label length and QR size with its text measurement replaced by [FixedWidthMeasurer]'s rule. The
- * channel label, which labeltastic does not have, is Meshtastic-Apple's `ChannelLabelRenderer` worked through by hand.
- * The margins are design#185's.
+ * channel label, which labeltastic does not have, is worked by hand from the formulas in Meshtastic-Apple's
+ * `ChannelLabelRenderer.swift`; the working is beside the test. The margins are design#185's.
  */
 class LabelLayoutTest {
     // A version 7 code, the size of a keyed contact's: 45 modules at 2 dots, so the text column starts at 103.
@@ -208,7 +208,9 @@ class LabelLayoutTest {
 
     @Test
     fun `a channel label stacks the name and radio above what scanning does`() {
-        // A version 3 code at 3 dots is 87 wide, so the column starts at 100 and is 213 wide.
+        // Swift's formulas for a version 3 code (29 modules) at 3 dots on 316: side = 87, the QR at endPx + module = 6
+        // and (96 - 87) / 2 = 4, the column at endPx + side + 2 * module + 6 = 102, its width 316 - 102 - endPx = 211.
+        // The block is 30 + 4 + 16 = 50 under top = 24: blockTop = 24 + (85 - 9 - 24 - 50) / 2 = 25.
         val qr = FittedQr("", QrModules(29, BooleanArray(29 * 29)), dotsPerModule = 3)
         val layout =
             channelLabelLayout(
@@ -219,15 +221,17 @@ class LabelLayoutTest {
                 FixedWidthMeasurer,
             )
 
+        val code = layout.ops.filterIsInstance<LabelOp.Qr>().single()
+        assertEquals(listOf(6, 4, 3), listOf(code.x, code.y, code.dotsPerModule))
         assertEquals(
-            listOf(LabelOp.Band(x = 100, y = 2, width = 213, height = 22, text = "JOIN MY MESH", size = 21)),
+            listOf(LabelOp.Band(x = 102, y = 2, width = 211, height = 22, text = "JOIN MY MESH", size = 21)),
             layout.ops.filterIsInstance<LabelOp.Band>(),
         )
         assertEquals(
             listOf(
-                LabelOp.Text("Hiking", x = 100, yCenter = 40, size = 30),
-                LabelOp.Text("US · LongFast", x = 100, yCenter = 67, size = 16),
-                LabelOp.Text("Adds 2 channels", x = 100, yCenter = 85, size = 14),
+                LabelOp.Text("Hiking", x = 102, yCenter = 40, size = 30),
+                LabelOp.Text("US · LongFast", x = 102, yCenter = 67, size = 16),
+                LabelOp.Text("Adds 2 channels", x = 102, yCenter = 85, size = 14),
             ),
             layout.texts(),
         )
