@@ -93,21 +93,23 @@ class RegionInfoTest {
 
     @Test
     fun ham_2m_regions_use_20kHz_slots() {
-        // ITU1_2M: 144-146 MHz, TINY_FAST (15.625 kHz) padded to 20.025 kHz slots -> 100 slots, default slot 26.
+        // ITU1_2M: 144-146 MHz, TINY_FAST (firmware's 15.6 kHz) padded to 20 kHz slots -> 100 slots, default slot 26.
+        // The tolerance is tight enough to reject 15.625 kHz, which drifts 25 Hz per slot.
         val itu1 = lora(RegionCode.ITU1_2M, ModemPreset.TINY_FAST)
         assertEquals(100, itu1.numChannels)
         assertEquals(26, itu1.channelNum("TinyFast"))
-        assertEquals(144.5106f, itu1.radioFreq(26), 0.001f)
+        assertEquals(144.51f, itu1.radioFreq(26), 0.0001f)
+        assertEquals(145.99f, itu1.radioFreq(100), 0.0001f)
 
         // ITU2_2M: 144-148 MHz -> 200 slots, default slot 51 (145.010 MHz).
         val itu2 = lora(RegionCode.ITU2_2M, ModemPreset.TINY_FAST)
         assertEquals(200, itu2.numChannels)
-        assertEquals(145.011f, itu2.radioFreq(itu2.channelNum("TinyFast")), 0.001f)
+        assertEquals(145.01f, itu2.radioFreq(itu2.channelNum("TinyFast")), 0.0001f)
 
         // ITU3_2M: 144-148 MHz -> 200 slots, default slot 33 (144.650 MHz).
         val itu3 = lora(RegionCode.ITU3_2M, ModemPreset.TINY_FAST)
         assertEquals(200, itu3.numChannels)
-        assertEquals(144.6508f, itu3.radioFreq(itu3.channelNum("TinyFast")), 0.001f)
+        assertEquals(144.65f, itu3.radioFreq(itu3.channelNum("TinyFast")), 0.0001f)
     }
 
     @Test
@@ -180,5 +182,80 @@ class RegionInfoTest {
     fun explicit_channel_num_wins_over_override_slot() {
         val itu1 = lora(RegionCode.ITU1_2M, ModemPreset.TINY_FAST, channelNum = 5)
         assertEquals(5, itu1.channelNum("TinyFast"))
+    }
+
+    @Test
+    fun wide_lora_widens_only_presets_with_a_wide_variant() {
+        // LORA_24: 2400-2483.5 MHz. LONG_FAST runs at 812.5 kHz there -> 103 slots.
+        assertEquals(103, lora(RegionCode.LORA_24, ModemPreset.LONG_FAST).numChannels)
+        // NARROW_FAST keeps 62.5 kHz on a wide region -> 1336 slots, not 411 at 203.125 kHz.
+        assertEquals(1336, lora(RegionCode.LORA_24, ModemPreset.NARROW_FAST).numChannels)
+        assertEquals(1336, lora(RegionCode.LORA_24, ModemPreset.NARROW_SLOW).numChannels)
+        // LITE keeps 125 kHz -> 668 slots, and TINY keeps 15.6 kHz -> 5353.
+        assertEquals(668, lora(RegionCode.LORA_24, ModemPreset.LITE_FAST).numChannels)
+        assertEquals(668, lora(RegionCode.LORA_24, ModemPreset.LITE_SLOW).numChannels)
+        assertEquals(5353, lora(RegionCode.LORA_24, ModemPreset.TINY_FAST).numChannels)
+        assertEquals(5353, lora(RegionCode.LORA_24, ModemPreset.TINY_SLOW).numChannels)
+    }
+
+    @Test
+    fun out_of_range_channel_num_falls_back_like_firmware() {
+        // US LONG_FAST has 104 slots: slot 500 is ignored and the name hash picks slot 20.
+        assertEquals(20, lora(RegionCode.US, ModemPreset.LONG_FAST, channelNum = 500).channelNum("LongFast"))
+        // ITU1_2M has 100 slots: slot 101 is ignored and the region's override slot 26 applies.
+        assertEquals(26, lora(RegionCode.ITU1_2M, ModemPreset.TINY_FAST, channelNum = 101).channelNum("TinyFast"))
+    }
+
+    @Test
+    fun override_slot_past_the_slot_count_falls_back_to_the_name_hash() {
+        // ITU2_70CM at a custom 500 kHz has 56 slots, so its override slot 137 cannot apply.
+        val wide =
+            lora(RegionCode.ITU2_70CM, ModemPreset.NARROW_SLOW)
+                .newBuilder()
+                .also { wb ->
+                    wb.use_preset = false
+                    wb.bandwidth = 500
+                }
+                .build()
+        assertEquals(56, wide.numChannels)
+        assertEquals(52, wide.channelNum("Ham"))
+    }
+
+    private fun custom(region: RegionCode, bandwidthCode: Int) = LoRaConfig.Builder()
+        .also { wb ->
+            wb.use_preset = false
+            wb.region = region
+            wb.bandwidth = bandwidthCode
+        }
+        .build()
+
+    @Test
+    fun fractional_bandwidth_codes_decode_like_firmware() {
+        // Firmware bwCodeToKHz: 8, 10 and 16 stand for 7.8, 10.4 and 15.6 kHz over US's 26 MHz.
+        assertEquals(3333, custom(RegionCode.US, 8).numChannels)
+        assertEquals(2500, custom(RegionCode.US, 10).numChannels)
+        assertEquals(1667, custom(RegionCode.US, 16).numChannels)
+        // 21 and 42 stand for 20.8 and 41.7 kHz.
+        assertEquals(1250, custom(RegionCode.US, 21).numChannels)
+        assertEquals(624, custom(RegionCode.US, 42).numChannels)
+        // ANZ (915-928 MHz) at 7.8 kHz: slot 1625 sits at 915 + 0.0039 + 1624 * 0.0078.
+        assertEquals(927.6711f, custom(RegionCode.ANZ, 8).radioFreq(1625), 0.001f)
+    }
+
+    @Test
+    fun custom_bandwidth_zero_runs_at_250_kHz() {
+        assertEquals(104, custom(RegionCode.US, 0).numChannels)
+    }
+
+    @Test
+    fun custom_bandwidth_wider_than_the_region_runs_at_the_region_default_preset() {
+        // EU_N_868 is 250 kHz wide, so a custom 500 kHz runs as NARROW_SLOW does there: 3 slots, slot 1 at 869.4417.
+        val tooWide = custom(RegionCode.EU_N_868, 500)
+        assertEquals(3, tooWide.numChannels)
+        assertEquals(869.4417f, tooWide.radioFreq(1), 0.001f)
+        // EU_868 is as narrow and defaults to LONG_FAST: one 250 kHz slot.
+        assertEquals(869.525f, custom(RegionCode.EU_868, 500).radioFreq(1), 0.001f)
+        // EU_433 is 1 MHz wide: a custom 1 MHz just fits and stays custom, where the LONG_FAST default would give 4.
+        assertEquals(1, custom(RegionCode.EU_433, 1000).numChannels)
     }
 }
