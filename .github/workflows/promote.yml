@@ -298,6 +298,17 @@ jobs:
           TAG: ${{ inputs.final_tag }}
         run: gh workflow run msstore-publish.yml --ref main -f "tag=$TAG"
 
+      # web-stable.yml deploys the release's meshtastic-web-<version>.zip to app.meshtastic.org.
+      # It runs on main, the only ref its web-stable environment admits.
+      - name: Dispatch web deploy
+        id: web
+        if: ${{ inputs.channel == 'production' }}
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.final_tag }}
+        run: gh workflow run web-stable.yml --ref main -f "tag=$TAG"
+
       # Same suppression again: version-bump.yml opens the next patch line on main.
       - name: Dispatch version bump
         id: bump
@@ -474,6 +485,7 @@ jobs:
           SCHED: ${{ steps.sched.outcome }}
           WINGET: ${{ steps.winget.outcome }}
           MSSTORE: ${{ steps.msstore.outcome }}
+          WEB: ${{ steps.web.outcome }}
           BUMP: ${{ steps.bump.outcome }}
           STAMP: ${{ steps.stamp.outcome }}
           STAMP_PR: ${{ steps.stamp_pr.outputs.url }}
@@ -540,6 +552,7 @@ jobs:
               fi
               store_row "winget" "$WINGET" "$HAS_WINGET_TOKEN" WINGET_TOKEN
               store_row "Microsoft Store" "$MSSTORE" "$HAS_MSSTORE_PRODUCT_ID" MSSTORE_PRODUCT_ID
+              row "Web deploy to app.meshtastic.org dispatched" "$WEB"
               row "Version bump dispatched" "$BUMP"
               row "Post-Release Cleanup" "dispatched by Docs Release once /${TAG}/ is published"
               if [[ "$HAS_HOMEBREW_TAP_TOKEN" == "true" ]]; then

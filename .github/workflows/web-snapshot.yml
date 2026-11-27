@@ -1,0 +1,84 @@
+name: Web Snapshot
+
+# Builds the web app from main and deploys it to app-snapshot.meshtastic.org, the web
+# counterpart of the rolling snapshot release main-check.yml publishes.
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - 'fastlane/**'
+      - 'obtainium/**'
+      # Hosts and test modules the web app does not build from. Listed as exclusions so a new
+      # web module deploys without being added anywhere.
+      - 'androidApp/**'
+      - 'desktopApp/**'
+      - 'baselineprofile/**'
+      - 'screenshot-tests/**'
+      - 'docs-screenshots/**'
+      - 'store-screenshots/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# The site only ever shows the newest commit, so a newer push replaces a build in flight. Keyed
+# by ref so a dispatch from another branch, which the environment refuses, cancels nothing.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    if: github.repository == 'meshtastic/Meshtastic-Android'
+    runs-on: ubuntu-26.04
+    timeout-minutes: 60
+    # The environment holds the Vercel token and ids, and admits only main.
+    environment:
+      name: web-snapshot
+      url: https://app-snapshot.meshtastic.org
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # git rev-list --count needs full history for the versionCode
+          persist-credentials: false
+
+      # The same name and code the snapshot APKs carry (reusable-check.yml, main-check.yml).
+      - name: Version the build as a snapshot
+        run: |
+          BASE=$(grep '^VERSION_NAME_BASE=' config.properties | cut -d'=' -f2)
+          OFFSET=$(grep '^VERSION_CODE_OFFSET=' config.properties | cut -d'=' -f2)
+          echo "VERSION_NAME=${BASE}-SNAPSHOT" >> "$GITHUB_ENV"
+          echo "VERSION_CODE=$(( $(git rev-list --count HEAD) + OFFSET ))" >> "$GITHUB_ENV"
+
+      - name: Gradle Setup
+        uses: ./.github/actions/gradle-setup
+        with:
+          gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+          cache_read_only: 'false'
+
+      # -Dorg.gradle.isolated-projects=false: KGP's wasm npm resolver configures the root project
+      # from each wasmJs project, which Isolated Projects rejects.
+      - name: Build the web distribution
+        run: >
+          ./gradlew :webApp:wasmJsBrowserDistribution
+          -Pmeshtastic.web=true
+          -Dorg.gradle.isolated-projects=false
+          -Pkotlin.incremental.wasm=false
+          -Pandroid.injected.version.name="$VERSION_NAME"
+          -Pandroid.injected.version.code="$VERSION_CODE"
+
+      - name: Deploy to app-snapshot.meshtastic.org
+        uses: ./.github/actions/vercel-deploy
+        with:
+          dist: webApp/build/dist/wasmJs/productionExecutable
+          vercel_token: ${{ secrets.VERCEL_TOKEN }}
+          vercel_org_id: ${{ vars.VERCEL_ORG_ID }}
+          vercel_project_id: ${{ vars.VERCEL_PROJECT_ID }}
+
+      - name: Summarize
+        run: echo "Deployed ${VERSION_NAME} (${VERSION_CODE}) at ${GITHUB_SHA} to https://app-snapshot.meshtastic.org" >> "$GITHUB_STEP_SUMMARY"

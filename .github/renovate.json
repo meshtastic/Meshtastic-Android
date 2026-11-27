@@ -201,6 +201,18 @@
       "depNameTemplate": "com.facebook:ktfmt",
       "datasourceTemplate": "maven",
       "versioningTemplate": "maven"
+    },
+    {
+      "customType": "regex",
+      "description": "The Vercel CLI is run through npx at a pinned version, which no package.json records.",
+      "managerFilePatterns": [
+        "/^\\.github/actions/vercel-deploy/action\\.yml$/"
+      ],
+      "matchStrings": [
+        "npx --yes vercel@(?<currentValue>\\d+\\.\\d+\\.\\d+)"
+      ],
+      "depNameTemplate": "vercel",
+      "datasourceTemplate": "npm"
     }
   ]
 }
