@@ -8,20 +8,14 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
-### Internal (v2.8.5-internal.7)
-Changes since [`v2.8.5-open.2`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.5-open.2):
+*No changes yet.*
+<!-- UNRELEASED_END -->
 
-#### 🏗️ Features
-* feat(connections): label a desktop serial radio with its last node by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8277
-* feat(beacon): let a broadcast target pin a frequency slot and toggle legacy text split by @tylerpieper in https://github.com/meshtastic/Meshtastic-Android/pull/8249
-#### 🛠️ Fixes
-* fix(data): log a dropped malformed radio frame as a warning by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8274
-* fix(model): match firmware's frequency slot math by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8090
+<!-- RELEASED_START -->
 
-### Open Beta (v2.8.5-open.2)
-Changes since [`v2.8.4`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.4):
+## [2.8.5] - 2026-11-27
 
-#### 🏗️ Features
+### 🏗️ Features
 * feat(map): record where an offline region's tiles came from by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7945
 * feat(settings): guided setup for a radio with no region by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7953
 * feat(settings): nearby meshes page and a searchable region list in the radio setup by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7955
@@ -54,7 +48,9 @@ Changes since [`v2.8.4`](https://github.com/meshtastic/Meshtastic-Android/releas
 * fix(desktop): open the no-op or mock transport for no-device, replay and unknown addresses by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8196
 * feat(messaging): show the relaying node on received messages and on reactions by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8210
 * feat(settings): manage contacts and favorites on a remote node by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8251
-#### 🖥️ Desktop
+* feat(connections): label a desktop serial radio with its last node by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8277
+* feat(beacon): let a broadcast target pin a frequency slot and toggle legacy text split by @tylerpieper in https://github.com/meshtastic/Meshtastic-Android/pull/8249
+### 🖥️ Desktop
 * fix(desktop): let the JVM size the heap from available RAM by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8015
 * fix(resources): keep suspending string lookups off the main dispatcher by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8050
 * refactor(network): dispatch transport addresses in the base factory by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8188
@@ -63,7 +59,7 @@ Changes since [`v2.8.4`](https://github.com/meshtastic/Meshtastic-Android/releas
 * refactor(network): install the API client's plugins from one place by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8187
 * fix(desktop): keep the data directory owner-only and read the agent port from a JVM property by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8213
 * fix(desktop): address Linux serial radios by their /dev/serial/by-id link by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8250
-#### 🛠️ Fixes
+### 🛠️ Fixes
 * fix(widget): compose the picker preview without a glance id by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7934
 * fix(map): download regional terrain from every z6 archive a region touches by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7943
 * fix(map): fade offline hillshade past the terrain data and add Shade Valleys by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7946
@@ -137,7 +133,9 @@ Changes since [`v2.8.4`](https://github.com/meshtastic/Meshtastic-Android/releas
 * fix(messaging): show the relay on packets that crossed MQTT but arrived over LoRa by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8252
 * fix(nodes): stop offering nodes the radio no longer holds as unheard by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8248
 * fix(node): stop the neighbor info log crashing on duplicate rows and chart x-values by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8266
-#### 📝 Other Changes
+* fix(data): log a dropped malformed radio frame as a warning by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8274
+* fix(model): match firmware's frequency slot math by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8090
+### 📝 Other Changes
 * fix(obtainium): percent-encode the scheme in redirect links by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7983
 * feat(connections): move connect-code scan to the import FAB by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8083
 * fix(data): retry the bundled hardware catalog after a failed seed by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8097
@@ -147,9 +145,7 @@ Changes since [`v2.8.4`](https://github.com/meshtastic/Meshtastic-Android/releas
 * @ThomasGorisse made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/8254
 * @NomDeTom made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/8282
 * @tylerpieper made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/8249
-<!-- UNRELEASED_END -->
 
-<!-- RELEASED_START -->
 
 ## [2.8.4] - 2026-11-05
 
