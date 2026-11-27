@@ -714,6 +714,7 @@ You can find detailed instructions and documentation on the official Meshtastic 
     <string name="mesh_beacon_region_label">地區</string>
     <string name="mesh_beacon_target_channel_index">頻道</string>
     <string name="mesh_beacon_target_default">默認</string>
+    <string name="mesh_beacon_target_frequency_slot">頻率槽位</string>
     <string name="mesh_hud_cardinal_north">Meshtastic is a remarkable open-source project that leverages the power of low-power, long-range radio communication. It allows you to create a decentralized, encrypted, and resilient mesh network for text messaging and data transfer, even without cellular or WiFi connectivity.
 
 **Key Features of Meshtastic:**

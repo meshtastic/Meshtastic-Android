@@ -600,6 +600,7 @@
     <string name="mesh_beacon_region_label">Регіон</string>
     <string name="mesh_beacon_target_channel_index">Канал</string>
     <string name="mesh_beacon_target_default">За замовчуванням</string>
+    <string name="mesh_beacon_target_frequency_slot">Слот</string>
     <!-- MESHTASTIC -->
     <string name="meshtastic">Meshtastic</string>
     <string name="meshtastic_alerts_notifications">Сповіщення про тривоги</string>
