@@ -64,6 +64,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.firstSetupDefaultFor
+import org.meshtastic.core.model.util.keepingTransparentModeOf
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.resources.Res
@@ -206,16 +207,10 @@ fun ChannelScreen(
                 val preset =
                     radioConfigState.loraRegionPresetMap.firstSetupDefaultFor(viewModel.region)
                         ?: Channel.default.loraConfig.modem_preset
-                val lora =
-                    Channel.default.loraConfig
-                        .newBuilder()
-                        .also { wb ->
-                            wb.region = viewModel.region
-                            wb.modem_preset = preset
-                            wb.tx_enabled = viewModel.txEnabled
-                        }
-                        .build()
-                installSettings(Channel.default.settings, lora)
+                installSettings(
+                    Channel.default.settings,
+                    defaultLoraConfigFor(viewModel.localConfig.value.lora, preset),
+                )
                 showResetDialog = false
             },
             confirmTextRes = Res.string.apply,
@@ -438,3 +433,20 @@ private fun ModemPresetInfo(modemPresetName: String, onClick: () -> Unit) {
         )
     }
 }
+
+/**
+ * The LoRa config "reset to defaults" sends: the app's default with [preset], keeping what a reset must not change on
+ * the device - its region, whether it transmits, and transparent mode.
+ */
+internal fun defaultLoraConfigFor(
+    current: Config.LoRaConfig?,
+    preset: Config.LoRaConfig.ModemPreset,
+): Config.LoRaConfig = Channel.default.loraConfig
+    .newBuilder()
+    .also { wb ->
+        wb.region = current?.region ?: Config.LoRaConfig.RegionCode.UNSET
+        wb.modem_preset = preset
+        wb.tx_enabled = current?.tx_enabled == true
+    }
+    .build()
+    .keepingTransparentModeOf(current)

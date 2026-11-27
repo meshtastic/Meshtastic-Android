@@ -33,6 +33,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.Channel
@@ -92,8 +93,8 @@ import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SignedIntegerEditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
-import org.meshtastic.core.ui.component.TransparentModeSetting
 import org.meshtastic.core.ui.util.formatFrequencyMhz
+import org.meshtastic.core.ui.viewmodel.TransparentModeViewModel
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.search.SettingsSearchCatalog
@@ -169,7 +170,11 @@ internal fun regionLabels(): Map<RegionCode, String> =
     RegionCode.entries.mapNotNull { region -> region.schemaLabelRes()?.let { region to stringResource(it) } }.toMap()
 
 @Composable
-fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
+fun LoRaConfigScreen(
+    viewModel: RadioConfigViewModel,
+    onBack: () -> Unit,
+    transparentModeViewModel: TransparentModeViewModel = koinViewModel(),
+) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val loraConfig = state.radioConfig.lora ?: Config.LoRaConfig.Builder().build()
     val primarySettings = state.channelList.getOrNull(0)
@@ -218,7 +223,14 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         responseState = state.responseState,
         showConnectPrompt = state.connectPromptVisible,
         onDismissPacketResponse = viewModel::clearPacketResponse,
-        onSave = { viewModel.setConfig(it.toSaveConfig(capabilities)) },
+        onSave = {
+            // Confirming the toggle was the user's choice, so the connect notice does not ask again this session.
+            if (turnsOwnTransparentModeOn(state.isLocal, reported = loraConfig, saved = it)) {
+                transparentModeViewModel.turnedOnByUser()
+            }
+            val config = Config.Builder().also { wb -> wb.lora = it.withCodingRateOverrideFor(capabilities) }.build()
+            viewModel.setConfig(config)
+        },
     ) {
         fieldItem(cards[0]) {
             TitledCard(title = stringResource(Res.string.options)) {
@@ -491,25 +503,11 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                         containerColor = CardDefaults.cardColors().containerColor,
                     )
                 }
-                HorizontalDivider()
-                TransparentModeSetting(
-                    checked = formState.value.transparent_mode,
-                    enabled = state.connected,
-                    onCheckedChange = {
-                        formState.value = formState.value.newBuilder().also { wb -> wb.transparent_mode = it }.build()
-                    },
-                )
+                TransparentModeRow(isLocal = state.isLocal, connected = state.connected, formState = formState)
             }
         }
     }
 }
-
-/**
- * The `set_config` a LoRa save sends. It is the form's config whole: the form starts from what the device reported, so
- * a field no control edited, `transparent_mode` included, goes back as the device had it.
- */
-internal fun Config.LoRaConfig.toSaveConfig(capabilities: Capabilities): Config =
-    Config.Builder().also { wb -> wb.lora = withCodingRateOverrideFor(capabilities) }.build()
 
 /** The fields the Advanced card holds; every other LoRa field is on the Options card. */
 internal val LORA_ADVANCED_FIELDS =

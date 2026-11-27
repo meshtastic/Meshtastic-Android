@@ -224,12 +224,30 @@ fun MeshBeacon.toJoinChannelSet(option: BeaconJoinOption, currentLora: LoRaConfi
             ChannelSet.Builder()
                 .also { wb ->
                     wb.settings = listOf(offerChannel)
-                    wb.lora_config = loraConfig.newBuilder().also { lb -> lb.channel_num = advertisedSlot ?: 0 }.build()
+                    wb.lora_config =
+                        loraConfig
+                            .newBuilder()
+                            .also { lb -> lb.channel_num = advertisedSlot ?: 0 }
+                            .build()
+                            .keepingTransparentModeOf(currentLora)
                 }
                 .build()
         }
 
         BeaconJoinOption.NONE -> null
+    }
+}
+
+/**
+ * This config with `transparent_mode` as [current] has it. A LoRa config built from defaults replaces the device's
+ * whole LoRa config, and transparent mode changes only when the user chooses to change it.
+ */
+fun LoRaConfig.keepingTransparentModeOf(current: LoRaConfig?): LoRaConfig {
+    val transparent = current?.transparent_mode == true
+    return if (transparent_mode == transparent) {
+        this
+    } else {
+        newBuilder().also { wb -> wb.transparent_mode = transparent }.build()
     }
 }
 
