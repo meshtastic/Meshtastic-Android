@@ -60,7 +60,6 @@ import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.component.Rssi
 import org.meshtastic.core.ui.icon.ChevronRight
 import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.core.ui.label.LabelSpec
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.feature.connections.model.DeviceListEntry
 import org.meshtastic.proto.Config
@@ -113,7 +112,7 @@ fun CurrentlyConnectedInfo(
     modifier: Modifier = Modifier,
     bleDevice: DeviceListEntry.Ble? = null,
     onClickLora: () -> Unit = {},
-    connectLabel: LabelSpec.Connect? = null,
+    onPrintLabel: (() -> Unit)? = null,
 ) {
     // Null until the first successful read: 0 dBm is the strongest value on this scale, not "unknown".
     var rssi by remember(bleDevice?.device?.address) { mutableStateOf<Int?>(null) }
@@ -172,7 +171,7 @@ fun CurrentlyConnectedInfo(
 
         text.loraSummary?.let { LoraRow(summary = it, onClick = onClickLora) }
 
-        connectLabel?.let { ConnectLabelButton(label = it) }
+        onPrintLabel?.let { ConnectLabelButton(onClick = it) }
 
         DisconnectButton(onClick = onClickDisconnect, label = text.disconnectLabel)
     }

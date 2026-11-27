@@ -126,8 +126,22 @@ class ConnectLinkTest {
     // design#185 item 9: the PIN only with fixed PIN pairing, and the label can be printed without it.
     @Test
     fun `the connect label carries the PIN only for a fixed PIN and keeps the link without it`() {
-        val fixed = connectLabelSpec(node, ble, bluetooth(PairingMode.FIXED_PIN, 123456), "SCAN TO CONNECT")
-        val random = connectLabelSpec(node, ble, bluetooth(PairingMode.RANDOM_PIN, 123456), "SCAN TO CONNECT")
+        val fixed =
+            connectLabelSpec(
+                node,
+                ble,
+                bluetooth(PairingMode.FIXED_PIN, 123456),
+                "SCAN TO CONNECT",
+                nodeIsThisSession = true,
+            )
+        val random =
+            connectLabelSpec(
+                node,
+                ble,
+                bluetooth(PairingMode.RANDOM_PIN, 123456),
+                "SCAN TO CONNECT",
+                nodeIsThisSession = true,
+            )
 
         assertEquals("meshtastic://meshtastic/connections?address=xAA:BB:CC:DD:EE:FF&pin=123456", fixed?.link)
         assertEquals("meshtastic://meshtastic/connections?address=xAA:BB:CC:DD:EE:FF", fixed?.linkWithoutPin)
@@ -143,6 +157,29 @@ class ConnectLinkTest {
 
     @Test
     fun `a radio on a serial port gets no connect label`() {
-        assertNull(connectLabelSpec(node, "s/dev/ttyUSB0", bluetooth(PairingMode.FIXED_PIN, 123456), "SCAN TO CONNECT"))
+        assertNull(
+            connectLabelSpec(
+                node,
+                "s/dev/ttyUSB0",
+                bluetooth(PairingMode.FIXED_PIN, 123456),
+                "SCAN TO CONNECT",
+                nodeIsThisSession = true,
+            ),
+        )
+    }
+
+    // Until the radio reports itself in this session the node on screen can be the previous radio's, cached.
+    @Test
+    fun `no connect label is made while the node is not this session's`() {
+        val label =
+            connectLabelSpec(
+                node,
+                ble,
+                bluetooth(PairingMode.FIXED_PIN, 123456),
+                "SCAN TO CONNECT",
+                nodeIsThisSession = false,
+            )
+
+        assertNull(label)
     }
 }
