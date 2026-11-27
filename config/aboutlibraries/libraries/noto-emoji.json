@@ -1,0 +1,16 @@
+{
+  "uniqueId": "com.google.fonts:noto-emoji",
+  "artifactVersion": "3.002",
+  "name": "Noto Emoji",
+  "description": "Monochrome emoji font, bundled so emoji on printed labels stay legible in one color.",
+  "website": "https://github.com/googlefonts/noto-emoji",
+  "developers": [
+    {
+      "name": "Google LLC",
+      "organisationUrl": "https://fonts.google.com/noto"
+    }
+  ],
+  "licenses": [
+    "OFL-1.1"
+  ]
+}
