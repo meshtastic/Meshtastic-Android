@@ -92,6 +92,7 @@ import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SignedIntegerEditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.core.ui.component.TransparentModeSetting
 import org.meshtastic.core.ui.util.formatFrequencyMhz
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
@@ -217,10 +218,7 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         responseState = state.responseState,
         showConnectPrompt = state.connectPromptVisible,
         onDismissPacketResponse = viewModel::clearPacketResponse,
-        onSave = {
-            val config = Config.Builder().also { wb -> wb.lora = it.withCodingRateOverrideFor(capabilities) }.build()
-            viewModel.setConfig(config)
-        },
+        onSave = { viewModel.setConfig(it.toSaveConfig(capabilities)) },
     ) {
         fieldItem(cards[0]) {
             TitledCard(title = stringResource(Res.string.options)) {
@@ -493,10 +491,25 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                         containerColor = CardDefaults.cardColors().containerColor,
                     )
                 }
+                HorizontalDivider()
+                TransparentModeSetting(
+                    checked = formState.value.transparent_mode,
+                    enabled = state.connected,
+                    onCheckedChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.transparent_mode = it }.build()
+                    },
+                )
             }
         }
     }
 }
+
+/**
+ * The `set_config` a LoRa save sends. It is the form's config whole: the form starts from what the device reported, so
+ * a field no control edited, `transparent_mode` included, goes back as the device had it.
+ */
+internal fun Config.LoRaConfig.toSaveConfig(capabilities: Capabilities): Config =
+    Config.Builder().also { wb -> wb.lora = withCodingRateOverrideFor(capabilities) }.build()
 
 /** The fields the Advanced card holds; every other LoRa field is on the Options card. */
 internal val LORA_ADVANCED_FIELDS =
