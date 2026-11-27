@@ -55,8 +55,9 @@ jobs:
             echo "::error::Expected one web distribution on $TAG, found ${#zips[@]}."
             exit 1
           fi
-          # release-web attested the zip it built; a file swapped in afterwards does not verify.
-          gh attestation verify "${zips[0]}" --repo "$REPO"
+          # Only a zip that release.yml attested verifies; any other file fails here.
+          gh attestation verify "${zips[0]}" --repo "$REPO" \
+            --signer-workflow "$REPO/.github/workflows/release.yml"
           unzip -q "${zips[0]}" -d "$RUNNER_TEMP/web/dist"
           echo "ASSET=$(basename "${zips[0]}")" >> "$GITHUB_ENV"
 
