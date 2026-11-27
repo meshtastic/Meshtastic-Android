@@ -67,6 +67,14 @@ import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.viewmodel.TransparentModeViewModel
 
 const val TRANSPARENT_MODE_SWITCH_TEST_TAG = "transparent_mode_switch"
+const val TRANSPARENT_MODE_ENABLE_CONFIRMATION_TAG = "transparent_mode_enable_confirmation"
+
+/** One tag per state of the notice, so a test can tell which one is up where string resources do not load. */
+const val TRANSPARENT_MODE_NOTICE_CHOICE_TAG = "transparent_mode_notice_choice"
+const val TRANSPARENT_MODE_NOTICE_IN_PROGRESS_TAG = "transparent_mode_notice_in_progress"
+const val TRANSPARENT_MODE_NOTICE_TURNED_OFF_TAG = "transparent_mode_notice_turned_off"
+const val TRANSPARENT_MODE_NOTICE_STILL_ON_TAG = "transparent_mode_notice_still_on"
+const val TRANSPARENT_MODE_NOTICE_UNCONFIRMED_TAG = "transparent_mode_notice_unconfirmed"
 
 /**
  * Shows the transparent mode notice over any screen while the connected node calls for it. [suppressed] holds it back
@@ -96,7 +104,7 @@ fun TransparentModeNotice(
 
         TransparentModeTurnOff.IN_PROGRESS ->
             MeshtasticDialog(
-                modifier = modifier,
+                modifier = modifier.testTag(TRANSPARENT_MODE_NOTICE_IN_PROGRESS_TAG),
                 titleRes = Res.string.transparent_mode_notice_title,
                 icon = MeshtasticIcons.Warning,
                 dismissable = false,
@@ -113,7 +121,7 @@ fun TransparentModeNotice(
 
         TransparentModeTurnOff.TURNED_OFF ->
             MeshtasticDialog(
-                modifier = modifier,
+                modifier = modifier.testTag(TRANSPARENT_MODE_NOTICE_TURNED_OFF_TAG),
                 titleRes = Res.string.lora_field_transparent_mode,
                 messageRes = Res.string.transparent_mode_turned_off,
                 confirmTextRes = Res.string.okay,
@@ -123,22 +131,24 @@ fun TransparentModeNotice(
 
         TransparentModeTurnOff.STILL_ON,
         TransparentModeTurnOff.UNCONFIRMED,
-        ->
-            MeshtasticDialog(
-                modifier = modifier,
-                titleRes = Res.string.transparent_mode_notice_title,
-                messageRes =
+        -> {
+            val (tag, message) =
                 if (turnOff == TransparentModeTurnOff.STILL_ON) {
-                    Res.string.transparent_mode_still_on
+                    TRANSPARENT_MODE_NOTICE_STILL_ON_TAG to Res.string.transparent_mode_still_on
                 } else {
-                    Res.string.transparent_mode_unconfirmed
-                },
+                    TRANSPARENT_MODE_NOTICE_UNCONFIRMED_TAG to Res.string.transparent_mode_unconfirmed
+                }
+            MeshtasticDialog(
+                modifier = modifier.testTag(tag),
+                titleRes = Res.string.transparent_mode_notice_title,
+                messageRes = message,
                 icon = MeshtasticIcons.Warning,
                 confirmTextRes = Res.string.retry,
                 onConfirm = onTurnOff,
                 dismissTextRes = Res.string.transparent_mode_leave_on,
                 onDismiss = onClose,
             )
+        }
     }
 }
 
@@ -146,7 +156,7 @@ fun TransparentModeNotice(
 @Composable
 fun TransparentModeChoiceNotice(onTurnOff: () -> Unit, onLeaveOn: () -> Unit, modifier: Modifier = Modifier) {
     MeshtasticDialog(
-        modifier = modifier,
+        modifier = modifier.testTag(TRANSPARENT_MODE_NOTICE_CHOICE_TAG),
         titleRes = Res.string.transparent_mode_notice_title,
         messageRes = Res.string.transparent_mode_notice_message,
         icon = MeshtasticIcons.Warning,
@@ -212,8 +222,9 @@ fun TransparentModeSetting(
 }
 
 @Composable
-fun TransparentModeEnableConfirmation(onConfirm: () -> Unit, onDismiss: () -> Unit) {
+fun TransparentModeEnableConfirmation(onConfirm: () -> Unit, onDismiss: () -> Unit, modifier: Modifier = Modifier) {
     MeshtasticResourceDialog(
+        modifier = modifier.testTag(TRANSPARENT_MODE_ENABLE_CONFIRMATION_TAG),
         titleRes = Res.string.transparent_mode_enable_title,
         messageRes = Res.string.transparent_mode_enable_warning,
         confirmTextRes = Res.string.transparent_mode_enable_confirm,

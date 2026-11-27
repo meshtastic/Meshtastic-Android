@@ -20,22 +20,17 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.meshtastic.core.repository.TransparentModeTurnOff
-import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.cancel
-import org.meshtastic.core.resources.getString
-import org.meshtastic.core.resources.retry
-import org.meshtastic.core.resources.transparent_mode_enable_confirm
-import org.meshtastic.core.resources.transparent_mode_leave_on
-import org.meshtastic.core.resources.transparent_mode_still_on
-import org.meshtastic.core.resources.transparent_mode_turn_off
 import org.meshtastic.core.ui.theme.AppTheme
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+/**
+ * Everything is found by test tag: the buttons' labels and the result text are string resources, which do not load in
+ * the wasmJs browser tests.
+ */
 @OptIn(ExperimentalTestApi::class)
 class TransparentModeNoticeUiTest {
 
@@ -57,7 +52,8 @@ class TransparentModeNoticeUiTest {
     fun `leave on closes the notice without turning transparent mode off`() = runComposeUiTest {
         setNotice(turnOff = null)
 
-        onNodeWithText(getString(Res.string.transparent_mode_leave_on)).performClick()
+        onNodeWithTag(TRANSPARENT_MODE_NOTICE_CHOICE_TAG).assertIsDisplayed()
+        onNodeWithTag(DIALOG_DISMISS_BUTTON_TAG).performClick()
 
         assertEquals(0, turnOffs)
         assertEquals(1, closes)
@@ -67,7 +63,7 @@ class TransparentModeNoticeUiTest {
     fun `turn off requests the turn-off and leaves the notice to report it`() = runComposeUiTest {
         setNotice(turnOff = null)
 
-        onNodeWithText(getString(Res.string.transparent_mode_turn_off)).performClick()
+        onNodeWithTag(DIALOG_CONFIRM_BUTTON_TAG).performClick()
 
         assertEquals(1, turnOffs)
         assertEquals(0, closes)
@@ -77,8 +73,9 @@ class TransparentModeNoticeUiTest {
     fun `a node that still reports on says so and retry turns off again`() = runComposeUiTest {
         setNotice(turnOff = TransparentModeTurnOff.STILL_ON)
 
-        onNodeWithText(getString(Res.string.transparent_mode_still_on)).assertIsDisplayed()
-        onNodeWithText(getString(Res.string.retry)).performClick()
+        onNodeWithTag(TRANSPARENT_MODE_NOTICE_STILL_ON_TAG).assertIsDisplayed()
+        onNodeWithTag(TRANSPARENT_MODE_NOTICE_UNCONFIRMED_TAG).assertDoesNotExist()
+        onNodeWithTag(DIALOG_CONFIRM_BUTTON_TAG).performClick()
 
         assertEquals(1, turnOffs)
         assertEquals(0, closes)
@@ -91,9 +88,10 @@ class TransparentModeNoticeUiTest {
         onNodeWithTag(TRANSPARENT_MODE_SWITCH_TEST_TAG).performClick()
 
         assertEquals(emptyList(), settingChanges)
-        onNodeWithText(getString(Res.string.cancel)).performClick()
+        onNodeWithTag(TRANSPARENT_MODE_ENABLE_CONFIRMATION_TAG).assertIsDisplayed()
+        onNodeWithTag(DIALOG_DISMISS_BUTTON_TAG).performClick()
         assertEquals(emptyList(), settingChanges)
-        onNodeWithText(getString(Res.string.transparent_mode_enable_confirm)).assertDoesNotExist()
+        onNodeWithTag(TRANSPARENT_MODE_ENABLE_CONFIRMATION_TAG).assertDoesNotExist()
     }
 
     @Test
@@ -101,7 +99,7 @@ class TransparentModeNoticeUiTest {
         setSetting(checked = false)
 
         onNodeWithTag(TRANSPARENT_MODE_SWITCH_TEST_TAG).performClick()
-        onNodeWithText(getString(Res.string.transparent_mode_enable_confirm)).performClick()
+        onNodeWithTag(DIALOG_CONFIRM_BUTTON_TAG).performClick()
 
         assertEquals(listOf(true), settingChanges)
     }
@@ -113,6 +111,6 @@ class TransparentModeNoticeUiTest {
         onNodeWithTag(TRANSPARENT_MODE_SWITCH_TEST_TAG).performClick()
 
         assertEquals(listOf(false), settingChanges)
-        onNodeWithText(getString(Res.string.transparent_mode_enable_confirm)).assertDoesNotExist()
+        onNodeWithTag(TRANSPARENT_MODE_ENABLE_CONFIRMATION_TAG).assertDoesNotExist()
     }
 }
