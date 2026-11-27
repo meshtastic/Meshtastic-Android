@@ -24,6 +24,7 @@ import org.meshtastic.core.repository.NodeController
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.sdk.AdminResult
 import org.meshtastic.sdk.NodeId
 
 /**
@@ -73,7 +74,12 @@ internal class NodeControllerImpl(
         nodeManager.removeByNodenum(nodeNum)
         nodeManager.myNodeNum.value ?: return
         try {
-            sessionAdmin.launch("Remove node") { removeNode(NodeId(nodeNum)) }
+            sessionAdmin.launch(
+                "Remove node",
+                onResult = { result -> if (result !is AdminResult.Success) nodeManager.cancelPendingRemoval(nodeNum) },
+            ) {
+                removeNode(NodeId(nodeNum))
+            }
         } catch (e: PacketQueueRejectedException) {
             // Node removal has always been local-first and is allowed while disconnected; the radio cleanup is
             // best-effort.

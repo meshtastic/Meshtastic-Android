@@ -94,5 +94,11 @@ internal class FakeLinks : RadioLinks {
 
     override fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String = "${interfaceId.id}$rest"
 
-    override fun open(address: String, scope: CoroutineScope): RadioLink = FakeLink(address).also(opened::add)
+    /** Addresses that pass [isAddressValid] but whose link cannot be built. */
+    val unopenable = mutableSetOf<String>()
+
+    override fun open(address: String, scope: CoroutineScope): RadioLink {
+        check(address !in unopenable) { "No link can be built for this address" }
+        return FakeLink(address).also(opened::add)
+    }
 }

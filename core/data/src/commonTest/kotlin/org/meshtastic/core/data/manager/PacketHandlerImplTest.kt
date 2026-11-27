@@ -230,6 +230,30 @@ class PacketHandlerImplTest {
     }
 
     @Test
+    fun `a status waits for a row the sender writes seconds after queueing`() = runTest {
+        // Regression: a 1 s wait dropped ENROUTE for a row a busy database wrote late, and the next connect re-sent it.
+        val fixture = fixture()
+        val outgoing = packet(903)
+        val stored = PersistedPacket(PERSISTED_ID, DataPacket(bytes = null, dataType = PortNum.TEXT_MESSAGE_APP.value))
+        var rowWritten = false
+        var statusesWritten = 0
+        everySuspend { fixture.repository.applyOutgoingQueueStatus(outgoing, MessageStatus.ENROUTE) } calls
+            {
+                if (rowWritten) stored.also { statusesWritten++ } else null
+            }
+
+        assertTrue(fixture.handler.sendToRadio(outgoing))
+        runCurrent()
+        advanceTimeBy(5.seconds)
+        rowWritten = true
+        advanceTimeBy(PacketHandlerImpl.PERSISTED_STATUS_RETRY_DELAY)
+        runCurrent()
+
+        assertEquals(1, statusesWritten)
+        fixture.shutdown()
+    }
+
+    @Test
     fun `reconnect re-arms a persisted timeout for the selected database`() = runTest {
         val fixture = fixture()
         val persisted =

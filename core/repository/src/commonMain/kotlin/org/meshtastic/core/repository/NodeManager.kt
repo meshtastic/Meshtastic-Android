@@ -180,6 +180,9 @@ interface NodeManager : NodeIdLookup {
     /** Removes a node from the in-memory database by its number. */
     fun removeByNodenum(nodeNum: Int)
 
+    /** Ends a removal the radio did not apply, so the node's next packet brings it back. */
+    fun cancelPendingRemoval(nodeNum: Int) = Unit
+
     /**
      * Applies node-number removals returned by the trusted configuration install. Removed numbers stay retired for the
      * current device/database session so delayed field packets cannot recreate migrated identities.

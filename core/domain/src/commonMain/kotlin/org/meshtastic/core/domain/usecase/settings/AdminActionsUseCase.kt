@@ -16,18 +16,22 @@
  */
 package org.meshtastic.core.domain.usecase.settings
 
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioController
+import org.meshtastic.core.repository.routingErrorOrNull
 import org.meshtastic.sdk.AdminResult
-import org.meshtastic.sdk.onSuccess
 
 /**
  * Use case for performing administrative and destructive actions on mesh nodes.
  *
  * This component provides methods for rebooting, shutting down, or resetting nodes within the mesh. Each suspends until
  * the device answers and returns that answer. A reset of the locally connected node also clears the phone's node
- * database once the device reports it applied.
+ * database, unless the device refuses the reset.
  */
 @Single
 open class AdminActionsUseCase
@@ -46,7 +50,29 @@ constructor(
 
     /** Factory resets [destNum]; [isLocal] also clears the phone's node database, which would be out of sync. */
     open suspend fun factoryReset(destNum: Int, isLocal: Boolean): AdminResult<Unit> =
-        radioController.factoryReset(destNum).onSuccess { if (isLocal) nodeRepository.clearNodeDB() }
+        resetting(isLocal, clearLocal = { nodeRepository.clearNodeDB() }) { radioController.factoryReset(destNum) }
+
+    /**
+     * Runs a reset and, for the connected node, clears the phone's copy unless the radio refused it. The radio reboots
+     * after a reset, so its answer can be lost, and the caller can go away before it arrives.
+     */
+    private suspend fun resetting(
+        isLocal: Boolean,
+        clearLocal: suspend () -> Unit,
+        send: suspend () -> AdminResult<Unit>,
+    ): AdminResult<Unit> {
+        var result: AdminResult<Unit>? = null
+        try {
+            val answer = send()
+            result = answer
+            return answer
+        } finally {
+            val answer = result
+            val abandoned = answer == null && !currentCoroutineContext().isActive
+            val notRefused = answer != null && answer.routingErrorOrNull() == null
+            if (isLocal && (abandoned || notRefused)) withContext(NonCancellable) { clearLocal() }
+        }
+    }
 
     /**
      * Syncs the node's real-time clock to the phone's current time, so a remote node whose RTC has drifted can be
@@ -56,7 +82,7 @@ constructor(
 
     /** Resets the NodeDB on [destNum]; [isLocal] also clears the phone's node database the same way. */
     open suspend fun nodedbReset(destNum: Int, preserveFavorites: Boolean, isLocal: Boolean): AdminResult<Unit> =
-        radioController.nodedbReset(destNum, preserveFavorites).onSuccess {
-            if (isLocal) nodeRepository.clearNodeDB(preserveFavorites)
+        resetting(isLocal, clearLocal = { nodeRepository.clearNodeDB(preserveFavorites) }) {
+            radioController.nodedbReset(destNum, preserveFavorites)
         }
 }

@@ -73,7 +73,8 @@ class PacketHandlerImpl(
 ) : PacketHandler {
 
     companion object {
-        private val PERSISTED_STATUS_WAIT = 1.seconds
+        /** How long a status waits for its row, which the sender writes after queueing and a busy database delays. */
+        private val PERSISTED_STATUS_WAIT = 30.seconds
         internal val PERSISTED_STATUS_RETRY_DELAY = 100.milliseconds
 
         /**

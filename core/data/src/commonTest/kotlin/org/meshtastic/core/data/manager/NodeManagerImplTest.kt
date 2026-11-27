@@ -3708,6 +3708,20 @@ class NodeManagerImplTest {
         assertNotNull(nodeManager.nodeDBbyNodeNum[LIVE_NODE])
     }
 
+    // Regression: a removal the radio refused kept the node suppressed until the next handshake.
+    @Test
+    fun `a node whose removal the radio refused comes back with its next update`() {
+        admitLeases(liveSession)
+        enableDbWrites()
+        nodeManager.installNodeInfo(sdkNode())
+        nodeManager.removeByNodenum(LIVE_NODE)
+
+        nodeManager.cancelPendingRemoval(LIVE_NODE)
+        nodeManager.applySessionNode(sdkNode(lastHeard = 2_000), setOf(NodeField.LastSeen), liveSession)
+
+        assertNotNull(nodeManager.nodeDBbyNodeNum[LIVE_NODE])
+    }
+
     @Test
     fun `a node the radio adds with its hardware posts the new-node notification`() {
         admitLeases(liveSession)

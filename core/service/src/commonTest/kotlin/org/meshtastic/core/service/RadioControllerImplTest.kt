@@ -89,6 +89,7 @@ import org.meshtastic.sdk.AdminEdit
 import org.meshtastic.sdk.AdminResult
 import org.meshtastic.sdk.ChannelIndex
 import org.meshtastic.sdk.ConnectionState
+import org.meshtastic.sdk.MeshtasticException
 import org.meshtastic.sdk.NodeId
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -900,9 +901,32 @@ class RadioControllerImplTest {
         val controller = editController(backgroundScope, admin)
 
         controller.removeByNodenum(packetId = 1, nodeNum = 55)
+        advanceUntilIdle()
 
         verifySuspend { nodeManager.removeByNodenum(55) }
         assertEquals(listOf("remove:55"), admin.commands)
+        verify(exactly(0)) { nodeManager.cancelPendingRemoval(any()) }
+    }
+
+    // Regression: a removal the radio refused left the node suppressed for the rest of the session.
+    @Test
+    fun removeByNodenumEndsThePendingRemovalWhenTheRadioRefuses() = runTest {
+        val admin = recordingAdmin().apply { removeResult = AdminResult.Unauthorized }
+        val controller = editController(backgroundScope, admin)
+
+        controller.removeByNodenum(packetId = 1, nodeNum = 55)
+        advanceUntilIdle()
+
+        verify { nodeManager.cancelPendingRemoval(55) }
+    }
+
+    // Regression: a commit the SDK rethrew escaped as MeshtasticException instead of the transaction failure.
+    @Test
+    fun editSettingsReportsACommitTheSdkRethrowsAsATransactionFailure() = runTest {
+        val admin = recordingAdmin().apply { beforeCommit = { throw MeshtasticException.NotConnected() } }
+        val controller = editController(backgroundScope, admin)
+
+        assertFailsWith<EditSettingsTransactionException> { controller.editLocalSettings { setConfig(deviceConfig) } }
     }
 
     @Test
@@ -1070,7 +1094,12 @@ class RadioControllerImplTest {
 
         override suspend fun toggleMuted(node: NodeId) = record("muted:${node.raw}")
 
-        override suspend fun removeNode(node: NodeId) = record("remove:${node.raw}")
+        var removeResult: AdminResult<Unit> = AdminResult.Success(Unit)
+
+        override suspend fun removeNode(node: NodeId): AdminResult<Unit> {
+            commands += "remove:${node.raw}"
+            return removeResult
+        }
 
         override suspend fun sendInputEvent(event: AdminMessage.InputEvent) = record("input:${event.event_code}")
 

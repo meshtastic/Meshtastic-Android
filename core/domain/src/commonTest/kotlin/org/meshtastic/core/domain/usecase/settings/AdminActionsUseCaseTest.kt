@@ -16,8 +16,14 @@
  */
 package org.meshtastic.core.domain.usecase.settings
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.proto.Routing
@@ -27,6 +33,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class AdminActionsUseCaseTest {
 
     private lateinit var radioController: FakeRadioController
@@ -64,6 +71,29 @@ class AdminActionsUseCaseTest {
         radioController.writeResult = AdminResult.Failed(Routing.Error.NO_ROUTE)
         useCase.factoryReset(1234, isLocal = true)
         assertEquals(1, nodeRepository.nodeDBbyNum.value.size)
+    }
+
+    // Regression: the phone's nodes were cleared only on an answered reset, and a reset reboots the radio.
+    @Test
+    fun `a factory reset the radio never answers still clears the local NodeDB`() = runTest {
+        nodeRepository.upsert(Node(num = 1))
+        radioController.writeResult = AdminResult.Timeout
+        useCase.factoryReset(1234, isLocal = true)
+        assertTrue(nodeRepository.nodeDBbyNum.value.isEmpty())
+    }
+
+    // Regression: the clear waited for the radio's answer, so a caller that went away first kept the stale nodes.
+    @Test
+    fun `a factory reset whose caller goes away still clears the local NodeDB`() = runTest {
+        nodeRepository.upsert(Node(num = 1))
+        val unanswered =
+            object : RadioController by radioController {
+                override suspend fun factoryReset(destNum: Int): AdminResult<Unit> = awaitCancellation()
+            }
+        val reset = launch { AdminActionsUseCase(unanswered, nodeRepository).factoryReset(1234, isLocal = true) }
+        runCurrent()
+        reset.cancelAndJoin()
+        assertTrue(nodeRepository.nodeDBbyNum.value.isEmpty())
     }
 
     @Test

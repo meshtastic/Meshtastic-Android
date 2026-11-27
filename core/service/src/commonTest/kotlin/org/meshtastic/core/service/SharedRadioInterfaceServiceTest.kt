@@ -57,6 +57,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertSame
@@ -268,6 +269,42 @@ class SharedRadioInterfaceServiceTest {
         assertTrue(failed.closed)
         assertEquals(2, links.opened.size)
         assertEquals(1, links.opened.last().connects)
+    }
+
+    @Test
+    fun `a link whose snapshot was not installed closes and leaves the connection failed`() = runTest(testDispatcher) {
+        // Regression: a failed install left the client connected and the app short of Connected with no way on.
+        val (service, link) = connectedService(TCP)
+        val errors = mutableListOf<String>()
+        backgroundScope.launch { service.connectionError.collect { errors += it } }
+        link.connection.value = ConnectionState.Connected
+
+        link.host.onSnapshotInstallFailed(assertNotNull(service.activeSession.value))
+
+        assertTrue(link.closed)
+        assertNull(service.activeSession.value)
+        val state = assertIs<ConnectionState.Failed>(serviceRepository.connectionState.value)
+        assertIs<MeshtasticException.HandshakeTimeout>(state.cause)
+        assertEquals(listOf(connectionErrorText(TransportDisconnectReason.HandshakeRecoveryExhausted)), errors)
+
+        service.connect()
+        assertEquals(2, links.opened.size, "Connect opens a fresh link")
+    }
+
+    @Test
+    fun `a selected radio whose link cannot open is failed until it is put away`() = runTest(testDispatcher) {
+        // Regression: a link that could not be built left the card on Disconnected with nothing shown.
+        links.unopenable += TCP
+        val service = service(TCP)
+
+        service.connect()
+
+        assertTrue(links.opened.isEmpty())
+        assertIs<ConnectionState.Failed>(serviceRepository.connectionState.value)
+
+        service.disconnect()
+
+        assertEquals(ConnectionState.Disconnected, serviceRepository.connectionState.value)
     }
 
     @Test

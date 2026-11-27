@@ -187,8 +187,15 @@ internal class SdkRadioLink(
     }
 
     private suspend fun install(event: RadioSessionEvent.Ready, session: RadioSessionContext, host: RadioSessionHost) {
-        if (!pipeline.sessionProjection.installReady(event, session)) {
+        val installed = safeCatching {
+            pipeline.sessionProjection.installReady(event, session)
+        }
+            .onFailure { Logger.e(it) { "SDK session snapshot install failed for app session ${session.generation}" } }
+            .getOrDefault(false)
+        if (!installed) {
             Logger.w { "SDK session snapshot was not installed for app session ${session.generation}" }
+            // Nothing else moves the app past this snapshot, so a session still open must not stay half connected.
+            if (host.isSessionActive(session)) host.onSnapshotInstallFailed(session)
             return
         }
         Logger.i { "SDK session snapshot installed for app session ${session.generation}" }

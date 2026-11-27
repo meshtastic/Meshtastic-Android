@@ -869,6 +869,10 @@ class NodeManagerImpl(
         serviceNotifications.cancelLowBatteryNotification(nodeNum)
     }
 
+    override fun cancelPendingRemoval(nodeNum: Int) {
+        nodeState.update { state -> state.copy(pendingRemovals = state.pendingRemovals.removing(nodeNum)) }
+    }
+
     /**
      * Each live update carries the SDK's flags, which trail a local optimistic write until its admin ack. A flag is
      * applied only when an [NodeField.Other] change moved it from the value the SDK last reported, or when the node is

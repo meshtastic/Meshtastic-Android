@@ -2445,7 +2445,12 @@ class RadioConfigViewModelTest {
         ChannelSettings.Builder().also { wb -> wb.name = "D" }.build(),
     )
 
-    private fun myNodeInfo(myNodeNum: Int, pioEnv: String? = null, firmwareVersion: String? = null) = MyNodeInfo(
+    private fun myNodeInfo(
+        myNodeNum: Int,
+        pioEnv: String? = null,
+        firmwareVersion: String? = null,
+        deviceId: String? = null,
+    ) = MyNodeInfo(
         myNodeNum = myNodeNum,
         hasGPS = false,
         model = null,
@@ -2459,9 +2464,48 @@ class RadioConfigViewModelTest {
         hasWifi = false,
         channelUtilization = 0f,
         airUtilTx = 0f,
-        deviceId = null,
+        deviceId = deviceId,
         pioEnv = pioEnv,
     )
+
+    private fun nodeNumbered(num: Int) = Node(num = num, user = User.Builder().also { wb -> wb.id = "!$num" }.build())
+
+    // Regression: a session opened on the connected node by number kept addressing the old number after a renumber.
+    @Test
+    fun `a session opened on the connected node by number follows it through a renumber`() = runTest {
+        nodeRepository.setNodes(listOf(nodeNumbered(100)))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100, deviceId = "0a1b2c"))
+        viewModel = createViewModel(destNum = 100)
+        runCurrent()
+
+        nodeRepository.setNodes(listOf(nodeNumbered(200)))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 200, deviceId = "0a1b2c"))
+        runCurrent()
+        val user = User.Builder().also { wb -> wb.long_name = "Base" }.build()
+        viewModel.saveUserConfig(user)
+        runCurrent()
+
+        verifySuspend { radioConfigUseCase.setOwner(200, user) }
+    }
+
+    // Regression: another radio's node can still be reached as a remote, so its number must not be dropped.
+    @Test
+    fun `a session on a node number keeps it when a different radio connects`() = runTest {
+        nodeRepository.setNodes(listOf(nodeNumbered(100)))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100, deviceId = "0a1b2c"))
+        viewModel = createViewModel(destNum = 100)
+        runCurrent()
+
+        // The new radio's node comes first, where a session with no number would find it.
+        nodeRepository.setNodes(listOf(nodeNumbered(200), nodeNumbered(100)))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 200, deviceId = "ffee00"))
+        runCurrent()
+        val user = User.Builder().also { wb -> wb.long_name = "Base" }.build()
+        viewModel.saveUserConfig(user)
+        runCurrent()
+
+        verifySuspend { radioConfigUseCase.setOwner(100, user) }
+    }
 
     @Test
     fun `local reboot-applying config save opens the restart window`() = runTest {

@@ -53,6 +53,7 @@ import org.meshtastic.sdk.AdminApi
 import org.meshtastic.sdk.AdminEdit
 import org.meshtastic.sdk.AdminResult
 import org.meshtastic.sdk.ChannelIndex
+import org.meshtastic.sdk.MeshtasticException
 import org.meshtastic.sdk.NodeId
 import org.meshtastic.sdk.onSuccess
 import kotlin.time.Duration.Companion.seconds
@@ -356,7 +357,14 @@ internal class AdminControllerImpl(
         val admin = if (isLocalDestination) sessionAdmin else sessionAdmin.forNode(NodeId(destNum))
 
         val projections = StagedProjections()
-        val result = admin.editSettings { EditSettingsScope(this, destNum, isLocalDestination, projections).block() }
+        val result =
+            try {
+                admin.editSettings { EditSettingsScope(this, destNum, isLocalDestination, projections).block() }
+            } catch (e: MeshtasticException) {
+                // The SDK rethrows a commit the link could not carry; callers know one failure type for the boundary.
+                Logger.w(e) { "Edit-settings transaction ended with the radio session" }
+                AdminResult.NodeUnreachable
+            }
         if (result !is AdminResult.Success) throw EditSettingsTransactionException(editSettingsFailureMessage(result))
         radio.runWithSessionLease(session) { projections.apply() }
     }

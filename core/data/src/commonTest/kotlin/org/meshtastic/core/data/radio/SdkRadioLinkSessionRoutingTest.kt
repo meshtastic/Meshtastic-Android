@@ -92,6 +92,10 @@ class SdkRadioLinkSessionRoutingTest {
             radio.disconnect()
             closeFailure?.let { throw it }
         }
+
+        override fun onSnapshotInstallFailed(session: RadioSessionContext) {
+            log += "install-failed ${session.generation}"
+        }
     }
 
     private class Rig(val scope: TestScope) {
@@ -224,6 +228,21 @@ class SdkRadioLinkSessionRoutingTest {
         link.routeDeviceLog(SessionScoped(2L, LogRecord.Builder().build()))
         runCurrent()
         assertEquals(1, rig.logs.currentLogs.size, "an item tagged with the open session is written")
+    }
+
+    // Regression: a snapshot that was not installed left the session open and the app short of Connected for good.
+    @Test
+    fun `a snapshot that is not installed is reported to the host`() = runTest {
+        val rig = Rig(this)
+        val events = MutableSharedFlow<RadioSessionEvent>()
+        pump(rig, rig.link(), events)
+
+        send(
+            events,
+            RadioSessionEvent.Ready(1, myInfo = null, configBundle = null, channels = null, nodes = emptyMap()),
+        )
+
+        assertEquals(listOf("open 1", "lockdown-connect", "install-failed 1"), rig.log)
     }
 
     // Regression: an Ended that closed whatever was open, whatever its id.

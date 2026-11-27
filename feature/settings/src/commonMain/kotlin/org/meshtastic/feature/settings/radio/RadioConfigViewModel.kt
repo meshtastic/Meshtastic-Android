@@ -365,6 +365,18 @@ open class RadioConfigViewModel(
 
         radioConfigRepository.deviceProfileFlow.onEach { _currentDeviceProfile.value = it }.launchIn(viewModelScope)
 
+        // A session opened on the connected node by number follows it through a renumber: the same device under a
+        // new number. Another radio's number is left alone, since that node may still be reachable as a remote.
+        var connectedNode: MyNodeInfo? = null
+        nodeRepository.myNodeInfo
+            .onEach { info ->
+                val previous = connectedNode
+                if (info != null) connectedNode = info
+                val renumbered = previous != null && info != null && previous.isRenumberedTo(info)
+                if (renumbered && activeDestNum.value == previous.myNodeNum) activeDestNum.value = null
+            }
+            .launchIn(viewModelScope)
+
         // Derive isLocal from the immutable destNum and the (possibly changing) myNodeInfo.
         // flatMapLatest cancels the previous inner flow on every change, so there is
         // no window where stale local config can leak through.
@@ -1503,6 +1515,10 @@ open class RadioConfigViewModel(
 }
 
 private data class LateRemoteRead(val route: String, val expiryJob: Job)
+
+/** The same device under a new node number, as firmware 2.8 leaves it once it mints its key. */
+private fun MyNodeInfo.isRenumberedTo(other: MyNodeInfo): Boolean =
+    myNodeNum != other.myNodeNum && deviceId != null && deviceId == other.deviceId
 
 internal data class ManualChannelUpdateResult(val packetIds: List<Int>, val finalSettings: List<ChannelSettings>)
 
