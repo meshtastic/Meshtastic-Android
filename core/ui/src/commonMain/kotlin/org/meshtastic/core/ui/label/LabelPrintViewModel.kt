@@ -150,9 +150,11 @@ class LabelPrintViewModel(printerFactory: NiimbotPrinterFactory, private val pre
             return
         }
         search?.cancel()
-        work?.cancel()
+        val previous = work?.also { it.cancel() }
         _state.update { it.copy(status = LabelPrinterStatus.CONNECTING, printerName = device.name) }
         work = viewModelScope.launch {
+            // A canceled connect disconnects as it unwinds, which must not land on this connection.
+            previous?.join()
             closing?.join()
             val result = safeCatching { printer.connect(device) }
             ensureActive()

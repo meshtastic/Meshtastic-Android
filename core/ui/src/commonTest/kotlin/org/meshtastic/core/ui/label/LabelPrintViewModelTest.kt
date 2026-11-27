@@ -16,8 +16,11 @@
  */
 package org.meshtastic.core.ui.label
 
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
@@ -28,6 +31,9 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.ble.BleCharacteristicInfo
+import org.meshtastic.core.ble.BleConnection
+import org.meshtastic.core.ble.BleConnectionFactory
+import org.meshtastic.core.ble.BleConnectionState
 import org.meshtastic.core.ble.BleDevice
 import org.meshtastic.core.ble.BleScanStartException
 import org.meshtastic.core.ble.BleScanStartFailureReason
@@ -254,5 +260,50 @@ class LabelPrintViewModelTest {
             val state = viewModel.state.value
             assertEquals(LabelPrintError.Scan(BleScanStartFailureReason.ScanningTooFrequently), state.error)
             assertEquals(LabelPrinterStatus.IDLE, state.status)
+        }
+
+    /**
+     * A connection whose first connect never completes and whose disconnects take time: 5 s for the first, which is the
+     * canceled connect cleaning up after itself, and 1 s for the rest.
+     */
+    private class SlowToLetGo(private val inner: FakeBleConnection) : BleConnection by inner {
+        var connects = 0
+        var disconnectsInFlight = 0
+        var connectedDuringDisconnect = false
+        private var disconnects = 0
+
+        override suspend fun connectAndAwait(device: BleDevice, timeout: Duration): BleConnectionState {
+            if (connects++ == 0) awaitCancellation()
+            connectedDuringDisconnect = connectedDuringDisconnect || disconnectsInFlight > 0
+            return inner.connectAndAwait(device, timeout)
+        }
+
+        override suspend fun disconnect() {
+            disconnectsInFlight++
+            delay(if (disconnects++ == 0) 5.seconds else 1.seconds)
+            inner.disconnect()
+            disconnectsInFlight--
+        }
+    }
+
+    @Test
+    fun `a connect canceled by closing the sheet finishes letting go before the reopened sheet connects`() =
+        runTest(dispatcher) {
+            prefs.printerAddress.value = mine.address
+            scanner.emitDevice(mine)
+            val slow = SlowToLetGo(connection)
+            val factory =
+                object : BleConnectionFactory {
+                    override fun create(scope: CoroutineScope, tag: String): BleConnection = slow
+                }
+            val viewModel = LabelPrintViewModel(NiimbotPrinterFactory(scanner, factory), prefs)
+            viewModel.start()
+
+            viewModel.stop()
+            viewModel.start()
+            advanceTimeBy(20.seconds)
+
+            assertEquals(2 to false, slow.connects to slow.connectedDuringDisconnect)
+            assertEquals(LabelPrinterStatus.READY, viewModel.state.value.status)
         }
 }
