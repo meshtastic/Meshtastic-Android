@@ -30,6 +30,9 @@ private fun bigEndian(value: Int): ByteArray = byteArrayOf((value shr BYTE_SHIFT
 
 private fun ByteArray.unsigned(index: Int): Int = this[index].toInt() and BYTE_MASK
 
+private const val TYPE_FAULT = 0xDB
+private const val TYPE_UNSUPPORTED = 0x00
+
 /** Why the printer did not print. */
 sealed class NiimbotException(message: String) : Exception(message) {
     /** The printer reported a fault (packet type 0xDB) with this code. */
@@ -43,6 +46,13 @@ sealed class NiimbotException(message: String) : Exception(message) {
 
     /** The link to the printer is gone: a write failed or its notifications ended. Nothing more can be sent. */
     class LinkLost(val request: Int) : NiimbotException("Link lost at request $request")
+}
+
+/** [packet] unless it is the printer reporting a fault or saying it does not know [request]. */
+private fun checked(packet: NiimbotPacket, request: Int): NiimbotPacket = when (packet.type) {
+    TYPE_FAULT -> throw NiimbotException.PrinterFault(packet.data.firstOrNull()?.toInt()?.and(BYTE_MASK) ?: 0)
+    TYPE_UNSUPPORTED -> throw NiimbotException.Unsupported(request)
+    else -> packet
 }
 
 /** What a printer fault code means, per MultiMote/niimbluelib as labeltastic's vendored niimprint lists them. */
@@ -105,14 +115,14 @@ class NiimbotProtocol(private val link: NiimbotLink) {
         transceive(NiimbotRequest.SET_LABEL_TYPE, byteArrayOf(LABEL_TYPE_GAP), STATUS_REPLY_OFFSET)
         startPage(version, bitmap)
         for (packet in NiimbotImageEncoder.packets(bitmap)) {
-            link.send(packet)
+            if (!sendBounded(packet)) throw NiimbotException.NoResponse(packet.type)
             delay(ROW_PACING)
         }
         transceive(NiimbotRequest.END_PAGE_PRINT, ONE)
         awaitPage()
         afterPage { transceive(NiimbotRequest.END_PRINT, ONE) }
         // Some v4 models drop the packet after a print; this one is the spare.
-        if (version >= VERSION_4) afterPage { link.send(NiimbotPacket(NiimbotRequest.HEARTBEAT, ONE)) }
+        if (version >= VERSION_4) afterPage { sendBounded(NiimbotPacket(NiimbotRequest.HEARTBEAT, ONE)) }
     }
 
     /** 0 for older printers; 3, 4 or 5 for newer firmware (niimbluelib's decoding of the status data). */
@@ -139,7 +149,7 @@ class NiimbotProtocol(private val link: NiimbotLink) {
             version >= VERSION_4 -> {
                 transceive(NiimbotRequest.START_PRINT, quantity + ByteArray(V4_PADDING))
                 // niimbluelib sends this status query and does not wait for it; its late reply is ignored.
-                link.send(NiimbotPacket(NiimbotRequest.GET_PRINT_STATUS, ONE))
+                sendBounded(NiimbotPacket(NiimbotRequest.GET_PRINT_STATUS, ONE))
                 transceive(NiimbotRequest.SET_DIMENSION, size + quantity + ByteArray(V4_PADDING))
             }
 
@@ -210,12 +220,6 @@ class NiimbotProtocol(private val link: NiimbotLink) {
         }
     }
 
-    private fun checked(packet: NiimbotPacket, request: Int): NiimbotPacket = when (packet.type) {
-        TYPE_FAULT -> throw NiimbotException.PrinterFault(packet.data.firstOrNull()?.toInt()?.and(BYTE_MASK) ?: 0)
-        TYPE_UNSUPPORTED -> throw NiimbotException.Unsupported(request)
-        else -> packet
-    }
-
     private suspend fun attempt(block: suspend () -> Unit) {
         try {
             block()
@@ -225,6 +229,10 @@ class NiimbotProtocol(private val link: NiimbotLink) {
             // Optional step: older firmware skips it and the print goes on, unless the link itself is gone.
         }
     }
+
+    /** Writes [packet] without waiting for a reply. False when the write did not return within [WRITE_TIMEOUT]. */
+    private suspend fun sendBounded(packet: NiimbotPacket): Boolean =
+        withTimeoutOrNull(WRITE_TIMEOUT) { link.send(packet) } != null
 
     private suspend fun afterPage(block: suspend () -> Unit) {
         try {
@@ -240,14 +248,18 @@ class NiimbotProtocol(private val link: NiimbotLink) {
         val ROW_PACING = 10.milliseconds
         val STATUS_POLL_INTERVAL = 300.milliseconds
         val PAGE_TIMEOUT = 60.seconds
+
+        /**
+         * Twice the 5 s link supervision timeout Android asks for, so a link that really died surfaces as lost first
+         * and only a write stuck on a live link runs into this.
+         */
+        val WRITE_TIMEOUT = 10.seconds
         const val DEFAULT_DENSITY = 3
         const val QUANTITY = 1
 
         /** Die-cut labels with gaps. */
         const val LABEL_TYPE_GAP: Byte = 1
         const val STATUS_REPLY_OFFSET = 16
-        const val TYPE_FAULT = 0xDB
-        const val TYPE_UNSUPPORTED = 0x00
         const val V4_PADDING = 7
         const val V3_PADDING = 5
         const val VERSION_3 = 3

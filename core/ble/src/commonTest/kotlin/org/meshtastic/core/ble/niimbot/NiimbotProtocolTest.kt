@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.ble.niimbot
 
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -42,11 +43,15 @@ internal class ScriptedPrinter(private val statusData: ByteArray? = null) : Niim
 
     /** A request type at which the link goes away: notifications end before any reply. */
     var linkLostAt: Int? = null
+
+    /** A request type whose write never returns while the link stays up. */
+    var writeHangsAt: Int? = null
     private var polls = 0
 
     override suspend fun send(packet: NiimbotPacket) {
         sent += packet.toBytes().hex()
         if (packet.type == linkLostAt) received.close()
+        if (packet.type == writeHangsAt) awaitCancellation()
         when (packet.type) {
             0x84,
             0x85,
@@ -213,6 +218,27 @@ class NiimbotProtocolTest {
         assertFailsWith<NiimbotException.NoResponse> { NiimbotProtocol(printer).print(picture) }
 
         assertTrue(testScheduler.currentTime in 60_000..61_000, "gave up after ${testScheduler.currentTime} ms")
+    }
+
+    @Test
+    fun `a row write that never returns fails the print with no answer after ten seconds`() = runTest {
+        val printer = ScriptedPrinter(ScriptedPrinter.statusData(2, 4)).apply { writeHangsAt = 0x85 }
+
+        val failure = assertFailsWith<NiimbotException.NoResponse> { NiimbotProtocol(printer).print(picture) }
+
+        assertEquals(0x85, failure.request)
+        assertTrue(testScheduler.currentTime in 10_000..11_000, "gave up after ${testScheduler.currentTime} ms")
+    }
+
+    @Test
+    fun `a trailing heartbeat that never returns cannot hang or fail a finished print`() = runTest {
+        val printer = ScriptedPrinter(ScriptedPrinter.statusData(3, 0)).apply { writeHangsAt = 0xDC }
+
+        NiimbotProtocol(printer).print(picture)
+
+        // 2 s for the opening heartbeat's reply timeout, then 10 s for the trailing write.
+        assertTrue(testScheduler.currentTime in 12_000..13_000, "returned after ${testScheduler.currentTime} ms")
+        assertTrue("5555f30101f3aaaa" in printer.sent)
     }
 
     @Test
