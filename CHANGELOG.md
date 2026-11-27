@@ -8,6 +8,16 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
+### Internal (v2.8.5-internal.7)
+Changes since [`v2.8.5-open.2`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.5-open.2):
+
+#### 🏗️ Features
+* feat(connections): label a desktop serial radio with its last node by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8277
+* feat(beacon): let a broadcast target pin a frequency slot and toggle legacy text split by @tylerpieper in https://github.com/meshtastic/Meshtastic-Android/pull/8249
+#### 🛠️ Fixes
+* fix(data): log a dropped malformed radio frame as a warning by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8274
+* fix(model): match firmware's frequency slot math by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/8090
+
 ### Open Beta (v2.8.5-open.2)
 Changes since [`v2.8.4`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.4):
 
@@ -135,6 +145,8 @@ Changes since [`v2.8.4`](https://github.com/meshtastic/Meshtastic-Android/releas
 
 ## New Contributors
 * @ThomasGorisse made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/8254
+* @NomDeTom made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/8282
+* @tylerpieper made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/8249
 <!-- UNRELEASED_END -->
 
 <!-- RELEASED_START -->
