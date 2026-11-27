@@ -214,4 +214,40 @@ class RegionInfoTest {
         assertEquals(56, wide.numChannels)
         assertEquals(52, wide.channelNum("Ham"))
     }
+
+    private fun custom(region: RegionCode, bandwidthCode: Int) = LoRaConfig.Builder()
+        .also { wb ->
+            wb.use_preset = false
+            wb.region = region
+            wb.bandwidth = bandwidthCode
+        }
+        .build()
+
+    @Test
+    fun fractional_bandwidth_codes_decode_like_firmware() {
+        // Firmware bwCodeToKHz: 8, 10 and 16 stand for 7.8, 10.4 and 15.6 kHz over US's 26 MHz.
+        assertEquals(3333, custom(RegionCode.US, 8).numChannels)
+        assertEquals(2500, custom(RegionCode.US, 10).numChannels)
+        assertEquals(1667, custom(RegionCode.US, 16).numChannels)
+        // 21 and 42 stand for 20.8 and 41.7 kHz.
+        assertEquals(1250, custom(RegionCode.US, 21).numChannels)
+        assertEquals(624, custom(RegionCode.US, 42).numChannels)
+        // ANZ (915-928 MHz) at 7.8 kHz: slot 1625 sits at 915 + 0.0039 + 1624 * 0.0078.
+        assertEquals(927.6711f, custom(RegionCode.ANZ, 8).radioFreq(1625), 0.001f)
+    }
+
+    @Test
+    fun custom_bandwidth_zero_runs_at_250_kHz() {
+        assertEquals(104, custom(RegionCode.US, 0).numChannels)
+    }
+
+    @Test
+    fun custom_bandwidth_wider_than_the_region_runs_at_the_region_default_preset() {
+        // EU_N_868 is 250 kHz wide, so a custom 500 kHz runs as NARROW_SLOW does there: 3 slots, slot 1 at 869.4417.
+        val tooWide = custom(RegionCode.EU_N_868, 500)
+        assertEquals(3, tooWide.numChannels)
+        assertEquals(869.4417f, tooWide.radioFreq(1), 0.001f)
+        // EU_868 is as narrow and defaults to LONG_FAST: one 250 kHz slot.
+        assertEquals(869.525f, custom(RegionCode.EU_868, 500).radioFreq(1), 0.001f)
+    }
 }

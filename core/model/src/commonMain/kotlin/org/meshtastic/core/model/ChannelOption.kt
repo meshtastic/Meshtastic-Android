@@ -23,9 +23,14 @@ import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
 import org.meshtastic.proto.Config.LoRaConfig.RegionCode
 import kotlin.math.round
 
-/** The bandwidth in MHz that a manual `LoRaConfig.bandwidth` wire code stands for in the slot math. */
+/** The bandwidth in MHz that a manual `LoRaConfig.bandwidth` wire code stands for (firmware `bwCodeToKHz`). */
 fun loraBandwidthMegahertz(code: Int): Float = when (code) {
+    8 -> .0078f
+    10 -> .0104f
+    16 -> .0156f
+    21 -> .0208f
     31 -> .03125f
+    42 -> .0417f
     62 -> .0625f
     200 -> .203125f
     400 -> .40625f
@@ -66,11 +71,21 @@ private const val WIDE_LORA_BANDWIDTH_SCALE = 3.25f
 val ModemPreset?.snrLimit: Float
     get() = (ChannelOption.from(this) ?: ChannelOption.DEFAULT).snrLimit
 
-private fun LoRaConfig.bandwidth(regionInfo: RegionInfo?) = if (use_preset) {
-    modem_preset.bandwidth(wideLora = regionInfo?.wideLora == true)
-} else {
-    loraBandwidthMegahertz(bandwidth)
+/**
+ * Firmware `frequencySlotCount`: a custom bandwidth of 0 runs at 250 kHz, and one wider than the region runs at the
+ * region default preset's bandwidth.
+ */
+private fun LoRaConfig.bandwidth(regionInfo: RegionInfo?): Float {
+    val wideLora = regionInfo?.wideLora == true
+    if (use_preset) return modem_preset.bandwidth(wideLora)
+    val custom = loraBandwidthMegahertz(bandwidth).takeIf { it > 0f } ?: DEFAULT_BANDWIDTH_MHZ
+    val exceedsRegion =
+        regionInfo != null &&
+            regionInfo.freqEnd - regionInfo.freqStart < regionInfo.spacing + regionInfo.padding * 2 + custom
+    return if (exceedsRegion) regionInfo.defaultPreset.bandwidth(wideLora) else custom
 }
+
+private const val DEFAULT_BANDWIDTH_MHZ = 0.25f
 
 /**
  * Width of one frequency slot: modem bandwidth plus the region's per-side padding and inter-slot spacing (firmware
@@ -163,6 +178,7 @@ private val FIRMWARE_2_6_5 = DeviceVersion("2.6.5")
  *   channel-name hash as usual
  * @property minFirmware The first firmware release whose region table contains this region, or null for regions all
  *   supported firmware knows; [Capabilities.supportsRegion] gates the picker with it
+ * @property defaultPreset The region's default preset in the firmware's region table
  * @see
  *   [LoRaWAN Regional Parameters](https://lora-alliance.org/wp-content/uploads/2020/11/lorawan_regional_parameters_v1.0.3reva_0.pdf)
  */
@@ -177,6 +193,7 @@ enum class RegionInfo(
     val padding: Float = 0f,
     val overrideSlot: Int = 0,
     val minFirmware: DeviceVersion? = null,
+    val defaultPreset: ModemPreset = ModemPreset.LONG_FAST,
 ) {
     /**
      * United States
@@ -368,6 +385,7 @@ enum class RegionInfo(
         spacing = 0.4f,
         padding = 0.0375f,
         minFirmware = FIRMWARE_2_8,
+        defaultPreset = ModemPreset.LITE_FAST,
     ),
 
     /** European Union 868MHz using the narrow presets; same band as [EU_868]. */
@@ -379,6 +397,7 @@ enum class RegionInfo(
         padding = 0.0104f,
         overrideSlot = 1,
         minFirmware = FIRMWARE_2_8,
+        defaultPreset = ModemPreset.NARROW_SLOW,
     ),
 
     /**
@@ -394,6 +413,7 @@ enum class RegionInfo(
         padding = 0.0022f,
         overrideSlot = 26,
         minFirmware = FIRMWARE_2_8,
+        defaultPreset = ModemPreset.TINY_FAST,
     ),
 
     /**
@@ -409,6 +429,7 @@ enum class RegionInfo(
         padding = 0.0022f,
         overrideSlot = 51,
         minFirmware = FIRMWARE_2_8,
+        defaultPreset = ModemPreset.TINY_FAST,
     ),
 
     /**
@@ -425,6 +446,7 @@ enum class RegionInfo(
         padding = 0.0022f,
         overrideSlot = 33,
         minFirmware = FIRMWARE_2_8,
+        defaultPreset = ModemPreset.TINY_FAST,
     ),
 
     /**
@@ -439,6 +461,7 @@ enum class RegionInfo(
         padding = 0.01875f,
         overrideSlot = 37,
         minFirmware = FIRMWARE_2_8,
+        defaultPreset = ModemPreset.NARROW_SLOW,
     ),
 
     /** ITU Region 1 (Europe, Africa, Middle East, former USSR) amateur 70cm allocation. Licensed operators only. */
@@ -450,6 +473,7 @@ enum class RegionInfo(
         padding = 0.01875f,
         overrideSlot = 37,
         minFirmware = FIRMWARE_2_8,
+        defaultPreset = ModemPreset.NARROW_SLOW,
     ),
 
     /**
@@ -464,6 +488,7 @@ enum class RegionInfo(
         padding = 0.01875f,
         overrideSlot = 137,
         minFirmware = FIRMWARE_2_8,
+        defaultPreset = ModemPreset.NARROW_SLOW,
     ),
 
     /**
@@ -478,6 +503,7 @@ enum class RegionInfo(
         padding = 0.01875f,
         overrideSlot = 37,
         minFirmware = FIRMWARE_2_8,
+        defaultPreset = ModemPreset.NARROW_SLOW,
     ),
 
     /** This needs to be last. Same as US. */
