@@ -16,5 +16,15 @@
  */
 package org.meshtastic.core.ui.label
 
+import androidx.compose.runtime.Composable
+import org.meshtastic.core.ui.util.isBluetoothSupported
+
 /** True where the app can reach a Niimbot label printer over Bluetooth LE, so share screens offer Print only there. */
 internal expect val platformLabelPrintSupported: Boolean
+
+/** Whether to offer Print label here: only where the app can reach the printer and the device has Bluetooth LE. */
+@Composable
+fun isLabelPrintSupported(): Boolean {
+    val bluetoothSupported = isBluetoothSupported()
+    return platformLabelPrintSupported && bluetoothSupported
+}

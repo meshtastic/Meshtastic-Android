@@ -21,9 +21,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -34,15 +36,21 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
@@ -62,6 +70,7 @@ import org.meshtastic.core.resources.bluetooth_scan_location_services_disabled
 import org.meshtastic.core.resources.bluetooth_scan_start_failed
 import org.meshtastic.core.resources.grant_permission
 import org.meshtastic.core.resources.label_print_channel_title
+import org.meshtastic.core.resources.label_print_connect_title
 import org.meshtastic.core.resources.label_print_connecting
 import org.meshtastic.core.resources.label_print_error_bluetooth
 import org.meshtastic.core.resources.label_print_error_busy
@@ -76,18 +85,22 @@ import org.meshtastic.core.resources.label_print_error_other
 import org.meshtastic.core.resources.label_print_error_scan_busy
 import org.meshtastic.core.resources.label_print_error_unsupported
 import org.meshtastic.core.resources.label_print_error_wrong_roll
+import org.meshtastic.core.resources.label_print_include_pin
 import org.meshtastic.core.resources.label_print_length
 import org.meshtastic.core.resources.label_print_length_mm
 import org.meshtastic.core.resources.label_print_name_tag_title
 import org.meshtastic.core.resources.label_print_none_found
 import org.meshtastic.core.resources.label_print_permission
+import org.meshtastic.core.resources.label_print_pin_warning
 import org.meshtastic.core.resources.label_print_preview_channel
+import org.meshtastic.core.resources.label_print_preview_connect
 import org.meshtastic.core.resources.label_print_preview_name_tag
 import org.meshtastic.core.resources.label_print_print
 import org.meshtastic.core.resources.label_print_print_another
 import org.meshtastic.core.resources.label_print_printer
 import org.meshtastic.core.resources.label_print_printing
 import org.meshtastic.core.resources.label_print_qr_too_dense_channels
+import org.meshtastic.core.resources.label_print_qr_too_dense_connect
 import org.meshtastic.core.resources.label_print_qr_too_dense_contact
 import org.meshtastic.core.resources.label_print_search_again
 import org.meshtastic.core.resources.label_print_searching
@@ -96,6 +109,7 @@ import org.meshtastic.core.resources.open_settings
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Print
 import org.meshtastic.core.ui.util.PermissionStatus
+import org.meshtastic.core.ui.util.PermissionUiState
 import org.meshtastic.core.ui.util.isBluetoothDisabled
 import org.meshtastic.core.ui.util.rememberBluetoothPermissionState
 import org.meshtastic.core.ui.util.rememberOpenBluetoothSettings
@@ -112,7 +126,10 @@ private val LABEL_LENGTHS_MM = listOf(30, 40)
 fun LabelPrintSheet(spec: LabelSpec, onDismiss: () -> Unit, viewModel: LabelPrintViewModel = koinViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val lengthMm by viewModel.labelLengthMm.collectAsStateWithLifecycle()
-    val rendered = rememberRenderedLabel(spec, lengthMm)
+    // A connect label can leave the pairing PIN out of its QR; the choice is made here, per print.
+    var includePin by rememberSaveable { mutableStateOf(true) }
+    val shown = if (spec is LabelSpec.Connect) spec.withPin(includePin) else spec
+    val rendered = rememberRenderedLabel(shown, lengthMm)
     val permission = rememberBluetoothPermissionState()
     val bluetoothOff = isBluetoothDisabled()
 
@@ -136,35 +153,14 @@ fun LabelPrintSheet(spec: LabelSpec, onDismiss: () -> Unit, viewModel: LabelPrin
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.semantics { heading() },
             )
-            LabelPreview(spec, rendered)
+            LabelPreview(shown, rendered)
+            if (spec is LabelSpec.Connect && spec.linkWithoutPin != null) {
+                PinOption(included = includePin, onChange = { includePin = it })
+            }
             LabelLengthPicker(lengthMm, viewModel::setLabelLengthMm)
             SectionTitle(Res.string.label_print_printer)
-            when {
-                !permission.isGranted ->
-                    Recovery(
-                        message = Res.string.label_print_permission,
-                        action =
-                        if (permission.status == PermissionStatus.PERMANENTLY_DENIED) {
-                            Res.string.open_settings
-                        } else {
-                            Res.string.grant_permission
-                        },
-                        onAction =
-                        if (permission.status == PermissionStatus.PERMANENTLY_DENIED) {
-                            permission.openAppSettings
-                        } else {
-                            permission.request
-                        },
-                    )
-
-                bluetoothOff ->
-                    Recovery(
-                        message = Res.string.label_print_error_bluetooth,
-                        action = Res.string.open_settings,
-                        onAction = rememberOpenBluetoothSettings(),
-                    )
-
-                else -> PrinterSection(state, onConnect = viewModel::connect, onSearch = viewModel::start)
+            PrinterAccess(permission, bluetoothOff) {
+                PrinterSection(state, onConnect = viewModel::connect, onSearch = viewModel::start)
             }
             state.error?.let { Text(text = it.message(), color = MaterialTheme.colorScheme.error) }
             Button(
@@ -184,7 +180,55 @@ private val LabelSpec.titleRes: StringResource
         when (this) {
             is LabelSpec.NameTag -> Res.string.label_print_name_tag_title
             is LabelSpec.Channels -> Res.string.label_print_channel_title
+            is LabelSpec.Connect -> Res.string.label_print_connect_title
         }
+
+/** Says what a PIN in the QR means, and lets the label be printed without it. */
+@Composable
+private fun PinOption(included: Boolean, onChange: (Boolean) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Row(
+            modifier =
+            Modifier.fillMaxWidth()
+                .toggleable(value = included, role = Role.Switch, onValueChange = onChange)
+                .padding(vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(text = stringResource(Res.string.label_print_include_pin), modifier = Modifier.weight(1f))
+            Switch(checked = included, onCheckedChange = null)
+        }
+        if (included) {
+            Text(
+                text = stringResource(Res.string.label_print_pin_warning),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+            )
+        }
+    }
+}
+
+/** What stands between the sheet and a search, with the way to fix it, or [printers] when nothing does. */
+@Composable
+private fun PrinterAccess(permission: PermissionUiState, bluetoothOff: Boolean, printers: @Composable () -> Unit) {
+    val blocked = permission.status == PermissionStatus.PERMANENTLY_DENIED
+    when {
+        !permission.isGranted ->
+            Recovery(
+                message = Res.string.label_print_permission,
+                action = if (blocked) Res.string.open_settings else Res.string.grant_permission,
+                onAction = if (blocked) permission.openAppSettings else permission.request,
+            )
+
+        bluetoothOff ->
+            Recovery(
+                message = Res.string.label_print_error_bluetooth,
+                action = Res.string.open_settings,
+                onAction = rememberOpenBluetoothSettings(),
+            )
+
+        else -> printers()
+    }
+}
 
 private val LabelPrintState.printLabel: StringResource
     get() =
@@ -212,6 +256,7 @@ private fun LabelPreview(spec: LabelSpec, rendered: RenderedLabel?) {
             when (spec) {
                 is LabelSpec.NameTag -> Res.string.label_print_qr_too_dense_contact
                 is LabelSpec.Channels -> Res.string.label_print_qr_too_dense_channels
+                is LabelSpec.Connect -> Res.string.label_print_qr_too_dense_connect
             }
         Text(text = stringResource(reason), color = MaterialTheme.colorScheme.error)
     } else {
@@ -219,6 +264,7 @@ private fun LabelPreview(spec: LabelSpec, rendered: RenderedLabel?) {
             when (spec) {
                 is LabelSpec.NameTag -> stringResource(Res.string.label_print_preview_name_tag, spec.content.longName)
                 is LabelSpec.Channels -> stringResource(Res.string.label_print_preview_channel, spec.content.title)
+                is LabelSpec.Connect -> stringResource(Res.string.label_print_preview_connect, spec.content.longName)
             }
         Image(
             bitmap = rendered.preview,
@@ -328,12 +374,17 @@ private fun LabelPrintError.message(): String = when (this) {
 
     is LabelPrintError.Scan ->
         when (reason) {
-            BleScanStartFailureReason.ScanningTooFrequently -> stringResource(Res.string.label_print_error_scan_busy)
+            BleScanStartFailureReason.ScanningTooFrequently ->
+                stringResource(Res.string.label_print_error_scan_busy)
+
             BleScanStartFailureReason.BluetoothDisabled -> stringResource(Res.string.label_print_error_bluetooth)
+
             // Android 11 and older only scan with location services on.
             BleScanStartFailureReason.LocationServicesDisabled ->
                 stringResource(Res.string.bluetooth_scan_location_services_disabled)
+
             BleScanStartFailureReason.MissingScanPermission -> stringResource(Res.string.label_print_permission)
+
             BleScanStartFailureReason.ApplicationRegistrationFailed,
             null,
             -> stringResource(Res.string.bluetooth_scan_start_failed)

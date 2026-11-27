@@ -116,4 +116,45 @@ class LabelQrTest {
         val one = assertNotNull(spec(1).layout(labelLengthDots(40), FixedWidthMeasurer))
         assertTrue(one.ops.filterIsInstance<LabelOp.Qr>().single().dotsPerModule >= 2)
     }
+
+    // design#185 items 8 and 9: the connect label is the name tag around the connect link, and can drop the PIN.
+    @Test
+    fun `a connect label encodes its link and is the name tag's layout under its own band`() {
+        val content = NameTagContent("WPG", "Wandering Packet Goblin", "!deadbeef")
+        val link = "meshtastic://meshtastic/connections?address=xAA:BB:CC:DD:EE:FF&pin=123456"
+        val connect = LabelSpec.Connect(content, link, link.substringBefore("&pin"), "SCAN TO CONNECT")
+        val encoded = mutableListOf<String>()
+        val recording = QrEncoder { text ->
+            encoded += text
+            LabelQrEncoder.encode(text)
+        }
+
+        val layout = assertNotNull(connect.layout(labelLengthDots(40), FixedWidthMeasurer, recording))
+        val code = layout.ops.filterIsInstance<LabelOp.Qr>().single()
+
+        assertEquals(listOf(link), encoded)
+        assertEquals(
+            nameTagLayout(
+                content,
+                FittedQr(link, code.modules, code.dotsPerModule),
+                316,
+                "SCAN TO CONNECT",
+                FixedWidthMeasurer,
+            )
+                .ops
+                .filterNot { it is LabelOp.Qr },
+            layout.ops.filterNot { it is LabelOp.Qr },
+        )
+        assertEquals("SCAN TO CONNECT", layout.ops.filterIsInstance<LabelOp.Band>().single().text)
+    }
+
+    @Test
+    fun `a connect label printed without the PIN encodes the link that has none`() {
+        val content = NameTagContent("WPG", "Wandering Packet Goblin", "!deadbeef")
+        val plain = "meshtastic://meshtastic/connections?address=xAA:BB:CC:DD:EE:FF"
+        val connect = LabelSpec.Connect(content, "$plain&pin=123456", plain, "SCAN TO CONNECT")
+
+        assertEquals(connect, connect.withPin(include = true))
+        assertEquals(LabelSpec.Connect(content, plain, null, "SCAN TO CONNECT"), connect.withPin(include = false))
+    }
 }

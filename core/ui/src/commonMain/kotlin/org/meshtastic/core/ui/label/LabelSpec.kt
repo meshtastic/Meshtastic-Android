@@ -57,11 +57,27 @@ sealed interface LabelSpec {
 
     /** A channel set as a channel label. The QR encodes [url], the link Share Channels shows. */
     data class Channels(val content: ChannelLabelContent, val url: String, override val band: String) : LabelSpec
+
+    /**
+     * The connected radio as a connect label: the name tag's layout around [link], the meshtastic/design#177 connect
+     * link. [linkWithoutPin] is set only when [link] carries the radio's fixed pairing PIN, which is in the QR alone
+     * and never printed as text.
+     */
+    data class Connect(
+        val content: NameTagContent,
+        val link: String,
+        val linkWithoutPin: String?,
+        override val band: String,
+    ) : LabelSpec {
+        /** This label, or the same without the PIN in its QR when [include] is false. */
+        fun withPin(include: Boolean): Connect =
+            if (include || linkWithoutPin == null) this else copy(link = linkWithoutPin, linkWithoutPin = null)
+    }
 }
 
 /**
  * Lays [this] out for a label [lengthDots] long, or returns null when its QR does not fit the head at 2 dots per
- * module. A contact's long name is cut in the QR payload first; a channel link has nothing to cut.
+ * module. A contact's long name is cut in the QR payload first; a channel or connect link has nothing to cut.
  */
 fun LabelSpec.layout(lengthDots: Int, measurer: LabelTextMeasurer, encoder: QrEncoder = LabelQrEncoder): LabelLayout? =
     when (this) {
@@ -70,4 +86,7 @@ fun LabelSpec.layout(lengthDots: Int, measurer: LabelTextMeasurer, encoder: QrEn
 
         is LabelSpec.Channels ->
             fitQr(sequenceOf(url), encoder)?.let { channelLabelLayout(content, it, lengthDots, band, measurer) }
+
+        is LabelSpec.Connect ->
+            fitQr(sequenceOf(link), encoder)?.let { nameTagLayout(content, it, lengthDots, band, measurer) }
     }

@@ -77,7 +77,7 @@ import org.meshtastic.core.ui.icon.Print
 import org.meshtastic.core.ui.icon.Share
 import org.meshtastic.core.ui.label.LabelPrintSheet
 import org.meshtastic.core.ui.label.LabelSpec
-import org.meshtastic.core.ui.label.platformLabelPrintSupported
+import org.meshtastic.core.ui.label.isLabelPrintSupported
 import org.meshtastic.core.ui.theme.SemanticColors
 import org.meshtastic.core.ui.util.LocalNfcEmulationSupported
 import org.meshtastic.core.ui.util.LocalNfcEmulatorProvider
@@ -85,7 +85,6 @@ import org.meshtastic.core.ui.util.LocalNfcScannerSupported
 import org.meshtastic.core.ui.util.LocalNfcWriterProvider
 import org.meshtastic.core.ui.util.SetScreenBrightness
 import org.meshtastic.core.ui.util.createClipEntry
-import org.meshtastic.core.ui.util.isBluetoothSupported
 import org.meshtastic.core.ui.util.rememberQrCodePainter
 import org.meshtastic.core.ui.util.rememberShareText
 
@@ -103,8 +102,8 @@ fun QrDialog(
     label: LabelSpec? = null,
 ) {
     // Print is offered only where the app can reach a label printer over Bluetooth LE.
-    val bluetoothSupported = isBluetoothSupported()
-    val printable = label?.takeIf { platformLabelPrintSupported && bluetoothSupported }
+    val printSupported = isLabelPrintSupported()
+    val printable = label?.takeIf { printSupported }
     var showPrint by rememberSaveable { mutableStateOf(false) }
     if (showPrint && printable != null) {
         LabelPrintSheet(spec = printable, onDismiss = { showPrint = false })

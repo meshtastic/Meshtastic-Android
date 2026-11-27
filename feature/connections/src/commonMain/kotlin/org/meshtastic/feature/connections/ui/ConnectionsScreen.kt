@@ -165,6 +165,7 @@ import org.meshtastic.feature.connections.ui.components.LiveUpdateSection
 import org.meshtastic.feature.connections.ui.components.TransportSelector
 import org.meshtastic.feature.connections.ui.components.TransportUnsupportedCard
 import org.meshtastic.feature.connections.ui.components.loraSummary
+import org.meshtastic.feature.connections.ui.components.rememberConnectLabel
 import org.meshtastic.proto.Config
 
 /**
@@ -561,6 +562,7 @@ fun ConnectionsScreen(
                                     onNavigateToNodeDetails = onNavigateToNodeDetails,
                                     onClickDisconnect = { scanModel.disconnect() },
                                     onClickLora = { onConfigNavigate(SettingsRoute.LoRa) },
+                                    bluetoothConfig = localConfig.bluetooth,
                                 )
 
                             ConnectionUiState.CONNECTING ->
@@ -993,9 +995,11 @@ private fun ConnectedDeviceContent(
     onNavigateToNodeDetails: (Int) -> Unit,
     onClickDisconnect: () -> Unit,
     onClickLora: () -> Unit,
+    bluetoothConfig: Config.BluetoothConfig?,
 ) {
     ourNode?.let { node ->
         CurrentlyConnectedInfo(
+            connectLabel = rememberConnectLabel(node, selectedDevice, bluetoothConfig),
             node = node,
             text = text,
             onClickLora = onClickLora,

@@ -2,7 +2,7 @@
 title: Connections
 parent: User Guide
 nav_order: 2
-last_updated: 2026-11-21
+last_updated: 2026-11-27
 description: Connect your phone, desktop or browser to a Meshtastic node over Bluetooth, USB, TCP/IP or WebSocket.
 aliases:
   - bluetooth
@@ -35,6 +35,10 @@ Bluetooth Low Energy is the default and most common connection method on Android
 Some nodes come with a connect code, printed on a label or shown on the node's screen. Scan it with your phone's camera, or open the floating button on the **Connect** tab, tap **Scan Connect Code QR Code** and point it at the code. The same button takes the link pasted as a URL. A code can also come from an NFC tag: hold the phone to a tag holding the `meshtastic://meshtastic/connections` form of the link, or pick **Scan Connect Code NFC** from the button first. The app asks whether to connect and shows the node's address, plus its pairing PIN when the code has one. Tap **Connect** and the app copies the PIN and pairs. Up to Android 16 the app enters the PIN for you, and if Android refuses that, the pairing dialog asks instead; on Android 17 the pairing dialog asks, and you paste it.
 
 A scanned code that isn't a Meshtastic connect code, or one with an address the app can't use, shows "That code isn't a Meshtastic connect code." and connects to nothing. A network address needs a host, and a USB address needs a port name. A PIN in the code that isn't six digits from 100000 to 999999 (so no leading zero) is ignored, and pairing asks for it as usual.
+
+To make a connect code for the node you are connected to, tap **Print label** on the connection card. It prints a connect label on a Niimbot D110 label printer, the same way a [contact prints as a name tag](nodes#printing-a-name-tag), with the node's names and ID beside the code. The button appears on an Android phone with Bluetooth, for a node connected over Bluetooth or the network; a USB connection has no code to share.
+
+> 🔒 **Security:** When the node pairs with a fixed PIN, the code carries that PIN, and anyone who scans the label can pair with the node. Turn off **Include the pairing PIN** in the print sheet to print the address alone. The PIN is never printed as text, and the app never sets or changes it. A node that pairs with a random PIN or none gets a code with no PIN.
 
 To change the pairing method, or to turn Bluetooth on for a node that ships with it off, open **Settings → Device configuration → Bluetooth**. See [Settings — Radio & User](settings-radio-user). For more information, see [Bluetooth configuration](https://meshtastic.org/docs/configuration/radio/bluetooth) on meshtastic.org.
 
