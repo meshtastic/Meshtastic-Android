@@ -16,11 +16,11 @@
  */
 package org.meshtastic.feature.settings.radio.component
 
-import org.meshtastic.core.model.numChannels
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
 import org.meshtastic.proto.Config.LoRaConfig.RegionCode
 import org.meshtastic.proto.ModuleConfig.MeshBeaconConfig
+import org.meshtastic.sdk.LoRaFrequency
 
 private val EU_TRIO = setOf(RegionCode.EU_868, RegionCode.EU_866, RegionCode.EU_N_868)
 private val EU_868_PRESETS =
@@ -58,7 +58,7 @@ internal fun beaconTargetSlotCount(region: RegionCode, preset: ModemPreset): Int
         wb.modem_preset = preset
     }
     .build()
-    .numChannels
+    .let { LoRaFrequency.plan(it, "").numChannels }
 
 /**
  * Keeps [slot] when it is addressable on [preset] in [region], clearing it to `null` when out of range so firmware does
