@@ -231,11 +231,17 @@ jobs:
           PRERELEASE: ${{ inputs.channel != 'production' }}
         run: |
           CURRENT=$(gh release view "$FINAL_TAG" --json tagName --jq .tagName 2>/dev/null || echo "$TAG")
+          # Leaving prerelease does not move Latest, and desktop auto-update reads Latest.
+          LATEST=()
+          if [[ "$PRERELEASE" == "false" ]]; then
+            LATEST=(--latest)
+          fi
           gh release edit "$CURRENT" \
             --tag "$FINAL_TAG" \
             --title "$FINAL_TAG ($VERSION_CODE)" \
             --draft=false \
-            --prerelease="$PRERELEASE"
+            --prerelease="$PRERELEASE" \
+            "${LATEST[@]}"
 
       # The draft's notes were generated at the internal cut and cover only the
       # PRs since the previous published pre-release. A production release is

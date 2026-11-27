@@ -15,6 +15,9 @@ name: Docs Release
 # root or /api/: the root belongs to production releases, and /api/ is an
 # unversioned channel that docs-deploy.yml rebuilds from main every day.
 #
+# A manual run from a branch with the `tag` input publishes that branch's docs under
+# the tag's version, for republishing after a docs build fix lands on main.
+#
 # These per-tag prerelease directories accumulate during a version cycle and are
 # reaped by post-release-cleanup.yml, which a production publish dispatches. That
 # cleanup also removes every production copy older than the newest one below /vX.Y.Z/.
@@ -31,6 +34,11 @@ on:
       - '!v*-internal.*'
 
   workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to publish (vX.Y.Z, vX.Y.Z-open.N or vX.Y.Z-closed.N). Set it when running from a branch, which builds that branch''s docs under the tag''s version; leave empty when running against the tag ref.'
+        required: false
+        default: ''
 
 permissions:
   contents: write
@@ -57,16 +65,25 @@ jobs:
       # published directory name) and whether this is a production release.
       - name: Resolve Release Channel
         id: version
+        env:
+          INPUT_TAG: ${{ inputs.tag }}
         run: |
           set -euo pipefail
-          case "$GITHUB_REF" in
-            refs/tags/*) TAG="${GITHUB_REF#refs/tags/}" ;;
-            *)
-              echo "This workflow must run against a release tag ref (got $GITHUB_REF)." >&2
-              echo "For workflow_dispatch, select the tag under 'Use workflow from'." >&2
+          if [[ -n "${INPUT_TAG:-}" ]]; then
+            TAG="$INPUT_TAG"
+            if ! git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null; then
+              echo "Tag '$TAG' does not exist." >&2
               exit 1
-              ;;
-          esac
+            fi
+          else
+            case "$GITHUB_REF" in
+              refs/tags/*) TAG="${GITHUB_REF#refs/tags/}" ;;
+              *)
+                echo "Running from a branch ($GITHUB_REF) needs the 'tag' input." >&2
+                exit 1
+                ;;
+            esac
+          fi
 
           if [[ "$TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
             echo "docs_version=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
