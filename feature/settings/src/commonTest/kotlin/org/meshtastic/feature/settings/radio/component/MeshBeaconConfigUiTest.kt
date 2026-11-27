@@ -719,7 +719,8 @@ class MeshBeaconConfigUiTest {
             assertNull(targetsState.value.single().frequency_slot)
         }
 
-        // Pin an in-range slot (1), then switch back to LongFast and again to ShortTurbo: slot 1 survives.
+        // Guards against over-clearing: pin an in-range slot (1), switch back to LongFast and again to ShortTurbo, and
+        // verify slot 1 survives (paired with the out-of-range clearing assertion above).
         onNodeWithText(getString(Res.string.mesh_beacon_target_default)).performClick()
         onNodeWithText("1").performClick()
         onNodeWithText(getString(Res.string.schema_lora_modempreset_short_turbo)).performClick()
@@ -791,20 +792,22 @@ class MeshBeaconConfigUiTest {
         val legacySplitFlag = MeshBeaconConfig.Flags.FLAG_LEGACY_SPLIT.value
         lateinit var flagsState: MutableState<Int>
         lateinit var usePresetState: MutableState<Boolean>
+        lateinit var storedBroadcastState: MutableState<Boolean>
 
         setContent {
             AppTheme {
                 flagsState = remember { mutableStateOf(listenFlag or broadcastFlag) }
                 usePresetState = remember { mutableStateOf(true) }
+                storedBroadcastState = remember { mutableStateOf(true) }
                 val gate =
                     beaconBroadcastGate(
                         connected = true,
                         useStandardPreset = usePresetState.value,
-                        storedBroadcastEnabled = true,
+                        storedBroadcastEnabled = storedBroadcastState.value,
                     )
                 LegacySplitPreference(
                     flags = flagsState.value,
-                    enabled = gate.sectionsEnabled,
+                    broadcastGate = gate,
                     onFlagsChange = { flagsState.value = it },
                 )
             }
@@ -816,10 +819,15 @@ class MeshBeaconConfigUiTest {
         runOnIdle { assertEquals(listenFlag or broadcastFlag or legacySplitFlag, flagsState.value) }
         onNodeWithText(label).assertIsOn()
 
-        // When the broadcast section is gated off (custom LoRa params), the switch is disabled.
+        // When broadcast is gated off by custom LoRa params while stored broadcast was on, the switch stays visible
+        // but disabled and clicks leave flags unchanged.
         runOnIdle { usePresetState.value = false }
         onNodeWithText(label).assertIsNotEnabled().performClick()
 
         runOnIdle { assertEquals(listenFlag or broadcastFlag or legacySplitFlag, flagsState.value) }
+
+        // When custom LoRa params are paired with stored broadcast off, the switch is hidden entirely.
+        runOnIdle { storedBroadcastState.value = false }
+        onNodeWithText(label).assertDoesNotExist()
     }
 }

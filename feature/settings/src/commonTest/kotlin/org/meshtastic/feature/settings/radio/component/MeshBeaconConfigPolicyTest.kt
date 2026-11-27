@@ -697,22 +697,6 @@ class MeshBeaconConfigPolicyTest {
         assertEquals(48, stamped.broadcast_offer_frequency_slot)
     }
 
-    @Test
-    fun stampBeaconConfigForSave_targetFrequencySlot_survivesTheStamp() {
-        val form =
-            MeshBeaconConfig.Builder()
-                .also { wb ->
-                    wb.broadcast_targets =
-                        listOf(MeshBeaconConfig.BroadcastTarget.Builder().also { tb -> tb.frequency_slot = 7 }.build())
-                }
-                .build()
-
-        val stamped =
-            stampBeaconConfigForSave(form, MeshBeaconConfig.Builder().build(), presetRadio, listOf(primaryChannel))
-
-        assertEquals(7, stamped.broadcast_targets.single().frequency_slot)
-    }
-
     private val longFastSlots = beaconTargetSlotCount(RegionCode.US, ModemPreset.LONG_FAST)
     private val shortTurboSlots = beaconTargetSlotCount(RegionCode.US, ModemPreset.SHORT_TURBO)
 
@@ -722,6 +706,7 @@ class MeshBeaconConfigPolicyTest {
         assertTrue(shortTurboSlots in 1 until longFastSlots, "a wider preset holds fewer slots")
     }
 
+    // Guards against over-clearing an in-range slot on preset change (paired with CannotHold_isCleared).
     @Test
     fun selectBeaconTargetPreset_slotTheNewPresetHolds_isKept() {
         val target = MeshBeaconConfig.BroadcastTarget.Builder().also { wb -> wb.frequency_slot = 1 }.build()
@@ -753,10 +738,15 @@ class MeshBeaconConfigPolicyTest {
                 }
                 .build()
 
-        val updated = selectBeaconTargetPreset(target, null, ModemPreset.LONG_FAST, RegionCode.US)
+        // Guards against over-clearing: resolves Default to LONG_FAST and keeps longFastSlots.
+        val kept = selectBeaconTargetPreset(target, null, ModemPreset.LONG_FAST, RegionCode.US)
+        assertNull(kept.preset)
+        assertEquals(longFastSlots, kept.frequency_slot)
 
-        assertNull(updated.preset)
-        assertEquals(longFastSlots, updated.frequency_slot)
+        // Discriminating case: resolves Default to SHORT_TURBO and clears the out-of-range pin.
+        val cleared = selectBeaconTargetPreset(target, null, ModemPreset.SHORT_TURBO, RegionCode.US)
+        assertNull(cleared.preset)
+        assertNull(cleared.frequency_slot)
     }
 
     @Test
@@ -899,5 +889,29 @@ class MeshBeaconConfigPolicyTest {
 
         assertNull(stamped.broadcast_targets[0].frequency_slot)
         assertEquals(4, stamped.broadcast_targets[1].frequency_slot)
+    }
+
+    @Test
+    fun sanitizeBeaconTargetSlot_clearsZeroAndKeepsPinWhenRegionSlotCountUnknown() {
+        assertNull(sanitizeBeaconTargetSlot(0, RegionCode.US, ModemPreset.LONG_FAST))
+        assertEquals(7, sanitizeBeaconTargetSlot(7, RegionCode.UNSET, ModemPreset.LONG_FAST))
+    }
+
+    @Test
+    fun stampBeaconConfigForSave_preservesLegacySplitFlagInPresetAndCustomModes() {
+        val allFlags =
+            MeshBeaconConfig.Flags.FLAG_LISTEN_ENABLED.value or
+                MeshBeaconConfig.Flags.FLAG_BROADCAST_ENABLED.value or
+                MeshBeaconConfig.Flags.FLAG_LEGACY_SPLIT.value
+        val form = MeshBeaconConfig.Builder().also { wb -> wb.flags = allFlags }.build()
+
+        val stampedPreset =
+            stampBeaconConfigForSave(form, MeshBeaconConfig.Builder().build(), presetRadio, listOf(primaryChannel))
+        assertEquals(allFlags, stampedPreset.flags)
+
+        val customRadio = presetRadio.newBuilder().also { wb -> wb.use_preset = false }.build()
+        val stampedCustom =
+            stampBeaconConfigForSave(form, MeshBeaconConfig.Builder().build(), customRadio, listOf(primaryChannel))
+        assertEquals(allFlags, stampedCustom.flags)
     }
 }
