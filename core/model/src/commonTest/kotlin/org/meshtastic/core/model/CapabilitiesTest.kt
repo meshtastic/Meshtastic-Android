@@ -151,6 +151,13 @@ class CapabilitiesTest {
     }
 
     @Test
+    fun supportsBeaconTargetFrequencySlot_requires_V2_8_2() {
+        assertFalse(caps("2.8.1").supportsBeaconTargetFrequencySlot)
+        assertTrue(caps("2.8.2").supportsBeaconTargetFrequencySlot)
+        assertTrue(caps("2.8.2.4c89b69").supportsBeaconTargetFrequencySlot)
+    }
+
+    @Test
     fun supportsEsp32Ota_requires_V2_7_18() {
         assertFalse(caps("2.7.17").supportsEsp32Ota)
         assertTrue(caps("2.7.18").supportsEsp32Ota)
@@ -249,6 +256,7 @@ class CapabilitiesTest {
         assertFalse(c.supportsTakConfig)
         assertFalse(c.supportsRemoteShell)
         assertFalse(c.supportsEsp32Ota)
+        assertFalse(c.supportsBeaconTargetFrequencySlot)
     }
 
     @Test
@@ -259,5 +267,6 @@ class CapabilitiesTest {
         assertTrue(c.supportsStatusMessage)
         assertTrue(c.supportsTakConfig)
         assertTrue(c.supportsRemoteShell)
+        assertTrue(c.supportsBeaconTargetFrequencySlot)
     }
 }

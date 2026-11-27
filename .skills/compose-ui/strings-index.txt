@@ -1226,6 +1226,8 @@ mesh_beacon_channels_title
 mesh_beacon_interval
 mesh_beacon_interval_error
 mesh_beacon_invitations_title
+mesh_beacon_legacy_split
+mesh_beacon_legacy_split_summary
 mesh_beacon_listen
 mesh_beacon_listen_summary
 mesh_beacon_message_error
@@ -1252,6 +1254,7 @@ mesh_beacon_target
 mesh_beacon_target_add
 mesh_beacon_target_channel_index
 mesh_beacon_target_default
+mesh_beacon_target_frequency_slot
 mesh_beacon_target_remove
 mesh_beacon_targets
 mesh_hud_camera_rationale

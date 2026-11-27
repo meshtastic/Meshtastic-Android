@@ -139,6 +139,12 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
     val supportsMeshBeacon = offers(ModuleConfig.mesh_beacon)
 
     /**
+     * Ability to pin a Mesh Beacon broadcast target to a frequency slot. Supported since firmware v2.8.2
+     * (`meshtastic/firmware#12126`); older firmware drops `BroadcastTarget.frequency_slot` on decode.
+     */
+    val supportsBeaconTargetFrequencySlot = atLeast(V2_8_2)
+
+    /**
      * Whether the node reports [NodeInfo.heard_on_current_lora] - whether it has heard each node over RF on the LoRa
      * configuration it is using now, from 2.8.1. Older firmware never sends the field, and a proto3 bool defaults to
      * false, so an ungated read marks every node as unheard.

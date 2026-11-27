@@ -1283,6 +1283,8 @@
     <string name="mesh_beacon_interval">Broadcast interval</string>
     <string name="mesh_beacon_interval_error">Choose an interval of at least one hour</string>
     <string name="mesh_beacon_invitations_title">Mesh invitations</string>
+    <string name="mesh_beacon_legacy_split">Legacy text message</string>
+    <string name="mesh_beacon_legacy_split_summary">Also send the beacon message as a standard text message for older firmware</string>
     <string name="mesh_beacon_listen">Listen for beacons</string>
     <string name="mesh_beacon_listen_summary">Capture invitations advertised by nearby meshes</string>
     <string name="mesh_beacon_message_error">Maximum %1$d bytes</string>
@@ -1309,6 +1311,7 @@
     <string name="mesh_beacon_target_add">Add target</string>
     <string name="mesh_beacon_target_channel_index">Channel</string>
     <string name="mesh_beacon_target_default">Default</string>
+    <string name="mesh_beacon_target_frequency_slot">Frequency slot</string>
     <string name="mesh_beacon_target_remove">Remove target</string>
     <string name="mesh_beacon_targets">Broadcast targets</string>
     <string name="mesh_hud_camera_rationale">Allow camera access to see nodes over the camera view.</string>
