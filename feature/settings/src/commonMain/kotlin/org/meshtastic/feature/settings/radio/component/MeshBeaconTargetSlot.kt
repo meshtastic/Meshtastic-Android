@@ -22,18 +22,53 @@ import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
 import org.meshtastic.proto.Config.LoRaConfig.RegionCode
 import org.meshtastic.proto.ModuleConfig.MeshBeaconConfig
 
+private val EU_TRIO = setOf(RegionCode.EU_868, RegionCode.EU_866, RegionCode.EU_N_868)
+private val EU_868_PRESETS =
+    setOf(
+        ModemPreset.LONG_FAST,
+        ModemPreset.LONG_SLOW,
+        ModemPreset.MEDIUM_SLOW,
+        ModemPreset.MEDIUM_FAST,
+        ModemPreset.SHORT_SLOW,
+        ModemPreset.SHORT_FAST,
+        ModemPreset.LONG_MODERATE,
+    )
+
 /**
- * How many frequency slots a broadcast target on [preset] can pin in [region]. The count follows bandwidth, so two
- * presets in one region can differ; 0 for a region the app does not know.
+ * The region a broadcast target on [preset] actually runs in (firmware's `MeshBeaconModule::beaconRegionFor`). Within
+ * the EU 868/866/N_868 trio, selecting a preset owned by a sibling runs the target in that sibling.
+ */
+internal fun beaconTargetRegion(region: RegionCode, preset: ModemPreset): RegionCode = when {
+    region !in EU_TRIO -> region
+    preset == ModemPreset.LITE_FAST || preset == ModemPreset.LITE_SLOW -> RegionCode.EU_866
+    preset == ModemPreset.NARROW_FAST || preset == ModemPreset.NARROW_SLOW -> RegionCode.EU_N_868
+    preset in EU_868_PRESETS -> RegionCode.EU_868
+    else -> region
+}
+
+/**
+ * How many frequency slots a broadcast target on [preset] can pin in [region]. The count follows bandwidth and
+ * [beaconTargetRegion], so two presets in one region (or across the EU trio) can differ; 0 for a region the app does
+ * not know.
  */
 internal fun beaconTargetSlotCount(region: RegionCode, preset: ModemPreset): Int = Config.LoRaConfig.Builder()
     .also { wb ->
-        wb.region = region
+        wb.region = beaconTargetRegion(region, preset)
         wb.use_preset = true
         wb.modem_preset = preset
     }
     .build()
     .numChannels
+
+/**
+ * Keeps [slot] when it is addressable on [preset] in [region], clearing it to `null` when out of range so firmware does
+ * not skip the target on TX. Leaves [slot] untouched when the region's slot count is unknown (0).
+ */
+internal fun sanitizeBeaconTargetSlot(slot: Int?, region: RegionCode, preset: ModemPreset): Int? {
+    if (slot == null) return null
+    val slotCount = beaconTargetSlotCount(region, preset)
+    return if (slotCount > 0 && slot !in 1..slotCount) null else slot
+}
 
 /**
  * Applies a preset pick to one broadcast target row. A pinned `frequency_slot` the new effective preset (unset resolves
@@ -48,8 +83,7 @@ internal fun selectBeaconTargetPreset(
     .newBuilder()
     .also { wb ->
         wb.preset = preset
-        val slot = target.frequency_slot
-        if (slot != null && slot > beaconTargetSlotCount(region, preset ?: currentPreset)) wb.frequency_slot = null
+        wb.frequency_slot = sanitizeBeaconTargetSlot(target.frequency_slot, region, preset ?: currentPreset)
     }
     .build()
 

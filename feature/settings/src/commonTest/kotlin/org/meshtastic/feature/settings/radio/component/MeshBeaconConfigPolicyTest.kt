@@ -786,4 +786,118 @@ class MeshBeaconConfigPolicyTest {
         val withoutSplit = withSplit.withFlag(legacySplit, false)
         assertEquals(listen or broadcast, withoutSplit)
     }
+
+    @Test
+    fun beaconTargetRegion_euTrioSwapsToPresetOwnerAndLeavesOtherRegionsAlone() {
+        assertEquals(RegionCode.EU_N_868, beaconTargetRegion(RegionCode.EU_868, ModemPreset.NARROW_SLOW))
+        assertEquals(RegionCode.EU_866, beaconTargetRegion(RegionCode.EU_868, ModemPreset.LITE_FAST))
+        assertEquals(RegionCode.EU_868, beaconTargetRegion(RegionCode.EU_N_868, ModemPreset.LONG_FAST))
+        assertEquals(RegionCode.EU_N_868, beaconTargetRegion(RegionCode.EU_866, ModemPreset.NARROW_FAST))
+        assertEquals(RegionCode.US, beaconTargetRegion(RegionCode.US, ModemPreset.NARROW_SLOW))
+        assertEquals(RegionCode.US, beaconTargetRegion(RegionCode.US, ModemPreset.LITE_FAST))
+        assertEquals(RegionCode.US, beaconTargetRegion(RegionCode.US, ModemPreset.LONG_FAST))
+    }
+
+    @Test
+    fun beaconTargetSlotCount_euTrioCountsInOwningSiblingRegion() {
+        assertEquals(3, beaconTargetSlotCount(RegionCode.EU_868, ModemPreset.NARROW_SLOW))
+        assertEquals(4, beaconTargetSlotCount(RegionCode.EU_868, ModemPreset.LITE_FAST))
+        assertEquals(1, beaconTargetSlotCount(RegionCode.EU_868, ModemPreset.LONG_FAST))
+        assertEquals(
+            beaconTargetSlotCount(RegionCode.EU_868, ModemPreset.LONG_FAST),
+            beaconTargetSlotCount(RegionCode.EU_N_868, ModemPreset.LONG_FAST),
+        )
+        assertEquals(presetRadio.numChannels, beaconTargetSlotCount(RegionCode.US, ModemPreset.LONG_FAST))
+    }
+
+    @Test
+    fun selectBeaconTargetPreset_euTrioUsesSiblingSlotCount() {
+        val target = MeshBeaconConfig.BroadcastTarget.Builder().also { wb -> wb.frequency_slot = 4 }.build()
+
+        val narrow = selectBeaconTargetPreset(target, ModemPreset.NARROW_SLOW, ModemPreset.LONG_FAST, RegionCode.EU_868)
+        assertEquals(ModemPreset.NARROW_SLOW, narrow.preset)
+        assertNull(narrow.frequency_slot)
+
+        val lite = selectBeaconTargetPreset(target, ModemPreset.LITE_FAST, ModemPreset.LONG_FAST, RegionCode.EU_868)
+        assertEquals(ModemPreset.LITE_FAST, lite.preset)
+        assertEquals(4, lite.frequency_slot)
+    }
+
+    @Test
+    fun stampBeaconConfigForSave_defaultPresetRow_clearsStalePinAfterRadioPresetShrinkAndKeepsInRangePin() {
+        val shrunkRadio = presetRadio.newBuilder().also { wb -> wb.modem_preset = ModemPreset.SHORT_TURBO }.build()
+        val form =
+            MeshBeaconConfig.Builder()
+                .also { wb ->
+                    wb.broadcast_targets =
+                        listOf(
+                            MeshBeaconConfig.BroadcastTarget.Builder().also { tb -> tb.frequency_slot = 60 }.build(),
+                            MeshBeaconConfig.BroadcastTarget.Builder().also { tb -> tb.frequency_slot = 40 }.build(),
+                        )
+                }
+                .build()
+
+        val stamped =
+            stampBeaconConfigForSave(form, MeshBeaconConfig.Builder().build(), shrunkRadio, listOf(primaryChannel))
+
+        assertEquals(RegionCode.US, stamped.broadcast_targets[0].region)
+        assertNull(stamped.broadcast_targets[0].frequency_slot)
+        assertEquals(RegionCode.US, stamped.broadcast_targets[1].region)
+        assertEquals(40, stamped.broadcast_targets[1].frequency_slot)
+    }
+
+    @Test
+    fun stampBeaconConfigForSave_explicitPresetRow_checksAgainstRowPresetNotRadioPreset() {
+        val shrunkRadio = presetRadio.newBuilder().also { wb -> wb.modem_preset = ModemPreset.SHORT_TURBO }.build()
+        val form =
+            MeshBeaconConfig.Builder()
+                .also { wb ->
+                    wb.broadcast_targets =
+                        listOf(
+                            MeshBeaconConfig.BroadcastTarget.Builder()
+                                .also { tb ->
+                                    tb.preset = ModemPreset.LONG_FAST
+                                    tb.frequency_slot = 60
+                                }
+                                .build(),
+                        )
+                }
+                .build()
+
+        val stamped =
+            stampBeaconConfigForSave(form, MeshBeaconConfig.Builder().build(), shrunkRadio, listOf(primaryChannel))
+
+        assertEquals(60, stamped.broadcast_targets.single().frequency_slot)
+    }
+
+    @Test
+    fun stampBeaconConfigForSave_euTrioRow_clearsSlotOutsideOwningSiblingRegion() {
+        val euRadio = presetRadio.newBuilder().also { wb -> wb.region = RegionCode.EU_868 }.build()
+        val form =
+            MeshBeaconConfig.Builder()
+                .also { wb ->
+                    wb.broadcast_targets =
+                        listOf(
+                            MeshBeaconConfig.BroadcastTarget.Builder()
+                                .also { tb ->
+                                    tb.preset = ModemPreset.NARROW_SLOW
+                                    tb.frequency_slot = 4
+                                }
+                                .build(),
+                            MeshBeaconConfig.BroadcastTarget.Builder()
+                                .also { tb ->
+                                    tb.preset = ModemPreset.LITE_FAST
+                                    tb.frequency_slot = 4
+                                }
+                                .build(),
+                        )
+                }
+                .build()
+
+        val stamped =
+            stampBeaconConfigForSave(form, MeshBeaconConfig.Builder().build(), euRadio, listOf(primaryChannel))
+
+        assertNull(stamped.broadcast_targets[0].frequency_slot)
+        assertEquals(4, stamped.broadcast_targets[1].frequency_slot)
+    }
 }
