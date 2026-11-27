@@ -42,7 +42,7 @@
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
-                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:datastore/commonMain">common</button>
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:datastore/nonWebMain">nonWeb</button>
             <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
                 <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
                 <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
@@ -53,9 +53,9 @@
                     </div>
                         <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
                             <label class="checkbox">
-                                <input type="checkbox" class="checkbox--input" id=":core:datastore/commonMain" data-filter=":core:datastore/commonMain">
+                                <input type="checkbox" class="checkbox--input" id=":core:datastore/nonWebMain" data-filter=":core:datastore/nonWebMain">
                                 <span class="checkbox--icon"></span>
-                                common
+                                nonWeb
                             </label>
                         </li>
                 </ul>
@@ -89,28 +89,32 @@
         </nav>
         <div id="resizer" class="resizer" data-item-type="BAR"></div>
         <div id="main" data-item-type="SECTION" role="main">
-<div class="main-content" data-page-type="classlike" id="content" pageids="core-datastore::org.meshtastic.core.datastore/FirmwareRecoveryDataSource///PointingToDeclaration//971956455">
+<div class="main-content" data-page-type="classlike" id="content" pageids="core-datastore::org.meshtastic.core.datastore/FirmwareRecoveryDataSource///PointingToDeclaration//1325788007">
   <div class="breadcrumbs"><a href="../../index.html">core-datastore</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.core.datastore</a><span class="delimiter">/</span><span class="current">FirmwareRecoveryDataSource</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Firmware</span><wbr><span>Recovery</span><wbr><span>Data</span><wbr><span><span>Source</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:datastore/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">class </span><a href="index.html">FirmwareRecoveryDataSource</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">dataStore<span class="token operator">: </span><a href="../../org.meshtastic.core.datastore.di/-core-preferences-data-store/index.html">CorePreferencesDataStore</a></span></span><span class="token punctuation">)</span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/datastore/src/commonMain/kotlin/org/meshtastic/core/datastore/FirmwareRecoveryDataSource.kt#L36">source</a>)</span></span></div><p class="paragraph">Persists the <a href="../../org.meshtastic.core.datastore.model/-pending-firmware-recovery/index.html">PendingFirmwareRecovery</a> record for a firmware update that may have left a device stranded in bootloader mode, plus the last BLE node as a candidate for one. Only the most recent of each is retained (updates are one-device-at-a-time in practice).</p></div></div>
+    <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+      <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:datastore/nonWebMain" data-filterable-set=":core:datastore/nonWebMain" data-active="" data-toggle=":core:datastore/nonWebMain">nonWeb</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:datastore/nonWebMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">class </span><a href="index.html">FirmwareRecoveryDataSource</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">dataStore<span class="token operator">: </span><a href="../../org.meshtastic.core.datastore.di/-core-preferences-data-store/index.html">CorePreferencesDataStore</a></span></span><span class="token punctuation">)</span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/datastore/src/nonWebMain/kotlin/org/meshtastic/core/datastore/FirmwareRecoveryDataSource.kt#L36">source</a>)</span></span></div><p class="paragraph">Persists the <a href="../../org.meshtastic.core.datastore.model/-pending-firmware-recovery/index.html">PendingFirmwareRecovery</a> record for a firmware update that may have left a device stranded in bootloader mode, plus the last BLE node as a candidate for one. Only the most recent of each is retained (updates are one-device-at-a-time in practice).</p></div>    </div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
     <div class="tabs-section-body">
       <div data-togglable="CONSTRUCTOR">
         <h2 class="tableheader">Constructors</h2>
-        <div class="table"><a data-name="91015404%2FConstructors%2F971956455" anchor-label="FirmwareRecoveryDataSource" id="91015404%2FConstructors%2F971956455" data-filterable-set=":core:datastore/commonMain"></a>
-          <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":core:datastore/commonMain" data-filterable-set=":core:datastore/commonMain">
+        <div class="table"><a data-name="91015404%2FConstructors%2F1325788007" anchor-label="FirmwareRecoveryDataSource" id="91015404%2FConstructors%2F1325788007" data-filterable-set=":core:datastore/nonWebMain"></a>
+          <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":core:datastore/nonWebMain" data-filterable-set=":core:datastore/nonWebMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-firmware-recovery-data-source.html"><span>Firmware</span><wbr><span>Recovery</span><wbr><span>Data</span><wbr><span><span>Source</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="91015404%2FConstructors%2F971956455"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="91015404%2FConstructors%2F1325788007"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:datastore/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">dataStore<span class="token operator">: </span><a href="../../org.meshtastic.core.datastore.di/-core-preferences-data-store/index.html">CorePreferencesDataStore</a></span></span><span class="token punctuation">)</span></div></div></div>
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:datastore/nonWebMain" data-filterable-set=":core:datastore/nonWebMain" data-active="" data-toggle=":core:datastore/nonWebMain">nonWeb</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:datastore/nonWebMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">dataStore<span class="token operator">: </span><a href="../../org.meshtastic.core.datastore.di/-core-preferences-data-store/index.html">CorePreferencesDataStore</a></span></span><span class="token punctuation">)</span></div></div>                  </div>
                 </div>
               </div>
             </div>
@@ -119,32 +123,36 @@
       </div>
       <div data-togglable="PROPERTY">
         <h2 class="tableheader">Properties</h2>
-        <div class="table"><a data-name="67481816%2FProperties%2F971956455" anchor-label="lastBleNode" id="67481816%2FProperties%2F971956455" data-filterable-set=":core:datastore/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":core:datastore/commonMain" data-filterable-set=":core:datastore/commonMain">
+        <div class="table"><a data-name="67481816%2FProperties%2F1325788007" anchor-label="lastBleNode" id="67481816%2FProperties%2F1325788007" data-filterable-set=":core:datastore/nonWebMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:datastore/nonWebMain" data-filterable-set=":core:datastore/nonWebMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="last-ble-node.html"><span>last</span><wbr><span>Ble</span><wbr><span><span>Node</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="67481816%2FProperties%2F971956455"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="67481816%2FProperties%2F1325788007"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:datastore/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">val </span><a href="last-ble-node.html">lastBleNode</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="../../org.meshtastic.core.datastore.model/-pending-firmware-recovery/index.html">PendingFirmwareRecovery</a><span class="token operator">?</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">The last node this app completed a BLE handshake with, kept so that node can be recovered when it turns up in its bootloader without the app having started the update that stranded it. Not shown by itself; a bootloader seen at its address promotes it to <a href="pending.html">pending</a> via <a href="promote-last-ble-node.html">promoteLastBleNode</a>.</p></div></div></div>
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:datastore/nonWebMain" data-filterable-set=":core:datastore/nonWebMain" data-active="" data-toggle=":core:datastore/nonWebMain">nonWeb</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:datastore/nonWebMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">val </span><a href="last-ble-node.html">lastBleNode</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="../../org.meshtastic.core.datastore.model/-pending-firmware-recovery/index.html">PendingFirmwareRecovery</a><span class="token operator">?</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">The last node this app completed a BLE handshake with, kept so that node can be recovered when it turns up in its bootloader without the app having started the update that stranded it. Not shown by itself; a bootloader seen at its address promotes it to <a href="pending.html">pending</a> via <a href="promote-last-ble-node.html">promoteLastBleNode</a>.</p></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1276971832%2FProperties%2F971956455" anchor-label="pending" id="-1276971832%2FProperties%2F971956455" data-filterable-set=":core:datastore/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":core:datastore/commonMain" data-filterable-set=":core:datastore/commonMain">
+<a data-name="-1276971832%2FProperties%2F1325788007" anchor-label="pending" id="-1276971832%2FProperties%2F1325788007" data-filterable-set=":core:datastore/nonWebMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:datastore/nonWebMain" data-filterable-set=":core:datastore/nonWebMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="pending.html"><span><span>pending</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1276971832%2FProperties%2F971956455"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1276971832%2FProperties%2F1325788007"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:datastore/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">val </span><a href="pending.html">pending</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="../../org.meshtastic.core.datastore.model/-pending-firmware-recovery/index.html">PendingFirmwareRecovery</a><span class="token operator">?</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">The pending recovery record, or <code class="lang-kotlin">null</code> when no interrupted update is outstanding.</p></div></div></div>
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:datastore/nonWebMain" data-filterable-set=":core:datastore/nonWebMain" data-active="" data-toggle=":core:datastore/nonWebMain">nonWeb</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:datastore/nonWebMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">val </span><a href="pending.html">pending</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="../../org.meshtastic.core.datastore.model/-pending-firmware-recovery/index.html">PendingFirmwareRecovery</a><span class="token operator">?</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">The pending recovery record, or <code class="lang-kotlin">null</code> when no interrupted update is outstanding.</p></div></div>                  </div>
                 </div>
               </div>
             </div>
@@ -153,77 +161,87 @@
       </div>
       <div data-togglable="FUNCTION">
         <h2 class="tableheader">Functions</h2>
-        <div class="table"><a data-name="1282025810%2FFunctions%2F971956455" anchor-label="clear" id="1282025810%2FFunctions%2F971956455" data-filterable-set=":core:datastore/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":core:datastore/commonMain" data-filterable-set=":core:datastore/commonMain">
+        <div class="table"><a data-name="1282025810%2FFunctions%2F1325788007" anchor-label="clear" id="1282025810%2FFunctions%2F1325788007" data-filterable-set=":core:datastore/nonWebMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:datastore/nonWebMain" data-filterable-set=":core:datastore/nonWebMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="clear.html"><span><span>clear</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1282025810%2FFunctions%2F971956455"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1282025810%2FFunctions%2F1325788007"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:datastore/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="clear.html"><span class="token function">clear</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Clears the outstanding recovery record (update finished, or the device returned on its own).</p></div></div></div>
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:datastore/nonWebMain" data-filterable-set=":core:datastore/nonWebMain" data-active="" data-toggle=":core:datastore/nonWebMain">nonWeb</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:datastore/nonWebMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="clear.html"><span class="token function">clear</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Clears the outstanding recovery record (update finished, or the device returned on its own).</p></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1362539317%2FFunctions%2F971956455" anchor-label="dismiss" id="1362539317%2FFunctions%2F971956455" data-filterable-set=":core:datastore/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":core:datastore/commonMain" data-filterable-set=":core:datastore/commonMain">
+<a data-name="1362539317%2FFunctions%2F1325788007" anchor-label="dismiss" id="1362539317%2FFunctions%2F1325788007" data-filterable-set=":core:datastore/nonWebMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:datastore/nonWebMain" data-filterable-set=":core:datastore/nonWebMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="dismiss.html"><span><span>dismiss</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1362539317%2FFunctions%2F971956455"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1362539317%2FFunctions%2F1325788007"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:datastore/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="dismiss.html"><span class="token function">dismiss</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Clears both records. Clearing only <a href="pending.html">pending</a> would let the next bootloader sighting promote <a href="last-ble-node.html">lastBleNode</a> straight back; it returns on the next successful handshake.</p></div></div></div>
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:datastore/nonWebMain" data-filterable-set=":core:datastore/nonWebMain" data-active="" data-toggle=":core:datastore/nonWebMain">nonWeb</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:datastore/nonWebMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="dismiss.html"><span class="token function">dismiss</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Clears both records. Clearing only <a href="pending.html">pending</a> would let the next bootloader sighting promote <a href="last-ble-node.html">lastBleNode</a> straight back; it returns on the next successful handshake.</p></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1472072336%2FFunctions%2F971956455" anchor-label="promoteLastBleNode" id="1472072336%2FFunctions%2F971956455" data-filterable-set=":core:datastore/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":core:datastore/commonMain" data-filterable-set=":core:datastore/commonMain">
+<a data-name="1472072336%2FFunctions%2F1325788007" anchor-label="promoteLastBleNode" id="1472072336%2FFunctions%2F1325788007" data-filterable-set=":core:datastore/nonWebMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:datastore/nonWebMain" data-filterable-set=":core:datastore/nonWebMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="promote-last-ble-node.html"><span>promote</span><wbr><span>Last</span><wbr><span>Ble</span><wbr><span><span>Node</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1472072336%2FFunctions%2F971956455"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1472072336%2FFunctions%2F1325788007"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:datastore/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="promote-last-ble-node.html"><span class="token function">promoteLastBleNode</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">fullAddress<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Makes <a href="last-ble-node.html">lastBleNode</a> the pending recovery, unless one is already pending or the last node is no longer the one at <a href="promote-last-ble-node.html">fullAddress</a>: a handshake with another node can replace it between the bootloader sighting and this call.</p></div></div></div>
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:datastore/nonWebMain" data-filterable-set=":core:datastore/nonWebMain" data-active="" data-toggle=":core:datastore/nonWebMain">nonWeb</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:datastore/nonWebMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="promote-last-ble-node.html"><span class="token function">promoteLastBleNode</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">fullAddress<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Makes <a href="last-ble-node.html">lastBleNode</a> the pending recovery, unless one is already pending or the last node is no longer the one at <a href="promote-last-ble-node.html">fullAddress</a>: a handshake with another node can replace it between the bootloader sighting and this call.</p></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-174745798%2FFunctions%2F971956455" anchor-label="set" id="-174745798%2FFunctions%2F971956455" data-filterable-set=":core:datastore/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":core:datastore/commonMain" data-filterable-set=":core:datastore/commonMain">
+<a data-name="-174745798%2FFunctions%2F1325788007" anchor-label="set" id="-174745798%2FFunctions%2F1325788007" data-filterable-set=":core:datastore/nonWebMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:datastore/nonWebMain" data-filterable-set=":core:datastore/nonWebMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="set.html"><span><span>set</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-174745798%2FFunctions%2F971956455"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-174745798%2FFunctions%2F1325788007"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:datastore/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="set.html"><span class="token function">set</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">recovery<span class="token operator">: </span><a href="../../org.meshtastic.core.datastore.model/-pending-firmware-recovery/index.html">PendingFirmwareRecovery</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Records <a href="set.html">recovery</a> as the outstanding interrupted update, replacing any previous record.</p></div></div></div>
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:datastore/nonWebMain" data-filterable-set=":core:datastore/nonWebMain" data-active="" data-toggle=":core:datastore/nonWebMain">nonWeb</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:datastore/nonWebMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="set.html"><span class="token function">set</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">recovery<span class="token operator">: </span><a href="../../org.meshtastic.core.datastore.model/-pending-firmware-recovery/index.html">PendingFirmwareRecovery</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Records <a href="set.html">recovery</a> as the outstanding interrupted update, replacing any previous record.</p></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="742037345%2FFunctions%2F971956455" anchor-label="setLastBleNode" id="742037345%2FFunctions%2F971956455" data-filterable-set=":core:datastore/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":core:datastore/commonMain" data-filterable-set=":core:datastore/commonMain">
+<a data-name="742037345%2FFunctions%2F1325788007" anchor-label="setLastBleNode" id="742037345%2FFunctions%2F1325788007" data-filterable-set=":core:datastore/nonWebMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:datastore/nonWebMain" data-filterable-set=":core:datastore/nonWebMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="set-last-ble-node.html"><span>set</span><wbr><span>Last</span><wbr><span>Ble</span><wbr><span><span>Node</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="742037345%2FFunctions%2F971956455"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="742037345%2FFunctions%2F1325788007"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:datastore/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="set-last-ble-node.html"><span class="token function">setLastBleNode</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">node<span class="token operator">: </span><a href="../../org.meshtastic.core.datastore.model/-pending-firmware-recovery/index.html">PendingFirmwareRecovery</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Records <a href="set-last-ble-node.html">node</a> as the last BLE node, replacing any previous one.</p></div></div></div>
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:datastore/nonWebMain" data-filterable-set=":core:datastore/nonWebMain" data-active="" data-toggle=":core:datastore/nonWebMain">nonWeb</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:datastore/nonWebMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="set-last-ble-node.html"><span class="token function">setLastBleNode</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">node<span class="token operator">: </span><a href="../../org.meshtastic.core.datastore.model/-pending-firmware-recovery/index.html">PendingFirmwareRecovery</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Records <a href="set-last-ble-node.html">node</a> as the last BLE node, replacing any previous one.</p></div></div>                  </div>
                 </div>
               </div>
             </div>

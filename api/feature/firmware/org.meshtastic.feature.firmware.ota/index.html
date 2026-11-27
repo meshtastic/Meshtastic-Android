@@ -43,6 +43,7 @@
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
                 <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":feature:firmware/commonMain">common</button>
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":feature:firmware/nonWebMain">nonWeb</button>
             <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
                 <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
                 <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
@@ -56,6 +57,13 @@
                                 <input type="checkbox" class="checkbox--input" id=":feature:firmware/commonMain" data-filter=":feature:firmware/commonMain">
                                 <span class="checkbox--icon"></span>
                                 common
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":feature:firmware/nonWebMain" data-filter=":feature:firmware/nonWebMain">
+                                <span class="checkbox--icon"></span>
+                                nonWeb
                             </label>
                         </li>
                 </ul>
@@ -89,7 +97,7 @@
         </nav>
         <div id="resizer" class="resizer" data-item-type="BAR"></div>
         <div id="main" data-item-type="SECTION" role="main">
-<div class="main-content" data-page-type="package" id="content" pageids="feature-firmware::org.meshtastic.feature.firmware.ota////PointingToDeclaration//-803617142">
+<div class="main-content" data-page-type="package" id="content" pageids="feature-firmware::org.meshtastic.feature.firmware.ota////PointingToDeclaration//1215805704">
   <div class="breadcrumbs"><a href="../index.html">feature-firmware</a><span class="delimiter">/</span><span class="current">org.meshtastic.feature.firmware.ota</span></div>
   <div class="cover ">
     <h1 class="cover"><span><span>Package-level</span></span> <span><span>declarations</span></span></h1>
@@ -264,17 +272,19 @@
               </div>
             </div>
           </div>
-<a data-name="339901488%2FClasslikes%2F-803617142" anchor-label="WifiOtaTransport" id="339901488%2FClasslikes%2F-803617142" data-filterable-set=":feature:firmware/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":feature:firmware/commonMain" data-filterable-set=":feature:firmware/commonMain">
+<a data-name="339901488%2FClasslikes%2F-449785590" anchor-label="WifiOtaTransport" id="339901488%2FClasslikes%2F-449785590" data-filterable-set=":feature:firmware/nonWebMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:firmware/nonWebMain" data-filterable-set=":feature:firmware/nonWebMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-wifi-ota-transport/index.html"><span>Wifi</span><wbr><span>Ota</span><wbr><span><span>Transport</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="339901488%2FClasslikes%2F-803617142"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="339901488%2FClasslikes%2F-449785590"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-wifi-ota-transport/index.html">WifiOtaTransport</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">deviceIpAddress<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">port<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span>DEFAULT_PORT</span></span><span class="token punctuation">)</span> : <a href="-unified-ota-protocol/index.html">UnifiedOtaProtocol</a></div><div class="brief "><p class="paragraph">WiFi/TCP transport implementation for ESP32 Unified OTA protocol.</p></div></div></div>
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:firmware/nonWebMain" data-filterable-set=":feature:firmware/nonWebMain" data-active="" data-toggle=":feature:firmware/nonWebMain">nonWeb</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/nonWebMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-wifi-ota-transport/index.html">WifiOtaTransport</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">deviceIpAddress<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">port<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span>DEFAULT_PORT</span></span><span class="token punctuation">)</span> : <a href="-unified-ota-protocol/index.html">UnifiedOtaProtocol</a></div><div class="brief "><p class="paragraph">WiFi/TCP transport implementation for ESP32 Unified OTA protocol.</p></div></div>                  </div>
                 </div>
               </div>
             </div>

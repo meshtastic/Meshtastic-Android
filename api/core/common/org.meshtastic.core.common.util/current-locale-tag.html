@@ -42,9 +42,8 @@
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
-                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":core:common/androidMain">android</button>
                 <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:common/commonMain">common</button>
-                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":core:common/jvmMain">jvm</button>
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":core:common/jvmAndroidMain">jvmAndroid</button>
             <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
                 <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
                 <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
@@ -53,13 +52,6 @@
                             <i class="ui-kit-icon ui-kit-icon_cross"></i>
                         </button>
                     </div>
-                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
-                            <label class="checkbox">
-                                <input type="checkbox" class="checkbox--input" id=":core:common/androidMain" data-filter=":core:common/androidMain">
-                                <span class="checkbox--icon"></span>
-                                android
-                            </label>
-                        </li>
                         <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
                             <label class="checkbox">
                                 <input type="checkbox" class="checkbox--input" id=":core:common/commonMain" data-filter=":core:common/commonMain">
@@ -69,9 +61,9 @@
                         </li>
                         <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
                             <label class="checkbox">
-                                <input type="checkbox" class="checkbox--input" id=":core:common/jvmMain" data-filter=":core:common/jvmMain">
+                                <input type="checkbox" class="checkbox--input" id=":core:common/jvmAndroidMain" data-filter=":core:common/jvmAndroidMain">
                                 <span class="checkbox--icon"></span>
-                                jvm
+                                jvmAndroid
                             </label>
                         </li>
                 </ul>
@@ -105,14 +97,14 @@
         </nav>
         <div id="resizer" class="resizer" data-item-type="BAR"></div>
         <div id="main" data-item-type="SECTION" role="main">
-<div class="main-content" data-page-type="member" id="content" pageids="core-common::org.meshtastic.core.common.util//currentLocaleTag/#/PointingToDeclaration//752545243">
+<div class="main-content" data-page-type="member" id="content" pageids="core-common::org.meshtastic.core.common.util//currentLocaleTag/#/PointingToDeclaration//-1711255750">
   <div class="breadcrumbs"><a href="../index.html">core-common</a><span class="delimiter">/</span><a href="index.html">org.meshtastic.core.common.util</a><span class="delimiter">/</span><span class="current">currentLocaleTag</span></div>
   <div class="cover ">
     <h1 class="cover"><span>current</span><wbr><span>Locale</span><wbr><span><span>Tag</span></span></h1>
   </div>
   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:common/androidMain" data-filterable-set=":core:common/androidMain" data-active="" data-toggle=":core:common/androidMain">android</button><button class="platform-bookmark" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain" data-toggle=":core:common/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":core:common/jvmMain" data-filterable-set=":core:common/jvmMain" data-toggle=":core:common/jvmMain">jvm</button></div>
-<div class="content sourceset-dependent-content" data-togglable=":core:common/androidMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="current-locale-tag.html"><span class="token function">currentLocaleTag</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/common/src/androidMain/kotlin/org/meshtastic/core/common/util/LocaleUtils.android.kt#L30">source</a>)</span></span></div><p class="paragraph">Returns the device locale as a BCP 47 language tag, script and region included: "sr-Latn-RS", "pt-BR", "fr".</p></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">fun </span><a href="current-locale-tag.html"><span class="token function">currentLocaleTag</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/common/src/commonMain/kotlin/org/meshtastic/core/common/util/MeasurementSystem.kt#L54">source</a>)</span></span></div><p class="paragraph">Returns the device locale as a BCP 47 language tag, script and region included: "sr-Latn-RS", "pt-BR", "fr".</p></div><div class="content sourceset-dependent-content" data-togglable=":core:common/jvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="current-locale-tag.html"><span class="token function">currentLocaleTag</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/common/src/jvmMain/kotlin/org/meshtastic/core/common/util/JvmPlatformUtils.kt#L108">source</a>)</span></span></div><p class="paragraph">Returns the device locale as a BCP 47 language tag, script and region included: "sr-Latn-RS", "pt-BR", "fr".</p></div>  </div>
+    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain" data-active="" data-toggle=":core:common/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":core:common/jvmAndroidMain" data-filterable-set=":core:common/jvmAndroidMain" data-toggle=":core:common/jvmAndroidMain">jvmAndroid</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">fun </span><a href="current-locale-tag.html"><span class="token function">currentLocaleTag</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/common/src/commonMain/kotlin/org/meshtastic/core/common/util/MeasurementSystem.kt#L54">source</a>)</span></span></div><p class="paragraph">Returns the device locale as a BCP 47 language tag, script and region included: "sr-Latn-RS", "pt-BR", "fr".</p></div><div class="content sourceset-dependent-content" data-togglable=":core:common/jvmAndroidMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="current-locale-tag.html"><span class="token function">currentLocaleTag</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/common/src/jvmAndroidMain/kotlin/org/meshtastic/core/common/util/LocaleCodes.jvmAndroid.kt#L25">source</a>)</span></span></div><p class="paragraph">Returns the device locale as a BCP 47 language tag, script and region included: "sr-Latn-RS", "pt-BR", "fr".</p></div>  </div>
 </div>
     <div class="footer">
         <div class="footer--container">

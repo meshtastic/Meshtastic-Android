@@ -93,7 +93,7 @@
   <div class="breadcrumbs"><a href="../../index.html">feature-wifi-provision</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.feature.wifiprovision</a><span class="delimiter">/</span><span class="current">WifiProvisionViewModel</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Wifi</span><wbr><span>Provision</span><wbr><span>View</span><wbr><span><span>Model</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:wifi-provision/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">WifiProvisionViewModel</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">bleScanner<span class="token operator">: </span><a href="../../../../core/ble/org.meshtastic.core.ble/-ble-scanner/index.html">BleScanner</a><span class="token punctuation">, </span></span><span class="parameter ">bleConnectionFactory<span class="token operator">: </span><a href="../../../../core/ble/org.meshtastic.core.ble/-ble-connection-factory/index.html">BleConnectionFactory</a><span class="token punctuation">, </span></span><span class="parameter ">dispatchers<span class="token operator">: </span><a href="../../../../core/di/org.meshtastic.core.di/-coroutine-dispatchers/index.html">CoroutineDispatchers</a><span class="token punctuation">, </span></span><span class="parameter ">applicationScope<span class="token operator">: </span><a href="../../../../core/common/org.meshtastic.core.common.di/-application-coroutine-scope/index.html">ApplicationCoroutineScope</a></span></span><span class="token punctuation">)</span> : <a href="https://developer.android.com/reference/kotlin/androidx/lifecycle/ViewModel.html">ViewModel</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/feature/wifi-provision/src/commonMain/kotlin/org/meshtastic/feature/wifiprovision/WifiProvisionViewModel.kt#L114">source</a>)</span></span></div><p class="paragraph">ViewModel for the WiFi provisioning flow.</p><p class="paragraph">Uses <span data-unresolved-link="org.koin.core.annotation/KoinViewModel///PointingToDeclaration/">KoinViewModel</span> so the instance is scoped to the navigation entry's ViewModelStoreOwner. A fresh <a href="../../org.meshtastic.feature.wifiprovision.domain/-nymea-wifi-service/index.html">NymeaWifiService</a> (and its own <a href="../../../../core/ble/org.meshtastic.core.ble/-ble-connection-factory/index.html">BleConnectionFactory</a>-backed <a href="../../../../core/ble/org.meshtastic.core.ble/-ble-connection/index.html">org.meshtastic.core.ble.BleConnection</a>) is created lazily for each provisioning session and cleaned up via <a href="../../../../feature/wifi-provision/org.meshtastic.feature.wifiprovision/-wifi-provision-view-model/on-cleared.html">onCleared</a>.</p></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:wifi-provision/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">WifiProvisionViewModel</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">bleScanner<span class="token operator">: </span><a href="../../../../core/ble/org.meshtastic.core.ble/-ble-scanner/index.html">BleScanner</a><span class="token punctuation">, </span></span><span class="parameter ">bleConnectionFactory<span class="token operator">: </span><a href="../../../../core/ble/org.meshtastic.core.ble/-ble-connection-factory/index.html">BleConnectionFactory</a><span class="token punctuation">, </span></span><span class="parameter ">dispatchers<span class="token operator">: </span><a href="../../../../core/di/org.meshtastic.core.di/-coroutine-dispatchers/index.html">CoroutineDispatchers</a><span class="token punctuation">, </span></span><span class="parameter ">applicationScope<span class="token operator">: </span><a href="../../../../core/common/org.meshtastic.core.common.di/-application-coroutine-scope/index.html">ApplicationCoroutineScope</a></span></span><span class="token punctuation">)</span> : <a href="https://developer.android.com/reference/kotlin/androidx/lifecycle/ViewModel.html">ViewModel</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/feature/wifi-provision/src/commonMain/kotlin/org/meshtastic/feature/wifiprovision/WifiProvisionViewModel.kt#L149">source</a>)</span></span></div><p class="paragraph">ViewModel for the WiFi provisioning flow.</p><p class="paragraph">Uses <span data-unresolved-link="org.koin.core.annotation/KoinViewModel///PointingToDeclaration/">KoinViewModel</span> so the instance is scoped to the navigation entry's ViewModelStoreOwner. A fresh <a href="../../org.meshtastic.feature.wifiprovision.domain/-nymea-wifi-service/index.html">NymeaWifiService</a> (and its own <a href="../../../../core/ble/org.meshtastic.core.ble/-ble-connection-factory/index.html">BleConnectionFactory</a>-backed <a href="../../../../core/ble/org.meshtastic.core.ble/-ble-connection/index.html">org.meshtastic.core.ble.BleConnection</a>) is created lazily for each provisioning session and cleaned up via <a href="../../../../feature/wifi-provision/org.meshtastic.feature.wifiprovision/-wifi-provision-view-model/on-cleared.html">onCleared</a>. Device discovery and ordering live in <a href="../../../../feature/wifi-provision/org.meshtastic.feature.wifiprovision.domain/-device-discovery/index.html">DeviceDiscovery</a>; nothing connects until the user taps a listed device or confirms an address.</p></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
@@ -138,7 +138,22 @@
       </div>
       <div data-togglable="PROPERTY">
         <h2 class="tableheader">Properties</h2>
-        <div class="table"><a data-name="1958162101%2FProperties%2F1081732140" anchor-label="uiState" id="1958162101%2FProperties%2F1081732140" data-filterable-set=":feature:wifi-provision/commonMain"></a>
+        <div class="table"><a data-name="286855050%2FProperties%2F1081732140" anchor-label="picksDevice" id="286855050%2FProperties%2F1081732140" data-filterable-set=":feature:wifi-provision/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:wifi-provision/commonMain" data-filterable-set=":feature:wifi-provision/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="picks-device.html"><span>picks</span><wbr><span><span>Device</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="286855050%2FProperties%2F1081732140"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:wifi-provision/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="picks-device.html">picksDevice</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">True where the scan is the browser's device chooser, which opens only from a click: the screen waits for one instead of connecting on arrival.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1958162101%2FProperties%2F1081732140" anchor-label="uiState" id="1958162101%2FProperties%2F1081732140" data-filterable-set=":feature:wifi-provision/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":feature:wifi-provision/commonMain" data-filterable-set=":feature:wifi-provision/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
@@ -172,6 +187,21 @@
               </div>
             </div>
           </div>
+<a data-name="1982705822%2FFunctions%2F1081732140" anchor-label="confirmConnect" id="1982705822%2FFunctions%2F1081732140" data-filterable-set=":feature:wifi-provision/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:wifi-provision/commonMain" data-filterable-set=":feature:wifi-provision/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="confirm-connect.html"><span>confirm</span><wbr><span><span>Connect</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1982705822%2FFunctions%2F1081732140"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:wifi-provision/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="confirm-connect.html"><span class="token function">confirmConnect</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">The user accepted the address held in <a href="../-wifi-provision-ui-state/pending-address.html">WifiProvisionUiState.pendingAddress</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
 <a data-name="1932386358%2FFunctions%2F1081732140" anchor-label="connectToDevice" id="1932386358%2FFunctions%2F1081732140" data-filterable-set=":feature:wifi-provision/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":feature:wifi-provision/commonMain" data-filterable-set=":feature:wifi-provision/commonMain">
             <div class="main-subrow keyValue ">
@@ -182,7 +212,22 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:wifi-provision/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="connect-to-device.html"><span class="token function">connectToDevice</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">address<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Scan for the nearest nymea-networkmanager device and connect to it. Pauses at the <a href="../-wifi-provision-ui-state/-phase/-device-found/index.html">WifiProvisionUiState.Phase.DeviceFound</a> phase so the user can confirm before proceeding — this is the Android analog of the web flasher's native BLE pairing dialog.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:wifi-provision/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="connect-to-device.html"><span class="token function">connectToDevice</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">address<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Connect to the device with <a href="connect-to-device.html">address</a>, or to the one the user picks in the browser's own chooser when <a href="connect-to-device.html">address</a> is null there. Where the app scans itself, a null <a href="connect-to-device.html">address</a> starts the device list instead: the connection never goes to whichever device advertises first. Pauses at <a href="../-wifi-provision-ui-state/-phase/-device-found/index.html">WifiProvisionUiState.Phase.DeviceFound</a> so the user can check the device before proceeding.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1193624255%2FFunctions%2F1081732140" anchor-label="connectToDiscovered" id="1193624255%2FFunctions%2F1081732140" data-filterable-set=":feature:wifi-provision/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:wifi-provision/commonMain" data-filterable-set=":feature:wifi-provision/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="connect-to-discovered.html"><span>connect</span><wbr><span>To</span><wbr><span><span>Discovered</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1193624255%2FFunctions%2F1081732140"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:wifi-provision/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="connect-to-discovered.html"><span class="token function">connectToDiscovered</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">address<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Connect to the listed device with <a href="connect-to-discovered.html">address</a>, which the user tapped.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -197,7 +242,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:wifi-provision/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="disconnect.html"><span class="token function">disconnect</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Disconnect and close any active BLE connection.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:wifi-provision/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="disconnect.html"><span class="token function">disconnect</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Cancel any scan or pending confirmation, close any active BLE connection and return to the initial state.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -217,6 +262,21 @@
               </div>
             </div>
           </div>
+<a data-name="250710013%2FFunctions%2F1081732140" anchor-label="open" id="250710013%2FFunctions%2F1081732140" data-filterable-set=":feature:wifi-provision/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:wifi-provision/commonMain" data-filterable-set=":feature:wifi-provision/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="open.html"><span><span>open</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="250710013%2FFunctions%2F1081732140"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:wifi-provision/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="open.html"><span class="token function">open</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">address<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Start the screen for <a href="open.html">address</a>, which a link or caller may supply. Nothing connects here:</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
 <a data-name="-2094108701%2FFunctions%2F1081732140" anchor-label="provisionWifi" id="-2094108701%2FFunctions%2F1081732140" data-filterable-set=":feature:wifi-provision/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":feature:wifi-provision/commonMain" data-filterable-set=":feature:wifi-provision/commonMain">
             <div class="main-subrow keyValue ">
@@ -228,6 +288,21 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:wifi-provision/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="provision-wifi.html"><span class="token function">provisionWifi</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">ssid<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">password<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">hidden<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Send WiFi credentials to the device.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-932802248%2FFunctions%2F1081732140" anchor-label="rescan" id="-932802248%2FFunctions%2F1081732140" data-filterable-set=":feature:wifi-provision/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:wifi-provision/commonMain" data-filterable-set=":feature:wifi-provision/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="rescan.html"><span><span>rescan</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-932802248%2FFunctions%2F1081732140"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:wifi-provision/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="rescan.html"><span class="token function">rescan</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Clear the list and scan again, from the list or after a failed scan or connect.</p></div></div></div>
                 </div>
               </div>
             </div>

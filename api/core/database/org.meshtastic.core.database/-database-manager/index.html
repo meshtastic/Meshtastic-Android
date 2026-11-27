@@ -42,7 +42,7 @@
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
-                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:database/commonMain">common</button>
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:database/nonWebMain">nonWeb</button>
             <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
                 <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
                 <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
@@ -53,9 +53,9 @@
                     </div>
                         <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
                             <label class="checkbox">
-                                <input type="checkbox" class="checkbox--input" id=":core:database/commonMain" data-filter=":core:database/commonMain">
+                                <input type="checkbox" class="checkbox--input" id=":core:database/nonWebMain" data-filter=":core:database/nonWebMain">
                                 <span class="checkbox--icon"></span>
-                                common
+                                nonWeb
                             </label>
                         </li>
                 </ul>
@@ -89,28 +89,32 @@
         </nav>
         <div id="resizer" class="resizer" data-item-type="BAR"></div>
         <div id="main" data-item-type="SECTION" role="main">
-<div class="main-content" data-page-type="classlike" id="content" pageids="core-database::org.meshtastic.core.database/DatabaseManager///PointingToDeclaration//-475033937">
+<div class="main-content" data-page-type="classlike" id="content" pageids="core-database::org.meshtastic.core.database/DatabaseManager///PointingToDeclaration//-121202385">
   <div class="breadcrumbs"><a href="../../index.html">core-database</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.core.database</a><span class="delimiter">/</span><span class="current">DatabaseManager</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Database</span><wbr><span><span>Manager</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">class </span><a href="index.html">DatabaseManager</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">datastore<span class="token operator">: </span><a href="../../org.meshtastic.core.database.di/-database-data-store/index.html">DatabaseDataStore</a><span class="token punctuation">, </span></span><span class="parameter ">dispatchers<span class="token operator">: </span><a href="../../../../core/di/org.meshtastic.core.di/-coroutine-dispatchers/index.html">CoroutineDispatchers</a></span></span><span class="token punctuation">)</span> : <a href="../-database-provider/index.html">DatabaseProvider</a>, <a href="../../../../core/common/org.meshtastic.core.common.database/-database-manager/index.html">DatabaseManager</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/database/src/commonMain/kotlin/org/meshtastic/core/database/DatabaseManager.kt#L135">source</a>)</span></span></div><p class="paragraph">Manages per-device Room database instances for node data, with LRU eviction.</p></div></div>
+    <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+      <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:database/nonWebMain" data-filterable-set=":core:database/nonWebMain" data-active="" data-toggle=":core:database/nonWebMain">nonWeb</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/nonWebMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">class </span><a href="index.html">DatabaseManager</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">datastore<span class="token operator">: </span><a href="../../org.meshtastic.core.database.di/-database-data-store/index.html">DatabaseDataStore</a><span class="token punctuation">, </span></span><span class="parameter ">dispatchers<span class="token operator">: </span><a href="../../../../core/di/org.meshtastic.core.di/-coroutine-dispatchers/index.html">CoroutineDispatchers</a></span></span><span class="token punctuation">)</span> : <a href="../-database-provider/index.html">DatabaseProvider</a>, <a href="../../../../core/common/org.meshtastic.core.common.database/-database-manager/index.html">DatabaseManager</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/database/src/nonWebMain/kotlin/org/meshtastic/core/database/DatabaseManager.kt#L128">source</a>)</span></span></div><p class="paragraph">Manages per-device Room database instances for node data, with LRU eviction.</p></div>    </div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
     <div class="tabs-section-body">
       <div data-togglable="CONSTRUCTOR">
         <h2 class="tableheader">Constructors</h2>
-        <div class="table"><a data-name="918918086%2FConstructors%2F-475033937" anchor-label="DatabaseManager" id="918918086%2FConstructors%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
-          <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+        <div class="table"><a data-name="918918086%2FConstructors%2F-121202385" anchor-label="DatabaseManager" id="918918086%2FConstructors%2F-121202385" data-filterable-set=":core:database/nonWebMain"></a>
+          <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":core:database/nonWebMain" data-filterable-set=":core:database/nonWebMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-database-manager.html"><span>Database</span><wbr><span><span>Manager</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="918918086%2FConstructors%2F-475033937"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="918918086%2FConstructors%2F-121202385"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">datastore<span class="token operator">: </span><a href="../../org.meshtastic.core.database.di/-database-data-store/index.html">DatabaseDataStore</a><span class="token punctuation">, </span></span><span class="parameter ">dispatchers<span class="token operator">: </span><a href="../../../../core/di/org.meshtastic.core.di/-coroutine-dispatchers/index.html">CoroutineDispatchers</a></span></span><span class="token punctuation">)</span></div></div></div>
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:database/nonWebMain" data-filterable-set=":core:database/nonWebMain" data-active="" data-toggle=":core:database/nonWebMain">nonWeb</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/nonWebMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">datastore<span class="token operator">: </span><a href="../../org.meshtastic.core.database.di/-database-data-store/index.html">DatabaseDataStore</a><span class="token punctuation">, </span></span><span class="parameter ">dispatchers<span class="token operator">: </span><a href="../../../../core/di/org.meshtastic.core.di/-coroutine-dispatchers/index.html">CoroutineDispatchers</a></span></span><span class="token punctuation">)</span></div></div>                  </div>
                 </div>
               </div>
             </div>
@@ -119,47 +123,70 @@
       </div>
       <div data-togglable="PROPERTY">
         <h2 class="tableheader">Properties</h2>
-        <div class="table"><a data-name="715387475%2FProperties%2F-475033937" anchor-label="cacheLimit" id="715387475%2FProperties%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+        <div class="table"><a data-name="715387475%2FProperties%2F-121202385" anchor-label="cacheLimit" id="715387475%2FProperties%2F-121202385" data-filterable-set=":core:database/nonWebMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/nonWebMain" data-filterable-set=":core:database/nonWebMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="cache-limit.html"><span>cache</span><wbr><span><span>Limit</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="715387475%2FProperties%2F-475033937"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="715387475%2FProperties%2F-121202385"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="cache-limit.html">cacheLimit</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">&gt;</span></div></div></div>
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:database/nonWebMain" data-filterable-set=":core:database/nonWebMain" data-active="" data-toggle=":core:database/nonWebMain">nonWeb</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/nonWebMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="cache-limit.html">cacheLimit</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">&gt;</span></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="717395505%2FProperties%2F-475033937" anchor-label="currentAddress" id="717395505%2FProperties%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+<a data-name="717395505%2FProperties%2F-121202385" anchor-label="currentAddress" id="717395505%2FProperties%2F-121202385" data-filterable-set=":core:database/nonWebMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/nonWebMain" data-filterable-set=":core:database/nonWebMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="current-address.html"><span>current</span><wbr><span><span>Address</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="717395505%2FProperties%2F-475033937"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="717395505%2FProperties%2F-121202385"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="current-address.html">currentAddress</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator">&gt;</span></div></div></div>
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:database/nonWebMain" data-filterable-set=":core:database/nonWebMain" data-active="" data-toggle=":core:database/nonWebMain">nonWeb</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/nonWebMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="current-address.html">currentAddress</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator">&gt;</span></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-416662505%2FProperties%2F-475033937" anchor-label="currentDb" id="-416662505%2FProperties%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+<a data-name="-416662505%2FProperties%2F-121202385" anchor-label="currentDb" id="-416662505%2FProperties%2F-121202385" data-filterable-set=":core:database/nonWebMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/nonWebMain" data-filterable-set=":core:database/nonWebMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="current-db.html"><span>current</span><wbr><span><span>Db</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-416662505%2FProperties%2F-475033937"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-416662505%2FProperties%2F-121202385"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="current-db.html">currentDb</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="../-meshtastic-database/index.html">MeshtasticDatabase</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Reactive stream of the currently active database instance.</p></div></div></div>
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:database/nonWebMain" data-filterable-set=":core:database/nonWebMain" data-active="" data-toggle=":core:database/nonWebMain">nonWeb</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/nonWebMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="current-db.html">currentDb</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="../-meshtastic-database/index.html">MeshtasticDatabase</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Reactive stream of the currently active database instance.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1812668788%2FProperties%2F-121202385" anchor-label="localNodeNums" id="1812668788%2FProperties%2F-121202385" data-filterable-set=":core:database/nonWebMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/nonWebMain" data-filterable-set=":core:database/nonWebMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="local-node-nums.html"><span>local</span><wbr><span>Node</span><wbr><span><span>Nums</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1812668788%2FProperties%2F-121202385"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:database/nonWebMain" data-filterable-set=":core:database/nonWebMain" data-active="" data-toggle=":core:database/nonWebMain">nonWeb</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/nonWebMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="local-node-nums.html">localNodeNums</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Returns true if a database exists for the given device address. Android Room stores DB files without an extension; JVM/iOS append <code class="lang-kotlin">.db</code>. We check both to stay platform-agnostic.</p></div></div>                  </div>
                 </div>
               </div>
             </div>
@@ -168,182 +195,206 @@
       </div>
       <div data-togglable="FUNCTION">
         <h2 class="tableheader">Functions</h2>
-        <div class="table"><a data-name="-546419326%2FFunctions%2F-475033937" anchor-label="associateDevice" id="-546419326%2FFunctions%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+        <div class="table"><a data-name="-546419326%2FFunctions%2F-121202385" anchor-label="associateDevice" id="-546419326%2FFunctions%2F-121202385" data-filterable-set=":core:database/nonWebMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/nonWebMain" data-filterable-set=":core:database/nonWebMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="associate-device.html"><span>associate</span><wbr><span><span>Device</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-546419326%2FFunctions%2F-475033937"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-546419326%2FFunctions%2F-121202385"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="associate-device.html"><span class="token function">associateDevice</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">address<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">nodeNum<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">deviceId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">isSessionActive<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div></div></div>
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:database/nonWebMain" data-filterable-set=":core:database/nonWebMain" data-active="" data-toggle=":core:database/nonWebMain">nonWeb</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/nonWebMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="associate-device.html"><span class="token function">associateDevice</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">address<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">nodeNum<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">deviceId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">isSessionActive<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-894312141%2FFunctions%2F-475033937" anchor-label="backupTargetDatabaseName" id="-894312141%2FFunctions%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+<a data-name="-894312141%2FFunctions%2F-121202385" anchor-label="backupTargetDatabaseName" id="-894312141%2FFunctions%2F-121202385" data-filterable-set=":core:database/nonWebMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/nonWebMain" data-filterable-set=":core:database/nonWebMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="backup-target-database-name.html"><span>backup</span><wbr><span>Target</span><wbr><span>Database</span><wbr><span><span>Name</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-894312141%2FFunctions%2F-475033937"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-894312141%2FFunctions%2F-121202385"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="backup-target-database-name.html"><span class="token function">backupTargetDatabaseName</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">The device database a backup or restore acts on: the active one, or with no device selected the most recently used device database. Null when no device database exists yet.</p></div></div></div>
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:database/nonWebMain" data-filterable-set=":core:database/nonWebMain" data-active="" data-toggle=":core:database/nonWebMain">nonWeb</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/nonWebMain"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="backup-target-database-name.html"><span class="token function">backupTargetDatabaseName</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">The device database a backup or restore acts on: the active one, or with no device selected the most recently used device database. Null when no device database exists yet.</p></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-52901131%2FFunctions%2F-475033937" anchor-label="cachedDeviceDbCount" id="-52901131%2FFunctions%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+<a data-name="-52901131%2FFunctions%2F-121202385" anchor-label="cachedDeviceDbCount" id="-52901131%2FFunctions%2F-121202385" data-filterable-set=":core:database/nonWebMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/nonWebMain" data-filterable-set=":core:database/nonWebMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="cached-device-db-count.html"><span>cached</span><wbr><span>Device</span><wbr><span>Db</span><wbr><span><span>Count</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-52901131%2FFunctions%2F-475033937"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-52901131%2FFunctions%2F-121202385"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="cached-device-db-count.html"><span class="token function">cachedDeviceDbCount</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:database/nonWebMain" data-filterable-set=":core:database/nonWebMain" data-active="" data-toggle=":core:database/nonWebMain">nonWeb</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/nonWebMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="cached-device-db-count.html"><span class="token function">cachedDeviceDbCount</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-773623402%2FFunctions%2F-475033937" anchor-label="close" id="-773623402%2FFunctions%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+<a data-name="-773623402%2FFunctions%2F-121202385" anchor-label="close" id="-773623402%2FFunctions%2F-121202385" data-filterable-set=":core:database/nonWebMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/nonWebMain" data-filterable-set=":core:database/nonWebMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="close.html"><span><span>close</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-773623402%2FFunctions%2F-475033937"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-773623402%2FFunctions%2F-121202385"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="close.html"><span class="token function">close</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Establishes an orderly shutdown boundary: rejects new work, bounds manager-job cancellation, admitted manager-operation draining, and admitted-writer draining, waits for the last serialized switch/association to finalize, then closes every manager-owned Room instance. If a cancelled child, admitted operation, writer, or pool close cannot finish successfully, ownership is retained and physical cleanup is skipped so a later <a href="close.html">close</a> call can retry without losing track of live resources. Retried attempts may call Room's idempotent <code class="lang-kotlin">close()</code> again for pools that completed during an earlier partial attempt.</p></div></div></div>
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:database/nonWebMain" data-filterable-set=":core:database/nonWebMain" data-active="" data-toggle=":core:database/nonWebMain">nonWeb</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/nonWebMain"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="close.html"><span class="token function">close</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Establishes an orderly shutdown boundary: rejects new work, bounds manager-job cancellation, admitted manager-operation draining, and admitted-writer draining, waits for the last serialized switch/association to finalize, then closes every manager-owned Room instance. If a cancelled child, admitted operation, writer, or pool close cannot finish successfully, ownership is retained and physical cleanup is skipped so a later <a href="close.html">close</a> call can retry without losing track of live resources. Retried attempts may call Room's idempotent <code class="lang-kotlin">close()</code> again for pools that completed during an earlier partial attempt.</p></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1617269936%2FFunctions%2F-475033937" anchor-label="getCurrentCacheLimit" id="-1617269936%2FFunctions%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+<a data-name="-1617269936%2FFunctions%2F-121202385" anchor-label="getCurrentCacheLimit" id="-1617269936%2FFunctions%2F-121202385" data-filterable-set=":core:database/nonWebMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/nonWebMain" data-filterable-set=":core:database/nonWebMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="get-current-cache-limit.html"><span>get</span><wbr><span>Current</span><wbr><span>Cache</span><wbr><span><span>Limit</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1617269936%2FFunctions%2F-475033937"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1617269936%2FFunctions%2F-121202385"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="get-current-cache-limit.html"><span class="token function">getCurrentCacheLimit</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:database/nonWebMain" data-filterable-set=":core:database/nonWebMain" data-active="" data-toggle=":core:database/nonWebMain">nonWeb</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/nonWebMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="get-current-cache-limit.html"><span class="token function">getCurrentCacheLimit</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1770895721%2FFunctions%2F-475033937" anchor-label="hasDatabaseFor" id="-1770895721%2FFunctions%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+<a data-name="-1770895721%2FFunctions%2F-121202385" anchor-label="hasDatabaseFor" id="-1770895721%2FFunctions%2F-121202385" data-filterable-set=":core:database/nonWebMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/nonWebMain" data-filterable-set=":core:database/nonWebMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="has-database-for.html"><span>has</span><wbr><span>Database</span><wbr><span><span>For</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1770895721%2FFunctions%2F-475033937"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1770895721%2FFunctions%2F-121202385"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="has-database-for.html"><span class="token function">hasDatabaseFor</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">address<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Returns true if a database exists for the given device address. Android Room stores DB files without an extension; JVM/iOS append <code class="lang-kotlin">.db</code>. We check both to stay platform-agnostic.</p></div></div></div>
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:database/nonWebMain" data-filterable-set=":core:database/nonWebMain" data-active="" data-toggle=":core:database/nonWebMain">nonWeb</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/nonWebMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="has-database-for.html"><span class="token function">hasDatabaseFor</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">address<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-389899493%2FFunctions%2F-475033937" anchor-label="init" id="-389899493%2FFunctions%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+<a data-name="-389899493%2FFunctions%2F-121202385" anchor-label="init" id="-389899493%2FFunctions%2F-121202385" data-filterable-set=":core:database/nonWebMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/nonWebMain" data-filterable-set=":core:database/nonWebMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="init.html"><span><span>init</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-389899493%2FFunctions%2F-475033937"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-389899493%2FFunctions%2F-121202385"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="init.html"><span class="token function">init</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">address<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Initialize the active database for <a href="init.html">address</a>.</p></div></div></div>
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:database/nonWebMain" data-filterable-set=":core:database/nonWebMain" data-active="" data-toggle=":core:database/nonWebMain">nonWeb</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/nonWebMain"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="init.html"><span class="token function">init</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">address<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Initialize the active database for <a href="init.html">address</a>.</p></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="388863360%2FFunctions%2F-475033937" anchor-label="observeCurrentDb" id="388863360%2FFunctions%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+<a data-name="388863360%2FFunctions%2F-121202385" anchor-label="observeCurrentDb" id="388863360%2FFunctions%2F-121202385" data-filterable-set=":core:database/nonWebMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/nonWebMain" data-filterable-set=":core:database/nonWebMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="observe-current-db.html"><span>observe</span><wbr><span>Current</span><wbr><span><span>Db</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="388863360%2FFunctions%2F-475033937"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="388863360%2FFunctions%2F-121202385"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="observe-current-db.html">T</a><span class="token operator">&gt; </span><a href="observe-current-db.html"><span class="token function">observeCurrentDb</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">name<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">query<span class="token operator">: </span><span class="token punctuation">(</span><a href="../-meshtastic-database/index.html">MeshtasticDatabase</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="observe-current-db.html">T</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="observe-current-db.html">T</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Re-latches long-lived DAO flows on database switches and recovers the active Room pool when a latch stalls (<a href="../-db-flow-stalled-exception/index.html">DbFlowStalledException</a>). A failed query is never replayed on the same pool; publishing the replacement causes <span data-unresolved-link="kotlinx.coroutines.flow//flatMapLatest/kotlinx.coroutines.flow.Flow[TypeParam(bounds=[kotlin.Any?])]#kotlin.coroutines.SuspendFunction1[TypeParam(bounds=[kotlin.Any?]),kotlinx.coroutines.flow.Flow[TypeParam(bounds=[kotlin.Any?])]]/PointingToDeclaration/">flatMapLatest</span> to start a fresh DAO flow. Concurrent failing collectors converge on the same replacement.</p></div></div></div>
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:database/nonWebMain" data-filterable-set=":core:database/nonWebMain" data-active="" data-toggle=":core:database/nonWebMain">nonWeb</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/nonWebMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="observe-current-db.html">T</a><span class="token operator">&gt; </span><a href="observe-current-db.html"><span class="token function">observeCurrentDb</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">name<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">query<span class="token operator">: </span><span class="token punctuation">(</span><a href="../-meshtastic-database/index.html">MeshtasticDatabase</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="observe-current-db.html">T</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="observe-current-db.html">T</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Re-latches long-lived DAO flows on database switches and recovers the active Room pool when a latch stalls (<a href="../-db-flow-stalled-exception/index.html">DbFlowStalledException</a>). A failed query is never replayed on the same pool; publishing the replacement causes <span data-unresolved-link="kotlinx.coroutines.flow//flatMapLatest/kotlinx.coroutines.flow.Flow[TypeParam(bounds=[kotlin.Any?])]#kotlin.coroutines.SuspendFunction1[TypeParam(bounds=[kotlin.Any?]),kotlinx.coroutines.flow.Flow[TypeParam(bounds=[kotlin.Any?])]]/PointingToDeclaration/">flatMapLatest</span> to start a fresh DAO flow. Concurrent failing collectors converge on the same replacement.</p></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1891287439%2FFunctions%2F-475033937" anchor-label="setCacheLimit" id="-1891287439%2FFunctions%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+<a data-name="-1891287439%2FFunctions%2F-121202385" anchor-label="setCacheLimit" id="-1891287439%2FFunctions%2F-121202385" data-filterable-set=":core:database/nonWebMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/nonWebMain" data-filterable-set=":core:database/nonWebMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="set-cache-limit.html"><span>set</span><wbr><span>Cache</span><wbr><span><span>Limit</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1891287439%2FFunctions%2F-475033937"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1891287439%2FFunctions%2F-121202385"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="set-cache-limit.html"><span class="token function">setCacheLimit</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">limit<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div></div></div>
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:database/nonWebMain" data-filterable-set=":core:database/nonWebMain" data-active="" data-toggle=":core:database/nonWebMain">nonWeb</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/nonWebMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="set-cache-limit.html"><span class="token function">setCacheLimit</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">limit<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="630551446%2FFunctions%2F-475033937" anchor-label="switchActiveDatabase" id="630551446%2FFunctions%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+<a data-name="630551446%2FFunctions%2F-121202385" anchor-label="switchActiveDatabase" id="630551446%2FFunctions%2F-121202385" data-filterable-set=":core:database/nonWebMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/nonWebMain" data-filterable-set=":core:database/nonWebMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="switch-active-database.html"><span>switch</span><wbr><span>Active</span><wbr><span><span>Database</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="630551446%2FFunctions%2F-475033937"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="630551446%2FFunctions%2F-121202385"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="switch-active-database.html"><span class="token function">switchActiveDatabase</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">address<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Switch active database to the one associated with <a href="switch-active-database.html">address</a>. Serialized via mutex.</p></div></div></div>
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:database/nonWebMain" data-filterable-set=":core:database/nonWebMain" data-active="" data-toggle=":core:database/nonWebMain">nonWeb</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/nonWebMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="switch-active-database.html"><span class="token function">switchActiveDatabase</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">address<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Switch active database to the one associated with <a href="switch-active-database.html">address</a>. Serialized via mutex.</p></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-84447584%2FFunctions%2F-475033937" anchor-label="withDb" id="-84447584%2FFunctions%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+<a data-name="-84447584%2FFunctions%2F-121202385" anchor-label="withDb" id="-84447584%2FFunctions%2F-121202385" data-filterable-set=":core:database/nonWebMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/nonWebMain" data-filterable-set=":core:database/nonWebMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="with-db.html"><span>with</span><wbr><span><span>Db</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-84447584%2FFunctions%2F-475033937"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-84447584%2FFunctions%2F-121202385"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="with-db.html">T</a><span class="token operator">&gt; </span><a href="with-db.html"><span class="token function">withDb</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">block<span class="token operator">: </span><span class="token keyword">suspend </span><span class="token punctuation">(</span><a href="../-meshtastic-database/index.html">MeshtasticDatabase</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="with-db.html">T</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="with-db.html">T</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Executes <a href="with-db.html">block</a> once against the admitted current DB instance, bounding the caller's wait at <a href="../../../../core/database/org.meshtastic.core.database/-database-manager/with-db-timeout-millis.html">withDbTimeoutMillis</a>.</p></div></div></div>
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:database/nonWebMain" data-filterable-set=":core:database/nonWebMain" data-active="" data-toggle=":core:database/nonWebMain">nonWeb</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/nonWebMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="with-db.html">T</a><span class="token operator">&gt; </span><a href="with-db.html"><span class="token function">withDb</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">block<span class="token operator">: </span><span class="token keyword">suspend </span><span class="token punctuation">(</span><a href="../-meshtastic-database/index.html">MeshtasticDatabase</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="with-db.html">T</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="with-db.html">T</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Executes <a href="with-db.html">block</a> once against the admitted current DB instance, bounding the caller's wait at <a href="../../../../core/database/org.meshtastic.core.database/-database-manager/with-db-timeout-millis.html">withDbTimeoutMillis</a>.</p></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1455062442%2FFunctions%2F-475033937" anchor-label="withReadDb" id="-1455062442%2FFunctions%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+<a data-name="-1455062442%2FFunctions%2F-121202385" anchor-label="withReadDb" id="-1455062442%2FFunctions%2F-121202385" data-filterable-set=":core:database/nonWebMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/nonWebMain" data-filterable-set=":core:database/nonWebMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="with-read-db.html"><span>with</span><wbr><span>Read</span><wbr><span><span>Db</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1455062442%2FFunctions%2F-475033937"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1455062442%2FFunctions%2F-121202385"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="with-read-db.html">T</a><span class="token operator">&gt; </span><a href="with-read-db.html"><span class="token function">withReadDb</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">block<span class="token operator">: </span><span class="token keyword">suspend </span><span class="token punctuation">(</span><a href="../-meshtastic-database/index.html">MeshtasticDatabase</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="with-read-db.html">T</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="with-read-db.html">T</a></div><div class="brief "><p class="paragraph">Executes one bounded read without writer admission or the serialized write-containment lane. Active database publication is synchronous and the captured pool is registered against eviction until the callback completes. The read is also admitted into the shutdown drain, is never replayed automatically, and new reads are rejected once shutdown begins.</p></div></div></div>
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:database/nonWebMain" data-filterable-set=":core:database/nonWebMain" data-active="" data-toggle=":core:database/nonWebMain">nonWeb</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/nonWebMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="with-read-db.html">T</a><span class="token operator">&gt; </span><a href="with-read-db.html"><span class="token function">withReadDb</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">block<span class="token operator">: </span><span class="token keyword">suspend </span><span class="token punctuation">(</span><a href="../-meshtastic-database/index.html">MeshtasticDatabase</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="with-read-db.html">T</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="with-read-db.html">T</a></div><div class="brief "><p class="paragraph">Executes one bounded read without writer admission or the serialized write-containment lane. Active database publication is synchronous and the captured pool is registered against eviction until the callback completes. The read is also admitted into the shutdown drain, is never replayed automatically, and new reads are rejected once shutdown begins.</p></div></div>                  </div>
                 </div>
               </div>
             </div>

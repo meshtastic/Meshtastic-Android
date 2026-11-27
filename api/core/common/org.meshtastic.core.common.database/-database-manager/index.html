@@ -93,7 +93,7 @@
   <div class="breadcrumbs"><a href="../../index.html">core-common</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.core.common.database</a><span class="delimiter">/</span><span class="current">DatabaseManager</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Database</span><wbr><span><span>Manager</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html">DatabaseManager</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/common/src/commonMain/kotlin/org/meshtastic/core/common/database/DatabaseManager.kt#L22">source</a>)</span></span></div><p class="paragraph">Interface for managing database instances and cache limits.</p></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html">DatabaseManager</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/common/src/commonMain/kotlin/org/meshtastic/core/common/database/DatabaseManager.kt#L24">source</a>)</span></span></div><p class="paragraph">Interface for managing database instances and cache limits.</p></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
@@ -111,6 +111,21 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">val </span><a href="cache-limit.html">cacheLimit</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Reactive stream of the current database cache limit.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1089886671%2FProperties%2F-2004510817" anchor-label="localNodeNums" id="-1089886671%2FProperties%2F-2004510817" data-filterable-set=":core:common/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="local-node-nums.html"><span>local</span><wbr><span>Node</span><wbr><span><span>Nums</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1089886671%2FProperties%2F-2004510817"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">val </span><a href="local-node-nums.html">localNodeNums</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">The local node number (<code class="lang-kotlin">MyNodeInfo.my_node_num</code>) each transport address reported in its last associated handshake, keyed by <a href="../../org.meshtastic.core.common.util/normalize-address.html">org.meshtastic.core.common.util.normalizeAddress</a>. Firmware 2.8 derives the number from the public key, so neither the MAC nor the advertised name identifies a radio's node; this record does. An implementation that keeps no per-address record emits an empty map.</p></div></div></div>
                 </div>
               </div>
             </div>

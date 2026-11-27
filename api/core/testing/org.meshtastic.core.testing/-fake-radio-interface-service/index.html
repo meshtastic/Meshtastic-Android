@@ -93,7 +93,7 @@
   <div class="breadcrumbs"><a href="../../index.html">core-testing</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.core.testing</a><span class="delimiter">/</span><span class="current">FakeRadioInterfaceService</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Fake</span><wbr><span>Radio</span><wbr><span>Interface</span><wbr><span><span>Service</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">FakeRadioInterfaceService</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>serviceScope<span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineScope///PointingToDeclaration/">CoroutineScope</span><span class="token operator"> = </span>MainScope()</span></span><span class="token punctuation">)</span> : <a href="../../../../core/repository/org.meshtastic.core.repository/-radio-interface-service/index.html">RadioInterfaceService</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/testing/src/commonMain/kotlin/org/meshtastic/core/testing/FakeRadioInterfaceService.kt#L58">source</a>)</span></span></div><p class="paragraph">A test double for <a href="../../../../core/repository/org.meshtastic.core.repository/-radio-interface-service/index.html">RadioInterfaceService</a> that provides an in-memory implementation.</p><p class="paragraph">The <a href="connection-state.html">connectionState</a> here mirrors the transport-level semantics of the real implementation. In production, only <a href="../../../../core/repository/org.meshtastic.core.repository/-mesh-connection-manager/index.html">MeshConnectionManager</a> observes this flow; tests should verify that bridging behavior rather than consuming it directly from UI/feature test code (use <a href="../-fake-service-repository/connection-state.html">FakeServiceRepository.connectionState</a> instead). Address selection remains separate from transport admission: <a href="connect.html">connect</a> and an in-flight <a href="restart-transport.html">restartTransport</a> publish a fresh monotonically increasing session generation.</p></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">FakeRadioInterfaceService</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>serviceScope<span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineScope///PointingToDeclaration/">CoroutineScope</span><span class="token operator"> = </span>MainScope()</span></span><span class="token punctuation">)</span> : <a href="../../../../core/repository/org.meshtastic.core.repository/-radio-interface-service/index.html">RadioInterfaceService</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/testing/src/commonMain/kotlin/org/meshtastic/core/testing/FakeRadioInterfaceService.kt#L59">source</a>)</span></span></div><p class="paragraph">A test double for <a href="../../../../core/repository/org.meshtastic.core.repository/-radio-interface-service/index.html">RadioInterfaceService</a> that provides an in-memory implementation.</p><p class="paragraph">The <a href="connection-state.html">connectionState</a> here mirrors the transport-level semantics of the real implementation. In production, only <a href="../../../../core/repository/org.meshtastic.core.repository/-mesh-connection-manager/index.html">MeshConnectionManager</a> observes this flow; tests should verify that bridging behavior rather than consuming it directly from UI/feature test code (use <a href="../-fake-service-repository/connection-state.html">FakeServiceRepository.connectionState</a> instead). Address selection remains separate from transport admission: <a href="connect.html">connect</a> and an in-flight <a href="restart-transport.html">restartTransport</a> publish a fresh monotonically increasing session generation.</p></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
@@ -269,6 +269,21 @@
               </div>
             </div>
           </div>
+<a data-name="611233086%2FProperties%2F1783121280" anchor-label="reportedStatuses" id="611233086%2FProperties%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="reported-statuses.html"><span>reported</span><wbr><span><span>Statuses</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="611233086%2FProperties%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="reported-statuses.html">reportedStatuses</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-mutable-list/index.html">MutableList</a><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model/-transport-status/index.html">TransportStatus</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Every status reported through <a href="on-status.html">onStatus</a>, in order.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
 <a data-name="770878170%2FProperties%2F1783121280" anchor-label="restartTransportCalled" id="770878170%2FProperties%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
             <div class="main-subrow keyValue ">
@@ -355,6 +370,21 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="supported-device-types.html">supportedDeviceTypes</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model/-device-type/index.html">DeviceType</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-583876370%2FProperties%2F1783121280" anchor-label="transportStatus" id="-583876370%2FProperties%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="transport-status.html"><span>transport</span><wbr><span><span>Status</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-583876370%2FProperties%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="transport-status.html">transportStatus</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model/-transport-status/index.html">TransportStatus</a><span class="token operator">?</span><span class="token operator">&gt;</span></div></div></div>
                 </div>
               </div>
             </div>
@@ -494,6 +524,21 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="on-disconnect.html"><span class="token function">onDisconnect</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">isPermanent<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">errorMessage<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">reason<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-transport-disconnect-reason/index.html">TransportDisconnectReason</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-787163988%2FFunctions%2F1783121280" anchor-label="onStatus" id="-787163988%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="on-status.html"><span>on</span><wbr><span><span>Status</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-787163988%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="on-status.html"><span class="token function">onStatus</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">status<span class="token operator">: </span><a href="../../../../core/model/org.meshtastic.core.model/-transport-status/index.html">TransportStatus</a></span></span><span class="token punctuation">)</span></div></div></div>
                 </div>
               </div>
             </div>

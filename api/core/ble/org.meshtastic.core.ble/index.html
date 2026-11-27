@@ -45,6 +45,7 @@
                 <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":core:ble/androidMain">android</button>
                 <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:ble/commonMain">common</button>
                 <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":core:ble/jvmMain">jvm</button>
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:ble/nonWebMain">nonWeb</button>
             <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
                 <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
                 <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
@@ -72,6 +73,13 @@
                                 <input type="checkbox" class="checkbox--input" id=":core:ble/jvmMain" data-filter=":core:ble/jvmMain">
                                 <span class="checkbox--icon"></span>
                                 jvm
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":core:ble/nonWebMain" data-filter=":core:ble/nonWebMain">
+                                <span class="checkbox--icon"></span>
+                                nonWeb
                             </label>
                         </li>
                 </ul>
@@ -105,7 +113,7 @@
         </nav>
         <div id="resizer" class="resizer" data-item-type="BAR"></div>
         <div id="main" data-item-type="SECTION" role="main">
-<div class="main-content" data-page-type="package" id="content" pageids="core-ble::org.meshtastic.core.ble////PointingToDeclaration//-387160023">
+<div class="main-content" data-page-type="package" id="content" pageids="core-ble::org.meshtastic.core.ble////PointingToDeclaration//1662243816">
   <div class="breadcrumbs"><a href="../index.html">core-ble</a><span class="delimiter">/</span><span class="current">org.meshtastic.core.ble</span></div>
   <div class="cover ">
     <h1 class="cover"><span><span>Package-level</span></span> <span><span>declarations</span></span></h1>
@@ -127,7 +135,7 @@
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
                     <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:ble/androidMain" data-filterable-set=":core:ble/androidMain" data-active="" data-toggle=":core:ble/androidMain">android</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ble/androidMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-android-bluetooth-repository/index.html">AndroidBluetoothRepository</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">context<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/Context.html">Context</a><span class="token punctuation">, </span></span><span class="parameter ">dispatchers<span class="token operator">: </span><a href="../../../core/di/org.meshtastic.core.di/-coroutine-dispatchers/index.html">CoroutineDispatchers</a><span class="token punctuation">, </span></span><span class="parameter ">processLifecycle<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/lifecycle/Lifecycle.html">Lifecycle</a></span></span><span class="token punctuation">)</span> : <a href="-bluetooth-repository/index.html">BluetoothRepository</a></div><div class="brief "><p class="paragraph">Android implementation of <a href="-bluetooth-repository/index.html">BluetoothRepository</a>.</p></div></div>                  </div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ble/androidMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-android-bluetooth-repository/index.html">AndroidBluetoothRepository</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">context<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/Context.html">Context</a><span class="token punctuation">, </span></span><span class="parameter ">dispatchers<span class="token operator">: </span><a href="../../../core/di/org.meshtastic.core.di/-coroutine-dispatchers/index.html">CoroutineDispatchers</a><span class="token punctuation">, </span></span><span class="parameter ">processLifecycle<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/lifecycle/Lifecycle.html">Lifecycle</a></span></span><span class="token punctuation">)</span> : <a href="../../../core/ble/org.meshtastic.core.ble/-bluetooth-repository/index.html">BluetoothRepository</a></div><div class="brief "><p class="paragraph">Android implementation of <a href="../../../core/ble/org.meshtastic.core.ble/-bluetooth-repository/index.html">BluetoothRepository</a>.</p></div></div>                  </div>
                 </div>
               </div>
             </div>
@@ -143,6 +151,21 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ble/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-ble-characteristic/index.html">BleCharacteristic</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>uuid<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.uuid/-uuid/index.html">Uuid</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Identifies a characteristic within a profiled BLE service.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-755242558%2FClasslikes%2F-1628497077" anchor-label="BleConnectFailedException" id="-755242558%2FClasslikes%2F-1628497077" data-filterable-set=":core:ble/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ble/commonMain" data-filterable-set=":core:ble/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-ble-connect-failed-exception/index.html"><span>Ble</span><wbr><span>Connect</span><wbr><span>Failed</span><wbr><span><span>Exception</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-755242558%2FClasslikes%2F-1628497077"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ble/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-ble-connect-failed-exception/index.html">BleConnectFailedException</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">message<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">cause<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span> : <a href="../../../core/model/org.meshtastic.core.model/-radio-not-connected-exception/index.html">RadioNotConnectedException</a></div><div class="brief "><p class="paragraph">The link did not come up; <a href="../../../core/ble/org.meshtastic.core.ble/-ble-connect-failed-exception/--root--.html">cause</a> carries the platform's rejection when it gave one.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -207,6 +230,21 @@
               </div>
             </div>
           </div>
+<a data-name="2042465998%2FClasslikes%2F-1628497077" anchor-label="BleDeviceNotFoundException" id="2042465998%2FClasslikes%2F-1628497077" data-filterable-set=":core:ble/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ble/commonMain" data-filterable-set=":core:ble/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-ble-device-not-found-exception/index.html"><span>Ble</span><wbr><span>Device</span><wbr><span>Not</span><wbr><span>Found</span><wbr><span><span>Exception</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2042465998%2FClasslikes%2F-1628497077"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ble/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-ble-device-not-found-exception/index.html">BleDeviceNotFoundException</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">message<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span> : <a href="../../../core/model/org.meshtastic.core.model/-radio-not-connected-exception/index.html">RadioNotConnectedException</a></div><div class="brief "><p class="paragraph">A scan for the selected address saw no advertisement.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
 <a data-name="306327099%2FClasslikes%2F-1628497077" anchor-label="BleExceptionInfo" id="306327099%2FClasslikes%2F-1628497077" data-filterable-set=":core:ble/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":core:ble/commonMain" data-filterable-set=":core:ble/commonMain">
             <div class="main-subrow keyValue ">
@@ -263,6 +301,21 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ble/commonMain"><div class="symbol monospace"><span class="token keyword">enum class </span><a href="-ble-log-level/index.html">BleLogLevel</a> : <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-enum/index.html">Enum</a><span class="token operator">&lt;</span><a href="-ble-log-level/index.html">BleLogLevel</a><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">Verbosity for Kable's internal BLE logging. Wraps <span data-unresolved-link="com.juul.kable.logs/Logging.Level///PointingToDeclaration/">Logging.Level</span> so callers and the Koin DI graph don't leak Kable types into modules that don't directly depend on Kable.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1852885408%2FClasslikes%2F-1628497077" anchor-label="BlePairingFailedException" id="1852885408%2FClasslikes%2F-1628497077" data-filterable-set=":core:ble/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ble/commonMain" data-filterable-set=":core:ble/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-ble-pairing-failed-exception/index.html"><span>Ble</span><wbr><span>Pairing</span><wbr><span>Failed</span><wbr><span><span>Exception</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1852885408%2FClasslikes%2F-1628497077"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ble/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-ble-pairing-failed-exception/index.html">BlePairingFailedException</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">cause<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a></span></span><span class="token punctuation">)</span> : <a href="../../../core/model/org.meshtastic.core.model/-radio-not-connected-exception/index.html">RadioNotConnectedException</a></div><div class="brief "><p class="paragraph">Bonding failed and the device is still not bonded.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -432,17 +485,19 @@
               </div>
             </div>
           </div>
-<a data-name="161652125%2FClasslikes%2F-1628497077" anchor-label="KableBleScanner" id="161652125%2FClasslikes%2F-1628497077" data-filterable-set=":core:ble/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":core:ble/commonMain" data-filterable-set=":core:ble/commonMain">
+<a data-name="161652125%2FClasslikes%2F-1274665525" anchor-label="KableBleScanner" id="161652125%2FClasslikes%2F-1274665525" data-filterable-set=":core:ble/nonWebMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ble/nonWebMain" data-filterable-set=":core:ble/nonWebMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-kable-ble-scanner/index.html"><span>Kable</span><wbr><span>Ble</span><wbr><span><span>Scanner</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="161652125%2FClasslikes%2F-1628497077"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="161652125%2FClasslikes%2F-1274665525"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ble/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">class </span><a href="-kable-ble-scanner/index.html">KableBleScanner</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">loggingConfig<span class="token operator">: </span><a href="-ble-logging-config/index.html">BleLoggingConfig</a></span></span><span class="token punctuation">)</span> : <a href="-ble-scanner/index.html">BleScanner</a></div></div></div>
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:ble/nonWebMain" data-filterable-set=":core:ble/nonWebMain" data-active="" data-toggle=":core:ble/nonWebMain">nonWeb</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ble/nonWebMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">class </span><a href="-kable-ble-scanner/index.html">KableBleScanner</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">loggingConfig<span class="token operator">: </span><a href="-ble-logging-config/index.html">BleLoggingConfig</a></span></span><span class="token punctuation">)</span> : <a href="-ble-scanner/index.html">BleScanner</a></div></div>                  </div>
                 </div>
               </div>
             </div>
@@ -474,7 +529,7 @@
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
                     <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:ble/jvmMain" data-filterable-set=":core:ble/jvmMain" data-active="" data-toggle=":core:ble/jvmMain">jvm</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ble/jvmMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-kable-bluetooth-repository/index.html">KableBluetoothRepository</a> : <a href="-bluetooth-repository/index.html">BluetoothRepository</a></div></div>                  </div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ble/jvmMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-kable-bluetooth-repository/index.html">KableBluetoothRepository</a> : <a href="../../../core/ble/org.meshtastic.core.ble/-bluetooth-repository/index.html">BluetoothRepository</a></div></div>                  </div>
                 </div>
               </div>
             </div>
@@ -519,7 +574,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ble/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-meshtastic-ble-device/index.html">MeshtasticBleDevice</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>address<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>name<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>advertisement<span class="token operator">: </span><span data-unresolved-link="com.juul.kable/Advertisement///PointingToDeclaration/">Advertisement</span><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span> : <a href="-ble-device/index.html">BleDevice</a></div><div class="brief "><p class="paragraph">Unified <a href="-ble-device/index.html">BleDevice</a> implementation for all BLE devices — scanned, bonded, or both.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ble/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-meshtastic-ble-device/index.html">MeshtasticBleDevice</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>address<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>name<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>advertisement<span class="token operator">: </span><span data-unresolved-link="com.juul.kable/Advertisement///PointingToDeclaration/">Advertisement</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>isBonded<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">true</span></span></span><span class="token punctuation">)</span> : <a href="-ble-device/index.html">BleDevice</a></div><div class="brief "><p class="paragraph">Unified <a href="-ble-device/index.html">BleDevice</a> implementation for all BLE devices — scanned, bonded, or both.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -577,7 +632,22 @@
       </div>
       <div data-togglable="FUNCTION">
         <h2 class="tableheader">Functions</h2>
-        <div class="table"><a data-name="1592619599%2FFunctions%2F-1628497077" anchor-label="bleAddressesMatch" id="1592619599%2FFunctions%2F-1628497077" data-filterable-set=":core:ble/commonMain"></a>
+        <div class="table"><a data-name="832185267%2FFunctions%2F-1628497077" anchor-label="addressOnlyBleDevice" id="832185267%2FFunctions%2F-1628497077" data-filterable-set=":core:ble/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ble/commonMain" data-filterable-set=":core:ble/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="address-only-ble-device.html"><span>address</span><wbr><span>Only</span><wbr><span>Ble</span><wbr><span><span>Device</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="832185267%2FFunctions%2F-1628497077"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ble/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="address-only-ble-device.html"><span class="token function">addressOnlyBleDevice</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">address<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-ble-device/index.html">BleDevice</a></div><div class="brief "><p class="paragraph">A device known only by its <a href="address-only-ble-device.html">address</a>, as a deep link names one before any scan has seen it.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1592619599%2FFunctions%2F-1628497077" anchor-label="bleAddressesMatch" id="1592619599%2FFunctions%2F-1628497077" data-filterable-set=":core:ble/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":core:ble/commonMain" data-filterable-set=":core:ble/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
@@ -602,7 +672,22 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ble/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token punctuation">.</span><a href="classify-ble-exception.html"><span class="token function">classifyBleException</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-ble-exception-info/index.html">BleExceptionInfo</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Inspects this <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a> and returns a <a href="-ble-exception-info/index.html">BleExceptionInfo</a> if it is a known Kable exception, or <code class="lang-kotlin">null</code> if it is unrelated to the BLE layer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ble/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token punctuation">.</span><a href="classify-ble-exception.html"><span class="token function">classifyBleException</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-ble-exception-info/index.html">BleExceptionInfo</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Inspects this <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a> and returns a <a href="-ble-exception-info/index.html">BleExceptionInfo</a> if it is a known platform BLE exception, or <code class="lang-kotlin">null</code> if it is unrelated to the BLE layer.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="809535060%2FFunctions%2F-1628497077" anchor-label="classifyBleFailure" id="809535060%2FFunctions%2F-1628497077" data-filterable-set=":core:ble/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":core:ble/commonMain" data-filterable-set=":core:ble/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="classify-ble-failure.html"><span>classify</span><wbr><span>Ble</span><wbr><span><span>Failure</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="809535060%2FFunctions%2F-1628497077"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ble/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token punctuation">.</span><a href="classify-ble-failure.html"><span class="token function">classifyBleFailure</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">setupHint<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../core/model/org.meshtastic.core.model/-transport-failure/index.html">TransportFailure</a></div><div class="brief "><p class="paragraph">Classifies why a BLE connection attempt failed, for the connection card. Walks the cause chain and keeps the most specific kind found, so a dropped link whose cause was a refused subscription reads as pairing rather than a drop.</p></div></div></div>
                 </div>
               </div>
             </div>

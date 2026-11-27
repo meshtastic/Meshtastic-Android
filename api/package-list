@@ -19,6 +19,8 @@ $dokka.location:org.meshtastic.core.service/TakCertificateStoreImpl/TakCertifica
 $dokka.location:org.meshtastic.core.service/TakCertificateStoreImpl/clear/#/PointingToDeclaration/core-service/org.meshtastic.core.service/[jvm]-tak-certificate-store-impl/clear.html
 $dokka.location:org.meshtastic.core.service/TakCertificateStoreImpl/load/#/PointingToDeclaration/core-service/org.meshtastic.core.service/[jvm]-tak-certificate-store-impl/load.html
 $dokka.location:org.meshtastic.core.service/TakCertificateStoreImpl/save/#org.meshtastic.core.repository.TakCertificateMaterial/PointingToDeclaration/core-service/org.meshtastic.core.service/[jvm]-tak-certificate-store-impl/save.html
+module:appShell
+org.meshtastic.appshell
 module:core-ble
 org.meshtastic.core.ble
 org.meshtastic.core.ble.di
@@ -46,6 +48,7 @@ org.meshtastic.core.datastore
 org.meshtastic.core.datastore.di
 org.meshtastic.core.datastore.model
 org.meshtastic.core.datastore.serializer
+org.meshtastic.core.datastore.store
 module:core-di
 org.meshtastic.core.di
 org.meshtastic.core.di.di
@@ -83,6 +86,7 @@ org.meshtastic.core.prefs.mesh
 org.meshtastic.core.prefs.meshlog
 org.meshtastic.core.prefs.notification
 org.meshtastic.core.prefs.radio
+org.meshtastic.core.prefs.store
 org.meshtastic.core.prefs.tak
 org.meshtastic.core.prefs.ui
 module:core-repository
@@ -114,6 +118,7 @@ org.meshtastic.core.ui.viewmodel
 module:feature-connections
 org.meshtastic.feature.connections
 org.meshtastic.feature.connections.component
+org.meshtastic.feature.connections.data
 org.meshtastic.feature.connections.di
 org.meshtastic.feature.connections.domain.usecase
 org.meshtastic.feature.connections.model

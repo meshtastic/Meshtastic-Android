@@ -45,6 +45,8 @@
                 <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":core:network/androidMain">android</button>
                 <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:network/commonMain">common</button>
                 <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":core:network/jvmMain">jvm</button>
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:network/nonAndroidMain">nonAndroid</button>
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:network/nonWebMain">nonWeb</button>
             <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
                 <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
                 <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
@@ -72,6 +74,20 @@
                                 <input type="checkbox" class="checkbox--input" id=":core:network/jvmMain" data-filter=":core:network/jvmMain">
                                 <span class="checkbox--icon"></span>
                                 jvm
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":core:network/nonAndroidMain" data-filter=":core:network/nonAndroidMain">
+                                <span class="checkbox--icon"></span>
+                                nonAndroid
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":core:network/nonWebMain" data-filter=":core:network/nonWebMain">
+                                <span class="checkbox--icon"></span>
+                                nonWeb
                             </label>
                         </li>
                 </ul>
@@ -105,7 +121,7 @@
         </nav>
         <div id="resizer" class="resizer" data-item-type="BAR"></div>
         <div id="main" data-item-type="SECTION" role="main">
-<div class="main-content" data-page-type="package" id="content" pageids="core-network::org.meshtastic.core.network.repository////PointingToDeclaration//-1134763690">
+<div class="main-content" data-page-type="package" id="content" pageids="core-network::org.meshtastic.core.network.repository////PointingToDeclaration//773184538">
   <div class="breadcrumbs"><a href="../index.html">core-network</a><span class="delimiter">/</span><span class="current">org.meshtastic.core.network.repository</span></div>
   <div class="cover ">
     <h1 class="cover"><span><span>Package-level</span></span> <span><span>declarations</span></span></h1>
@@ -247,6 +263,21 @@
               </div>
             </div>
           </div>
+<a data-name="1486191865%2FClasslikes%2F-1825752930" anchor-label="MqttEndpointUnsupportedException" id="1486191865%2FClasslikes%2F-1825752930" data-filterable-set=":core:network/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:network/commonMain" data-filterable-set=":core:network/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-mqtt-endpoint-unsupported-exception/index.html"><span>Mqtt</span><wbr><span>Endpoint</span><wbr><span>Unsupported</span><wbr><span><span>Exception</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1486191865%2FClasslikes%2F-1825752930"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:network/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-mqtt-endpoint-unsupported-exception/index.html">MqttEndpointUnsupportedException</a> : <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-illegal-argument-exception/index.html">IllegalArgumentException</a></div><div class="brief "><p class="paragraph">A broker address this platform has no transport for, as a bare host is in a browser.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
 <a data-name="-519880514%2FClasslikes%2F-1825752930" anchor-label="MQTTRepository" id="-519880514%2FClasslikes%2F-1825752930" data-filterable-set=":core:network/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":core:network/commonMain" data-filterable-set=":core:network/commonMain">
             <div class="main-subrow keyValue ">
@@ -273,6 +304,21 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:network/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-m-q-t-t-repository-impl/index.html">MQTTRepositoryImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">radioConfigRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-radio-config-repository/index.html">RadioConfigRepository</a><span class="token punctuation">, </span></span><span class="parameter ">nodeRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-node-repository/index.html">NodeRepository</a><span class="token punctuation">, </span></span><span class="parameter ">buildConfigProvider<span class="token operator">: </span><a href="../../../core/common/org.meshtastic.core.common/-build-config-provider/index.html">BuildConfigProvider</a><span class="token punctuation">, </span></span><span class="parameter ">dispatchers<span class="token operator">: </span><a href="../../../core/di/org.meshtastic.core.di/-coroutine-dispatchers/index.html">CoroutineDispatchers</a></span></span><span class="token punctuation">)</span> : <a href="-m-q-t-t-repository/index.html">MQTTRepository</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-408470553%2FClasslikes%2F-1825752930" anchor-label="MqttRootWildcardException" id="-408470553%2FClasslikes%2F-1825752930" data-filterable-set=":core:network/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:network/commonMain" data-filterable-set=":core:network/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-mqtt-root-wildcard-exception/index.html"><span>Mqtt</span><wbr><span>Root</span><wbr><span>Wildcard</span><wbr><span><span>Exception</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-408470553%2FClasslikes%2F-1825752930"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:network/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-mqtt-root-wildcard-exception/index.html">MqttRootWildcardException</a> : <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-illegal-argument-exception/index.html">IllegalArgumentException</a></div><div class="brief "><p class="paragraph">A root topic holding <code class="lang-kotlin">#</code> or <code class="lang-kotlin">+</code>, which no subscription filter built under it can carry.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -505,19 +551,51 @@
               </div>
             </div>
           </div>
-<a data-name="820159950%2FFunctions%2F-1134763690" anchor-label="mqttTlsConfig" id="820159950%2FFunctions%2F-1134763690" data-filterable-set=":core:network/commonMain,:core:network/androidMain,:core:network/jvmMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":core:network/commonMain,:core:network/androidMain,:core:network/jvmMain" data-filterable-set=":core:network/commonMain,:core:network/androidMain,:core:network/jvmMain">
+<a data-name="381373033%2FFunctions%2F-1825752930" anchor-label="isOpenableHere" id="381373033%2FFunctions%2F-1825752930" data-filterable-set=":core:network/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":core:network/commonMain" data-filterable-set=":core:network/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="is-openable-here.html"><span>is</span><wbr><span>Openable</span><wbr><span><span>Here</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="381373033%2FFunctions%2F-1825752930"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:network/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><span data-unresolved-link="org.meshtastic.mqtt/MqttEndpoint///PointingToDeclaration/">MqttEndpoint</span><span class="token punctuation">.</span><a href="is-openable-here.html"><span class="token function">isOpenableHere</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Whether this platform's transport opens <span data-unresolved-link="org.meshtastic.mqtt/MqttEndpoint///PointingToDeclaration/">this</span>: any endpoint, but in a browser only <code class="lang-kotlin">ws://</code> and <code class="lang-kotlin">wss://</code>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="820159950%2FFunctions%2F-1207565888" anchor-label="mqttTlsConfig" id="820159950%2FFunctions%2F-1207565888" data-filterable-set=":core:network/commonMain,:core:network/androidMain,:core:network/nonAndroidMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:network/commonMain,:core:network/androidMain,:core:network/nonAndroidMain" data-filterable-set=":core:network/commonMain,:core:network/androidMain,:core:network/nonAndroidMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="mqtt-tls-config.html"><span>mqtt</span><wbr><span>Tls</span><wbr><span><span>Config</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="820159950%2FFunctions%2F-1134763690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="820159950%2FFunctions%2F-1207565888"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:network/androidMain" data-filterable-set=":core:network/androidMain" data-active="" data-toggle=":core:network/androidMain">android</button><button class="platform-bookmark" data-filterable-current=":core:network/commonMain" data-filterable-set=":core:network/commonMain" data-toggle=":core:network/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":core:network/jvmMain" data-filterable-set=":core:network/jvmMain" data-toggle=":core:network/jvmMain">jvm</button></div>
-<div class="content sourceset-dependent-content" data-togglable=":core:network/androidMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="mqtt-tls-config.html"><span class="token function">mqttTlsConfig</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="io.ktor.network.tls/TLSConfigBuilder///PointingToDeclaration/">TLSConfigBuilder</span><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">TLS customisation applied to the MQTT transports, or <code class="lang-kotlin">null</code> to keep the platform default trust decision.</p></div></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:network/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">fun </span><a href="mqtt-tls-config.html"><span class="token function">mqttTlsConfig</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="io.ktor.network.tls/TLSConfigBuilder///PointingToDeclaration/">TLSConfigBuilder</span><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">TLS customisation applied to the MQTT transports, or <code class="lang-kotlin">null</code> to keep the platform default trust decision.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":core:network/jvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="mqtt-tls-config.html"><span class="token function">mqttTlsConfig</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="io.ktor.network.tls/TLSConfigBuilder///PointingToDeclaration/">TLSConfigBuilder</span><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Desktop has no equivalent of Android's user credential store: the JVM already trusts whatever the running JDK's <code class="lang-kotlin">cacerts</code> holds, and a self-hosted CA is added there (or via <code class="lang-kotlin">-Djavax.net.ssl.trustStore</code>) rather than by the app. Use the platform trust decision unchanged.</p></div></div>                  </div>
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:network/androidMain" data-filterable-set=":core:network/androidMain" data-active="" data-toggle=":core:network/androidMain">android</button><button class="platform-bookmark" data-filterable-current=":core:network/commonMain" data-filterable-set=":core:network/commonMain" data-toggle=":core:network/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":core:network/nonAndroidMain" data-filterable-set=":core:network/nonAndroidMain" data-toggle=":core:network/nonAndroidMain">nonAndroid</button></div>
+<div class="content sourceset-dependent-content" data-togglable=":core:network/androidMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="mqtt-tls-config.html"><span class="token function">mqttTlsConfig</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="io.ktor.network.tls/TLSConfigBuilder///PointingToDeclaration/">TLSConfigBuilder</span><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">TLS customisation applied to the MQTT transports, or <code class="lang-kotlin">null</code> to keep the platform default trust decision.</p></div></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:network/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">fun </span><a href="mqtt-tls-config.html"><span class="token function">mqttTlsConfig</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="io.ktor.network.tls/TLSConfigBuilder///PointingToDeclaration/">TLSConfigBuilder</span><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">TLS customisation applied to the MQTT transports, or <code class="lang-kotlin">null</code> to keep the platform default trust decision.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":core:network/nonAndroidMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="mqtt-tls-config.html"><span class="token function">mqttTlsConfig</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="io.ktor.network.tls/TLSConfigBuilder///PointingToDeclaration/">TLSConfigBuilder</span><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Desktop trusts the JDK <code class="lang-kotlin">cacerts</code>, Apple's <code class="lang-kotlin">TLSConfigBuilder</code> has no <code class="lang-kotlin">trustManager</code>, and a browser page cannot influence TLS trust, so each defers to the platform trust decision.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-496172909%2FFunctions%2F121004080" anchor-label="mqttTransportFactory" id="-496172909%2FFunctions%2F121004080" data-filterable-set=":core:network/commonMain,:core:network/nonWebMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:network/commonMain,:core:network/nonWebMain" data-filterable-set=":core:network/commonMain,:core:network/nonWebMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="mqtt-transport-factory.html"><span>mqtt</span><wbr><span>Transport</span><wbr><span><span>Factory</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-496172909%2FFunctions%2F121004080"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:network/commonMain" data-filterable-set=":core:network/commonMain" data-active="" data-toggle=":core:network/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":core:network/nonWebMain" data-filterable-set=":core:network/nonWebMain" data-toggle=":core:network/nonWebMain">nonWeb</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:network/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">fun </span><a href="mqtt-transport-factory.html"><span class="token function">mqttTransportFactory</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">tls<span class="token operator">: </span><span data-unresolved-link="io.ktor.network.tls/TLSConfigBuilder///PointingToDeclaration/">TLSConfigBuilder</span><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="org.meshtastic.mqtt/MqttTransportFactory///PointingToDeclaration/">MqttTransportFactory</span></div><div class="brief "><p class="paragraph">The transport(s) registered for outbound MQTT connections, composed per platform: <code class="lang-kotlin">nonWebMain</code> gets TCP/TLS (the default, <code class="lang-kotlin">tcp://</code>/<code class="lang-kotlin">ssl://</code>) plus WebSocket (<code class="lang-kotlin">ws://</code>/<code class="lang-kotlin">wss://</code>); <code class="lang-kotlin">wasmJs</code> gets WebSocket only — a browser cannot open a raw TCP socket at all (permanent sandbox limitation, not a library gap; <code class="lang-kotlin">mqtt-client-transport-tcp</code> publishes no wasmJs variant at all, confirmed via its Gradle Module Metadata).</p></div></div><div class="content sourceset-dependent-content" data-togglable=":core:network/nonWebMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="mqtt-transport-factory.html"><span class="token function">mqttTransportFactory</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">tls<span class="token operator">: </span><span data-unresolved-link="io.ktor.network.tls/TLSConfigBuilder///PointingToDeclaration/">TLSConfigBuilder</span><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="org.meshtastic.mqtt/MqttTransportFactory///PointingToDeclaration/">MqttTransportFactory</span></div><div class="brief "><p class="paragraph">The transport(s) registered for outbound MQTT connections, composed per platform: <code class="lang-kotlin">nonWebMain</code> gets TCP/TLS (the default, <code class="lang-kotlin">tcp://</code>/<code class="lang-kotlin">ssl://</code>) plus WebSocket (<code class="lang-kotlin">ws://</code>/<code class="lang-kotlin">wss://</code>); <code class="lang-kotlin">wasmJs</code> gets WebSocket only — a browser cannot open a raw TCP socket at all (permanent sandbox limitation, not a library gap; <code class="lang-kotlin">mqtt-client-transport-tcp</code> publishes no wasmJs variant at all, confirmed via its Gradle Module Metadata).</p></div></div>                  </div>
                 </div>
               </div>
             </div>

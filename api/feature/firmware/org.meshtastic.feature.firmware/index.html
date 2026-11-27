@@ -46,6 +46,7 @@
                 <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":feature:firmware/commonMain">common</button>
                 <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":feature:firmware/jvmAndroidMain">jvmAndroid</button>
                 <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":feature:firmware/jvmMain">jvm</button>
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":feature:firmware/nonWebMain">nonWeb</button>
             <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
                 <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
                 <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
@@ -82,6 +83,13 @@
                                 jvm
                             </label>
                         </li>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":feature:firmware/nonWebMain" data-filter=":feature:firmware/nonWebMain">
+                                <span class="checkbox--icon"></span>
+                                nonWeb
+                            </label>
+                        </li>
                 </ul>
                 <div class="dropdown--overlay"></div>
             </div>
@@ -113,7 +121,7 @@
         </nav>
         <div id="resizer" class="resizer" data-item-type="BAR"></div>
         <div id="main" data-item-type="SECTION" role="main">
-<div class="main-content" data-page-type="package" id="content" pageids="feature-firmware::org.meshtastic.feature.firmware////PointingToDeclaration//-734795874">
+<div class="main-content" data-page-type="package" id="content" pageids="feature-firmware::org.meshtastic.feature.firmware////PointingToDeclaration//948978716">
   <div class="breadcrumbs"><a href="../index.html">feature-firmware</a><span class="delimiter">/</span><span class="current">org.meshtastic.feature.firmware</span></div>
   <div class="cover ">
     <h1 class="cover"><span><span>Package-level</span></span> <span><span>declarations</span></span></h1>
@@ -234,6 +242,38 @@
               </div>
             </div>
           </div>
+<a data-name="-580397940%2FClasslikes%2F-803617142" anchor-label="BootloaderWarningSource" id="-580397940%2FClasslikes%2F-803617142" data-filterable-set=":feature:firmware/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:firmware/commonMain" data-filterable-set=":feature:firmware/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-bootloader-warning-source/index.html"><span>Bootloader</span><wbr><span>Warning</span><wbr><span><span>Source</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-580397940%2FClasslikes%2F-803617142"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-bootloader-warning-source/index.html">BootloaderWarningSource</a></div><div class="brief "><p class="paragraph">Feature-local seam over core:datastore's <code class="lang-kotlin">BootloaderWarningDataSource</code>, which is Preferences-backed and has no wasmJs variant: the radios whose bootloader warning the user dismissed.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1928819495%2FClasslikes%2F-449785590" anchor-label="BootloaderWarningSourceAdapter" id="1928819495%2FClasslikes%2F-449785590" data-filterable-set=":feature:firmware/nonWebMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:firmware/nonWebMain" data-filterable-set=":feature:firmware/nonWebMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-bootloader-warning-source-adapter/index.html"><span>Bootloader</span><wbr><span>Warning</span><wbr><span>Source</span><wbr><span><span>Adapter</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1928819495%2FClasslikes%2F-449785590"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:firmware/nonWebMain" data-filterable-set=":feature:firmware/nonWebMain" data-active="" data-toggle=":feature:firmware/nonWebMain">nonWeb</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/nonWebMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-bootloader-warning-source-adapter/index.html">BootloaderWarningSourceAdapter</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">delegate<span class="token operator">: </span><a href="../../../core/datastore/org.meshtastic.core.datastore/-bootloader-warning-data-source/index.html">BootloaderWarningDataSource</a></span></span><span class="token punctuation">)</span> : <a href="-bootloader-warning-source/index.html">BootloaderWarningSource</a></div><div class="brief "><p class="paragraph">Delegates to the Preferences-backed <code class="lang-kotlin">BootloaderWarningDataSource</code>.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 <a data-name="-1664621828%2FClasslikes%2F-803617142" anchor-label="DefaultFirmwareUpdateManager" id="-1664621828%2FClasslikes%2F-803617142" data-filterable-set=":feature:firmware/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":feature:firmware/commonMain" data-filterable-set=":feature:firmware/commonMain">
             <div class="main-subrow keyValue ">
@@ -261,7 +301,7 @@
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
                     <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:firmware/jvmMain" data-filterable-set=":feature:firmware/jvmMain" data-active="" data-toggle=":feature:firmware/jvmMain">jvm</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/jvmMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-desktop-firmware-usb-manager/index.html">DesktopFirmwareUsbManager</a> : <a href="../../../feature/firmware/org.meshtastic.feature.firmware/-firmware-usb-manager/index.html">FirmwareUsbManager</a></div></div>                  </div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/jvmMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-desktop-firmware-usb-manager/index.html">DesktopFirmwareUsbManager</a> : <a href="../../../feature/firmware/org.meshtastic.feature.firmware/-no-maintenance-firmware-usb-manager/index.html">NoMaintenanceFirmwareUsbManager</a></div></div>                  </div>
                 </div>
               </div>
             </div>
@@ -292,6 +332,38 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-firmware-file-handler/index.html">FirmwareFileHandler</a></div><div class="brief "><p class="paragraph">Abstraction over platform file and network I/O required by the firmware update pipeline. Implementations live in <code class="lang-kotlin">androidMain</code> and <code class="lang-kotlin">jvmMain</code>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1551124697%2FClasslikes%2F-803617142" anchor-label="FirmwareRecoverySource" id="1551124697%2FClasslikes%2F-803617142" data-filterable-set=":feature:firmware/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:firmware/commonMain" data-filterable-set=":feature:firmware/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-firmware-recovery-source/index.html"><span>Firmware</span><wbr><span>Recovery</span><wbr><span><span>Source</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1551124697%2FClasslikes%2F-803617142"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-firmware-recovery-source/index.html">FirmwareRecoverySource</a></div><div class="brief "><p class="paragraph">Feature-local seam over core:datastore's <code class="lang-kotlin">FirmwareRecoveryDataSource</code>, likewise Preferences-backed: the record of an interrupted BLE update that may have stranded a radio in its bootloader.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1970994746%2FClasslikes%2F-449785590" anchor-label="FirmwareRecoverySourceAdapter" id="1970994746%2FClasslikes%2F-449785590" data-filterable-set=":feature:firmware/nonWebMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:firmware/nonWebMain" data-filterable-set=":feature:firmware/nonWebMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-firmware-recovery-source-adapter/index.html"><span>Firmware</span><wbr><span>Recovery</span><wbr><span>Source</span><wbr><span><span>Adapter</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1970994746%2FClasslikes%2F-449785590"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:firmware/nonWebMain" data-filterable-set=":feature:firmware/nonWebMain" data-active="" data-toggle=":feature:firmware/nonWebMain">nonWeb</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/nonWebMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-firmware-recovery-source-adapter/index.html">FirmwareRecoverySourceAdapter</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">delegate<span class="token operator">: </span><a href="../../../core/datastore/org.meshtastic.core.datastore/-firmware-recovery-data-source/index.html">FirmwareRecoveryDataSource</a></span></span><span class="token punctuation">)</span> : <a href="-firmware-recovery-source/index.html">FirmwareRecoverySource</a></div><div class="brief "><p class="paragraph">Delegates to the Preferences-backed <code class="lang-kotlin">FirmwareRecoveryDataSource</code>.</p></div></div>                  </div>
                 </div>
               </div>
             </div>
@@ -396,7 +468,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-firmware-update-view-model/index.html">FirmwareUpdateViewModel</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">firmwareReleaseRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-firmware-release-repository/index.html">FirmwareReleaseRepository</a><span class="token punctuation">, </span></span><span class="parameter ">deviceHardwareRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-device-hardware-repository/index.html">DeviceHardwareRepository</a><span class="token punctuation">, </span></span><span class="parameter ">maintenanceUf2Repository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-maintenance-uf2-repository/index.html">MaintenanceUf2Repository</a><span class="token punctuation">, </span></span><span class="parameter ">nodeRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-node-repository/index.html">NodeRepository</a><span class="token punctuation">, </span></span><span class="parameter ">radioController<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-radio-controller/index.html">RadioController</a><span class="token punctuation">, </span></span><span class="parameter ">radioPrefs<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-radio-prefs/index.html">RadioPrefs</a><span class="token punctuation">, </span></span><span class="parameter ">bootloaderWarningDataSource<span class="token operator">: </span><a href="../../../core/datastore/org.meshtastic.core.datastore/-bootloader-warning-data-source/index.html">BootloaderWarningDataSource</a><span class="token punctuation">, </span></span><span class="parameter ">firmwareRecoveryDataSource<span class="token operator">: </span><a href="../../../core/datastore/org.meshtastic.core.datastore/-firmware-recovery-data-source/index.html">FirmwareRecoveryDataSource</a><span class="token punctuation">, </span></span><span class="parameter ">firmwareUpdateManager<span class="token operator">: </span><a href="-firmware-update-manager/index.html">FirmwareUpdateManager</a><span class="token punctuation">, </span></span><span class="parameter ">usbManager<span class="token operator">: </span><a href="-firmware-usb-manager/index.html">FirmwareUsbManager</a><span class="token punctuation">, </span></span><span class="parameter ">fileHandler<span class="token operator">: </span><a href="-firmware-file-handler/index.html">FirmwareFileHandler</a><span class="token punctuation">, </span></span><span class="parameter ">firmwareRetriever<span class="token operator">: </span><a href="-firmware-retriever/index.html">FirmwareRetriever</a><span class="token punctuation">, </span></span><span class="parameter ">radioOperationLock<span class="token operator">: </span><a href="../../../core/common/org.meshtastic.core.common.state/-radio-operation-lock/index.html">RadioOperationLock</a><span class="token punctuation">, </span></span><span class="parameter ">applicationScope<span class="token operator">: </span><a href="../../../core/common/org.meshtastic.core.common.di/-application-coroutine-scope/index.html">ApplicationCoroutineScope</a><span class="token punctuation">, </span></span><span class="parameter ">hiddenFeaturesUnlock<span class="token operator">: </span><a href="../../../core/common/org.meshtastic.core.common.state/-hidden-features-unlock/index.html">HiddenFeaturesUnlock</a><span class="token punctuation">, </span></span><span class="parameter ">analytics<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-platform-analytics/index.html">PlatformAnalytics</a><span class="token punctuation">, </span></span><span class="parameter ">nodeRestartTracker<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-node-restart-tracker/index.html">NodeRestartTracker</a><span class="token punctuation">, </span></span><span class="parameter ">bluetoothRepository<span class="token operator">: </span><a href="../../../core/ble/org.meshtastic.core.ble/-bluetooth-repository/index.html">BluetoothRepository</a><span class="token punctuation">, </span></span><span class="parameter ">firmwareUpdateStatusRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-firmware-update-status-repository/index.html">FirmwareUpdateStatusRepository</a><span class="token punctuation">, </span></span><span class="parameter ">uiPrefs<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-ui-prefs/index.html">UiPrefs</a></span></span><span class="token punctuation">)</span> : <a href="https://developer.android.com/reference/kotlin/androidx/lifecycle/ViewModel.html">ViewModel</a></div><div class="brief "><p class="paragraph">ViewModel driving the firmware update screen. Coordinates release checking, file retrieval, transport-specific update execution, and post-update device verification.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-firmware-update-view-model/index.html">FirmwareUpdateViewModel</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">firmwareReleaseRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-firmware-release-repository/index.html">FirmwareReleaseRepository</a><span class="token punctuation">, </span></span><span class="parameter ">deviceHardwareRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-device-hardware-repository/index.html">DeviceHardwareRepository</a><span class="token punctuation">, </span></span><span class="parameter ">maintenanceUf2Repository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-maintenance-uf2-repository/index.html">MaintenanceUf2Repository</a><span class="token punctuation">, </span></span><span class="parameter ">nodeRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-node-repository/index.html">NodeRepository</a><span class="token punctuation">, </span></span><span class="parameter ">radioController<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-radio-controller/index.html">RadioController</a><span class="token punctuation">, </span></span><span class="parameter ">radioPrefs<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-radio-prefs/index.html">RadioPrefs</a><span class="token punctuation">, </span></span><span class="parameter ">bootloaderWarningDataSource<span class="token operator">: </span><a href="-bootloader-warning-source/index.html">BootloaderWarningSource</a><span class="token punctuation">, </span></span><span class="parameter ">firmwareRecoveryDataSource<span class="token operator">: </span><a href="-firmware-recovery-source/index.html">FirmwareRecoverySource</a><span class="token punctuation">, </span></span><span class="parameter ">firmwareUpdateManager<span class="token operator">: </span><a href="-firmware-update-manager/index.html">FirmwareUpdateManager</a><span class="token punctuation">, </span></span><span class="parameter ">usbManager<span class="token operator">: </span><a href="-firmware-usb-manager/index.html">FirmwareUsbManager</a><span class="token punctuation">, </span></span><span class="parameter ">fileHandler<span class="token operator">: </span><a href="-firmware-file-handler/index.html">FirmwareFileHandler</a><span class="token punctuation">, </span></span><span class="parameter ">firmwareRetriever<span class="token operator">: </span><a href="-firmware-retriever/index.html">FirmwareRetriever</a><span class="token punctuation">, </span></span><span class="parameter ">radioOperationLock<span class="token operator">: </span><a href="../../../core/common/org.meshtastic.core.common.state/-radio-operation-lock/index.html">RadioOperationLock</a><span class="token punctuation">, </span></span><span class="parameter ">applicationScope<span class="token operator">: </span><a href="../../../core/common/org.meshtastic.core.common.di/-application-coroutine-scope/index.html">ApplicationCoroutineScope</a><span class="token punctuation">, </span></span><span class="parameter ">hiddenFeaturesUnlock<span class="token operator">: </span><a href="../../../core/common/org.meshtastic.core.common.state/-hidden-features-unlock/index.html">HiddenFeaturesUnlock</a><span class="token punctuation">, </span></span><span class="parameter ">analytics<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-platform-analytics/index.html">PlatformAnalytics</a><span class="token punctuation">, </span></span><span class="parameter ">nodeRestartTracker<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-node-restart-tracker/index.html">NodeRestartTracker</a><span class="token punctuation">, </span></span><span class="parameter ">bluetoothRepository<span class="token operator">: </span><a href="../../../core/ble/org.meshtastic.core.ble/-bluetooth-repository/index.html">BluetoothRepository</a><span class="token punctuation">, </span></span><span class="parameter ">firmwareUpdateStatusRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-firmware-update-status-repository/index.html">FirmwareUpdateStatusRepository</a><span class="token punctuation">, </span></span><span class="parameter ">uiPrefs<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-ui-prefs/index.html">UiPrefs</a></span></span><span class="token punctuation">)</span> : <a href="https://developer.android.com/reference/kotlin/androidx/lifecycle/ViewModel.html">ViewModel</a></div><div class="brief "><p class="paragraph">ViewModel driving the firmware update screen. Coordinates release checking, file retrieval, transport-specific update execution, and post-update device verification.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -444,6 +516,21 @@
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
                     <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:firmware/jvmMain" data-filterable-set=":feature:firmware/jvmMain" data-active="" data-toggle=":feature:firmware/jvmMain">jvm</button></div>
 <div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/jvmMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-jvm-firmware-file-handler/index.html">JvmFirmwareFileHandler</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">client<span class="token operator">: </span><span data-unresolved-link="io.ktor.client/HttpClient///PointingToDeclaration/">HttpClient</span></span></span><span class="token punctuation">)</span> : <a href="-base-firmware-file-handler/index.html">BaseFirmwareFileHandler</a></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="736317832%2FClasslikes%2F-803617142" anchor-label="NoMaintenanceFirmwareUsbManager" id="736317832%2FClasslikes%2F-803617142" data-filterable-set=":feature:firmware/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:firmware/commonMain" data-filterable-set=":feature:firmware/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-no-maintenance-firmware-usb-manager/index.html"><span>No</span><wbr><span>Maintenance</span><wbr><span>Firmware</span><wbr><span>Usb</span><wbr><span><span>Manager</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="736317832%2FClasslikes%2F-803617142"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">class </span><a href="-no-maintenance-firmware-usb-manager/index.html">NoMaintenanceFirmwareUsbManager</a> : <a href="-firmware-usb-manager/index.html">FirmwareUsbManager</a></div><div class="brief "><p class="paragraph">The <a href="-firmware-usb-manager/index.html">FirmwareUsbManager</a> of a host with no maintenance affordance at all, desktop and the browser: with no way to vet a bootloader volume and no CDC unblock, every maintenance operation below is a no-op, so the section is hidden rather than shown and then dead-ended. <a href="-no-maintenance-firmware-usb-manager/ensure-serial-permission.html">ensureSerialPermission</a> is the exception: neither host has a USB permission model to preflight, so it succeeds trivially.</p></div></div></div>
                 </div>
               </div>
             </div>

@@ -42,7 +42,7 @@
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
-                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:service/commonMain">common</button>
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:service/nonWebMain">nonWeb</button>
             <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
                 <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
                 <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
@@ -53,9 +53,9 @@
                     </div>
                         <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
                             <label class="checkbox">
-                                <input type="checkbox" class="checkbox--input" id=":core:service/commonMain" data-filter=":core:service/commonMain">
+                                <input type="checkbox" class="checkbox--input" id=":core:service/nonWebMain" data-filter=":core:service/nonWebMain">
                                 <span class="checkbox--icon"></span>
-                                common
+                                nonWeb
                             </label>
                         </li>
                 </ul>
@@ -89,28 +89,32 @@
         </nav>
         <div id="resizer" class="resizer" data-item-type="BAR"></div>
         <div id="main" data-item-type="SECTION" role="main">
-<div class="main-content" data-page-type="classlike" id="content" pageids="core-service::org.meshtastic.core.service/DefaultLastBleNodeRecorder///PointingToDeclaration//1835284133">
+<div class="main-content" data-page-type="classlike" id="content" pageids="core-service::org.meshtastic.core.service/DefaultLastBleNodeRecorder///PointingToDeclaration//-2105851611">
   <div class="breadcrumbs"><a href="../../index.html">core-service</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.core.service</a><span class="delimiter">/</span><span class="current">DefaultLastBleNodeRecorder</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Default</span><wbr><span>Last</span><wbr><span>Ble</span><wbr><span>Node</span><wbr><span><span>Recorder</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">DefaultLastBleNodeRecorder</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">serviceRepository<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-service-repository/index.html">ServiceRepository</a><span class="token punctuation">, </span></span><span class="parameter ">nodeRepository<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-node-repository/index.html">NodeRepository</a><span class="token punctuation">, </span></span><span class="parameter ">nodeManager<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-node-manager/index.html">NodeManager</a><span class="token punctuation">, </span></span><span class="parameter ">firmwareRecoveryDataSource<span class="token operator">: </span><a href="../../../../core/datastore/org.meshtastic.core.datastore/-firmware-recovery-data-source/index.html">FirmwareRecoveryDataSource</a></span></span><span class="token punctuation">)</span> : <a href="../-last-ble-node-recorder/index.html">LastBleNodeRecorder</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/service/src/commonMain/kotlin/org/meshtastic/core/service/LastBleNodeRecorder.kt#L55">source</a>)</span></span></div><p class="paragraph">Every BLE node is recorded, ESP32 included: only an nRF52 bootloader advertises the legacy DFU service the scan looks for, so other architectures never match.</p></div></div>
+    <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+      <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:service/nonWebMain" data-filterable-set=":core:service/nonWebMain" data-active="" data-toggle=":core:service/nonWebMain">nonWeb</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/nonWebMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">DefaultLastBleNodeRecorder</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">serviceRepository<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-service-repository/index.html">ServiceRepository</a><span class="token punctuation">, </span></span><span class="parameter ">nodeRepository<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-node-repository/index.html">NodeRepository</a><span class="token punctuation">, </span></span><span class="parameter ">nodeManager<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-node-manager/index.html">NodeManager</a><span class="token punctuation">, </span></span><span class="parameter ">firmwareRecoveryDataSource<span class="token operator">: </span><a href="../../../../core/datastore/org.meshtastic.core.datastore/-firmware-recovery-data-source/index.html">FirmwareRecoveryDataSource</a></span></span><span class="token punctuation">)</span> : <a href="../-last-ble-node-recorder/index.html">LastBleNodeRecorder</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/service/src/nonWebMain/kotlin/org/meshtastic/core/service/DefaultLastBleNodeRecorder.kt#L46">source</a>)</span></span></div><p class="paragraph">Every BLE node is recorded, ESP32 included: only an nRF52 bootloader advertises the legacy DFU service the scan looks for, so other architectures never match.</p></div>    </div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
     <div class="tabs-section-body">
       <div data-togglable="CONSTRUCTOR">
         <h2 class="tableheader">Constructors</h2>
-        <div class="table"><a data-name="-521959141%2FConstructors%2F1835284133" anchor-label="DefaultLastBleNodeRecorder" id="-521959141%2FConstructors%2F1835284133" data-filterable-set=":core:service/commonMain"></a>
-          <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":core:service/commonMain" data-filterable-set=":core:service/commonMain">
+        <div class="table"><a data-name="-521959141%2FConstructors%2F-2105851611" anchor-label="DefaultLastBleNodeRecorder" id="-521959141%2FConstructors%2F-2105851611" data-filterable-set=":core:service/nonWebMain"></a>
+          <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":core:service/nonWebMain" data-filterable-set=":core:service/nonWebMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-default-last-ble-node-recorder.html"><span>Default</span><wbr><span>Last</span><wbr><span>Ble</span><wbr><span>Node</span><wbr><span><span>Recorder</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-521959141%2FConstructors%2F1835284133"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-521959141%2FConstructors%2F-2105851611"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">serviceRepository<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-service-repository/index.html">ServiceRepository</a><span class="token punctuation">, </span></span><span class="parameter ">nodeRepository<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-node-repository/index.html">NodeRepository</a><span class="token punctuation">, </span></span><span class="parameter ">nodeManager<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-node-manager/index.html">NodeManager</a><span class="token punctuation">, </span></span><span class="parameter ">firmwareRecoveryDataSource<span class="token operator">: </span><a href="../../../../core/datastore/org.meshtastic.core.datastore/-firmware-recovery-data-source/index.html">FirmwareRecoveryDataSource</a></span></span><span class="token punctuation">)</span></div></div></div>
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:service/nonWebMain" data-filterable-set=":core:service/nonWebMain" data-active="" data-toggle=":core:service/nonWebMain">nonWeb</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/nonWebMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">serviceRepository<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-service-repository/index.html">ServiceRepository</a><span class="token punctuation">, </span></span><span class="parameter ">nodeRepository<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-node-repository/index.html">NodeRepository</a><span class="token punctuation">, </span></span><span class="parameter ">nodeManager<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-node-manager/index.html">NodeManager</a><span class="token punctuation">, </span></span><span class="parameter ">firmwareRecoveryDataSource<span class="token operator">: </span><a href="../../../../core/datastore/org.meshtastic.core.datastore/-firmware-recovery-data-source/index.html">FirmwareRecoveryDataSource</a></span></span><span class="token punctuation">)</span></div></div>                  </div>
                 </div>
               </div>
             </div>
@@ -119,17 +123,19 @@
       </div>
       <div data-togglable="FUNCTION">
         <h2 class="tableheader">Functions</h2>
-        <div class="table"><a data-name="-1936577378%2FFunctions%2F1835284133" anchor-label="start" id="-1936577378%2FFunctions%2F1835284133" data-filterable-set=":core:service/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":core:service/commonMain" data-filterable-set=":core:service/commonMain">
+        <div class="table"><a data-name="-1936577378%2FFunctions%2F-2105851611" anchor-label="start" id="-1936577378%2FFunctions%2F-2105851611" data-filterable-set=":core:service/nonWebMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:service/nonWebMain" data-filterable-set=":core:service/nonWebMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="start.html"><span><span>start</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1936577378%2FFunctions%2F1835284133"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1936577378%2FFunctions%2F-2105851611"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="start.html"><span class="token function">start</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">scope<span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineScope///PointingToDeclaration/">CoroutineScope</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Records for as long as <a href="../-last-ble-node-recorder/start.html">scope</a> lives.</p></div></div></div>
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:service/nonWebMain" data-filterable-set=":core:service/nonWebMain" data-active="" data-toggle=":core:service/nonWebMain">nonWeb</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/nonWebMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="start.html"><span class="token function">start</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">scope<span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineScope///PointingToDeclaration/">CoroutineScope</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Records for as long as <a href="../-last-ble-node-recorder/start.html">scope</a> lives.</p></div></div>                  </div>
                 </div>
               </div>
             </div>

@@ -45,6 +45,7 @@
                 <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":core:service/androidMain">android</button>
                 <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:service/commonMain">common</button>
                 <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":core:service/jvmMain">jvm</button>
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:service/nonWebMain">nonWeb</button>
             <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
                 <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
                 <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
@@ -72,6 +73,13 @@
                                 <input type="checkbox" class="checkbox--input" id=":core:service/jvmMain" data-filter=":core:service/jvmMain">
                                 <span class="checkbox--icon"></span>
                                 jvm
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":core:service/nonWebMain" data-filter=":core:service/nonWebMain">
+                                <span class="checkbox--icon"></span>
+                                nonWeb
                             </label>
                         </li>
                 </ul>
@@ -105,7 +113,7 @@
         </nav>
         <div id="resizer" class="resizer" data-item-type="BAR"></div>
         <div id="main" data-item-type="SECTION" role="main">
-<div class="main-content" data-page-type="package" id="content" pageids="core-service::org.meshtastic.core.service////PointingToDeclaration//-443142321">
+<div class="main-content" data-page-type="package" id="content" pageids="core-service::org.meshtastic.core.service////PointingToDeclaration//943752680">
   <div class="breadcrumbs"><a href="../index.html">core-service</a><span class="delimiter">/</span><span class="current">org.meshtastic.core.service</span></div>
   <div class="cover ">
     <h1 class="cover"><span><span>Package-level</span></span> <span><span>declarations</span></span></h1>
@@ -144,7 +152,7 @@
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
                     <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain" data-active="" data-toggle=":core:service/androidMain">android</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/androidMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-android-local-network-access/index.html">AndroidLocalNetworkAccess</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">context<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/Context.html">Context</a></span></span><span class="token punctuation">)</span> : <a href="-local-network-access/index.html">LocalNetworkAccess</a></div></div>                  </div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/androidMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-android-local-network-access/index.html">AndroidLocalNetworkAccess</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">context<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/Context.html">Context</a></span></span><span class="token punctuation">)</span> : <a href="../../../core/service/org.meshtastic.core.service/-local-network-access/index.html">LocalNetworkAccess</a></div></div>                  </div>
                 </div>
               </div>
             </div>
@@ -178,7 +186,7 @@
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
                     <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain" data-active="" data-toggle=":core:service/androidMain">android</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/androidMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-android-mesh-location-manager/index.html">AndroidMeshLocationManager</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">context<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/app/Application.html">Application</a><span class="token punctuation">, </span></span><span class="parameter ">locationRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-location-repository/index.html">LocationRepository</a></span></span><span class="token punctuation">)</span> : <a href="../../../core/repository/org.meshtastic.core.repository/-mesh-location-manager/index.html">MeshLocationManager</a></div></div>                  </div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/androidMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-android-mesh-location-manager/index.html">AndroidMeshLocationManager</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">context<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/app/Application.html">Application</a><span class="token punctuation">, </span></span><span class="parameter ">locationRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-location-repository/index.html">LocationRepository</a><span class="token punctuation">, </span></span><span class="parameter ">radioConfigRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-radio-config-repository/index.html">RadioConfigRepository</a></span></span><span class="token punctuation">)</span> : <a href="../../../core/repository/org.meshtastic.core.repository/-mesh-location-manager/index.html">MeshLocationManager</a></div></div>                  </div>
                 </div>
               </div>
             </div>
@@ -229,7 +237,7 @@
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
                     <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain" data-active="" data-toggle=":core:service/androidMain">android</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/androidMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-android-service-repository/index.html">AndroidServiceRepository</a> : <a href="-service-repository-impl/index.html">ServiceRepositoryImpl</a></div><div class="brief "><p class="paragraph">Android DI binding of the shared <a href="-service-repository-impl/index.html">ServiceRepositoryImpl</a>.</p></div></div>                  </div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/androidMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-android-service-repository/index.html">AndroidServiceRepository</a> : <a href="../../../core/service/org.meshtastic.core.service/-service-repository-impl/index.html">ServiceRepositoryImpl</a></div><div class="brief "><p class="paragraph">Android DI binding of the shared <a href="../../../core/service/org.meshtastic.core.service/-service-repository-impl/index.html">ServiceRepositoryImpl</a>.</p></div></div>                  </div>
                 </div>
               </div>
             </div>
@@ -300,34 +308,19 @@
               </div>
             </div>
           </div>
-<a data-name="-2073806477%2FClasslikes%2F1835284133" anchor-label="DefaultLastBleNodeRecorder" id="-2073806477%2FClasslikes%2F1835284133" data-filterable-set=":core:service/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":core:service/commonMain" data-filterable-set=":core:service/commonMain">
+<a data-name="-2073806477%2FClasslikes%2F-2105851611" anchor-label="DefaultLastBleNodeRecorder" id="-2073806477%2FClasslikes%2F-2105851611" data-filterable-set=":core:service/nonWebMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:service/nonWebMain" data-filterable-set=":core:service/nonWebMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-default-last-ble-node-recorder/index.html"><span>Default</span><wbr><span>Last</span><wbr><span>Ble</span><wbr><span>Node</span><wbr><span><span>Recorder</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2073806477%2FClasslikes%2F1835284133"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-default-last-ble-node-recorder/index.html">DefaultLastBleNodeRecorder</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">serviceRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-service-repository/index.html">ServiceRepository</a><span class="token punctuation">, </span></span><span class="parameter ">nodeRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-node-repository/index.html">NodeRepository</a><span class="token punctuation">, </span></span><span class="parameter ">nodeManager<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-node-manager/index.html">NodeManager</a><span class="token punctuation">, </span></span><span class="parameter ">firmwareRecoveryDataSource<span class="token operator">: </span><a href="../../../core/datastore/org.meshtastic.core.datastore/-firmware-recovery-data-source/index.html">FirmwareRecoveryDataSource</a></span></span><span class="token punctuation">)</span> : <a href="-last-ble-node-recorder/index.html">LastBleNodeRecorder</a></div><div class="brief "><p class="paragraph">Every BLE node is recorded, ESP32 included: only an nRF52 bootloader advertises the legacy DFU service the scan looks for, so other architectures never match.</p></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-<a data-name="246344424%2FClasslikes%2F711075505" anchor-label="DesktopLocalNetworkAccess" id="246344424%2FClasslikes%2F711075505" data-filterable-set=":core:service/jvmMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":core:service/jvmMain" data-filterable-set=":core:service/jvmMain">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="-desktop-local-network-access/index.html"><span>Desktop</span><wbr><span>Local</span><wbr><span>Network</span><wbr><span><span>Access</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="246344424%2FClasslikes%2F711075505"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2073806477%2FClasslikes%2F-2105851611"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:service/jvmMain" data-filterable-set=":core:service/jvmMain" data-active="" data-toggle=":core:service/jvmMain">jvm</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/jvmMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-desktop-local-network-access/index.html">DesktopLocalNetworkAccess</a> : <a href="-local-network-access/index.html">LocalNetworkAccess</a></div><div class="brief "><p class="paragraph">Desktop has no local-network permission model, so a socket to a LAN address is always permitted.</p></div></div>                  </div>
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:service/nonWebMain" data-filterable-set=":core:service/nonWebMain" data-active="" data-toggle=":core:service/nonWebMain">nonWeb</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/nonWebMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-default-last-ble-node-recorder/index.html">DefaultLastBleNodeRecorder</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">serviceRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-service-repository/index.html">ServiceRepository</a><span class="token punctuation">, </span></span><span class="parameter ">nodeRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-node-repository/index.html">NodeRepository</a><span class="token punctuation">, </span></span><span class="parameter ">nodeManager<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-node-manager/index.html">NodeManager</a><span class="token punctuation">, </span></span><span class="parameter ">firmwareRecoveryDataSource<span class="token operator">: </span><a href="../../../core/datastore/org.meshtastic.core.datastore/-firmware-recovery-data-source/index.html">FirmwareRecoveryDataSource</a></span></span><span class="token punctuation">)</span> : <a href="-last-ble-node-recorder/index.html">LastBleNodeRecorder</a></div><div class="brief "><p class="paragraph">Every BLE node is recorded, ESP32 included: only an nRF52 bootloader advertises the legacy DFU service the scan looks for, so other architectures never match.</p></div></div>                  </div>
                 </div>
               </div>
             </div>
@@ -347,6 +340,21 @@
               </div>
             </div>
           </div>
+<a data-name="800174378%2FClasslikes%2F1835284133" anchor-label="DispatchingMeshNotificationManager" id="800174378%2FClasslikes%2F1835284133" data-filterable-set=":core:service/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:service/commonMain" data-filterable-set=":core:service/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-dispatching-mesh-notification-manager/index.html"><span>Dispatching</span><wbr><span>Mesh</span><wbr><span>Notification</span><wbr><span><span>Manager</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="800174378%2FClasslikes%2F1835284133"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-dispatching-mesh-notification-manager/index.html">DispatchingMeshNotificationManager</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">notificationManager<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-notification-manager/index.html">NotificationManager</a></span></span><span class="token punctuation">)</span> : <a href="../../../core/repository/org.meshtastic.core.repository/-mesh-notification-manager/index.html">MeshNotificationManager</a></div><div class="brief "><p class="paragraph">The <a href="../../../core/repository/org.meshtastic.core.repository/-mesh-notification-manager/index.html">MeshNotificationManager</a> for platforms that show plain notifications through a <a href="../../../core/repository/org.meshtastic.core.repository/-notification-manager/index.html">NotificationManager</a> (desktop and web): turns each mesh event into a <a href="../../../core/repository/org.meshtastic.core.repository/-notification/index.html">Notification</a> record in the slot and with the click destination Android uses for the same event, and leaves the gating on preferences and permission to the <a href="../../../core/repository/org.meshtastic.core.repository/-notification-manager/index.html">NotificationManager</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
 <a data-name="-1140989574%2FClasslikes%2F1455702677" anchor-label="ForegroundStartPolicy" id="-1140989574%2FClasslikes%2F1455702677" data-filterable-set=":core:service/androidMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain">
             <div class="main-subrow keyValue ">
@@ -360,6 +368,21 @@
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
                     <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain" data-active="" data-toggle=":core:service/androidMain">android</button></div>
 <div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/androidMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-foreground-start-policy/index.html">ForegroundStartPolicy</a></div><div class="brief "><p class="paragraph">Decides whether starting <a href="-mesh-service/index.html">MeshService</a> as a foreground service is legal, and which foreground service types it may claim.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="939619799%2FClasslikes%2F1835284133" anchor-label="InProcessMessageQueue" id="939619799%2FClasslikes%2F1835284133" data-filterable-set=":core:service/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:service/commonMain" data-filterable-set=":core:service/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-in-process-message-queue/index.html"><span>In</span><wbr><span>Process</span><wbr><span>Message</span><wbr><span><span>Queue</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="939619799%2FClasslikes%2F1835284133"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-in-process-message-queue/index.html">InProcessMessageQueue</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">packetRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-packet-repository/index.html">PacketRepository</a><span class="token punctuation">, </span></span><span class="parameter ">radioController<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-radio-controller/index.html">RadioController</a><span class="token punctuation">, </span></span><span class="parameter ">dispatchers<span class="token operator">: </span><a href="../../../core/di/org.meshtastic.core.di/-coroutine-dispatchers/index.html">CoroutineDispatchers</a></span></span><span class="token punctuation">)</span> : <a href="../../../core/repository/org.meshtastic.core.repository/-message-queue/index.html">MessageQueue</a>, <a href="../../../core/repository/org.meshtastic.core.repository/-mesh-worker-manager/index.html">MeshWorkerManager</a></div><div class="brief "><p class="paragraph"><a href="../../../core/repository/org.meshtastic.core.repository/-message-queue/index.html">MessageQueue</a> and <a href="../../../core/repository/org.meshtastic.core.repository/-mesh-worker-manager/index.html">MeshWorkerManager</a> for hosts without a background work scheduler (desktop and web): both hand the packet straight to <a href="../../../core/service/org.meshtastic.core.service/-in-process-message-queue/radio-controller.html">radioController</a> from this process.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -398,23 +421,6 @@
               </div>
             </div>
           </div>
-<a data-name="-1276984478%2FClasslikes%2F711075505" anchor-label="JvmReverseGeocoder" id="-1276984478%2FClasslikes%2F711075505" data-filterable-set=":core:service/jvmMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":core:service/jvmMain" data-filterable-set=":core:service/jvmMain">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="-jvm-reverse-geocoder/index.html"><span>Jvm</span><wbr><span>Reverse</span><wbr><span><span>Geocoder</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1276984478%2FClasslikes%2F711075505"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:service/jvmMain" data-filterable-set=":core:service/jvmMain" data-active="" data-toggle=":core:service/jvmMain">jvm</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/jvmMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-jvm-reverse-geocoder/index.html">JvmReverseGeocoder</a> : <a href="../../../core/repository/org.meshtastic.core.repository/-reverse-geocoder/index.html">ReverseGeocoder</a></div><div class="brief "><p class="paragraph">Desktop has no geocoder; the topic finder falls back to the region and the roots it hears.</p></div></div>                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
 <a data-name="2107143430%2FClasslikes%2F1835284133" anchor-label="LastBleNodeRecorder" id="2107143430%2FClasslikes%2F1835284133" data-filterable-set=":core:service/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":core:service/commonMain" data-filterable-set=":core:service/commonMain">
             <div class="main-subrow keyValue ">
@@ -425,7 +431,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><span class="token keyword">interface </span><a href="-last-ble-node-recorder/index.html">LastBleNodeRecorder</a></div><div class="brief "><p class="paragraph">Keeps <a href="../../../core/datastore/org.meshtastic.core.datastore/-firmware-recovery-data-source/last-ble-node.html">FirmwareRecoveryDataSource.lastBleNode</a> pointing at the node of the last completed BLE handshake, so the Connections screen can offer to re-flash it if it later turns up stranded in its bootloader.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><span class="token keyword">interface </span><a href="-last-ble-node-recorder/index.html">LastBleNodeRecorder</a></div><div class="brief "><p class="paragraph">Keeps <code class="lang-kotlin">FirmwareRecoveryDataSource.lastBleNode</code> pointing at the node of the last completed BLE handshake, so the Connections screen can offer to re-flash it if it later turns up stranded in its bootloader.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -570,24 +576,37 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-mesh-service-orchestrator/index.html">MeshServiceOrchestrator</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">radioInterfaceService<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-radio-interface-service/index.html">RadioInterfaceService</a><span class="token punctuation">, </span></span><span class="parameter ">serviceStateWriter<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-service-state-writer/index.html">ServiceStateWriter</a><span class="token punctuation">, </span></span><span class="parameter ">nodeManager<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-node-manager/index.html">NodeManager</a><span class="token punctuation">, </span></span><span class="parameter ">messageProcessor<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-mesh-message-processor/index.html">MeshMessageProcessor</a><span class="token punctuation">, </span></span><span class="parameter ">serviceNotifications<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-mesh-notification-manager/index.html">MeshNotificationManager</a><span class="token punctuation">, </span></span><span class="parameter ">takServerManager<span class="token operator">: </span><a href="../../../core/takserver/org.meshtastic.core.takserver/-t-a-k-server-manager/index.html">TAKServerManager</a><span class="token punctuation">, </span></span><span class="parameter ">takMeshIntegration<span class="token operator">: </span><a href="../../../core/takserver/org.meshtastic.core.takserver/-t-a-k-mesh-integration/index.html">TAKMeshIntegration</a><span class="token punctuation">, </span></span><span class="parameter ">takPrefs<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-tak-prefs/index.html">TakPrefs</a><span class="token punctuation">, </span></span><span class="parameter ">databaseManager<span class="token operator">: </span><a href="../../../core/common/org.meshtastic.core.common.database/-database-manager/index.html">DatabaseManager</a><span class="token punctuation">, </span></span><span class="parameter ">connectionManager<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-mesh-connection-manager/index.html">MeshConnectionManager</a><span class="token punctuation">, </span></span><span class="parameter ">dispatchers<span class="token operator">: </span><a href="../../../core/di/org.meshtastic.core.di/-coroutine-dispatchers/index.html">CoroutineDispatchers</a><span class="token punctuation">, </span></span><span class="parameter ">localNetworkAccess<span class="token operator">: </span><a href="-local-network-access/index.html">LocalNetworkAccess</a><span class="token punctuation">, </span></span><span class="parameter ">lastBleNodeRecorder<span class="token operator">: </span><a href="-last-ble-node-recorder/index.html">LastBleNodeRecorder</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Platform-agnostic orchestrator for the mesh service lifecycle.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-mesh-service-orchestrator/index.html">MeshServiceOrchestrator</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">radioInterfaceService<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-radio-interface-service/index.html">RadioInterfaceService</a><span class="token punctuation">, </span></span><span class="parameter ">serviceStateWriter<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-service-state-writer/index.html">ServiceStateWriter</a><span class="token punctuation">, </span></span><span class="parameter ">nodeManager<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-node-manager/index.html">NodeManager</a><span class="token punctuation">, </span></span><span class="parameter ">messageProcessor<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-mesh-message-processor/index.html">MeshMessageProcessor</a><span class="token punctuation">, </span></span><span class="parameter ">serviceNotifications<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-mesh-notification-manager/index.html">MeshNotificationManager</a><span class="token punctuation">, </span></span><span class="parameter ">takServerIntegration<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-tak-server-integration/index.html">TakServerIntegration</a><span class="token punctuation">, </span></span><span class="parameter ">takPrefs<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-tak-prefs/index.html">TakPrefs</a><span class="token punctuation">, </span></span><span class="parameter ">databaseManager<span class="token operator">: </span><a href="../../../core/common/org.meshtastic.core.common.database/-database-manager/index.html">DatabaseManager</a><span class="token punctuation">, </span></span><span class="parameter ">connectionManager<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-mesh-connection-manager/index.html">MeshConnectionManager</a><span class="token punctuation">, </span></span><span class="parameter ">dispatchers<span class="token operator">: </span><a href="../../../core/di/org.meshtastic.core.di/-coroutine-dispatchers/index.html">CoroutineDispatchers</a><span class="token punctuation">, </span></span><span class="parameter ">localNetworkAccess<span class="token operator">: </span><a href="-local-network-access/index.html">LocalNetworkAccess</a><span class="token punctuation">, </span></span><span class="parameter ">lastBleNodeRecorder<span class="token operator">: </span><a href="-last-ble-node-recorder/index.html">LastBleNodeRecorder</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Platform-agnostic orchestrator for the mesh service lifecycle.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="382054428%2FClasslikes%2F711075505" anchor-label="NoopDeviceAddressChangeHook" id="382054428%2FClasslikes%2F711075505" data-filterable-set=":core:service/jvmMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":core:service/jvmMain" data-filterable-set=":core:service/jvmMain">
+<a data-name="382054428%2FClasslikes%2F1835284133" anchor-label="NoopDeviceAddressChangeHook" id="382054428%2FClasslikes%2F1835284133" data-filterable-set=":core:service/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:service/commonMain" data-filterable-set=":core:service/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-noop-device-address-change-hook/index.html"><span>Noop</span><wbr><span>Device</span><wbr><span>Address</span><wbr><span>Change</span><wbr><span><span>Hook</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="382054428%2FClasslikes%2F711075505"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="382054428%2FClasslikes%2F1835284133"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:service/jvmMain" data-filterable-set=":core:service/jvmMain" data-active="" data-toggle=":core:service/jvmMain">jvm</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/jvmMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-noop-device-address-change-hook/index.html">NoopDeviceAddressChangeHook</a> : <a href="-device-address-change-hook/index.html">DeviceAddressChangeHook</a></div><div class="brief "><p class="paragraph">Desktop runs the service in-process, so a new address needs nothing started.</p></div></div>                  </div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-noop-device-address-change-hook/index.html">NoopDeviceAddressChangeHook</a> : <a href="-device-address-change-hook/index.html">DeviceAddressChangeHook</a></div><div class="brief "><p class="paragraph"><a href="-device-address-change-hook/index.html">DeviceAddressChangeHook</a> for hosts with no mesh service to start. Bind it per platform.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="241242606%2FClasslikes%2F1835284133" anchor-label="NoopLocalNetworkAccess" id="241242606%2FClasslikes%2F1835284133" data-filterable-set=":core:service/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:service/commonMain" data-filterable-set=":core:service/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-noop-local-network-access/index.html"><span>Noop</span><wbr><span>Local</span><wbr><span>Network</span><wbr><span><span>Access</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="241242606%2FClasslikes%2F1835284133"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-noop-local-network-access/index.html">NoopLocalNetworkAccess</a> : <a href="-local-network-access/index.html">LocalNetworkAccess</a></div><div class="brief "><p class="paragraph"><a href="-local-network-access/index.html">LocalNetworkAccess</a> for hosts without the Android 17 gate: access is always granted. Bind it per platform.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -638,7 +657,7 @@
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
                     <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain" data-active="" data-toggle=":core:service/androidMain">android</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/androidMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-quick-settings-tile-controller/index.html">QuickSettingsTileController</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">context<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/Context.html">Context</a><span class="token punctuation">, </span></span><span class="parameter ">radioController<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-radio-controller/index.html">RadioController</a><span class="token punctuation">, </span></span><span class="parameter ">radioInterfaceService<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-radio-interface-service/index.html">RadioInterfaceService</a><span class="token punctuation">, </span></span><span class="parameter ">radioPrefs<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-radio-prefs/index.html">RadioPrefs</a><span class="token punctuation">, </span></span><span class="parameter ">nodeRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-node-repository/index.html">NodeRepository</a><span class="token punctuation">, </span></span><span class="parameter ">orchestrator<span class="token operator">: </span><a href="-mesh-service-orchestrator/index.html">MeshServiceOrchestrator</a><span class="token punctuation">, </span></span><span class="parameter ">appScope<span class="token operator">: </span><a href="../../../core/common/org.meshtastic.core.common.di/-application-coroutine-scope/index.html">ApplicationCoroutineScope</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Backs <a href="-mesh-quick-settings-tile-service/index.html">MeshQuickSettingsTileService</a>: publishes the tile's state and performs its taps on the application scope, so a tap's work outlives the tile service, which the system unbinds as soon as the shade closes.</p></div></div>                  </div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/androidMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-quick-settings-tile-controller/index.html">QuickSettingsTileController</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">context<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/Context.html">Context</a><span class="token punctuation">, </span></span><span class="parameter ">radioController<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-radio-controller/index.html">RadioController</a><span class="token punctuation">, </span></span><span class="parameter ">radioInterfaceService<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-radio-interface-service/index.html">RadioInterfaceService</a><span class="token punctuation">, </span></span><span class="parameter ">radioPrefs<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-radio-prefs/index.html">RadioPrefs</a><span class="token punctuation">, </span></span><span class="parameter ">nodeRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-node-repository/index.html">NodeRepository</a><span class="token punctuation">, </span></span><span class="parameter ">orchestrator<span class="token operator">: </span><a href="../../../core/service/org.meshtastic.core.service/-mesh-service-orchestrator/index.html">MeshServiceOrchestrator</a><span class="token punctuation">, </span></span><span class="parameter ">appScope<span class="token operator">: </span><a href="../../../core/common/org.meshtastic.core.common.di/-application-coroutine-scope/index.html">ApplicationCoroutineScope</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Backs <a href="-mesh-quick-settings-tile-service/index.html">MeshQuickSettingsTileService</a>: publishes the tile's state and performs its taps on the application scope, so a tap's work outlives the tile service, which the system unbinds as soon as the shade closes.</p></div></div>                  </div>
                 </div>
               </div>
             </div>
@@ -798,7 +817,7 @@
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
                     <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain" data-active="" data-toggle=":core:service/androidMain">android</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/androidMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-start-mesh-service-on-address-change/index.html">StartMeshServiceOnAddressChange</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">context<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/Context.html">Context</a></span></span><span class="token punctuation">)</span> : <a href="-device-address-change-hook/index.html">DeviceAddressChangeHook</a></div><div class="brief "><p class="paragraph">Starts <a href="-mesh-service/index.html">MeshService</a> for a newly selected device, since the foreground service owns the connection on Android.</p></div></div>                  </div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/androidMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-start-mesh-service-on-address-change/index.html">StartMeshServiceOnAddressChange</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">context<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/Context.html">Context</a></span></span><span class="token punctuation">)</span> : <a href="../../../core/service/org.meshtastic.core.service/-device-address-change-hook/index.html">DeviceAddressChangeHook</a></div><div class="brief "><p class="paragraph">Starts <a href="-mesh-service/index.html">MeshService</a> for a newly selected device, since the foreground service owns the connection on Android.</p></div></div>                  </div>
                 </div>
               </div>
             </div>
@@ -816,6 +835,21 @@
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
                     <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain" data-active="" data-toggle=":core:service/androidMain">android</button><button class="platform-bookmark" data-filterable-current=":core:service/jvmMain" data-filterable-set=":core:service/jvmMain" data-toggle=":core:service/jvmMain">jvm</button></div>
 <div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/androidMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="[android]-tak-certificate-store-impl/index.html">TakCertificateStoreImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">app<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/app/Application.html">Application</a></span></span><span class="token punctuation">)</span> : <a href="../../../core/repository/org.meshtastic.core.repository/-tak-certificate-store/index.html">TakCertificateStore</a></div><div class="brief "><p class="paragraph">Encrypted per-install storage for the local TAK server's TLS material, in <a href="../../../core/service/org.meshtastic.core.service/index.html">openEncryptedPreferences</a>. Blobs are Base64-encoded because EncryptedSharedPreferences only stores strings.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":core:service/jvmMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="[jvm]-tak-certificate-store-impl/index.html">TakCertificateStoreImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">dataDir<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/io/File.html">File</a><span class="token operator"> = </span>File(desktopDataDir())</span></span><span class="token punctuation">)</span> : <a href="../../../core/repository/org.meshtastic.core.repository/-tak-certificate-store/index.html">TakCertificateStore</a></div><div class="brief "><p class="paragraph">File-backed encrypted store for the local TAK server's TLS material on JVM/Desktop.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="949313468%2FClasslikes%2F1835284133" anchor-label="UnreadBadgeSync" id="949313468%2FClasslikes%2F1835284133" data-filterable-set=":core:service/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:service/commonMain" data-filterable-set=":core:service/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-unread-badge-sync/index.html"><span>Unread</span><wbr><span>Badge</span><wbr><span><span>Sync</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="949313468%2FClasslikes%2F1835284133"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-unread-badge-sync/index.html">UnreadBadgeSync</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">packetRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-packet-repository/index.html">PacketRepository</a><span class="token punctuation">, </span></span><span class="parameter ">badge<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-app-icon-badge/index.html">AppIconBadge</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Keeps <a href="../../../core/service/org.meshtastic.core.service/-unread-badge-sync/badge.html">badge</a> on the unread message count the navigation bar shows, for as long as <a href="-unread-badge-sync/run.html">run</a> is collecting.</p></div></div></div>
                 </div>
               </div>
             </div>
