@@ -33,6 +33,7 @@ import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.common.util.safeCatching
+import org.meshtastic.core.model.DeviceAddress
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.isLora
@@ -121,8 +122,11 @@ class MeshMessageProcessorImpl(
                     FromRadio.Builder().also { wb -> wb.log_record = LogRecord.ADAPTER.decode(bytes) }.build()
                 }
                     .getOrElse {
-                        Logger.e(primaryException) {
-                            "Failed to parse radio packet (len=${bytes.size}). Not a valid FromRadio or LogRecord."
+                        // A malformed frame is dropped and the session carries on: a warning, not a crash report.
+                        val transport = DeviceAddress.parse(frame.session.address)?.interfaceId ?: "unknown"
+                        Logger.w {
+                            "Dropped radio frame: not a valid FromRadio or LogRecord " +
+                                "(transport=$transport, len=${bytes.size}, ${primaryException::class.simpleName})"
                         }
                         return
                     }
