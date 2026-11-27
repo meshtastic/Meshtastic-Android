@@ -191,7 +191,7 @@ When you connect to a node that has transparent mode on, the app shows a notice 
 - **Turn off** clears transparent mode and leaves every other LoRa setting as it was. This stops any host that is using the node as its radio. The app reports success once the node confirms the setting is off. If the node still reports it on, or does not answer, the notice says so and offers **Retry**.
 - **Leave on** closes the notice. A **Transparent mode is on** card stays on the **Connections** tab for the rest of the connection; tap it to open the notice again. The notice also returns the next time you connect to the node.
 
-While transparent mode is on, the message composer is replaced by a line saying that sending is off, and a resend or a reaction is refused with the same reason.
+While transparent mode is on, the message composer is replaced by a line saying that sending is off, and a resend or a reaction is refused with the same reason. A reply typed into a message notification is refused too, and a notification says why.
 
 You can also change the setting on **Settings → LoRa**, on the **Advanced** card.
 

@@ -30,7 +30,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -69,11 +68,14 @@ import org.meshtastic.core.ui.viewmodel.TransparentModeViewModel
 
 const val TRANSPARENT_MODE_SWITCH_TEST_TAG = "transparent_mode_switch"
 
-/** Shows the transparent mode notice over any screen while the connected node calls for it. */
+/**
+ * Shows the transparent mode notice over any screen while the connected node calls for it. [suppressed] holds it back
+ * while a flow that must not be interrupted, the firmware update, is open.
+ */
 @Composable
-fun TransparentModeNoticeHost(viewModel: TransparentModeViewModel = koinViewModel()) {
+fun TransparentModeNoticeHost(suppressed: Boolean, viewModel: TransparentModeViewModel = koinViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    if (state.noticeVisible) {
+    if (state.noticeVisible && !suppressed) {
         TransparentModeNotice(turnOff = state.turnOff, onTurnOff = viewModel::turnOff, onClose = viewModel::closeNotice)
     }
 }
@@ -177,13 +179,8 @@ fun TransparentModeSetting(
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var showEnableConfirmation by rememberSaveable { mutableStateOf(false) }
-
-    LaunchedEffect(enabled) {
-        if (!enabled) {
-            showEnableConfirmation = false
-        }
-    }
+    // Keyed on enabled, so a confirmation left open when the control was disabled does not come back with it.
+    var showEnableConfirmation by rememberSaveable(enabled) { mutableStateOf(false) }
 
     if (showEnableConfirmation) {
         TransparentModeEnableConfirmation(

@@ -127,6 +127,18 @@ class ConversationActionServiceTest {
     }
 
     @Test
+    fun `a reply refused for transparent mode says why in a notification and is not marked sent`() {
+        everySuspend { sendMessageUseCase.invoke(any(), any(), any()) } returns SendMessageOutcome.TransparentMode
+
+        run(replyIntent("hi"))
+
+        verifySuspend { notifications.showTransparentModeSendBlocked(contactKey) }
+        verifySuspend { notifications.cancelMessageNotification(contactKey) }
+        verifySuspend(VerifyMode.exactly(0)) { packetRepository.clearUnreadCount(any(), any()) }
+        verifySuspend(VerifyMode.exactly(0)) { notifications.refreshConversationAfterReply(any()) }
+    }
+
+    @Test
     fun `a failed reply still dismisses so the reply spinner resolves`() {
         everySuspend { sendMessageUseCase.invoke(any(), any(), any()) } throws RuntimeException("radio down")
 

@@ -245,6 +245,8 @@ class DesktopMcpServer(
             when (val outcome = sendMessageUseCase(text = text, contactKey = contactKey)) {
                 SendMessageOutcome.Refused -> error("refused for $contactKey")
 
+                SendMessageOutcome.TransparentMode -> error("the connected node is in transparent mode")
+
                 is SendMessageOutcome.Queued -> {
                     val wait = (request.arguments.int("wait_seconds") ?: DEFAULT_SEND_WAIT_S).seconds
                     json(awaitStatus(outcome.packetId, contactKey, device, wait))

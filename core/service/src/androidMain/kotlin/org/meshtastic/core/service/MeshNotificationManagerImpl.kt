@@ -128,6 +128,8 @@ import org.meshtastic.core.resources.no_local_stats
 import org.meshtastic.core.resources.notification_reaction_to
 import org.meshtastic.core.resources.powered
 import org.meshtastic.core.resources.reply
+import org.meshtastic.core.resources.transparent_mode_banner_title
+import org.meshtastic.core.resources.transparent_mode_send_blocked
 import org.meshtastic.core.resources.unknown_username
 import org.meshtastic.core.resources.you
 import org.meshtastic.proto.ClientNotification
@@ -724,6 +726,12 @@ class MeshNotificationManagerImpl(
         ensureChannels()
         notificationManager.notify(TAG_ALERT, contactKey.hashCode(), createAlertNotification(contactKey, name, alert))
     }
+
+    override suspend fun showTransparentModeSendBlocked(contactKey: String) = showAlertNotification(
+        contactKey,
+        getStringSuspend(Res.string.transparent_mode_banner_title),
+        getStringSuspend(Res.string.transparent_mode_send_blocked),
+    )
 
     override suspend fun showMeshBeaconNotification(offer: MeshBeaconOffer) {
         ensureChannels()

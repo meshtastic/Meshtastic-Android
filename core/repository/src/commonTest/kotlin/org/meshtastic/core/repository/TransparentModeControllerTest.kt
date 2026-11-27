@@ -16,10 +16,15 @@
  */
 package org.meshtastic.core.repository
 
+import dev.mokkery.MockMode
+import dev.mokkery.answering.returns
+import dev.mokkery.every
+import dev.mokkery.mock
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
@@ -36,7 +41,6 @@ import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -45,10 +49,8 @@ class TransparentModeControllerTest {
 
     private val radioConfigRepository = FakeRadioConfigRepository()
     private val serviceRepository = FakeServiceRepository()
-    private val radioController = FakeRadioController().apply { nextPacketId = READ_BACK_ID }
+    private val radioController = FakeRadioController().apply { nextPacketId = FIRST_REQUEST_ID }
     private val connectionIdentity = MutableStateFlow<ConnectionIdentity?>(null)
-    private val controller =
-        TransparentModeController(radioConfigRepository, serviceRepository, radioController, connectionIdentity)
 
     /** A LoRa config away from its defaults in every kind of field, with transparent mode off. */
     private val normalLora =
@@ -71,13 +73,35 @@ class TransparentModeControllerTest {
             .build()
     private val transparentLora = normalLora.newBuilder().also { wb -> wb.transparent_mode = true }.build()
 
-    private fun connect(lora: Config.LoRaConfig, session: Long = 1L) {
+    private fun TestScope.newController() = TransparentModeController(
+        radioConfigRepository,
+        serviceRepository,
+        radioController,
+        mock<NodeManager>(MockMode.autofill) {
+            every { connectionIdentity } returns this@TransparentModeControllerTest.connectionIdentity
+        },
+        // Not backgroundScope: advanceUntilIdle has to run the response timeouts.
+        CoroutineScope(StandardTestDispatcher(testScheduler)),
+    )
+
+    private fun cache(lora: Config.LoRaConfig) {
         radioConfigRepository.setLocalConfigDirect(LocalConfig.Builder().also { wb -> wb.lora = lora }.build())
-        connectionIdentity.value = ConnectionIdentity(session, ADDRESS, NODE_NUM, deviceId = null)
+    }
+
+    /** A completed handshake: the node's config is cached, then the state reaches Connected. */
+    private fun connect(lora: Config.LoRaConfig, session: Long = 1L, nodeNum: Int = NODE_NUM) {
+        cache(lora)
+        connectionIdentity.value = ConnectionIdentity(session, ADDRESS, nodeNum, deviceId = null)
         serviceRepository.setConnectionState(ConnectionState.Connected)
     }
 
-    private fun loraResponse(lora: Config.LoRaConfig, requestId: Int = READ_BACK_ID, from: Int = NODE_NUM): MeshPacket {
+    /** The link drops and the same transport session reconnects, as a BLE reconnect or a node reboot does. */
+    private fun reconnect(lora: Config.LoRaConfig) {
+        serviceRepository.setConnectionState(ConnectionState.Disconnected)
+        connect(lora)
+    }
+
+    private fun loraResponse(lora: Config.LoRaConfig, requestId: Int, from: Int = NODE_NUM): MeshPacket {
         val admin =
             AdminMessage.Builder()
                 .also { wb -> wb.get_config_response = Config.Builder().also { cb -> cb.lora = lora }.build() }
@@ -98,16 +122,31 @@ class TransparentModeControllerTest {
             .build()
     }
 
-    private fun TestScope.startTurnOff() {
-        launch { controller.turnOff() }
+    private fun pendingRead() = radioController.adminRequests.last { it.kind == "getConfig" }
+
+    private fun reads() = radioController.adminRequests.count { it.kind == "getConfig" }
+
+    /**
+     * The node answers the outstanding LoRa read. In production the admin handler stores that answer in the config
+     * cache for the session it arrived on, so the fake cache is updated the same way here.
+     */
+    private suspend fun TestScope.nodeAnswers(lora: Config.LoRaConfig) {
+        val requestId = checkNotNull(pendingRead().packetId)
+        radioController.nextPacketId++
+        cache(lora)
+        serviceRepository.emitMeshPacket(loraResponse(lora, requestId))
+        runCurrent()
+    }
+
+    private fun TestScope.startTurnOff(controller: TransparentModeController) {
+        controller.turnOff()
         runCurrent()
     }
 
     @Test
     fun `the notice shows once the connected node reports transparent mode`() = runTest {
-        radioConfigRepository.setLocalConfigDirect(
-            LocalConfig.Builder().also { wb -> wb.lora = transparentLora }.build(),
-        )
+        val controller = newController()
+        cache(transparentLora)
         connectionIdentity.value = ConnectionIdentity(1L, ADDRESS, NODE_NUM, deviceId = null)
         serviceRepository.setConnectionState(ConnectionState.Connecting)
 
@@ -120,19 +159,21 @@ class TransparentModeControllerTest {
 
     @Test
     fun `a node with transparent mode off shows no notice and no indicator`() = runTest {
+        val controller = newController()
         connect(normalLora)
 
         assertEquals(TransparentModeState(), controller.state.first())
     }
 
     @Test
-    fun `leaving it on keeps the indicator and writes nothing and the banner reopens the notice`() = runTest {
+    fun `leaving it on keeps the indicator and sends nothing and the banner reopens the notice`() = runTest {
+        val controller = newController()
         connect(transparentLora)
 
         controller.closeNotice()
 
         assertEquals(TransparentModeState(active = true, noticeVisible = false), controller.state.first())
-        assertTrue(radioController.configWrites.isEmpty())
+        assertTrue(radioController.adminRequests.isEmpty())
 
         controller.reopenNotice()
 
@@ -140,117 +181,223 @@ class TransparentModeControllerTest {
     }
 
     @Test
-    fun `the notice returns on the next connection to the same node`() = runTest {
-        connect(transparentLora, session = 1L)
+    fun `the notice returns after a reconnect on the same transport session`() = runTest {
+        val controller = newController()
+        connect(transparentLora)
         controller.closeNotice()
 
-        serviceRepository.setConnectionState(ConnectionState.Disconnected)
-        connectionIdentity.value = null
-        connect(transparentLora, session = 2L)
+        reconnect(transparentLora)
 
         assertEquals(TransparentModeState(active = true, noticeVisible = true), controller.state.first())
     }
 
     @Test
-    fun `turning it off sends the reported LoRa config with only transparent mode cleared`() = runTest {
-        connect(transparentLora)
+    fun `turning it off sends back what the node reports with only transparent mode cleared`() = runTest {
+        val controller = newController()
+        connect(transparentLora.newBuilder().also { wb -> wb.hop_limit = 7 }.build())
 
-        startTurnOff()
+        startTurnOff(controller)
+
+        assertTrue(radioController.localConfigs.isEmpty())
+
+        nodeAnswers(transparentLora)
 
         assertEquals(listOf(Config.Builder().also { wb -> wb.lora = normalLora }.build()), radioController.localConfigs)
     }
 
     @Test
-    fun `success waits for the read-back to say transparent mode is off`() = runTest {
+    fun `an unanswered first read is unconfirmed and nothing is written`() = runTest {
+        val controller = newController()
         connect(transparentLora)
 
-        startTurnOff()
-
-        assertEquals(TransparentModeTurnOff.IN_PROGRESS, controller.state.first().turnOff)
-        val readBack = radioController.adminRequests.single { it.kind == "getConfig" }
-        assertEquals(NODE_NUM, readBack.destNum)
-        assertEquals(AdminMessage.ConfigType.LORA_CONFIG.value, readBack.payload)
-
-        serviceRepository.emitMeshPacket(loraResponse(normalLora))
+        startTurnOff(controller)
         advanceUntilIdle()
 
-        assertEquals(TransparentModeTurnOff.TURNED_OFF, controller.state.first().turnOff)
-        assertEquals(false, radioConfigRepository.lastSetLocalConfig?.lora?.transparent_mode)
+        assertEquals(TransparentModeTurnOff.UNCONFIRMED, controller.state.first().turnOff)
+        assertTrue(radioController.localConfigs.isEmpty())
     }
 
     @Test
-    fun `a read-back that still says on is reported as still on and a retry writes again`() = runTest {
+    fun `success waits for the read-back to say transparent mode is off`() = runTest {
+        val controller = newController()
         connect(transparentLora)
 
-        startTurnOff()
-        serviceRepository.emitMeshPacket(loraResponse(transparentLora))
-        advanceUntilIdle()
+        startTurnOff(controller)
+        nodeAnswers(transparentLora)
+
+        assertEquals(TransparentModeTurnOff.IN_PROGRESS, controller.state.first().turnOff)
+        assertEquals(NODE_NUM, pendingRead().destNum)
+        assertEquals(AdminMessage.ConfigType.LORA_CONFIG.value, pendingRead().payload)
+        assertEquals(2, reads())
+
+        nodeAnswers(normalLora)
+
+        assertEquals(TransparentModeTurnOff.TURNED_OFF, controller.state.first().turnOff)
+    }
+
+    @Test
+    fun `a read-back that still says on is reported as still on and a retry runs again`() = runTest {
+        val controller = newController()
+        connect(transparentLora)
+
+        startTurnOff(controller)
+        nodeAnswers(transparentLora)
+        nodeAnswers(transparentLora)
 
         val state = controller.state.first()
         assertEquals(TransparentModeTurnOff.STILL_ON, state.turnOff)
         assertTrue(state.noticeVisible)
-        assertEquals(true, radioConfigRepository.lastSetLocalConfig?.lora?.transparent_mode)
 
-        startTurnOff()
+        startTurnOff(controller)
 
-        assertEquals(2, radioController.localConfigs.size)
         assertEquals(TransparentModeTurnOff.IN_PROGRESS, controller.state.first().turnOff)
+        assertEquals(3, reads())
     }
 
     @Test
-    fun `an unanswered read-back is unconfirmed and the cache keeps what the node last reported`() = runTest {
+    fun `an unanswered read-back is unconfirmed`() = runTest {
+        val controller = newController()
         connect(transparentLora)
 
-        startTurnOff()
+        startTurnOff(controller)
+        nodeAnswers(transparentLora)
         advanceUntilIdle()
 
-        assertEquals(TransparentModeTurnOff.UNCONFIRMED, controller.state.first().turnOff)
-        assertEquals(transparentLora, radioConfigRepository.lastSetLocalConfig?.lora)
+        val state = controller.state.first()
+        assertEquals(TransparentModeTurnOff.UNCONFIRMED, state.turnOff)
+        assertTrue(state.active)
     }
 
     @Test
     fun `a rejected write is unconfirmed`() = runTest {
+        val controller = newController()
         connect(transparentLora)
         radioController.rejectLocalConfigWritesRemaining = 1
 
-        startTurnOff()
+        startTurnOff(controller)
+        nodeAnswers(transparentLora)
         advanceUntilIdle()
 
         assertEquals(TransparentModeTurnOff.UNCONFIRMED, controller.state.first().turnOff)
-        assertTrue(radioController.adminRequests.none { it.kind == "getConfig" })
+        assertEquals(1, reads())
     }
 
     @Test
     fun `an answer to another request or from another node does not confirm the turn-off`() = runTest {
+        val controller = newController()
         connect(transparentLora)
+        startTurnOff(controller)
+        nodeAnswers(transparentLora)
+        val readBackId = checkNotNull(pendingRead().packetId)
 
-        startTurnOff()
-        serviceRepository.emitMeshPacket(loraResponse(normalLora, requestId = READ_BACK_ID + 1))
-        serviceRepository.emitMeshPacket(loraResponse(normalLora, from = NODE_NUM + 1))
+        serviceRepository.emitMeshPacket(loraResponse(normalLora, requestId = readBackId + 1))
+        serviceRepository.emitMeshPacket(loraResponse(normalLora, requestId = readBackId, from = NODE_NUM + 1))
         runCurrent()
 
         assertEquals(TransparentModeTurnOff.IN_PROGRESS, controller.state.first().turnOff)
     }
 
     @Test
-    fun `closing the result of a turn-off clears the notice`() = runTest {
+    fun `a reconnect during the read-back drops the attempt and never touches the config cache`() = runTest {
+        val controller = newController()
         connect(transparentLora)
-        startTurnOff()
-        serviceRepository.emitMeshPacket(loraResponse(normalLora))
+        startTurnOff(controller)
+        nodeAnswers(transparentLora)
+
+        reconnect(normalLora)
         advanceUntilIdle()
-        radioConfigRepository.setLocalConfigDirect(LocalConfig.Builder().also { wb -> wb.lora = normalLora }.build())
+
+        assertEquals(TransparentModeState(), controller.state.first())
+        assertNull(radioConfigRepository.lastSetLocalConfig)
+    }
+
+    @Test
+    fun `switching radios during the read-back drops the attempt and never touches the config cache`() = runTest {
+        val controller = newController()
+        connect(transparentLora)
+        startTurnOff(controller)
+        nodeAnswers(transparentLora)
+        val oldReadBack = checkNotNull(pendingRead().packetId)
+
+        serviceRepository.setConnectionState(ConnectionState.Disconnected)
+        connect(transparentLora, session = 2L, nodeNum = OTHER_NODE_NUM)
+        runCurrent()
+        serviceRepository.emitMeshPacket(loraResponse(normalLora, oldReadBack))
+        advanceUntilIdle()
+
+        assertEquals(TransparentModeState(active = true, noticeVisible = true), controller.state.first())
+        assertNull(radioConfigRepository.lastSetLocalConfig)
+    }
+
+    @Test
+    fun `after a reconnect mid turn-off the new notice can be closed`() = runTest {
+        val controller = newController()
+        connect(transparentLora)
+        startTurnOff(controller)
+
+        reconnect(transparentLora)
+        controller.closeNotice()
+
+        assertEquals(TransparentModeState(active = true, noticeVisible = false), controller.state.first())
+    }
+
+    @Test
+    fun `after a reconnect mid turn-off the new notice can turn it off`() = runTest {
+        val controller = newController()
+        connect(transparentLora)
+        startTurnOff(controller)
+        val readsBefore = reads()
+
+        reconnect(transparentLora)
+        startTurnOff(controller)
+
+        assertEquals(TransparentModeTurnOff.IN_PROGRESS, controller.state.first().turnOff)
+        assertEquals(readsBefore + 1, reads())
+    }
+
+    @Test
+    fun `a turn-off in flight still counts as transparent though the cache says off`() = runTest {
+        val controller = newController()
+        connect(transparentLora)
+
+        startTurnOff(controller)
+        cache(normalLora)
+
+        assertTrue(controller.active.first())
+    }
+
+    @Test
+    fun `turning it on from settings shows the indicator without the notice until the next connection`() = runTest {
+        val controller = newController()
+        connect(normalLora)
+
+        controller.turnedOnByUser()
+        cache(transparentLora)
+
+        assertEquals(TransparentModeState(active = true, noticeVisible = false), controller.state.first())
+
+        reconnect(transparentLora)
+
+        assertEquals(TransparentModeState(active = true, noticeVisible = true), controller.state.first())
+    }
+
+    @Test
+    fun `closing the result of a turn-off clears the notice`() = runTest {
+        val controller = newController()
+        connect(transparentLora)
+        startTurnOff(controller)
+        nodeAnswers(transparentLora)
+        nodeAnswers(normalLora)
 
         controller.closeNotice()
 
-        val state = controller.state.first()
-        assertFalse(state.noticeVisible)
-        assertFalse(state.active)
-        assertNull(state.turnOff)
+        assertEquals(TransparentModeState(), controller.state.first())
     }
 
     private companion object {
         const val NODE_NUM = 0x1234
-        const val READ_BACK_ID = 42
+        const val OTHER_NODE_NUM = 0x5678
+        const val FIRST_REQUEST_ID = 42
         const val ADDRESS = "x12:34"
     }
 }

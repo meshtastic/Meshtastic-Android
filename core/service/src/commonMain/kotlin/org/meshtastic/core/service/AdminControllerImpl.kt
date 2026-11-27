@@ -147,6 +147,14 @@ internal class AdminControllerImpl(
         scope.handledLaunch { radioConfigRepository.setLocalConfig(config) }
     }
 
+    override suspend fun sendLocalConfig(config: Config) {
+        val packetId = commandSender.generatePacketId()
+        heardOnCurrentLoraRefresher.beforeLocalWrite(config, packetId)
+        commandSender.sendAdmin(myNodeNum, packetId) {
+            AdminMessage.Builder().also { wb -> wb.set_config = config }.build()
+        }
+    }
+
     override fun setDisplayMirror(enabled: Boolean) {
         commandSender.sendAdminImmediate(myNodeNum) {
             AdminMessage.Builder().also { wb -> wb.set_display_mirror = enabled }.build()

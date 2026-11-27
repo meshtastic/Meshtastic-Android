@@ -29,6 +29,7 @@ import dev.mokkery.verifySuspend
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -40,14 +41,19 @@ import org.meshtastic.core.repository.CustomEmojiPrefs
 import org.meshtastic.core.repository.HomoglyphPrefs
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.MessagingController
+import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.QuickChatActionRepository
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.TransparentModeController
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.repository.usecase.SendMessageOutcome
 import org.meshtastic.core.repository.usecase.SendMessageUseCase
 import org.meshtastic.core.testing.FakeFilterPrefs
 import org.meshtastic.core.testing.FakeNodeRepository
+import org.meshtastic.core.testing.FakeRadioConfigRepository
+import org.meshtastic.core.testing.FakeRadioController
+import org.meshtastic.core.testing.FakeServiceRepository
 import org.meshtastic.core.ui.util.SnackbarManager
 import org.meshtastic.feature.messaging.translation.MessageTranslationService
 import org.meshtastic.proto.ChannelSet
@@ -110,6 +116,16 @@ class MessageViewModelResendTest {
                 activeConversationTracker = ActiveConversationTracker(),
                 messageTranslationService = mock<MessageTranslationService>(MockMode.autofill),
                 snackbarManager = SnackbarManager(),
+                transparentModeController =
+                TransparentModeController(
+                    FakeRadioConfigRepository(),
+                    FakeServiceRepository(),
+                    FakeRadioController(),
+                    mock<NodeManager>(MockMode.autofill) {
+                        every { connectionIdentity } returns MutableStateFlow(null)
+                    },
+                    TestScope(),
+                ),
             )
     }
 

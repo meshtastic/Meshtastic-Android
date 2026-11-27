@@ -49,6 +49,12 @@ interface AdminController {
      */
     suspend fun setLocalConfig(config: Config)
 
+    /**
+     * Sends [config] to the local node like [setLocalConfig], without the optimistic cache write. For a caller that
+     * reads the config back and must not have the cache say what the node has not confirmed.
+     */
+    suspend fun sendLocalConfig(config: Config)
+
     /** Updates a local radio channel. Same fire-and-forget contract as [setLocalConfig]. */
     suspend fun setLocalChannel(channel: Channel)
 

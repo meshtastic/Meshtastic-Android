@@ -31,9 +31,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
@@ -43,7 +42,6 @@ import kotlinx.coroutines.withContext
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.currentLocaleCode
 import org.meshtastic.core.common.util.ioDispatcher
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.ContactSettings
 import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.Node
@@ -59,7 +57,9 @@ import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.QuickChatActionRepository
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.TransparentModeController
 import org.meshtastic.core.repository.UiPrefs
+import org.meshtastic.core.repository.usecase.SendMessageOutcome
 import org.meshtastic.core.repository.usecase.SendMessageUseCase
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
@@ -114,6 +114,7 @@ class MessageViewModel(
     private val sendMessageUseCase: SendMessageUseCase,
     private val messageTranslationService: MessageTranslationService,
     private val snackbarManager: SnackbarManager,
+    private val transparentModeController: TransparentModeController,
 ) : ViewModel() {
     private val _title = MutableStateFlow("")
     val title: StateFlow<String> = _title.asStateFlow()
@@ -188,19 +189,14 @@ class MessageViewModel(
 
     val connectionState = connectionStateProvider.connectionState
 
-    private val transparentMode: Flow<Boolean> =
-        combine(connectionStateProvider.connectionState, radioConfigRepository.localConfigFlow) { state, config ->
-            state == ConnectionState.Connected && config.lora?.transparent_mode == true
-        }
-            .distinctUntilChanged()
-
     /** The connected node is a raw LoRa modem (transparent mode) and drops whatever this app sends through it. */
-    val sendBlockedByTransparentMode: StateFlow<Boolean> = transparentMode.stateInWhileSubscribed(initialValue = false)
+    val sendBlockedByTransparentMode: StateFlow<Boolean> =
+        transparentModeController.active.stateInWhileSubscribed(initialValue = false)
 
-    private suspend fun refusedByTransparentMode(): Boolean {
-        if (transparentMode.firstOrNull() != true) return false
-        sendErrorEvents.tryEmit(UiText.Resource(Res.string.transparent_mode_send_blocked))
-        return true
+    private fun reportTransparentMode(outcome: SendMessageOutcome) {
+        if (outcome == SendMessageOutcome.TransparentMode) {
+            sendErrorEvents.tryEmit(UiText.Resource(Res.string.transparent_mode_send_blocked))
+        }
     }
 
     val nodeList: StateFlow<List<Node>> = nodeRepository.getNodes().stateInWhileSubscribed(initialValue = emptyList())
@@ -419,13 +415,15 @@ class MessageViewModel(
      */
     fun sendMessage(str: String, contactKey: String = "0${NodeAddress.ID_BROADCAST}", replyId: Int? = null) {
         safeLaunch(errorEvents = sendErrorEvents, tag = "sendMessage") {
-            if (refusedByTransparentMode()) return@safeLaunch
-            sendMessageUseCase.invoke(str, contactKey, replyId)
+            reportTransparentMode(sendMessageUseCase.invoke(str, contactKey, replyId))
         }
     }
 
     fun sendReaction(emoji: String, replyId: Int, contactKey: String) = safeLaunch(tag = "sendReaction") {
-        if (refusedByTransparentMode()) return@safeLaunch
+        if (transparentModeController.active.first()) {
+            reportTransparentMode(SendMessageOutcome.TransparentMode)
+            return@safeLaunch
+        }
         messagingController.sendReaction(emoji, replyId, contactKey)
     }
 
@@ -438,8 +436,7 @@ class MessageViewModel(
      */
     fun resendMessage(uuid: Long, contactKey: String) {
         safeLaunch(errorEvents = sendErrorEvents, tag = "resendMessage") {
-            if (refusedByTransparentMode()) return@safeLaunch
-            sendMessageUseCase.resend(uuid, contactKey)
+            reportTransparentMode(sendMessageUseCase.resend(uuid, contactKey))
         }
     }
 

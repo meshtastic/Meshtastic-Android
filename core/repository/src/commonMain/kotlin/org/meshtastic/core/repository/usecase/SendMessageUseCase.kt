@@ -18,6 +18,7 @@ package org.meshtastic.core.repository.usecase
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.first
 import org.meshtastic.core.common.util.HomoglyphCharacterStringTransformer
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.Capabilities
@@ -32,6 +33,7 @@ import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioController
+import org.meshtastic.core.repository.TransparentModeController
 import org.meshtastic.proto.Config
 import kotlin.random.Random
 
@@ -72,6 +74,12 @@ sealed interface SendMessageOutcome {
      * gone.
      */
     data object Refused : SendMessageOutcome
+
+    /**
+     * Nothing was saved or sent: the connected node is in transparent mode and drops whatever a client sends to another
+     * node, so the send is refused with that reason instead of failing later without one.
+     */
+    data object TransparentMode : SendMessageOutcome
 }
 
 @Suppress("TooGenericExceptionCaught")
@@ -82,6 +90,7 @@ class SendMessageUseCaseImpl(
     private val homoglyphEncodingPrefs: HomoglyphPrefs,
     private val messageQueue: MessageQueue,
     private val analytics: PlatformAnalytics,
+    private val transparentMode: TransparentModeController,
 ) : SendMessageUseCase {
 
     /**
@@ -94,11 +103,8 @@ class SendMessageUseCaseImpl(
     @Suppress("NestedBlockDepth", "LongMethod", "CyclomaticComplexMethod")
     override suspend operator fun invoke(text: String, contactKey: String, replyId: Int?): SendMessageOutcome {
         val parsedKey = ContactKey(contactKey)
-        // A retired conversation's channel is no longer on the radio, so there is no slot to send on. Without this
-        // the key's absent channel prefix would read as 0 and the message would go out on the primary channel.
-        if (parsedKey.isRetired) {
-            Logger.w { "Refusing to send to a retired conversation" }
-            return SendMessageOutcome.Refused
+        refusalFor(parsedKey)?.let {
+            return it
         }
         val channel = parsedKey.channelOrNull
         val dest = parsedKey.addressString
@@ -176,11 +182,25 @@ class SendMessageUseCaseImpl(
         }
     }
 
+    /**
+     * Why nothing can be sent to [key], or null when it can. A retired conversation's channel is no longer on the
+     * radio: without the check its absent channel prefix would read as 0 and the message would go out on the primary.
+     */
+    private suspend fun refusalFor(key: ContactKey): SendMessageOutcome? = when {
+        key.isRetired -> {
+            Logger.w { "Refusing to send to a retired conversation" }
+            SendMessageOutcome.Refused
+        }
+
+        transparentMode.active.first() -> SendMessageOutcome.TransparentMode
+
+        else -> null
+    }
+
     override suspend fun resend(uuid: Long, contactKey: String): SendMessageOutcome {
         val parsedKey = ContactKey(contactKey)
-        if (parsedKey.isRetired) {
-            Logger.w { "Refusing to resend to a retired conversation" }
-            return SendMessageOutcome.Refused
+        refusalFor(parsedKey)?.let {
+            return it
         }
 
         val packetId = Random.nextInt(1, Int.MAX_VALUE)

@@ -60,6 +60,7 @@ class CoreRepositoryModule {
         @Provided homoglyphEncodingPrefs: HomoglyphPrefs,
         @Provided messageQueue: MessageQueue,
         @Provided analytics: PlatformAnalytics,
+        transparentModeController: TransparentModeController,
     ): SendMessageUseCase = SendMessageUseCaseImpl(
         nodeRepository,
         packetRepository,
@@ -67,6 +68,7 @@ class CoreRepositoryModule {
         homoglyphEncodingPrefs,
         messageQueue,
         analytics,
+        transparentModeController,
     )
 
     @Single
@@ -75,10 +77,12 @@ class CoreRepositoryModule {
         @Provided serviceRepository: ServiceRepository,
         @Provided radioController: RadioController,
         @Provided nodeManager: NodeManager,
+        @Provided applicationScope: ApplicationCoroutineScope,
     ): TransparentModeController = TransparentModeController(
         radioConfigRepository,
         serviceRepository,
         radioController,
-        nodeManager.connectionIdentity,
+        nodeManager,
+        applicationScope,
     )
 }

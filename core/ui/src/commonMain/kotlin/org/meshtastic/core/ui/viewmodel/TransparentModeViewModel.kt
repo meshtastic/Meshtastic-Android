@@ -29,11 +29,11 @@ class TransparentModeViewModel(private val controller: TransparentModeController
     val state: StateFlow<TransparentModeState> =
         controller.state.stateInWhileSubscribed(initialValue = TransparentModeState())
 
-    fun turnOff() {
-        safeLaunch(tag = "turnOffTransparentMode") { controller.turnOff() }
-    }
+    fun turnOff() = controller.turnOff()
 
     fun closeNotice() = controller.closeNotice()
 
     fun reopenNotice() = controller.reopenNotice()
+
+    fun turnedOnByUser() = controller.turnedOnByUser()
 }
