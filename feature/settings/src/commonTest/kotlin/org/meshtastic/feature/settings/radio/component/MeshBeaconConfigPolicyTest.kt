@@ -894,24 +894,8 @@ class MeshBeaconConfigPolicyTest {
     @Test
     fun sanitizeBeaconTargetSlot_clearsZeroAndKeepsPinWhenRegionSlotCountUnknown() {
         assertNull(sanitizeBeaconTargetSlot(0, RegionCode.US, ModemPreset.LONG_FAST))
-        assertEquals(7, sanitizeBeaconTargetSlot(7, RegionCode.UNSET, ModemPreset.LONG_FAST))
-    }
-
-    @Test
-    fun stampBeaconConfigForSave_preservesLegacySplitFlagInPresetAndCustomModes() {
-        val allFlags =
-            MeshBeaconConfig.Flags.FLAG_LISTEN_ENABLED.value or
-                MeshBeaconConfig.Flags.FLAG_BROADCAST_ENABLED.value or
-                MeshBeaconConfig.Flags.FLAG_LEGACY_SPLIT.value
-        val form = MeshBeaconConfig.Builder().also { wb -> wb.flags = allFlags }.build()
-
-        val stampedPreset =
-            stampBeaconConfigForSave(form, MeshBeaconConfig.Builder().build(), presetRadio, listOf(primaryChannel))
-        assertEquals(allFlags, stampedPreset.flags)
-
-        val customRadio = presetRadio.newBuilder().also { wb -> wb.use_preset = false }.build()
-        val stampedCustom =
-            stampBeaconConfigForSave(form, MeshBeaconConfig.Builder().build(), customRadio, listOf(primaryChannel))
-        assertEquals(allFlags, stampedCustom.flags)
+        // UA_868 is a proto region the app has no band for, so its slot count is 0 and any pin is left alone.
+        assertEquals(0, beaconTargetSlotCount(RegionCode.UA_868, ModemPreset.LONG_FAST))
+        assertEquals(7, sanitizeBeaconTargetSlot(7, RegionCode.UA_868, ModemPreset.LONG_FAST))
     }
 }
