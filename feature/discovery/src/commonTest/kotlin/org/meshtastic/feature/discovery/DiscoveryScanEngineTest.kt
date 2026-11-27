@@ -57,6 +57,7 @@ import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.Data
+import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalStats
 import org.meshtastic.proto.MeshPacket
@@ -1185,7 +1186,10 @@ class DiscoveryScanEngineTest {
         radioConfigRepository.setChannelSet(ChannelSet.Builder().also { wb -> wb.settings = listOf(settings) }.build())
     }
 
-    private fun setHomeLora(channelNum: Int) {
+    private fun setHomeLora(
+        channelNum: Int,
+        region: Config.LoRaConfig.RegionCode = Config.LoRaConfig.RegionCode.UNSET,
+    ) {
         radioConfigRepository.setLocalConfigDirect(
             LocalConfig.Builder()
                 .also { wb ->
@@ -1194,6 +1198,7 @@ class DiscoveryScanEngineTest {
                             .also { lb ->
                                 lb.use_preset = true
                                 lb.modem_preset = ChannelOption.LONG_FAST.modemPreset
+                                lb.region = region
                                 lb.channel_num = channelNum
                             }
                             .build()
@@ -1201,6 +1206,23 @@ class DiscoveryScanEngineTest {
                 .build(),
         )
     }
+
+    private fun setOurFirmwareVersion(version: String?) {
+        nodeRepository.setOurNode(
+            Node(
+                num = 1000,
+                metadata = version?.let { DeviceMetadata.Builder().also { wb -> wb.firmware_version = it }.build() },
+            ),
+        )
+    }
+
+    private fun jpBeaconTarget(slot: Int) = ScanTarget(
+        preset = ChannelOption.LONG_FAST,
+        label = "LONG_FAST · JP$slot",
+        channel = primaryChannelSettings(name = "JPNet$slot", psk = ByteString.of(9, 9, 9)),
+        region = Config.LoRaConfig.RegionCode.JP,
+        frequencySlot = slot,
+    )
 
     private fun assertPrimaryWrite(channel: Channel, expected: ChannelSettings) {
         assertEquals(0, channel.index)
@@ -1278,6 +1300,49 @@ class DiscoveryScanEngineTest {
         assertEquals(2, radioController.channelWrites.size)
         assertPrimaryWrite(radioController.channelWrites.last(), expected = home)
         assertEquals(ChannelOption.LONG_FAST.modemPreset, radioController.lastLocalConfig?.lora?.modem_preset)
+    }
+
+    @Test
+    fun jpBeaconTargetSlot12IsKeptOnLegacyFirmware() = runTest {
+        setHomeLora(channelNum = 0, region = Config.LoRaConfig.RegionCode.JP)
+        setPrimaryChannel(primaryChannelSettings(name = "", psk = defaultPublicPsk))
+        setOurFirmwareVersion("2.7.26")
+        val engine = createEngine(this)
+
+        engine.startScanTargets(listOf(jpBeaconTarget(slot = 12)), dwellDurationSeconds = 1)
+        advanceUntilIdle()
+
+        assertTrue(engine.scanState.value is DiscoveryScanState.Complete)
+        assertEquals(12, radioController.configWrites.first().lora?.channel_num)
+    }
+
+    @Test
+    fun jpBeaconTargetSlot12ResetsToAutoAndSlot7IsKeptOnAribFirmware() = runTest {
+        setHomeLora(channelNum = 0, region = Config.LoRaConfig.RegionCode.JP)
+        setPrimaryChannel(primaryChannelSettings(name = "", psk = defaultPublicPsk))
+        setOurFirmwareVersion("2.8.3")
+        val engine = createEngine(this)
+
+        engine.startScanTargets(listOf(jpBeaconTarget(slot = 12), jpBeaconTarget(slot = 7)), dwellDurationSeconds = 1)
+        advanceUntilIdle()
+
+        assertTrue(engine.scanState.value is DiscoveryScanState.Complete)
+        assertEquals(0, radioController.configWrites[0].lora?.channel_num)
+        assertEquals(7, radioController.configWrites[1].lora?.channel_num)
+    }
+
+    @Test
+    fun jpBeaconTargetSlot12FallsBackToLegacyWhenFirmwareUnknown() = runTest {
+        setHomeLora(channelNum = 0, region = Config.LoRaConfig.RegionCode.JP)
+        setPrimaryChannel(primaryChannelSettings(name = "", psk = defaultPublicPsk))
+        nodeRepository.setOurNode(null)
+        val engine = createEngine(this)
+
+        engine.startScanTargets(listOf(jpBeaconTarget(slot = 12)), dwellDurationSeconds = 1)
+        advanceUntilIdle()
+
+        assertTrue(engine.scanState.value is DiscoveryScanState.Complete)
+        assertEquals(12, radioController.configWrites.first().lora?.channel_num)
     }
 
     // endregion

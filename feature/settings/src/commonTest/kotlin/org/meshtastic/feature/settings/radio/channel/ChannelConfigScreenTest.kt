@@ -16,10 +16,22 @@
  */
 package org.meshtastic.feature.settings.radio.channel
 
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.v2.runComposeUiTest
 import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.Channel
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.freq
+import org.meshtastic.core.resources.getString
+import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.feature.settings.radio.channel.component.ChannelConfigHeader
 import org.meshtastic.feature.settings.radio.channel.component.ChannelPskEditState
 import org.meshtastic.proto.ChannelSettings
+import org.meshtastic.proto.Config
+import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
+import org.meshtastic.proto.Config.LoRaConfig.RegionCode
 import org.meshtastic.proto.ModuleSettings
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -124,5 +136,34 @@ class ChannelConfigScreenTest {
     @Test
     fun `primary channel sharing location is selected without secondary channel location support`() {
         assertEquals(0, determineLocationSharingChannel(Capabilities("2.6.9"), listOf(shareLocationPrimary)))
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun `jp narrow slow slot 2 header frequency follows firmware version`() = runComposeUiTest {
+        val jpNarrowSlowSlot2 =
+            Config.LoRaConfig.Builder()
+                .also { wb ->
+                    wb.region = RegionCode.JP
+                    wb.use_preset = true
+                    wb.modem_preset = ModemPreset.NARROW_SLOW
+                    wb.channel_num = 2
+                }
+                .build()
+        val legacyChannel = primaryChannelForConfig(publicPrimary, jpNarrowSlowSlot2, Capabilities("2.7.26"))
+        val aribChannel = primaryChannelForConfig(publicPrimary, jpNarrowSlowSlot2, Capabilities("2.8.3"))
+        val unknownChannel = primaryChannelForConfig(publicPrimary, jpNarrowSlowSlot2, Capabilities("0.0.0"))
+
+        assertEquals(920.59375f, legacyChannel.radioFreq, 0.001f)
+        assertEquals(920.59375f, unknownChannel.radioFreq, 0.001f)
+        assertEquals(920.8f, aribChannel.radioFreq, 0.001f)
+
+        setContent {
+            AppTheme {
+                ChannelConfigHeader(frequency = aribChannel.radioFreq, slot = 2, isAutoSlot = false)
+            }
+        }
+
+        onNodeWithText("${getString(Res.string.freq)}: ${aribChannel.radioFreq}MHz").assertIsDisplayed()
     }
 }

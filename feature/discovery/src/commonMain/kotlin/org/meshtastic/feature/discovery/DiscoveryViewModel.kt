@@ -33,6 +33,7 @@ import org.meshtastic.core.model.util.isAlreadyJoined
 import org.meshtastic.core.repository.DiscoveryPrefs
 import org.meshtastic.core.repository.DiscoveryRepository
 import org.meshtastic.core.repository.MeshBeaconRepository
+import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.safeLaunch
@@ -43,6 +44,7 @@ import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config.LoRaConfig
 import org.meshtastic.proto.Config.LoRaConfig.RegionCode
 
+@Suppress("LongParameterList")
 @KoinViewModel
 class DiscoveryViewModel(
     private val scanEngine: DiscoveryScanEngine,
@@ -50,6 +52,7 @@ class DiscoveryViewModel(
     private val discoveryPrefs: DiscoveryPrefs,
     private val check24GhzCapability: Check24GhzCapability,
     private val meshBeaconRepository: MeshBeaconRepository,
+    nodeRepository: NodeRepository,
     radioConfigRepository: RadioConfigRepository,
     discoveryRepository: DiscoveryRepository,
 ) : ViewModel() {
@@ -65,6 +68,12 @@ class DiscoveryViewModel(
     /** The radio's current channel settings (index 0 = primary), which drives the add-vs-switch decision. */
     val currentChannels: StateFlow<List<ChannelSettings>> =
         radioConfigRepository.channelSetFlow.map { it.settings }.stateInWhileSubscribed(initialValue = emptyList())
+
+    /** Whether the radio's firmware plans JP slots on the ARIB STD-T108 grid for beacon slot math. */
+    val jpAribGrid: StateFlow<Boolean> =
+        nodeRepository.ourNodeInfo
+            .map { it?.capabilities?.supportsJpAribSlotGrid == true }
+            .stateInWhileSubscribed(initialValue = false)
 
     /**
      * Mesh Beacon invitations received from other meshes, newest first, minus offers for a channel the radio already

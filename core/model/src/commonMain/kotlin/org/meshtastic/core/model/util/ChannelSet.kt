@@ -158,7 +158,11 @@ enum class BeaconJoinOption {
  * @param currentChannels The radio's current channel settings, index 0 = primary.
  */
 @Suppress("ReturnCount")
-fun MeshBeacon.beaconJoinOption(currentLora: LoRaConfig?, currentChannels: List<ChannelSettings>): BeaconJoinOption {
+fun MeshBeacon.beaconJoinOption(
+    currentLora: LoRaConfig?,
+    currentChannels: List<ChannelSettings>,
+    jpAribGrid: Boolean = false,
+): BeaconJoinOption {
     val offer = offer_channel ?: return BeaconJoinOption.NONE
     val lora = currentLora ?: return BeaconJoinOption.SWITCH
     // An offered preset must match the radio's; an omitted preset (null) means "ride the current preset" → matches.
@@ -166,16 +170,19 @@ fun MeshBeacon.beaconJoinOption(currentLora: LoRaConfig?, currentChannels: List<
     // offer_region == UNSET (0) means "not offered"; only a set, differing region forces a switch.
     val regionMatches = offer_region == RegionCode.UNSET || offer_region == lora.region
     if (!presetMatches || !regionMatches) return BeaconJoinOption.SWITCH
-    if (lora.numChannels <= 0) return BeaconJoinOption.SWITCH
-    val advertisedSlot = advertisedFrequencySlot(lora)
+    if (lora.numChannels(jpAribGrid) <= 0) return BeaconJoinOption.SWITCH
+    val advertisedSlot = advertisedFrequencySlot(lora, jpAribGrid)
     // Only an advertised slot makes a pinned radio comparable: our own channel_num describes where we sit, never
     // where the offered mesh sits, so without one there is nothing to compare a pin against.
     if (advertisedSlot == null && lora.channel_num != 0) return BeaconJoinOption.SWITCH
     // Hash the *effective* names: an empty channel name resolves to its preset display name ("LongFast", …), which is
     // what firmware hashes for the slot — comparing raw "" on both sides would misclassify an unnamed primary.
     val currentSlot =
-        lora.channelNum(Channel(currentChannels.firstOrNull() ?: ChannelSettings.Builder().build(), lora).name)
-    val offeredSlot = advertisedSlot ?: lora.channelNum(Channel(offer, lora).name)
+        lora.channelNum(
+            Channel(currentChannels.firstOrNull() ?: ChannelSettings.Builder().build(), lora).name,
+            jpAribGrid,
+        )
+    val offeredSlot = advertisedSlot ?: lora.channelNum(Channel(offer, lora).name, jpAribGrid)
     return if (offeredSlot == currentSlot) BeaconJoinOption.ADD else BeaconJoinOption.SWITCH
 }
 
@@ -196,8 +203,13 @@ fun MeshBeacon.beaconJoinOption(currentLora: LoRaConfig?, currentChannels: List<
  * never leaks our location — matching Apple's `joinBeaconMesh`/`addBeaconChannel`.
  *
  * @param currentLora The radio's current [LoRaConfig]; a switch reuses only its region/preset as fallbacks.
+ * @param jpAribGrid whether the radio's firmware plans JP slots on the ARIB STD-T108 grid.
  */
-fun MeshBeacon.toJoinChannelSet(option: BeaconJoinOption, currentLora: LoRaConfig?): ChannelSet? {
+fun MeshBeacon.toJoinChannelSet(
+    option: BeaconJoinOption,
+    currentLora: LoRaConfig?,
+    jpAribGrid: Boolean = false,
+): ChannelSet? {
     val offerChannel = (offer_channel ?: return null).withoutPositionSharing()
     return when (option) {
         BeaconJoinOption.ADD -> ChannelSet.Builder().also { wb -> wb.settings = listOf(offerChannel) }.build()
@@ -220,7 +232,7 @@ fun MeshBeacon.toJoinChannelSet(option: BeaconJoinOption, currentLora: LoRaConfi
                     .build()
             // Bound the advertised slot against the config we are about to send, not the one we are leaving: the
             // offered region can have a different slot count from ours. Zero leaves firmware to derive it.
-            val advertisedSlot = advertisedFrequencySlot(loraConfig)
+            val advertisedSlot = advertisedFrequencySlot(loraConfig, jpAribGrid)
             ChannelSet.Builder()
                 .also { wb ->
                     wb.settings = listOf(offerChannel)

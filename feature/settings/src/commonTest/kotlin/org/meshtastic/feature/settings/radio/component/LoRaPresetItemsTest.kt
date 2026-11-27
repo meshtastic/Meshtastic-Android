@@ -17,8 +17,11 @@
 package org.meshtastic.feature.settings.radio.component
 
 import org.meshtastic.core.model.Capabilities
+import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.RegionPresetConstraint
 import org.meshtastic.core.ui.util.formatFrequencyMhz
+import org.meshtastic.proto.ChannelSettings
+import org.meshtastic.proto.Config
 import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
 import org.meshtastic.proto.Config.LoRaConfig.RegionCode
 import kotlin.test.Test
@@ -100,5 +103,46 @@ class LoRaPresetItemsTest {
         assertEquals("906.875", formatFrequencyMhz(906.875f))
         assertEquals("869.400", formatFrequencyMhz(869.4f))
         assertEquals("2403.000", formatFrequencyMhz(2403f))
+    }
+
+    @Test
+    fun withChannelSlotFor_enforcesJpSlotBoundsByFirmwareVersion() {
+        val jpLongFast =
+            Config.LoRaConfig.Builder()
+                .also { wb ->
+                    wb.region = RegionCode.JP
+                    wb.use_preset = true
+                    wb.modem_preset = ModemPreset.LONG_FAST
+                    wb.channel_num = 0
+                }
+                .build()
+        val legacyCaps = Capabilities("2.7.26", forceEnableAll = false)
+        val aribCaps = Capabilities("2.8.3", forceEnableAll = false)
+
+        // Post-ARIB JP LongFast has 7 slots: 7 is accepted, 8 and 12 are rejected.
+        assertEquals(7, jpLongFast.withChannelSlotFor(7, aribCaps).channel_num)
+        assertEquals(0, jpLongFast.withChannelSlotFor(8, aribCaps).channel_num)
+        assertEquals(0, jpLongFast.withChannelSlotFor(12, aribCaps).channel_num)
+        assertEquals(0, jpLongFast.withChannelSlotFor(-1, aribCaps).channel_num)
+
+        // Pre-ARIB JP LongFast has 12 slots: 12 is accepted, 13 is rejected.
+        assertEquals(12, jpLongFast.withChannelSlotFor(12, legacyCaps).channel_num)
+        assertEquals(0, jpLongFast.withChannelSlotFor(13, legacyCaps).channel_num)
+
+        // Displayed frequency matches the gated grid for JP NarrowSlow slot 2.
+        val jpNarrowSlowSlot2 =
+            Config.LoRaConfig.Builder()
+                .also { wb ->
+                    wb.region = RegionCode.JP
+                    wb.use_preset = true
+                    wb.modem_preset = ModemPreset.NARROW_SLOW
+                    wb.channel_num = 2
+                }
+                .build()
+        val primary = ChannelSettings.Builder().build()
+        val legacyFreq = Channel(primary, jpNarrowSlowSlot2, legacyCaps.supportsJpAribSlotGrid).radioFreq
+        val aribFreq = Channel(primary, jpNarrowSlowSlot2, aribCaps.supportsJpAribSlotGrid).radioFreq
+        assertEquals("920.594", formatFrequencyMhz(legacyFreq))
+        assertEquals("920.800", formatFrequencyMhz(aribFreq))
     }
 }

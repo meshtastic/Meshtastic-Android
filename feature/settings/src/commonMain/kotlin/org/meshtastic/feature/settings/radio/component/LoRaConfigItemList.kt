@@ -190,7 +190,10 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val formState = rememberConfigState(initialValue = loraConfig)
     val capabilities = remember(state.metadata?.firmware_version) { Capabilities(state.metadata?.firmware_version) }
 
-    val primaryChannel = remember(primarySettings, formState.value) { Channel(primarySettings, formState.value) }
+    val primaryChannel =
+        remember(primarySettings, formState.value, capabilities) {
+            Channel(primarySettings, formState.value, capabilities.supportsJpAribSlotGrid)
+        }
     val focusManager = LocalFocusManager.current
     val bandwidthSelection =
         loRaBandwidthSelection(
@@ -438,11 +441,7 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     } else {
                         null
                     },
-                    onValueChanged = {
-                        if (it <= formState.value.numChannels) { // total num of LoRa channels
-                            formState.value = formState.value.newBuilder().also { wb -> wb.channel_num = it }.build()
-                        }
-                    },
+                    onValueChanged = { formState.value = formState.value.withChannelSlotFor(it, capabilities) },
                 )
                 HorizontalDivider()
                 SwitchPreference(
@@ -561,6 +560,13 @@ private fun FrequencyOverridePreference(
 
 internal fun Config.LoRaConfig.withCodingRateOverrideFor(capabilities: Capabilities): Config.LoRaConfig =
     if (capabilities.supportsCodingRateOverride) normalizeCodingRateOverride() else this
+
+internal fun Config.LoRaConfig.withChannelSlotFor(slot: Int, capabilities: Capabilities): Config.LoRaConfig =
+    if (slot in 0..numChannels(capabilities.supportsJpAribSlotGrid)) {
+        newBuilder().also { wb -> wb.channel_num = slot }.build()
+    } else {
+        this
+    }
 
 /**
  * Raises the preset's coding rate without leaving the preset (design#161). Only rates above the preset's own are

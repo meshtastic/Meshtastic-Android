@@ -22,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
@@ -550,5 +551,66 @@ class MeshBeaconConfigUiTest {
             assertEquals(0, targetsState.value.single().channel_index)
         }
         onNodeWithText(getString(Res.string.mesh_beacon_target_default)).assertIsDisplayed()
+    }
+
+    @Test
+    fun jpPinnedSlot6_stampsSlot6OnLegacyFirmwareSave() = runComposeUiTest {
+        val saved = saveJpPinnedSlot6(Capabilities("2.7.26"))
+        assertEquals(6, saved?.broadcast_offer_frequency_slot)
+    }
+
+    @Test
+    fun jpPinnedSlot6_omitsDerivedSlot6OnAribFirmwareSave() = runComposeUiTest {
+        val saved = saveJpPinnedSlot6(Capabilities("2.8.3"))
+        assertNull(saved?.broadcast_offer_frequency_slot)
+    }
+
+    private fun ComposeUiTest.saveJpPinnedSlot6(capabilities: Capabilities): MeshBeaconConfig? {
+        val radioLora =
+            Config.LoRaConfig.Builder()
+                .also { wb ->
+                    wb.region = RegionCode.JP
+                    wb.modem_preset = ModemPreset.LONG_FAST
+                    wb.use_preset = true
+                    wb.channel_num = 6
+                }
+                .build()
+        val channelList = listOf(ChannelSettings.Builder().also { wb -> wb.name = "LongFast" }.build())
+        val initialConfig = MeshBeaconConfig.Builder().build()
+        lateinit var configState: ConfigState<MeshBeaconConfig>
+        var savedConfig: MeshBeaconConfig? = null
+
+        setContent {
+            AppTheme {
+                configState = rememberConfigState(initialConfig)
+                RadioConfigScreenList(
+                    title = "Mesh Beacon",
+                    onBack = {},
+                    responseState = ResponseState.Empty,
+                    onDismissPacketResponse = {},
+                    configState = configState,
+                    enabled = true,
+                    saveEnabled = channelList.isNotEmpty(),
+                    onSave = {
+                        savedConfig =
+                            stampBeaconConfigForSave(
+                                it,
+                                initialConfig,
+                                radioLora,
+                                channelList,
+                                capabilities.supportsJpAribSlotGrid,
+                            )
+                    },
+                ) {}
+            }
+        }
+
+        runOnIdle {
+            configState.value = configState.value.newBuilder().also { wb -> wb.broadcast_message = "JP" }.build()
+        }
+
+        onNodeWithText(getString(Res.string.save_changes)).assertIsEnabled().performClick()
+
+        return runOnIdle { savedConfig }
     }
 }

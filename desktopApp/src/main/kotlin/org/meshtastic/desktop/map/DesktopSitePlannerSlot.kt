@@ -53,7 +53,7 @@ fun DesktopSitePlannerSlot(session: SitePlannerSession) {
         remember(terrainRegion) { listOfNotNull(terrainRegion?.let { RegionTerrain(terrain.tileStore, it.bounds) }) }
 
     SitePlannerHost(
-        initialParams = subject.toSitePlannerParams(channelSet),
+        initialParams = subject.toSitePlannerParams(channelSet, ourNode),
         estimate = rememberCoverageEstimate(offlineTerrain),
         onDismiss = session.onDismiss,
         onImport = { name, geoJson, latitude, longitude ->

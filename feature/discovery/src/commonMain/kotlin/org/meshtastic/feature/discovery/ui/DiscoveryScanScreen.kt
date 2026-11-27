@@ -131,6 +131,7 @@ fun DiscoveryScanScreen(
     val selectedBeaconChannels by viewModel.selectedBeaconChannels.collectAsStateWithLifecycle()
     val currentLora by viewModel.currentLora.collectAsStateWithLifecycle()
     val currentChannels by viewModel.currentChannels.collectAsStateWithLifecycle()
+    val jpAribGrid by viewModel.jpAribGrid.collectAsStateWithLifecycle()
     val dwellMinutes by viewModel.dwellDurationMinutes.collectAsStateWithLifecycle()
     val isConnected by viewModel.isConnected.collectAsStateWithLifecycle()
     val is24GhzBlocked by viewModel.is24GhzBlocked.collectAsStateWithLifecycle()
@@ -221,13 +222,15 @@ fun DiscoveryScanScreen(
                     }
                     items(beaconOffers, key = { "invitation_${it.key}" }) { offer ->
                         val joinOption =
-                            remember(offer, currentLora, currentChannels) {
-                                offer.beacon.beaconJoinOption(currentLora, currentChannels)
+                            remember(offer, currentLora, currentChannels, jpAribGrid) {
+                                offer.beacon.beaconJoinOption(currentLora, currentChannels, jpAribGrid)
                             }
                         MeshBeaconInvitationCard(
                             offer = offer,
                             joinOption = joinOption,
-                            onJoin = { offer.beacon.toJoinChannelSet(joinOption, currentLora)?.let(onJoinOffer) },
+                            onJoin = {
+                                offer.beacon.toJoinChannelSet(joinOption, currentLora, jpAribGrid)?.let(onJoinOffer)
+                            },
                             onDiscover = { viewModel.discoverOffer(offer) },
                             onDismiss = { viewModel.dismissOffer(offer) },
                         )

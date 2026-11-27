@@ -192,7 +192,14 @@ fun MeshBeaconConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, 
         showConnectPrompt = state.connectPromptVisible,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            val stamped = stampBeaconConfigForSave(it, meshBeaconConfig, radioLora, state.channelList)
+            val stamped =
+                stampBeaconConfigForSave(
+                    it,
+                    meshBeaconConfig,
+                    radioLora,
+                    state.channelList,
+                    capabilities.supportsJpAribSlotGrid,
+                )
             viewModel.setModuleConfig(ModuleConfig.Builder().also { wb -> wb.mesh_beacon = stamped }.build())
         },
     ) {

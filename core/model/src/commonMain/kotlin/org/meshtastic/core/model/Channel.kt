@@ -25,7 +25,15 @@ import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config.LoRaConfig
 import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
 
-data class Channel(val settings: ChannelSettings = default.settings, val loraConfig: LoRaConfig = default.loraConfig) {
+/**
+ * @property jpAribGrid whether the radio this channel belongs to plans JP slots on the ARIB STD-T108 grid
+ *   ([Capabilities.supportsJpAribSlotGrid]); it only changes [channelNum] and [radioFreq] for JP.
+ */
+data class Channel(
+    val settings: ChannelSettings = default.settings,
+    val loraConfig: LoRaConfig = default.loraConfig,
+    val jpAribGrid: Boolean = false,
+) {
     companion object {
         // These bytes must match the well known and not secret bytes used the default channel AES128 key device code
         private val channelDefaultKey =
@@ -158,10 +166,10 @@ data class Channel(val settings: ChannelSettings = default.settings, val loraCon
         }
 
     val channelNum: Int
-        get() = loraConfig.channelNum(name)
+        get() = loraConfig.channelNum(name, jpAribGrid)
 
     val radioFreq: Float
-        get() = loraConfig.radioFreq(channelNum)
+        get() = loraConfig.radioFreq(channelNum, jpAribGrid)
 
     override fun equals(other: Any?): Boolean =
         (other is Channel) && psk.toByteArray() contentEquals other.psk.toByteArray() && name == other.name

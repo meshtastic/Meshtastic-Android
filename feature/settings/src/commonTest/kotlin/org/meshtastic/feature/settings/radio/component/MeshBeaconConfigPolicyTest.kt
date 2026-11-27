@@ -657,7 +657,7 @@ class MeshBeaconConfigPolicyTest {
 
     @Test
     fun stampBeaconConfigForSave_pinnedRadio_advertisesTheSlotItActuallySitsOn() {
-        assertTrue(presetRadio.numChannels > 1, "a one-slot region makes this vacuous")
+        assertTrue(presetRadio.numChannels() > 1, "a one-slot region makes this vacuous")
         val derived = Channel(primaryChannel, presetRadio).channelNum
         val pin = if (derived == 1) 2 else 1
         val radioLora = presetRadio.newBuilder().also { wb -> wb.channel_num = pin }.build()
@@ -695,5 +695,40 @@ class MeshBeaconConfigPolicyTest {
         val stamped = stampBeaconConfigForSave(MeshBeaconConfig.Builder().build(), stored, radioLora, emptyList())
 
         assertEquals(48, stamped.broadcast_offer_frequency_slot)
+    }
+
+    @Test
+    fun stampBeaconConfigForSave_jpGridFlagControlsAdvertisedSlot() {
+        val jpLongFastPinned6 =
+            Config.LoRaConfig.Builder()
+                .also { wb ->
+                    wb.region = RegionCode.JP
+                    wb.modem_preset = ModemPreset.LONG_FAST
+                    wb.use_preset = true
+                    wb.channel_num = 6
+                }
+                .build()
+        val defaultPrimary = ChannelSettings.Builder().also { wb -> wb.name = "LongFast" }.build()
+
+        // Legacy JP derives slot 12 for LongFast so slot 6 must be advertised; ARIB derives slot 6 so it is omitted.
+        val legacyStamped =
+            stampBeaconConfigForSave(
+                MeshBeaconConfig.Builder().build(),
+                MeshBeaconConfig.Builder().build(),
+                jpLongFastPinned6,
+                channelList = listOf(defaultPrimary),
+                jpAribGrid = false,
+            )
+        val aribStamped =
+            stampBeaconConfigForSave(
+                MeshBeaconConfig.Builder().build(),
+                MeshBeaconConfig.Builder().build(),
+                jpLongFastPinned6,
+                channelList = listOf(defaultPrimary),
+                jpAribGrid = true,
+            )
+
+        assertEquals(6, legacyStamped.broadcast_offer_frequency_slot)
+        assertNull(aribStamped.broadcast_offer_frequency_slot)
     }
 }
