@@ -110,7 +110,18 @@ interface BleConnection {
      */
     val lastFailureCause: Throwable?
         get() = null
+
+    /**
+     * The GATT services discovered on the connected device, for a peripheral whose service UUID is not known ahead of
+     * time. Empty where the platform does not list them.
+     */
+    suspend fun discoveredServices(timeout: Duration = 30.seconds): List<BleServiceInfo> = emptyList()
 }
+
+/** A discovered GATT service and what its characteristics can do. */
+data class BleServiceInfo(val uuid: Uuid, val characteristics: List<BleCharacteristicInfo>)
+
+data class BleCharacteristicInfo(val uuid: Uuid, val notifies: Boolean, val writesWithoutResponse: Boolean)
 
 /** Represents a BLE service for commonMain. */
 interface BleService {

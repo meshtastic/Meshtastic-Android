@@ -23,6 +23,7 @@ import com.juul.kable.PeripheralBuilder
 import com.juul.kable.State
 import com.juul.kable.WriteType
 import com.juul.kable.characteristicOf
+import com.juul.kable.notify
 import com.juul.kable.writeWithoutResponse
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -109,6 +110,16 @@ internal inline fun <T> asException(block: () -> T): T = try {
     throw if (t is Exception || t is Error) t else IllegalStateException(t.message, t)
 }
 
+@Suppress("TooGenericExceptionCaught")
+private suspend fun Peripheral.queryMaxWriteLength(): Int? = try {
+    asException { maximumWriteValueLengthForType(WriteType.WithoutResponse) }
+} catch (e: CancellationException) {
+    throw e
+} catch (e: Exception) {
+    Logger.w(e) { "maximumWriteValueLengthForType failed; callers use their own fallback" }
+    null
+}
+
 /**
  * [BleConnection] implementation using Kable for cross-platform BLE communication.
  *
@@ -119,8 +130,11 @@ internal inline fun <T> asException(block: () -> T): T = try {
  * the `autoConnect` path. At most two attempts are made per [connect] call — the caller ([BleRadioTransport]) owns the
  * macro-level retry/backoff loop.
  */
-class KableBleConnection(private val scope: CoroutineScope, private val loggingConfig: BleLoggingConfig) :
-    BleConnection {
+class KableBleConnection(
+    private val scope: CoroutineScope,
+    private val loggingConfig: BleLoggingConfig,
+    private val tracksActiveConnection: Boolean = true,
+) : BleConnection {
 
     @Volatile private var peripheral: Peripheral? = null
 
@@ -184,7 +198,7 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
             cleanUpPeripheral()
             peripheral = p
             writeLengthAtConnect = null
-            ActiveBleConnection.active = ActiveConnection(p, device.address)
+            if (tracksActiveConnection) ActiveBleConnection.active = ActiveConnection(p, device.address)
         }
 
         _deviceFlow.emit(device)
@@ -250,16 +264,6 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
             )
         }
         writeLengthAtConnect = p.queryMaxWriteLength()?.coerceAtMost(MAX_ATTRIBUTE_LENGTH)
-    }
-
-    @Suppress("TooGenericExceptionCaught")
-    private suspend fun Peripheral.queryMaxWriteLength(): Int? = try {
-        asException { maximumWriteValueLengthForType(WriteType.WithoutResponse) }
-    } catch (e: CancellationException) {
-        throw e
-    } catch (e: Exception) {
-        Logger.w(e) { "maximumWriteValueLengthForType failed; callers use their own fallback" }
-        null
     }
 
     @Suppress("TooGenericExceptionCaught", "SwallowedException")
@@ -344,6 +348,25 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
                 }
             }
         }
+    }
+
+    override suspend fun discoveredServices(timeout: Duration): List<BleServiceInfo> {
+        val p = peripheral ?: error("Not connected")
+        return withTimeout(timeout) { p.services.first { it != null } }
+            .orEmpty()
+            .map { service ->
+                BleServiceInfo(
+                    uuid = service.serviceUuid,
+                    characteristics =
+                    service.characteristics.map {
+                        BleCharacteristicInfo(
+                            uuid = it.characteristicUuid,
+                            notifies = it.properties.notify,
+                            writesWithoutResponse = it.properties.writeWithoutResponse,
+                        )
+                    },
+                )
+            }
     }
 
     override fun maximumWriteValueLength(writeType: BleWriteType): Int? =

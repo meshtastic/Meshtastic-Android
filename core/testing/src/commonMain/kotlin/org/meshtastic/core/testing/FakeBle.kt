@@ -32,6 +32,7 @@ import org.meshtastic.core.ble.BleConnectionState
 import org.meshtastic.core.ble.BleDevice
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.BleService
+import org.meshtastic.core.ble.BleServiceInfo
 import org.meshtastic.core.ble.BleWriteType
 import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.ble.BluetoothState
@@ -205,6 +206,11 @@ class FakeBleConnection :
 
     override fun maximumWriteValueLength(writeType: BleWriteType): Int? = maxWriteValueLength
 
+    /** What [discoveredServices] reports. */
+    var discoveredServices: List<BleServiceInfo> = emptyList()
+
+    override suspend fun discoveredServices(timeout: Duration): List<BleServiceInfo> = discoveredServices
+
     override fun invalidateServiceCache(): Boolean {
         invalidateServiceCacheCalls++
         return invalidateServiceCacheResult
@@ -344,7 +350,15 @@ class FakeBleService : BleService {
 
 class FakeBleConnectionFactory(private val fakeConnection: FakeBleConnection = FakeBleConnection()) :
     BleConnectionFactory {
+    /** Tags of the connections asked for through [createAuxiliary]. */
+    val auxiliaryTags = mutableListOf<String>()
+
     override fun create(scope: CoroutineScope, tag: String): BleConnection = fakeConnection
+
+    override fun createAuxiliary(scope: CoroutineScope, tag: String): BleConnection {
+        auxiliaryTags += tag
+        return fakeConnection
+    }
 }
 
 @Suppress("EmptyFunctionBlock")
