@@ -528,3 +528,20 @@ interface MeshBeaconPrefs {
 
     fun setStoredBeacons(records: List<String>)
 }
+
+/** What the label print sheet remembers between uses. */
+interface LabelPrintPrefs {
+    /** Length of the die-cut labels loaded, in millimeters. */
+    val labelLengthMm: StateFlow<Int>
+
+    fun setLabelLengthMm(millimeters: Int)
+
+    /** Address of the printer used last, or null before one was picked. */
+    val printerAddress: StateFlow<String?>
+
+    fun setPrinterAddress(address: String?)
+
+    companion object {
+        const val DEFAULT_LABEL_LENGTH_MM = 40
+    }
+}

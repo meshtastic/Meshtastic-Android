@@ -59,6 +59,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.copy
+import org.meshtastic.core.resources.label_print_action
 import org.meshtastic.core.resources.okay
 import org.meshtastic.core.resources.qr_code
 import org.meshtastic.core.resources.share_action
@@ -72,7 +73,11 @@ import org.meshtastic.core.resources.write_nfc_text
 import org.meshtastic.core.ui.icon.Copy
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Nfc
+import org.meshtastic.core.ui.icon.Print
 import org.meshtastic.core.ui.icon.Share
+import org.meshtastic.core.ui.label.LabelPrintSheet
+import org.meshtastic.core.ui.label.LabelSpec
+import org.meshtastic.core.ui.label.platformLabelPrintSupported
 import org.meshtastic.core.ui.theme.SemanticColors
 import org.meshtastic.core.ui.util.LocalNfcEmulationSupported
 import org.meshtastic.core.ui.util.LocalNfcEmulatorProvider
@@ -80,6 +85,7 @@ import org.meshtastic.core.ui.util.LocalNfcScannerSupported
 import org.meshtastic.core.ui.util.LocalNfcWriterProvider
 import org.meshtastic.core.ui.util.SetScreenBrightness
 import org.meshtastic.core.ui.util.createClipEntry
+import org.meshtastic.core.ui.util.isBluetoothSupported
 import org.meshtastic.core.ui.util.rememberQrCodePainter
 import org.meshtastic.core.ui.util.rememberShareText
 
@@ -94,7 +100,16 @@ fun QrDialog(
     subtitle: String? = null,
     shareSubject: String = title,
     options: (@Composable () -> Unit)? = null,
+    label: LabelSpec? = null,
 ) {
+    // Print is offered only where the app can reach a label printer over Bluetooth LE.
+    val bluetoothSupported = isBluetoothSupported()
+    val printable = label?.takeIf { platformLabelPrintSupported && bluetoothSupported }
+    var showPrint by rememberSaveable { mutableStateOf(false) }
+    if (showPrint && printable != null) {
+        LabelPrintSheet(spec = printable, onDismiss = { showPrint = false })
+    }
+
     val clipboardManager = LocalClipboard.current
     val coroutineScope = rememberCoroutineScope()
     // Render at the actual on-screen pixel size so low-density devices don't over-allocate bitmap memory.
@@ -229,6 +244,19 @@ fun QrDialog(
                 ) {
                     Icon(imageVector = MeshtasticIcons.Share, contentDescription = null)
                     Text(text = stringResource(Res.string.share_action), modifier = Modifier.padding(start = 8.dp))
+                }
+
+                if (printable != null) {
+                    OutlinedButton(
+                        onClick = { showPrint = true },
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                    ) {
+                        Icon(imageVector = MeshtasticIcons.Print, contentDescription = null)
+                        Text(
+                            text = stringResource(Res.string.label_print_action),
+                            modifier = Modifier.padding(start = 8.dp),
+                        )
+                    }
                 }
 
                 if (nfcSupported) {
