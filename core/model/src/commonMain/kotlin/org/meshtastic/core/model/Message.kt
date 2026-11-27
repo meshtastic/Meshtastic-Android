@@ -311,6 +311,8 @@ data class Message(
     val transportMechanism: Int = 0,
     /** True when the radio verified this broadcast's XEdDSA signature ([MeshPacket.xeddsa_signed]). */
     val xeddsaSigned: Boolean = false,
+    /** A received message in a public-key conversation that arrived encrypted with a channel key instead. */
+    val channelKeyEncrypted: Boolean = false,
     /** The radio's verdict on the ack that delivered this message (see [MeshPacket.AckProofStatus]). */
     val ackProofStatus: Int = 0,
     /** On-device translation of [text], persisted so the user can toggle back to it without re-translating. */

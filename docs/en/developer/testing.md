@@ -2,7 +2,7 @@
 title: Testing
 parent: Developer Guide
 nav_order: 7
-last_updated: 2026-11-23
+last_updated: 2026-11-26
 description: Testing strategy for the Meshtastic KMP project — test categories, screenshot pipeline, baseline profiles, and CI integration.
 aliases:
   - tests
@@ -187,7 +187,7 @@ Each of these calls `reusable-check.yml`. The test shards compile with `-Pwarnin
 warning that passes a local build fails CI unless you pass the same flag.
 
 A pull request whose changes match the `web` path filter also runs `web-check` in `pull-request.yml`:
-`wasmJsBrowserTest` and the production `:webApp` link. The merge queue and `main` never build the web target.
+`wasmJsBrowserTest` and the production `:webApp` link. The merge queue never builds the web target; on `main` only `web-snapshot.yml` does, to deploy app-snapshot.meshtastic.org.
 
 On a pull request into `main`, Develocity Predictive Test Selection runs only the `jvmTest` tests it predicts the
 change can affect. Pull requests into `release/**`, the merge queue, `main` and local runs execute every test. On a

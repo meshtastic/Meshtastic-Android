@@ -360,6 +360,8 @@
     <string name="reboot">Reštartovať</string>
     <!-- REMOTE -->
     <string name="remote_admin">Administrácia na diaľku</string>
+    <string name="remote_contacts_ignore">Ignorovať</string>
+    <string name="remote_contacts_remove">Odstrániť</string>
     <string name="remote_hardware">Vzdialený hardvér</string>
     <string name="remote_shell_modifier_locked">Zamknuté</string>
     <string name="remote_shell_send">Odoslať</string>

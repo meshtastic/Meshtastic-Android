@@ -193,6 +193,7 @@
     <string name="schema_mqtt_password">Passwort</string>
     <string name="schema_mqtt_proxy_to_client_enabled">Proxy zu Client aktiviert</string>
     <string name="schema_mqtt_root">Hauptthema</string>
+    <string name="schema_mqtt_root_description">MQTT-Root-Topic</string>
     <string name="schema_mqtt_tls_enabled">TLS aktiviert</string>
     <string name="schema_mqtt_username">Benutzername</string>
     <string name="schema_neighborinfo_enabled">Nachbarinformationen aktiviert</string>

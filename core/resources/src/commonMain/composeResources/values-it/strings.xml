@@ -906,6 +906,7 @@
     <string name="mesh_beacon_target_add">Aggiungi destinazione</string>
     <string name="mesh_beacon_target_channel_index">Canale</string>
     <string name="mesh_beacon_target_default">Predefinito</string>
+    <string name="mesh_beacon_target_frequency_slot">Slot di frequenza</string>
     <string name="mesh_beacon_target_remove">Rimuovi destinazione</string>
     <string name="mesh_beacon_targets">Destinazioni della trasmissione</string>
     <string name="mesh_hud_cardinal_east">E</string>
@@ -1230,6 +1231,8 @@
     <string name="remote">Controllo remoto</string>
     <string name="remote_admin">Amministrazione Remota</string>
     <string name="remote_admin_unreachable">Impossibile raggiungere il nodo — riprova o avvicinati.</string>
+    <string name="remote_contacts_ignore">Ignora</string>
+    <string name="remote_contacts_remove">Elimina</string>
     <string name="remote_hardware">Hardware Remoto</string>
     <string name="remote_hardware_config">Configurazione Hardware Remoto</string>
     <string name="remote_hardware_enabled">Hardware Remoto abilitato</string>

@@ -220,10 +220,6 @@ jobs:
             scripts
             .github/actions/bot-pr
 
-      # Later steps switch the workspace to main; the Discord post reads the tag's copy kept here.
-      - name: Keep the tag's metainfo
-        run: cp desktopApp/packaging/linux/org.meshtastic.MeshtasticDesktop.metainfo.xml "$RUNNER_TEMP/tag-metainfo.xml"
-
       # A rerun finds the release already moved to the final tag, so that is looked up first.
       - name: Update GitHub Release with gh CLI
         id: release
@@ -235,11 +231,17 @@ jobs:
           PRERELEASE: ${{ inputs.channel != 'production' }}
         run: |
           CURRENT=$(gh release view "$FINAL_TAG" --json tagName --jq .tagName 2>/dev/null || echo "$TAG")
+          # Leaving prerelease does not move Latest, and desktop auto-update reads Latest.
+          LATEST=()
+          if [[ "$PRERELEASE" == "false" ]]; then
+            LATEST=(--latest)
+          fi
           gh release edit "$CURRENT" \
             --tag "$FINAL_TAG" \
             --title "$FINAL_TAG ($VERSION_CODE)" \
             --draft=false \
-            --prerelease="$PRERELEASE"
+            --prerelease="$PRERELEASE" \
+            "${LATEST[@]}"
 
       # The draft's notes were generated at the internal cut and cover only the
       # PRs since the previous published pre-release. A production release is
@@ -301,6 +303,17 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ inputs.final_tag }}
         run: gh workflow run msstore-publish.yml --ref main -f "tag=$TAG"
+
+      # web-stable.yml deploys the release's meshtastic-web-<version>.zip to app.meshtastic.org.
+      # It runs on main, the only ref its web-stable environment admits.
+      - name: Dispatch web deploy
+        id: web
+        if: ${{ inputs.channel == 'production' }}
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.final_tag }}
+        run: gh workflow run web-stable.yml --ref main -f "tag=$TAG"
 
       # Same suppression again: version-bump.yml opens the next patch line on main.
       - name: Dispatch version bump
@@ -478,6 +491,7 @@ jobs:
           SCHED: ${{ steps.sched.outcome }}
           WINGET: ${{ steps.winget.outcome }}
           MSSTORE: ${{ steps.msstore.outcome }}
+          WEB: ${{ steps.web.outcome }}
           BUMP: ${{ steps.bump.outcome }}
           STAMP: ${{ steps.stamp.outcome }}
           STAMP_PR: ${{ steps.stamp_pr.outputs.url }}
@@ -544,6 +558,7 @@ jobs:
               fi
               store_row "winget" "$WINGET" "$HAS_WINGET_TOKEN" WINGET_TOKEN
               store_row "Microsoft Store" "$MSSTORE" "$HAS_MSSTORE_PRODUCT_ID" MSSTORE_PRODUCT_ID
+              row "Web deploy to app.meshtastic.org dispatched" "$WEB"
               row "Version bump dispatched" "$BUMP"
               row "Post-Release Cleanup" "dispatched by Docs Release once /${TAG}/ is published"
               if [[ "$HAS_HOMEBREW_TAP_TOKEN" == "true" ]]; then
@@ -573,8 +588,8 @@ jobs:
         if: ${{ always() && steps.release.outcome == 'success' && inputs.channel != 'internal' }}
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_ANDROID }}
+          GH_TOKEN: ${{ github.token }}
           VERSION: ${{ inputs.final_tag }}
-          BASE_VERSION: ${{ inputs.base_version }}
           CHANNEL: ${{ inputs.channel }}
         run: |
           if [[ -z "$DISCORD_WEBHOOK" ]]; then
@@ -587,25 +602,15 @@ jobs:
           if [ "$CHANNEL" == "open" ]; then TRACK="Beta (Open)"; fi
           if [ "$CHANNEL" == "production" ]; then TRACK="Production"; fi
 
-          # The same prose as the release Highlights and Play's "What's new", from the tag's metainfo.
-          WHATS_NEW=$(python3 .workflow-ref/scripts/release-highlights.py --text \
-            "$RUNNER_TEMP/tag-metainfo.xml" "$BASE_VERSION")
-          DESCRIPTION="A new build has been promoted to the **$TRACK** track."
-          if [[ -n "$WHATS_NEW" ]]; then
-            DESCRIPTION+=$'\n\n'"**What's new:** $WHATS_NEW"
-          fi
+          # The published release notes: Highlights, then the generated sections, as the release page reads.
+          gh release view "$VERSION" --repo "$GITHUB_REPOSITORY" --json body --jq .body > "$RUNNER_TEMP/discord-notes.md" || : > "$RUNNER_TEMP/discord-notes.md"
+          PAYLOAD=$(python3 .workflow-ref/scripts/discord-release-post.py \
+            "$RUNNER_TEMP/discord-notes.md" "$VERSION" "$TRACK" \
+            "https://github.com/$GITHUB_REPOSITORY/releases/tag/$VERSION")
 
-          # jq builds the JSON so quotes and newlines in the prose stay valid. Discord caps a description at 4096.
-          PAYLOAD=$(jq -n \
-            --arg title "🚀 New Android Release: $VERSION" \
-            --arg description "${DESCRIPTION:0:4096}" \
-            --arg track "$TRACK" \
-            --arg version "$VERSION" \
-            --arg url "https://github.com/meshtastic/Meshtastic-Android/releases/tag/$VERSION" \
-            '{content: null, embeds: [{title: $title, description: $description, color: 5763719, url: $url,
-              fields: [{name: "Track", value: $track, inline: true}, {name: "Version", value: $version, inline: true}]}]}')
-
-          curl -H "Content-Type: application/json" -d "$PAYLOAD" "$DISCORD_WEBHOOK"
+          # A webhook error must not fail update-github-release: the cask and Flathub jobs run after it.
+          curl --fail-with-body -sS -H "Content-Type: application/json" -d "$PAYLOAD" "$DISCORD_WEBHOOK" \
+            || echo "::warning::The Discord post failed"
 
   # Runs in-workflow rather than on `release: published` because the undraft above
   # uses github.token, whose events never trigger other workflows. Once the cask is

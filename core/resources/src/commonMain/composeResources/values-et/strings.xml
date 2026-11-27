@@ -990,6 +990,7 @@
     <string name="mesh_beacon_target_add">Lisa sihtmärk</string>
     <string name="mesh_beacon_target_channel_index">Kanal</string>
     <string name="mesh_beacon_target_default">Vaikimisi</string>
+    <string name="mesh_beacon_target_frequency_slot">Sageduspesa</string>
     <string name="mesh_beacon_target_remove">Eemalda sihtmärk</string>
     <string name="mesh_beacon_targets">Levita sihtmärke</string>
     <string name="mesh_map_location">Meshtastic kaardi asukoht</string>
@@ -1366,6 +1367,8 @@
     <string name="remote">Kaugjuhtimine</string>
     <string name="remote_admin">Kaughaldus</string>
     <string name="remote_admin_unreachable">Sõlmega ei õnnest ühenduda – proovi uuesti või liigu lähemale.</string>
+    <string name="remote_contacts_ignore">Eira</string>
+    <string name="remote_contacts_remove">Eemalda</string>
     <string name="remote_hardware">Kaugriistvara</string>
     <string name="remote_hardware_config">Kaug riistvara sätted</string>
     <string name="remote_hardware_enabled">Kaug riistvara lubatud</string>

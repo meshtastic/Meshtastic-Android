@@ -62,7 +62,9 @@ internal fun beaconPresetConstraint(
  * (design#140's never-render-blank rule); null when the stored value is already one of the allowed intervals.
  */
 internal fun beaconIntervalFallback(storedSeconds: Long, allowed: List<FixedUpdateIntervals>): Long? =
-    storedSeconds.takeUnless { seconds -> allowed.any { it.value == seconds } }
+    storedSeconds.takeUnless { seconds ->
+        allowed.any { it.value == seconds }
+    }
 
 /**
  * Matches [offerChannel] to its true `channel_index` among [selectableChannels] by name and PSK (a channel's identity
@@ -84,10 +86,12 @@ internal fun beaconOfferChannelIndex(
  * Applies design#140's save-time invariants to [form] before it is written. When [radioLora] uses a standard modem
  * preset (`use_preset = true`): the radio's own region (behavior 1), configured preset (behavior 4) and frequency slot
  * ([beaconOfferFrequencySlot]) are always stamped, never user-chosen; every broadcast target's region is kept in
- * lockstep; and an untouched offered channel defaults to the radio's primary channel (behavior 3's required-channel
- * rule), while an already-set offered channel (even one that no longer matches a radio channel) is kept. Only the
- * offered channel's name and PSK are carried over, never the radio's own channel_index/id/uplink/downlink/module flags,
- * which have no meaning for a channel someone else's radio is being invited to join.
+ * lockstep, and any out-of-range target `frequency_slot` pin (against the target's effective preset in
+ * [radioLora.region][Config.LoRaConfig.region]) is cleared on save so firmware does not skip the target; and an
+ * untouched offered channel defaults to the radio's primary channel (behavior 3's required-channel rule), while an
+ * already-set offered channel (even one that no longer matches a radio channel) is kept. Only the offered channel's
+ * name and PSK are carried over, never the radio's own channel_index/id/uplink/downlink/module flags, which have no
+ * meaning for a channel someone else's radio is being invited to join.
  *
  * When the radio uses custom LoRa parameters (`use_preset = false`), `modem_preset` is meaningless, so every broadcast
  * field instead carries over from [stored] verbatim: stamping a stale preset would mint a live on-air lie about what
@@ -119,7 +123,20 @@ internal fun stampBeaconConfigForSave(
             wb.broadcast_offer_frequency_slot =
                 beaconOfferFrequencySlot(offerChannel, channelList.getOrNull(0), radioLora)
             wb.broadcast_targets =
-                form.broadcast_targets.map { it.newBuilder().also { wb -> wb.region = radioLora.region }.build() }
+                form.broadcast_targets.map { target ->
+                    target
+                        .newBuilder()
+                        .also { tb ->
+                            tb.region = radioLora.region
+                            tb.frequency_slot =
+                                sanitizeBeaconTargetSlot(
+                                    target.frequency_slot,
+                                    radioLora.region,
+                                    target.preset ?: radioLora.modem_preset,
+                                )
+                        }
+                        .build()
+                }
         }
         .build()
 } else {
@@ -163,7 +180,9 @@ internal fun selectBeaconTargetChannel(
  * stored list is returned unchanged.
  */
 internal fun seedBeaconTargets(stored: List<MeshBeaconConfig.BroadcastTarget>): List<MeshBeaconConfig.BroadcastTarget> =
-    stored.ifEmpty { listOf(MeshBeaconConfig.BroadcastTarget.Builder().build()) }
+    stored.ifEmpty {
+        listOf(MeshBeaconConfig.BroadcastTarget.Builder().build())
+    }
 
 /**
  * [MeshBeaconConfigScreen]'s actual `formState` initial value: [seedBeaconTargets] applied to the loaded config's

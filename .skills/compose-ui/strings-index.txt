@@ -1229,6 +1229,8 @@ mesh_beacon_channels_title
 mesh_beacon_interval
 mesh_beacon_interval_error
 mesh_beacon_invitations_title
+mesh_beacon_legacy_split
+mesh_beacon_legacy_split_summary
 mesh_beacon_listen
 mesh_beacon_listen_summary
 mesh_beacon_message_error
@@ -1255,6 +1257,7 @@ mesh_beacon_target
 mesh_beacon_target_add
 mesh_beacon_target_channel_index
 mesh_beacon_target_default
+mesh_beacon_target_frequency_slot
 mesh_beacon_target_remove
 mesh_beacon_targets
 mesh_hud_camera_rationale
@@ -2020,6 +2023,8 @@ security_ack_proof_no_key
 security_ack_proof_no_key_info
 security_ack_proof_verified
 security_ack_proof_verified_info
+security_channel_key_message
+security_channel_key_message_info
 security_icon_badge_warning_description
 security_icon_description
 security_icon_help_dismiss

@@ -48,3 +48,25 @@ fun MessageActionsContentPreview() {
         }
     }
 }
+
+@Suppress("PreviewPublic")
+@PreviewLightDark
+@Composable
+fun MessageActionsChannelKeyPreview() {
+    AppTheme {
+        Column(modifier = Modifier.background(MaterialTheme.colorScheme.surface)) {
+            MessageActionsContent(
+                quickEmojis = emptyList(),
+                onReply = {},
+                onReact = {},
+                onMoreReactions = {},
+                onCopy = {},
+                onSelect = {},
+                onDelete = {},
+                onStatus = {},
+                timestamp = "Aug 11, 2026 10:16 AM",
+                channelKeyEncrypted = true,
+            )
+        }
+    }
+}

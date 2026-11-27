@@ -228,6 +228,7 @@
     <string name="mesh_beacon_region_label">Regio</string>
     <string name="mesh_beacon_target_channel_index">Kanaal</string>
     <string name="mesh_beacon_target_default">Standaard</string>
+    <string name="mesh_beacon_target_frequency_slot">Frequentie slot</string>
     <!-- MESHTASTIC -->
     <string name="meshtastic_alerts_notifications">Waarschuwingsmeldingen</string>
     <string name="meshtastic_low_battery_notifications">Batterij bijna leeg</string>
@@ -328,6 +329,8 @@
     <string name="reboot">Herstart</string>
     <!-- REMOTE -->
     <string name="remote_admin">Extern beheer</string>
+    <string name="remote_contacts_ignore">Negeer</string>
+    <string name="remote_contacts_remove">Verwijder</string>
     <string name="remote_hardware">Externe Hardware</string>
     <string name="remote_hardware_config">Externe hardwareconfiguratie</string>
     <string name="remote_hardware_enabled">Externe hardware ingeschakeld</string>

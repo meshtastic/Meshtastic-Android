@@ -389,6 +389,7 @@
     <string name="mesh_beacon_region_label">Régió</string>
     <string name="mesh_beacon_target_channel_index">Csatorna</string>
     <string name="mesh_beacon_target_default">Alapértelmezett</string>
+    <string name="mesh_beacon_target_frequency_slot">Frekvenciasáv</string>
     <string name="mesh_map_location">Mesh-térkép helyzet</string>
     <string name="mesh_map_location_description">Engedélyezi a telefon kék helyjelölőjét a mesh térképen.</string>
     <!-- MESHTASTIC -->
@@ -567,6 +568,8 @@
     <!-- REMOTE -->
     <string name="remote">Távoli</string>
     <string name="remote_admin">Távoli Adminisztráció</string>
+    <string name="remote_contacts_ignore">Mellőzés</string>
+    <string name="remote_contacts_remove">Törlés</string>
     <string name="remote_hardware">Távoli hardver</string>
     <string name="remote_hardware_config">Távoli hardver beállításai</string>
     <string name="remote_hardware_enabled">Távoli hardver engedélyezve</string>

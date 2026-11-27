@@ -818,6 +818,7 @@
     <string name="mesh_beacon_target_add">Ziel hinzufügen</string>
     <string name="mesh_beacon_target_channel_index">Kanal</string>
     <string name="mesh_beacon_target_default">Standardwert</string>
+    <string name="mesh_beacon_target_frequency_slot">Frequenz Slot</string>
     <string name="mesh_beacon_target_remove">Ziel entfernen</string>
     <string name="mesh_hud_cardinal_east">E</string>
     <string name="mesh_hud_cardinal_north">N</string>
@@ -1141,6 +1142,8 @@
     <string name="remote">Entfernt</string>
     <string name="remote_admin">Ferneinstellung</string>
     <string name="remote_admin_unreachable">Knoten nicht erreichbar - erneut versuchen oder Standort wechseln.</string>
+    <string name="remote_contacts_ignore">Ignorieren</string>
+    <string name="remote_contacts_remove">Entfernen</string>
     <string name="remote_hardware">Entfernte Hardware</string>
     <string name="remote_hardware_config">Einstellung entfernte Hardware</string>
     <string name="remote_hardware_enabled">Einstellung entfernte Hardware</string>

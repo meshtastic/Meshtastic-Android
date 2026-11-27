@@ -37,9 +37,21 @@ fun Project.configureDokka() {
                 suppress.set(true)
             }
 
-            // Dokka 2.x requires each source file to belong to exactly one source set.
+            // Dokka 2.x requires each source file to belong to exactly one source set. A kept source set's
+            // dependsOn parents must be kept too, or analysis fails with "no source module".
             val baseSourceSets =
-                listOf("main", "commonMain", "androidMain", "jvmMain", "jvmAndroidMain", "fdroid", "google", "release")
+                listOf(
+                    "main",
+                    "commonMain",
+                    "nonWebMain",
+                    "nonAndroidMain",
+                    "androidMain",
+                    "jvmMain",
+                    "jvmAndroidMain",
+                    "fdroid",
+                    "google",
+                    "release",
+                )
 
             val isCoreSourceSet = name in baseSourceSets
             suppress.set(!isCoreSourceSet)

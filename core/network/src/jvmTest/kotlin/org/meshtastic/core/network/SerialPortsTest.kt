@@ -72,4 +72,36 @@ class SerialPortsTest {
             serialPortEntries(listOf("ttyACM3", "ttyS0"), mapOf("ttyACM3" to link)),
         )
     }
+
+    // Only an address that belongs to one radio may carry that radio's remembered node into the picker.
+    @Test
+    fun `a link carrying the port's USB serial number names one radio`() {
+        val link = "/dev/serial/by-id/usb-RAKwireless_WisCore_RAK4631_Board_7885014CB2C5B186-if00"
+
+        val entries =
+            serialPortEntries(
+                listOf("ttyACM3", "ttyS0"),
+                mapOf("ttyACM3" to link),
+                mapOf("ttyACM3" to "7885014CB2C5B186", "ttyS0" to "Unknown"),
+            )
+
+        assertEquals(listOf(true, false), entries.map { it.namesRadio })
+    }
+
+    // A CH340 reports no serial, so udev names the link by model; a CP2102's default `0001` is shared by many boards.
+    @Test
+    fun `a bridge link without a serial or with a factory default serial names no radio`() {
+        val entries =
+            serialPortEntries(
+                listOf("ttyUSB0", "ttyUSB1"),
+                mapOf(
+                    "ttyUSB0" to "/dev/serial/by-id/usb-1a86_USB_Serial-if00-port0",
+                    "ttyUSB1" to
+                        "/dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0",
+                ),
+                mapOf("ttyUSB0" to null, "ttyUSB1" to "0001"),
+            )
+
+        assertEquals(listOf(false, false), entries.map { it.namesRadio })
+    }
 }

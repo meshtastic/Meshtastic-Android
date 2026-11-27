@@ -62,6 +62,8 @@ import org.meshtastic.core.resources.message_delivery_status
 import org.meshtastic.core.resources.more_reactions
 import org.meshtastic.core.resources.relayed_by
 import org.meshtastic.core.resources.reply
+import org.meshtastic.core.resources.security_channel_key_message
+import org.meshtastic.core.resources.security_channel_key_message_info
 import org.meshtastic.core.resources.security_signed_message_info
 import org.meshtastic.core.resources.security_signed_verified
 import org.meshtastic.core.resources.select
@@ -76,12 +78,14 @@ import org.meshtastic.core.ui.icon.Delete
 import org.meshtastic.core.ui.icon.History
 import org.meshtastic.core.ui.icon.HopCount
 import org.meshtastic.core.ui.icon.KeyOff
+import org.meshtastic.core.ui.icon.LockOpen
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.More
 import org.meshtastic.core.ui.icon.Reply
 import org.meshtastic.core.ui.icon.SelectAll
 import org.meshtastic.core.ui.icon.ShieldCheck
 import org.meshtastic.core.ui.icon.Translate
+import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 import org.meshtastic.proto.MeshPacket
 
 @Suppress("LongMethod")
@@ -102,6 +106,7 @@ fun MessageActionsContent(
     timestamp: String? = null,
     relay: String? = null,
     xeddsaSigned: Boolean = false,
+    channelKeyEncrypted: Boolean = false,
     ackProofStatus: Int = 0,
     translationRowState: TranslationRowState? = null,
     onTranslate: () -> Unit = {},
@@ -125,6 +130,20 @@ fun MessageActionsContent(
                         MeshtasticIcons.ShieldCheck,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary,
+                    )
+                },
+            )
+        }
+
+        if (channelKeyEncrypted) {
+            ListItem(
+                headlineContent = { Text(stringResource(Res.string.security_channel_key_message)) },
+                supportingContent = { Text(stringResource(Res.string.security_channel_key_message_info)) },
+                leadingContent = {
+                    Icon(
+                        MeshtasticIcons.LockOpen,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.StatusYellow,
                     )
                 },
             )

@@ -833,6 +833,7 @@
     <string name="mesh_beacon_region_label">Région</string>
     <string name="mesh_beacon_target_channel_index">Canal</string>
     <string name="mesh_beacon_target_default">Par défaut</string>
+    <string name="mesh_beacon_target_frequency_slot">Emplacement de fréquence</string>
     <string name="mesh_map_location">Emplacement de la carte de maillage</string>
     <string name="mesh_map_location_description">Active le point de localisation bleu de votre téléphone sur la carte de maillage.</string>
     <!-- MESHTASTIC -->
@@ -1104,6 +1105,8 @@
     <string name="remote">Distant</string>
     <string name="remote_admin">Administration à distance</string>
     <string name="remote_admin_unreachable">Impossible d'atteindre le nœud — essayez à nouveau ou approchez-le.</string>
+    <string name="remote_contacts_ignore">Ignorer</string>
+    <string name="remote_contacts_remove">Supprimer</string>
     <string name="remote_hardware">Matériel télécommande</string>
     <string name="remote_hardware_config">Configuration du matériel distant</string>
     <string name="remote_hardware_enabled">Matériel distant activé</string>

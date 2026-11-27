@@ -104,8 +104,10 @@ data class Channel(val settings: ChannelSettings = default.settings, val loraCon
                 // number / radio frequency, and MQTT topic all derive from this name (see `hash`, `frequencyPlan`).
                 // Source of truth: firmware DisplayFormatters::getModemPresetDisplayName(preset, useShortName=false).
                 // Two names are deliberately abbreviated (LONG_MODERATE -> "LongMod", VERY_LONG_SLOW -> "VLongSlow"),
-                // so do NOT auto-derive from the enum name. This `when` is intentionally exhaustive with no `else`: a
-                // new firmware preset SHOULD break the build here, forcing someone to copy its exact firmware name.
+                // so do NOT auto-derive from the enum name. "VLongSlow" is the name firmware used until it dropped the
+                // preset in 2.6.5; later firmware never hashes it, because it replaces the preset first. This `when` is
+                // intentionally exhaustive with no `else`: a new firmware preset SHOULD break the build here, forcing
+                // someone to copy its exact firmware name.
                 if (loraConfig.use_preset) {
                     when (loraConfig.modem_preset) {
                         ModemPreset.SHORT_TURBO -> "ShortTurbo"

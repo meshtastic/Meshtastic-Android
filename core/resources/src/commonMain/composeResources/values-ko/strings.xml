@@ -269,6 +269,7 @@
     <string name="mesh_beacon_region_label">지역</string>
     <string name="mesh_beacon_target_channel_index">채널</string>
     <string name="mesh_beacon_target_default">기본값</string>
+    <string name="mesh_beacon_target_frequency_slot">주파수 슬롯</string>
     <!-- MESHTASTIC -->
     <string name="meshtastic">Meshtastic</string>
     <string name="meshtastic_alerts_notifications">경고 알림</string>
@@ -394,6 +395,8 @@
     <!-- REMOTE -->
     <string name="remote">원격</string>
     <string name="remote_admin">원격 설정</string>
+    <string name="remote_contacts_ignore">무시하기</string>
+    <string name="remote_contacts_remove">지우기</string>
     <string name="remote_hardware">원격 하드웨어</string>
     <string name="remote_hardware_config">원격 하드웨어 설정</string>
     <string name="remote_hardware_enabled">원격 하드웨어 활성화</string>

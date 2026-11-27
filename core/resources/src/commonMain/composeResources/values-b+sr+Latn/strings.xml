@@ -366,6 +366,8 @@
     <string name="reboot">Поново покрени</string>
     <!-- REMOTE -->
     <string name="remote_admin">Udaljena administracija</string>
+    <string name="remote_contacts_ignore">Игнориши</string>
+    <string name="remote_contacts_remove">Уклони</string>
     <string name="remote_shell_key_alt">Висина</string>
     <string name="remote_shell_modifier_locked">Закључано</string>
     <string name="remote_shell_send">Pošalji</string>

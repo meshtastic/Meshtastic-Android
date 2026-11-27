@@ -30,6 +30,17 @@ The production build runs Binaryen's `wasm-opt`, which takes several minutes. To
 
 The distribution directory is a static site: serve it from any web server. Each release attaches it as `meshtastic-web-<version>.zip`.
 
+The project hosts two copies on Vercel, deployed by `.github/actions/vercel-deploy` as prebuilt static output, so no Vercel build runs:
+
+| Site | Source | Workflow |
+| --- | --- | --- |
+| app.meshtastic.org | the newest production release's zip | `web-stable.yml`, dispatched by a production promotion or by hand with a tag |
+| app-snapshot.meshtastic.org | `main`, versioned `<version>-SNAPSHOT` | `web-snapshot.yml`, on every push to `main` |
+
+Each job reads its Vercel token and project ids from its GitHub environment (`web-stable`, `web-snapshot`), and both environments admit only `main`. The two sites are separate origins, so each keeps its own database, settings and paired radios.
+
+For any other host:
+
 - Serve `.wasm` files as `application/wasm`. Browsers refuse to stream-compile a module sent with any other type.
 - Compress the wasm: the app's module is about 22 MB raw, 5.4 MB gzipped and 3.7 MB as Brotli. The production distribution carries a `<name>.br` beside each content-hashed module (the 20-hex-digit names), for a server that serves precompressed files, such as nginx's `brotli_static` or node-headless. Serve those hashed names with `Cache-Control: immutable`; revalidate everything else.
 - A distribution's `index.html` preloads the wasm modules `webApp.js` names, so they download beside the script. Only the development distribution carries JavaScript source maps.

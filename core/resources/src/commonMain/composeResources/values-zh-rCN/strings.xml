@@ -918,6 +918,7 @@
     <string name="mesh_beacon_target_add">添加目标</string>
     <string name="mesh_beacon_target_channel_index">频道</string>
     <string name="mesh_beacon_target_default">默认</string>
+    <string name="mesh_beacon_target_frequency_slot">频率槽位</string>
     <string name="mesh_beacon_target_remove">取消目标</string>
     <string name="mesh_beacon_targets">广播目标</string>
     <string name="mesh_map_location">网格地图位置</string>
@@ -1243,6 +1244,8 @@
     <string name="remote">远程</string>
     <string name="remote_admin">远程管理</string>
     <string name="remote_admin_unreachable">无法连接节点 — 再试一次或移动更近。</string>
+    <string name="remote_contacts_ignore">忽略</string>
+    <string name="remote_contacts_remove">移除</string>
     <string name="remote_hardware">远程硬件</string>
     <string name="remote_hardware_config">远程硬件设置</string>
     <string name="remote_hardware_enabled">启用远程硬件</string>

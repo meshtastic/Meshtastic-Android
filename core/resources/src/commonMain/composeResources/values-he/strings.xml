@@ -190,6 +190,7 @@
     <string name="radio_setup_name_headline">שם</string>
     <string name="reboot">אתחול מחדש</string>
     <!-- REMOTE -->
+    <string name="remote_contacts_ignore">התעלם</string>
     <string name="remote_shell_modifier_locked">נעול</string>
     <string name="remote_shell_send">שלח</string>
     <string name="remote_shell_status_not_connected">לא מחובר</string>

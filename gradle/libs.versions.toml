@@ -4,7 +4,7 @@ jsqr = "1.4.0"
 xmlutil = "1.0.2.1"
 
 # Android
-agp = "9.5.2"
+agp = "9.5.3"
 appcompat = "1.8.0"
 appfunctions = "1.0.0"
 
@@ -111,7 +111,7 @@ okio = "3.18.2"
 bouncycastle = "1.87"
 uri-kmp = "0.0.21"
 spotless = "8.12.0"
-sceneview = "4.74.0"
+sceneview = "4.76.0"
 vico = "3.4.0-next.1"
 kable = "0.46.0"
 mqttastic = "0.9.1"
@@ -267,7 +267,7 @@ dokka-gradlePlugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", versi
 
 kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version = "0.5.2" }
 kotlinx-atomicfu = { module = "org.jetbrains.kotlinx:atomicfu", version = "0.33.0" }
-kotlinx-browser = { module = "org.jetbrains.kotlinx:kotlinx-browser", version = "0.5.0" }
+kotlinx-browser = { module = "org.jetbrains.kotlinx:kotlinx-browser", version = "0.6.1" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines-android" }
 kotlinx-coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines-android" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines-android" }

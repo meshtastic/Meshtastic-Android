@@ -661,7 +661,21 @@ class MeshDataHandlerImpl(
 
     private fun DataPacket.contactKey(myNodeNum: Int): String {
         val contactId = if (isFromLocal(myNodeNum) || isBroadcast) to else from
-        return "$channel$contactId"
+        return "${conversationChannel(myNodeNum)}$contactId"
+    }
+
+    /**
+     * The channel slot of the conversation this packet belongs to. A direct message from a node that both ends hold a
+     * key for goes in the PKI conversation, the one the node list opens, even when it arrived channel-encrypted, so a
+     * peer's DMs stay in one chat. The packet keeps its own [DataPacket.channel], which marks it in that chat.
+     */
+    private fun DataPacket.conversationChannel(myNodeNum: Int): Int {
+        val inboundDirect = !isFromLocal(myNodeNum) && !isBroadcast
+        val bothKeyed =
+            inboundDirect &&
+                from?.let(nodeManager::getNodeById)?.hasPKC == true &&
+                nodeManager.nodeDBbyNodeNum[myNodeNum]?.hasPKC == true
+        return if (bothKeyed) NodeAddress.PKC_CHANNEL_INDEX else channel
     }
 
     private fun DataPacket.hasSameSenderAs(other: DataPacket, myNodeNum: Int): Boolean =

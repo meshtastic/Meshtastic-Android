@@ -98,4 +98,6 @@ Each deploy overlays only its own channels via `scripts/docs/publish-to-gh-pages
 so every other channel survives the next deploy. The header
 version dropdown (`_includes/version_switcher.html`) reads `/versions.json` at runtime;
 a separate header link points to the upstream docs at meshtastic.org. To backfill a
-release, run the "Docs Release" workflow manually against the release tag.
+release, run the "Docs Release" workflow manually against the release tag. To
+republish a tag with a docs build fix that landed later, run it from `main` with
+the `tag` input set; that publishes `main`'s docs under the tag's version.

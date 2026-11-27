@@ -199,6 +199,8 @@
     <string name="radio_setup_name_headline">Nome</string>
     <string name="reboot">Reiniciar</string>
     <!-- REMOTE -->
+    <string name="remote_contacts_ignore">Ignorar</string>
+    <string name="remote_contacts_remove">Eliminar</string>
     <string name="remote_shell_modifier_locked">Bloqueado</string>
     <string name="remote_shell_send">Enviar</string>
     <string name="remote_shell_status_not_connected">Non conectado</string>

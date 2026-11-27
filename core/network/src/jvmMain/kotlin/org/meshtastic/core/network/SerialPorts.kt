@@ -26,13 +26,36 @@ private val SERIAL_BY_ID_DIR = File("/dev/serial/by-id")
  * kernel gives a re-enumerated device the next free `ttyACM` number while the old one is still open, and udev points
  * the link at the new one. Other ports, and other hosts, whose names already follow the device, use the system name.
  */
-fun availableSerialPorts(): List<SerialPortEntry> =
-    serialPortEntries(SerialPort.getCommPorts().map { it.systemPortName }, serialByIdLinks(SERIAL_BY_ID_DIR))
-
-/** Each of [names] with its by-id link from [links] as the address, or its own name when it has none. */
-internal fun serialPortEntries(names: List<String>, links: Map<String, String>): List<SerialPortEntry> = names.map {
-    SerialPortEntry(it, links[it] ?: it)
+fun availableSerialPorts(): List<SerialPortEntry> {
+    val ports = SerialPort.getCommPorts()
+    return serialPortEntries(
+        ports.map { it.systemPortName },
+        serialByIdLinks(SERIAL_BY_ID_DIR),
+        ports.associate { it.systemPortName to it.serialNumber },
+    )
 }
+
+/**
+ * Each of [names] with its by-id link from [links] as the address, or its own name when it has none. The address names
+ * one radio only when its link carries the port's USB serial number from [serials].
+ */
+internal fun serialPortEntries(
+    names: List<String>,
+    links: Map<String, String>,
+    serials: Map<String, String?> = emptyMap(),
+): List<SerialPortEntry> = names.map { name ->
+    val link = links[name]
+    SerialPortEntry(name, link ?: name, namesRadio = link != null && linkCarriesSerial(link, serials[name]))
+}
+
+/**
+ * udev writes the USB serial number into a by-id name, `usb-<vendor>_<model>_<serial>-if00`, only when the device
+ * reports one; a short serial is a bridge chip's factory default (a CP2102 reports `0001`) that many boards share.
+ */
+internal fun linkCarriesSerial(link: String, serial: String?): Boolean =
+    serial != null && serial.length >= MIN_UNIQUE_SERIAL_LENGTH && File(link).name.contains("_$serial-if")
+
+private const val MIN_UNIQUE_SERIAL_LENGTH = 8
 
 /** Each device node name in [dir]'s link targets, mapped to the first of its links by name. */
 internal fun serialByIdLinks(dir: File): Map<String, String> = dir.listFiles()
@@ -41,5 +64,8 @@ internal fun serialByIdLinks(dir: File): Map<String, String> = dir.listFiles()
     .groupBy({ it.first }, { it.second })
     .mapValues { (_, links) -> links.min() }
 
-/** A serial port the desktop picker offers: [name] to show, [address] to store and reopen. */
-data class SerialPortEntry(val name: String, val address: String)
+/**
+ * A serial port the desktop picker offers: [name] to show, [address] to store and reopen. [namesRadio] is true when the
+ * address belongs to one physical radio rather than to a port or a board model.
+ */
+data class SerialPortEntry(val name: String, val address: String, val namesRadio: Boolean = false)
