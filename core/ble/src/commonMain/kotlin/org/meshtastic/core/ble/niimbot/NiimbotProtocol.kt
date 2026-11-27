@@ -38,8 +38,11 @@ sealed class NiimbotException(message: String) : Exception(message) {
     /** The printer answered that it does not know [request]. */
     class Unsupported(val request: Int) : NiimbotException("Printer does not support request $request")
 
-    /** The printer did not answer [request] in time, or the link to it is gone. */
+    /** The printer did not answer [request] in time. */
     class NoResponse(val request: Int) : NiimbotException("No reply to request $request")
+
+    /** The link to the printer is gone: a write failed or its notifications ended. Nothing more can be sent. */
+    class LinkLost(val request: Int) : NiimbotException("Link lost at request $request")
 }
 
 /** What a printer fault code means, per MultiMote/niimbluelib as labeltastic's vendored niimprint lists them. */
@@ -107,9 +110,9 @@ class NiimbotProtocol(private val link: NiimbotLink) {
         }
         transceive(NiimbotRequest.END_PAGE_PRINT, ONE)
         awaitPage()
-        attempt { transceive(NiimbotRequest.END_PRINT, ONE) }
+        afterPage { transceive(NiimbotRequest.END_PRINT, ONE) }
         // Some v4 models drop the packet after a print; this one is the spare.
-        if (version >= VERSION_4) attempt { link.send(NiimbotPacket(NiimbotRequest.HEARTBEAT, ONE)) }
+        if (version >= VERSION_4) afterPage { link.send(NiimbotPacket(NiimbotRequest.HEARTBEAT, ONE)) }
     }
 
     /** 0 for older printers; 3, 4 or 5 for newer firmware (niimbluelib's decoding of the status data). */
@@ -154,32 +157,38 @@ class NiimbotProtocol(private val link: NiimbotLink) {
         }
     }
 
+    /** Polls until the printer reports the page, for at most [PAGE_TIMEOUT] of wall time, writes included. */
     private suspend fun awaitPage() {
-        repeat(STATUS_POLLS) {
-            delay(STATUS_POLL_INTERVAL)
-            if (pagesPrinted() >= QUANTITY) return
-        }
-        throw NiimbotException.NoResponse(NiimbotRequest.GET_PRINT_STATUS)
+        withTimeoutOrNull(PAGE_TIMEOUT) {
+            do {
+                delay(STATUS_POLL_INTERVAL)
+            } while (pagesPrinted() < QUANTITY)
+        } ?: throw NiimbotException.NoResponse(NiimbotRequest.GET_PRINT_STATUS)
     }
 
-    /** A fault the printer reports is the answer; a poll a busy printer skips counts as no page yet. */
+    /**
+     * A fault the printer reports is the answer and a lost link ends the print; a poll a busy printer skips counts as
+     * no page yet.
+     */
     private suspend fun pagesPrinted(): Int = try {
         val data = transceive(NiimbotRequest.GET_PRINT_STATUS, ONE, STATUS_REPLY_OFFSET).data
         if (data.size >= 2) data.unsigned(0) shl BYTE_SHIFT or data.unsigned(1) else 0
-    } catch (fault: NiimbotException.PrinterFault) {
-        throw fault
-    } catch (_: NiimbotException) {
+    } catch (skipped: NiimbotException) {
+        if (skipped is NiimbotException.PrinterFault || skipped is NiimbotException.LinkLost) throw skipped
         0
     }
 
+    /** Sends [request] and waits for its reply; the write and the wait together get [REPLY_TIMEOUT]. */
     private suspend fun transceive(request: Int, data: ByteArray, replyOffset: Int = 1): NiimbotPacket {
         val replyType = request + replyOffset and BYTE_MASK
         return try {
-            discardStale(request)
-            link.send(NiimbotPacket(request, data))
-            withTimeoutOrNull(REPLY_TIMEOUT) { awaitReply(request, replyType) }
+            withTimeoutOrNull(REPLY_TIMEOUT) {
+                discardStale(request)
+                link.send(NiimbotPacket(request, data))
+                awaitReply(request, replyType)
+            }
         } catch (_: ClosedReceiveChannelException) {
-            null
+            throw NiimbotException.LinkLost(request)
         } ?: throw NiimbotException.NoResponse(request)
     }
 
@@ -207,8 +216,17 @@ class NiimbotProtocol(private val link: NiimbotLink) {
     private suspend fun attempt(block: suspend () -> Unit) {
         try {
             block()
+        } catch (skipped: NiimbotException) {
+            // Optional step: older firmware skips it and the print goes on, unless the link itself is gone.
+            if (skipped is NiimbotException.LinkLost) throw skipped
+        }
+    }
+
+    private suspend fun afterPage(block: suspend () -> Unit) {
+        try {
+            block()
         } catch (_: NiimbotException) {
-            // Optional step: older firmware skips it and the print goes on.
+            // The page is out by now, so nothing here fails the print, a lost link included.
         }
     }
 
@@ -217,9 +235,7 @@ class NiimbotProtocol(private val link: NiimbotLink) {
         val REPLY_TIMEOUT = 2.seconds
         val ROW_PACING = 10.milliseconds
         val STATUS_POLL_INTERVAL = 300.milliseconds
-
-        /** About a minute of polling. */
-        const val STATUS_POLLS = 200
+        val PAGE_TIMEOUT = 60.seconds
         const val DEFAULT_DENSITY = 3
         const val QUANTITY = 1
 

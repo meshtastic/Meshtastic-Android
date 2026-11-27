@@ -21,6 +21,7 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 
 /**
  * A printer that answers each request the way niimprint's `_transceive` expects: the request type plus 1, or plus 16
@@ -35,10 +36,17 @@ internal class ScriptedPrinter(private val statusData: ByteArray? = null) : Niim
 
     /** A fault code the printer raises once it has taken a row packet. */
     var faultAfterRows: Int? = null
+
+    /** When true the printer stays connected but never answers a print status poll. */
+    var silentStatus = false
+
+    /** A request type at which the link goes away: notifications end before any reply. */
+    var linkLostAt: Int? = null
     private var polls = 0
 
     override suspend fun send(packet: NiimbotPacket) {
         sent += packet.toBytes().hex()
+        if (packet.type == linkLostAt) received.close()
         when (packet.type) {
             0x84,
             0x85,
@@ -46,7 +54,7 @@ internal class ScriptedPrinter(private val statusData: ByteArray? = null) : Niim
 
             0xA5 -> statusData?.let { received.trySend(NiimbotPacket(0xB5, it)) }
 
-            0xA3 -> {
+            0xA3 -> if (!silentStatus) {
                 val page = pages[minOf(polls++, pages.size - 1)]
                 received.trySend(NiimbotPacket(0xB3, byteArrayOf(0, page.toByte(), 100, 100)))
             }
@@ -69,9 +77,10 @@ internal class ScriptedPrinter(private val statusData: ByteArray? = null) : Niim
 }
 
 /**
- * Expected sequences are what labeltastic's vendored niimprint (`print_image_new`, and the calls `print_image` opens
- * with) writes for a 96x3 picture with one dot at (0, 1), at meshtastic/labeltastic#38. The heartbeat and status data
- * requests ahead of them are the order labeltastic's `print_label` and Meshtastic-Apple use.
+ * The v3 and v4 sequences are what labeltastic's vendored niimprint (`print_image_new`) writes for a 96x3 picture with
+ * one dot at (0, 1), at meshtastic/labeltastic#38. The heartbeat and status data requests ahead of them are the order
+ * labeltastic's `print_label` and Meshtastic-Apple use. The legacy sequence is Meshtastic-Apple's, not niimprint's; see
+ * its test.
  */
 class NiimbotProtocolTest {
     private val picture = LabelBitmap(width = 96, height = 3).also { it.setInk(0, 1) }
@@ -127,8 +136,12 @@ class NiimbotProtocolTest {
         )
     }
 
+    // Pins the legacy sequence of Meshtastic-Apple's `NiimbotPrinter.printLabel`, which this code follows. Only the five
+    // packets before the rows match niimprint's `print_image`: niimprint then sends one 0x85 per row with zero counts
+    // and no 0x84, and polls END_PRINT until it answers true, where Swift sends the compressed rows, waits on 0xA3 and
+    // sends END_PRINT once without checking it.
     @Test
-    fun `a printer without status data gets the legacy start and no connect`() = runTest {
+    fun `a printer without status data gets the Swift port's legacy sequence and no connect`() = runTest {
         val printer = ScriptedPrinter(statusData = null)
 
         NiimbotProtocol(printer).print(picture)
@@ -188,6 +201,34 @@ class NiimbotProtocolTest {
         val failure = assertFailsWith<NiimbotException.NoResponse> { NiimbotProtocol(printer).print(picture) }
 
         assertEquals(NiimbotRequest.GET_PRINT_STATUS, failure.request)
+    }
+
+    // The wait for the page is bounded to a minute of wall time, the writes and reply timeouts of its polls included.
+    @Test
+    fun `a connected printer that stops answering fails the print after a minute`() = runTest {
+        val printer = ScriptedPrinter(ScriptedPrinter.statusData(2, 4)).apply { silentStatus = true }
+
+        assertFailsWith<NiimbotException.NoResponse> { NiimbotProtocol(printer).print(picture) }
+
+        assertTrue(testScheduler.currentTime in 60_000..61_000, "gave up after ${testScheduler.currentTime} ms")
+    }
+
+    @Test
+    fun `a link lost while waiting for the page ends the print at once`() = runTest {
+        val printer = ScriptedPrinter(ScriptedPrinter.statusData(2, 4)).apply { linkLostAt = 0xA3 }
+
+        assertFailsWith<NiimbotException.LinkLost> { NiimbotProtocol(printer).print(picture) }
+
+        assertEquals(1, printer.sent.count { it == "5555a30101a3aaaa" })
+    }
+
+    @Test
+    fun `a link lost at an optional step ends the print instead of going on`() = runTest {
+        val printer = ScriptedPrinter(ScriptedPrinter.statusData(2, 4)).apply { linkLostAt = 0xDC }
+
+        assertFailsWith<NiimbotException.LinkLost> { NiimbotProtocol(printer).print(picture) }
+
+        assertEquals(listOf("5555dc0101dcaaaa"), printer.sent)
     }
 
     @Test

@@ -95,4 +95,15 @@ class NiimbotPrinterTest {
 
         assertFailsWith<NiimbotException.Unsupported> { printer.connect(FakeBleDevice("AA:BB:CC:DD:EE:FF")) }
     }
+
+    // A printer left connected does not advertise, so a failed connect has to let go of it.
+    @Test
+    fun `a connect that fails after the link is up disconnects`() = runTest {
+        val connection = FakeBleConnection().apply { discoveredServices = services.take(1) }
+        val printer = NiimbotPrinter(FakeBleScanner(), FakeBleConnectionFactory(connection), backgroundScope)
+
+        assertFailsWith<NiimbotException.Unsupported> { printer.connect(FakeBleDevice("AA:BB:CC:DD:EE:FF")) }
+
+        assertEquals(1, connection.disconnectCalls)
+    }
 }

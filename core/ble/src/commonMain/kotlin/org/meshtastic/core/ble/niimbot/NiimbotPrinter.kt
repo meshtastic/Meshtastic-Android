@@ -18,6 +18,7 @@ package org.meshtastic.core.ble.niimbot
 
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -28,6 +29,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 import org.meshtastic.core.ble.BleCharacteristic
 import org.meshtastic.core.ble.BleConnection
@@ -91,13 +93,20 @@ class NiimbotPrinter(private val scanner: BleScanner, connectionFactory: BleConn
     /** Connects and opens the print channel, or throws the [NiimbotException] that says why not. */
     suspend fun connect(device: BleDevice) {
         link = null
-        link =
-            try {
-                openLink(device)
-            } catch (_: TimeoutCancellationException) {
-                // The connection's own bound on discovery ran out, which is the printer not answering.
-                null
-            } ?: throw NiimbotException.NoResponse(NiimbotRequest.CONNECT)
+        var opened: NiimbotLink? = null
+        try {
+            opened =
+                try {
+                    openLink(device)
+                } catch (_: TimeoutCancellationException) {
+                    // The connection's own bound on discovery ran out, which is the printer not answering.
+                    null
+                }
+        } finally {
+            // A printer left connected stops advertising, so the next search would never find it.
+            if (opened == null) withContext(NonCancellable) { connection.disconnect() }
+        }
+        link = opened ?: throw NiimbotException.NoResponse(NiimbotRequest.CONNECT)
     }
 
     private suspend fun openLink(device: BleDevice): NiimbotLink? {
@@ -153,7 +162,7 @@ class NiimbotPrinter(private val scanner: BleScanner, connectionFactory: BleConn
                 safeCatching {
                     service.write(characteristic, bytes.copyOfRange(offset, end), BleWriteType.WITHOUT_RESPONSE)
                 }
-                    .getOrElse { throw NiimbotException.NoResponse(packet.type) }
+                    .getOrElse { throw NiimbotException.LinkLost(packet.type) }
                 offset = end
             }
         }
