@@ -124,28 +124,26 @@ class LabelQrTest {
         val link = "meshtastic://meshtastic/connections?address=xAA:BB:CC:DD:EE:FF&pin=123456"
         val connect = LabelSpec.Connect(content, link, link.substringBefore("&pin"), "SCAN TO CONNECT")
         val encoded = mutableListOf<String>()
+        // A 45-module code, so the positions are the ones labeltastic's render_compact gives the same node on 40 mm
+        // (see LabelLayoutTest), with only the band's words changed.
         val recording = QrEncoder { text ->
             encoded += text
-            LabelQrEncoder.encode(text)
+            QrModules(45, BooleanArray(45 * 45))
         }
 
         val layout = assertNotNull(connect.layout(labelLengthDots(40), FixedWidthMeasurer, recording))
-        val code = layout.ops.filterIsInstance<LabelOp.Qr>().single()
 
         assertEquals(listOf(link), encoded)
         assertEquals(
-            nameTagLayout(
-                content,
-                FittedQr(link, code.modules, code.dotsPerModule),
-                316,
-                "SCAN TO CONNECT",
-                FixedWidthMeasurer,
-            )
-                .ops
-                .filterNot { it is LabelOp.Qr },
+            listOf(
+                LabelOp.Band(x = 103, y = 2, width = 210, height = 22, text = "SCAN TO CONNECT", size = 21),
+                LabelOp.Mark(right = 313, bottom = 94, height = 18),
+                LabelOp.Text("WPG", x = 103, yCenter = 39, size = 32),
+                LabelOp.Text("Wandering Packet Goblin", x = 103, yCenter = 64, size = 15),
+                LabelOp.Text("!deadbeef", x = 103, yCenter = 85, size = 16),
+            ),
             layout.ops.filterNot { it is LabelOp.Qr },
         )
-        assertEquals("SCAN TO CONNECT", layout.ops.filterIsInstance<LabelOp.Band>().single().text)
     }
 
     @Test
