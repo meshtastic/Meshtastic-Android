@@ -120,7 +120,7 @@ jmdns = "3.6.5"
 dbus-java = "5.2.2"
 qrcode-kotlin = "4.5.0"
 takpacket-sdk = "0.10.0"
-meshtastic-sdk = "0.2.1-SNAPSHOT"
+meshtastic-sdk = "0.3.1"
 meshtastic-protobufs = "2.8.3"
 
 # Gradle Plugins
