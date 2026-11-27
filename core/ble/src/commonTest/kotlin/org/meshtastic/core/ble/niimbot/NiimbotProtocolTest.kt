@@ -54,10 +54,11 @@ internal class ScriptedPrinter(private val statusData: ByteArray? = null) : Niim
 
             0xA5 -> statusData?.let { received.trySend(NiimbotPacket(0xB5, it)) }
 
-            0xA3 -> if (!silentStatus) {
-                val page = pages[minOf(polls++, pages.size - 1)]
-                received.trySend(NiimbotPacket(0xB3, byteArrayOf(0, page.toByte(), 100, 100)))
-            }
+            0xA3 ->
+                if (!silentStatus) {
+                    val page = pages[minOf(polls++, pages.size - 1)]
+                    received.trySend(NiimbotPacket(0xB3, byteArrayOf(0, page.toByte(), 100, 100)))
+                }
 
             0x21,
             0x23,
@@ -136,7 +137,8 @@ class NiimbotProtocolTest {
         )
     }
 
-    // Pins the legacy sequence of Meshtastic-Apple's `NiimbotPrinter.printLabel`, which this code follows. Only the five
+    // Pins the legacy sequence of Meshtastic-Apple's `NiimbotPrinter.printLabel`, which this code follows. Only the
+    // five
     // packets before the rows match niimprint's `print_image`: niimprint then sends one 0x85 per row with zero counts
     // and no 0x84, and polls END_PRINT until it answers true, where Swift sends the compressed rows, waits on 0xA3 and
     // sends END_PRINT once without checking it.

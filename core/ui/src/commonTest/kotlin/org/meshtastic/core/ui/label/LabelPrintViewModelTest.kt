@@ -166,15 +166,15 @@ class LabelPrintViewModelTest {
     }
 
     @Test
-    fun `closing the sheet ends a print in flight so it cannot write into the reopened sheet`() = runTest(dispatcher) {
+    fun `closing the sheet ends a print in flight so it cannot write into the closed sheet`() = runTest(dispatcher) {
         val viewModel = readyOnSilentPrinter()
         viewModel.print(LabelBitmap(width = 96, height = 1))
 
         viewModel.stop()
-        viewModel.start()
         advanceTimeBy(10.seconds)
 
-        assertEquals(LabelPrinterStatus.READY to null, viewModel.state.value.status to viewModel.state.value.error)
+        // A print left running would fail at 6 s and show the closed sheet as ready with an error.
+        assertEquals(LabelPrintState(), viewModel.state.value)
     }
 
     @Test
@@ -200,8 +200,25 @@ class LabelPrintViewModelTest {
         // The first print would have failed 6 s after it started, which is now; the second has 3 s left.
         advanceTimeBy(3500.milliseconds)
 
-        assertEquals(LabelPrinterStatus.PRINTING to null, viewModel.state.value.status to viewModel.state.value.error)
+        assertEquals(
+            LabelPrinterStatus.PRINTING to null,
+            viewModel.state.value.status to viewModel.state.value.error,
+        )
     }
+
+    @Test
+    fun `a print cut off by a drop that is not searched for cannot bring the printer back to ready`() =
+        runTest(dispatcher) {
+            val viewModel = readyOnSilentPrinter()
+            connection.simulateRemoteDisconnect()
+            viewModel.print(LabelBitmap(width = 96, height = 1))
+
+            connection.simulateRemoteDisconnect()
+            advanceTimeBy(10.seconds)
+
+            val state = viewModel.state.value
+            assertEquals(LabelPrinterStatus.IDLE to LabelPrintError.NoResponse, state.status to state.error)
+        }
 
     // Each search spends one of the scan starts Android rations, which the radio's reconnect shares.
     @Test
@@ -218,23 +235,24 @@ class LabelPrintViewModelTest {
     }
 
     @Test
-    fun `a search Android refuses for scanning too often says so rather than blaming Bluetooth`() = runTest(dispatcher) {
-        val refusing =
-            object : BleScanner {
-                override fun scan(timeout: Duration, serviceUuid: Uuid?, address: String?): Flow<BleDevice> = flow {
-                    throw BleScanStartException(
-                        BleScanStartFailureReason.ScanningTooFrequently,
-                        IllegalStateException("quota"),
-                    )
+    fun `a search Android refuses for scanning too often says so rather than blaming Bluetooth`() =
+        runTest(dispatcher) {
+            val refusing =
+                object : BleScanner {
+                    override fun scan(timeout: Duration, serviceUuid: Uuid?, address: String?): Flow<BleDevice> = flow {
+                        throw BleScanStartException(
+                            BleScanStartFailureReason.ScanningTooFrequently,
+                            IllegalStateException("quota"),
+                        )
+                    }
                 }
-            }
-        val viewModel =
-            LabelPrintViewModel(NiimbotPrinterFactory(refusing, FakeBleConnectionFactory(connection)), prefs)
+            val viewModel =
+                LabelPrintViewModel(NiimbotPrinterFactory(refusing, FakeBleConnectionFactory(connection)), prefs)
 
-        viewModel.start()
+            viewModel.start()
 
-        val state = viewModel.state.value
-        assertEquals(LabelPrintError.Scan(BleScanStartFailureReason.ScanningTooFrequently), state.error)
-        assertEquals(LabelPrinterStatus.IDLE, state.status)
-    }
+            val state = viewModel.state.value
+            assertEquals(LabelPrintError.Scan(BleScanStartFailureReason.ScanningTooFrequently), state.error)
+            assertEquals(LabelPrinterStatus.IDLE, state.status)
+        }
 }

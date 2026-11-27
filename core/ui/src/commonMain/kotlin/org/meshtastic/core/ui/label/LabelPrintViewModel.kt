@@ -89,8 +89,8 @@ class LabelPrintViewModel(printerFactory: NiimbotPrinterFactory, private val pre
     private var closing: Job? = null
 
     /**
-     * True once a dropped printer was searched for without the user asking. A second drop then waits for the user: every
-     * search spends one of the few scan starts Android allows the app, which the radio's reconnect needs too.
+     * True once a dropped printer was searched for without the user asking. A second drop then waits for the user:
+     * every search spends one of the few scan starts Android allows the app, which the radio's reconnect needs too.
      */
     private var searchedAfterDrop = false
 
@@ -124,25 +124,25 @@ class LabelPrintViewModel(printerFactory: NiimbotPrinterFactory, private val pre
     /** Connects to the printer the user picked. */
     fun connect(device: BleDevice) {
         searchedAfterDrop = false
+        _state.update { it.copy(error = null) }
         connectTo(device)
     }
 
     fun print(bitmap: LabelBitmap) {
         if (_state.value.status != LabelPrinterStatus.READY) return
         _state.update { it.copy(status = LabelPrinterStatus.PRINTING, error = null) }
-        work =
-            viewModelScope.launch {
-                val result = safeCatching { printer.print(bitmap) }
-                ensureActive()
-                if (result.isSuccess) searchedAfterDrop = false
-                _state.update { state ->
-                    state.copy(
-                        status = LabelPrinterStatus.READY,
-                        printed = state.printed || result.isSuccess,
-                        error = result.exceptionOrNull()?.toLabelPrintError(),
-                    )
-                }
+        work = viewModelScope.launch {
+            val result = safeCatching { printer.print(bitmap) }
+            ensureActive()
+            if (result.isSuccess) searchedAfterDrop = false
+            _state.update { state ->
+                state.copy(
+                    status = LabelPrinterStatus.READY,
+                    printed = state.printed || result.isSuccess,
+                    error = result.exceptionOrNull()?.toLabelPrintError(),
+                )
             }
+        }
     }
 
     private fun connectTo(device: BleDevice) {
@@ -151,21 +151,20 @@ class LabelPrintViewModel(printerFactory: NiimbotPrinterFactory, private val pre
         }
         search?.cancel()
         work?.cancel()
-        _state.update { it.copy(status = LabelPrinterStatus.CONNECTING, printerName = device.name, error = null) }
-        work =
-            viewModelScope.launch {
-                closing?.join()
-                val result = safeCatching { printer.connect(device) }
-                ensureActive()
-                result
-                    .onSuccess { _ ->
-                        prefs.setPrinterAddress(device.address)
-                        _state.update { it.copy(status = LabelPrinterStatus.READY) }
-                    }
-                    .onFailure { failure ->
-                        _state.update { it.copy(status = LabelPrinterStatus.IDLE, error = failure.toLabelPrintError()) }
-                    }
-            }
+        _state.update { it.copy(status = LabelPrinterStatus.CONNECTING, printerName = device.name) }
+        work = viewModelScope.launch {
+            closing?.join()
+            val result = safeCatching { printer.connect(device) }
+            ensureActive()
+            result
+                .onSuccess { _ ->
+                    prefs.setPrinterAddress(device.address)
+                    _state.update { it.copy(status = LabelPrinterStatus.READY) }
+                }
+                .onFailure { failure ->
+                    _state.update { it.copy(status = LabelPrinterStatus.IDLE, error = failure.toLabelPrintError()) }
+                }
+        }
     }
 
     /** The printer went away (auto power-off, out of range): its print is over, and it is looked for once. */
@@ -184,32 +183,30 @@ class LabelPrintViewModel(printerFactory: NiimbotPrinterFactory, private val pre
     private fun startSearch() {
         search?.cancel()
         _state.update { it.copy(status = LabelPrinterStatus.SEARCHING, printerName = null, found = emptyList()) }
-        search =
-            viewModelScope.launch {
-                val scan =
-                    safeCatching {
-                        printer.scan().collect { device ->
-                            _state.update { state ->
-                                if (state.found.any { it.address == device.address }) {
-                                    state
-                                } else {
-                                    state.copy(found = state.found + device)
-                                }
-                            }
-                            if (device.address == prefs.printerAddress.value) connectTo(device)
+        search = viewModelScope.launch {
+            val scan = safeCatching {
+                printer.scan().collect { device ->
+                    _state.update { state ->
+                        if (state.found.any { it.address == device.address }) {
+                            state
+                        } else {
+                            state.copy(found = state.found + device)
                         }
                     }
-                _state.update { state ->
-                    if (state.status == LabelPrinterStatus.SEARCHING) {
-                        state.copy(
-                            status = LabelPrinterStatus.IDLE,
-                            error = scan.exceptionOrNull()?.toScanError() ?: state.error,
-                        )
-                    } else {
-                        state
-                    }
+                    if (device.address == prefs.printerAddress.value) connectTo(device)
                 }
             }
+            _state.update { state ->
+                if (state.status == LabelPrinterStatus.SEARCHING) {
+                    state.copy(
+                        status = LabelPrinterStatus.IDLE,
+                        error = scan.exceptionOrNull()?.toScanError() ?: state.error,
+                    )
+                } else {
+                    state
+                }
+            }
+        }
     }
 }
 

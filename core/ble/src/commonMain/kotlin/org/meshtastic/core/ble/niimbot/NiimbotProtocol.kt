@@ -173,8 +173,11 @@ class NiimbotProtocol(private val link: NiimbotLink) {
     private suspend fun pagesPrinted(): Int = try {
         val data = transceive(NiimbotRequest.GET_PRINT_STATUS, ONE, STATUS_REPLY_OFFSET).data
         if (data.size >= 2) data.unsigned(0) shl BYTE_SHIFT or data.unsigned(1) else 0
-    } catch (skipped: NiimbotException) {
-        if (skipped is NiimbotException.PrinterFault || skipped is NiimbotException.LinkLost) throw skipped
+    } catch (fault: NiimbotException.PrinterFault) {
+        throw fault
+    } catch (lost: NiimbotException.LinkLost) {
+        throw lost
+    } catch (_: NiimbotException) {
         0
     }
 
@@ -216,9 +219,10 @@ class NiimbotProtocol(private val link: NiimbotLink) {
     private suspend fun attempt(block: suspend () -> Unit) {
         try {
             block()
-        } catch (skipped: NiimbotException) {
+        } catch (lost: NiimbotException.LinkLost) {
+            throw lost
+        } catch (_: NiimbotException) {
             // Optional step: older firmware skips it and the print goes on, unless the link itself is gone.
-            if (skipped is NiimbotException.LinkLost) throw skipped
         }
     }
 
