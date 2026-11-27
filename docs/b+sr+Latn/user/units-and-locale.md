@@ -28,7 +28,7 @@ Units follow your device's **region**, not the display language. Plain languages
 
 ## The node's own screen is separate
 
-**Settings → Device configuration → Display → Display Units** configures the screen on the node, not the app. The **12 Hour Clock** and **Always point north** settings do too, and all three apply to the node's display only. Temperature on that screen has its own setting, **Display Fahrenheit**, on the node's Telemetry module. See the [Telemetry module reference](https://meshtastic.org/docs/configuration/module/telemetry#display-fahrenheit) on meshtastic.org.
+**Settings → Device configuration → Display → Display Units** configures the screen on the node, not the app. The **12 Hour Clock** setting does too, and both apply to the node's display only. Temperature on that screen has its own setting, **Display Fahrenheit**, on the node's Telemetry module. See the [Telemetry module reference](https://meshtastic.org/docs/configuration/module/telemetry#display-fahrenheit) on meshtastic.org.
 
 If your node list shows miles while the node's screen shows kilometers, this is why: the two are set in different places. Changing the node's setting never alters what the app displays. See the [Display Config](https://meshtastic.org/docs/configuration/radio/display) guide on meshtastic.org for the device-side options.
 
