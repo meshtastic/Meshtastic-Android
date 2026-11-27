@@ -20,6 +20,7 @@ import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.mock
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,7 +42,6 @@ import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -298,35 +298,67 @@ class TransparentModeControllerTest {
     }
 
     @Test
-    fun `a reconnect during the read-back drops the attempt and never touches the config cache`() = runTest {
+    fun `a reconnect during the first read stops the attempt before it writes`() = runTest {
         val controller = newController()
         connect(transparentLora)
         startTurnOff(controller)
-        nodeAnswers(transparentLora)
+        val firstRead = checkNotNull(pendingRead().packetId)
 
-        reconnect(normalLora)
+        reconnect(transparentLora)
         advanceUntilIdle()
 
-        assertEquals(TransparentModeState(), controller.state.first())
-        assertNull(radioConfigRepository.lastSetLocalConfig)
+        // A cancelled read leaves no response timeout to run out.
+        assertEquals(0L, testScheduler.currentTime)
+
+        serviceRepository.emitMeshPacket(loraResponse(transparentLora, firstRead))
+        advanceUntilIdle()
+
+        assertTrue(radioController.localConfigs.isEmpty())
+        assertEquals(TransparentModeState(active = true, noticeVisible = true), controller.state.first())
     }
 
     @Test
-    fun `switching radios during the read-back drops the attempt and never touches the config cache`() = runTest {
+    fun `switching radios during the first read stops the attempt before it writes`() = runTest {
         val controller = newController()
         connect(transparentLora)
         startTurnOff(controller)
-        nodeAnswers(transparentLora)
-        val oldReadBack = checkNotNull(pendingRead().packetId)
+        val firstRead = checkNotNull(pendingRead().packetId)
 
         serviceRepository.setConnectionState(ConnectionState.Disconnected)
         connect(transparentLora, session = 2L, nodeNum = OTHER_NODE_NUM)
-        runCurrent()
-        serviceRepository.emitMeshPacket(loraResponse(normalLora, oldReadBack))
         advanceUntilIdle()
 
+        assertEquals(0L, testScheduler.currentTime)
+
+        serviceRepository.emitMeshPacket(loraResponse(transparentLora, firstRead))
+        advanceUntilIdle()
+
+        assertTrue(radioController.localConfigs.isEmpty())
         assertEquals(TransparentModeState(active = true, noticeVisible = true), controller.state.first())
-        assertNull(radioConfigRepository.lastSetLocalConfig)
+    }
+
+    @Test
+    fun `an attempt that dies on an error leaves a notice that can be closed`() = runTest {
+        val failing =
+            object : RadioController by radioController {
+                override suspend fun getConfig(destNum: Int, configType: Int, packetId: Int): Unit =
+                    throw NotImplementedError("radio layer broke")
+            }
+        val controller =
+            TransparentModeController(
+                radioConfigRepository,
+                serviceRepository,
+                failing,
+                mock<NodeManager>(MockMode.autofill) {
+                    every { connectionIdentity } returns this@TransparentModeControllerTest.connectionIdentity
+                },
+                CoroutineScope(StandardTestDispatcher(testScheduler) + CoroutineExceptionHandler { _, _ -> }),
+            )
+        connect(transparentLora)
+
+        startTurnOff(controller)
+
+        assertEquals(TransparentModeState(active = true, noticeVisible = true), controller.state.first())
     }
 
     @Test

@@ -177,24 +177,32 @@ class TransparentModeController(
         if (attempt.value == inProgress) return
         attempt.value = inProgress
         scope.launch {
-            val outcome =
-                session
-                    .map { it == started }
-                    .distinctUntilChanged()
-                    .mapLatest { same ->
-                        if (same) readWriteAndReadBack(started.nodeNum) else null
-                    }
-                    .first()
-            attempt.compareAndSet(inProgress, outcome?.let { TransparentModeAttempt(started, it) })
+            var outcome: TransparentModeTurnOff? = null
+            try {
+                outcome =
+                    session
+                        .map { it == started }
+                        .distinctUntilChanged()
+                        .mapLatest { same -> if (same) readWriteAndReadBack(started) else null }
+                        .first()
+            } finally {
+                // Every exit clears the spinner: an attempt left IN_PROGRESS can be neither closed nor retried.
+                attempt.compareAndSet(inProgress, outcome?.let { TransparentModeAttempt(started, it) })
+            }
         }
     }
 
-    private suspend fun readWriteAndReadBack(nodeNum: Int): TransparentModeTurnOff {
+    private suspend fun readWriteAndReadBack(started: TransparentModeSession): TransparentModeTurnOff {
+        val nodeNum = started.nodeNum
         val readBack = safeCatching {
             // What the node says now, not the cache: an earlier save the node dropped or adjusted is still cached.
-            val reported = readLoraConfig(nodeNum) ?: return TransparentModeTurnOff.UNCONFIRMED
-            radioController.sendLocalConfig(reported.withTransparentModeOff())
+            // The write goes to whichever node is local now, so it is sent only on the connection that was read.
             readLoraConfig(nodeNum)
+                ?.takeIf { currentSession() == started }
+                ?.let { reported ->
+                    radioController.sendLocalConfig(reported.withTransparentModeOff())
+                    readLoraConfig(nodeNum)
+                }
         }
             .getOrNull()
         return when {
