@@ -63,4 +63,4 @@ runs:
         VERCEL_TOKEN: ${{ inputs.vercel_token }}
         VERCEL_ORG_ID: ${{ inputs.vercel_org_id }}
         VERCEL_PROJECT_ID: ${{ inputs.vercel_project_id }}
-      run: npx --yes vercel@67.0.0 deploy --prebuilt --prod --yes
+      run: npx --yes vercel@68.0.0 deploy --prebuilt --prod --yes
