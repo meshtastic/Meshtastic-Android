@@ -190,6 +190,12 @@ class RegionInfoTest {
         assertEquals(103, lora(RegionCode.LORA_24, ModemPreset.LONG_FAST).numChannels)
         // NARROW_FAST keeps 62.5 kHz on a wide region -> 1336 slots, not 411 at 203.125 kHz.
         assertEquals(1336, lora(RegionCode.LORA_24, ModemPreset.NARROW_FAST).numChannels)
+        assertEquals(1336, lora(RegionCode.LORA_24, ModemPreset.NARROW_SLOW).numChannels)
+        // LITE keeps 125 kHz -> 668 slots, and TINY keeps 15.6 kHz -> 5353.
+        assertEquals(668, lora(RegionCode.LORA_24, ModemPreset.LITE_FAST).numChannels)
+        assertEquals(668, lora(RegionCode.LORA_24, ModemPreset.LITE_SLOW).numChannels)
+        assertEquals(5353, lora(RegionCode.LORA_24, ModemPreset.TINY_FAST).numChannels)
+        assertEquals(5353, lora(RegionCode.LORA_24, ModemPreset.TINY_SLOW).numChannels)
     }
 
     @Test
@@ -249,5 +255,7 @@ class RegionInfoTest {
         assertEquals(869.4417f, tooWide.radioFreq(1), 0.001f)
         // EU_868 is as narrow and defaults to LONG_FAST: one 250 kHz slot.
         assertEquals(869.525f, custom(RegionCode.EU_868, 500).radioFreq(1), 0.001f)
+        // EU_433 is 1 MHz wide: a custom 1 MHz just fits and stays custom, where the LONG_FAST default would give 4.
+        assertEquals(1, custom(RegionCode.EU_433, 1000).numChannels)
     }
 }
