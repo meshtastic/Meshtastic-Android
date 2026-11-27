@@ -2,7 +2,7 @@
 title: Connections
 parent: User Guide
 nav_order: 2
-last_updated: 2026-11-21
+last_updated: 2026-11-27
 description: Connect your phone, desktop or browser to a Meshtastic node over Bluetooth, USB, TCP/IP or WebSocket.
 aliases:
   - bluetooth
@@ -181,6 +181,19 @@ Once the region is set, the tab also warns you if the node is receive-only: a **
 These cards appear only for the node you are connected to when it is not in managed mode and its settings are writable.
 
 For more information, see [Settings — Radio & User](settings-radio-user#lora-config).
+
+### Transparent mode
+
+A node in transparent mode is the radio for another program, such as meshtasticd. It passes raw LoRa frames to that program and does nothing else, so messaging, positions, node updates and remote admin do not work from the app.
+
+When you connect to a node that has transparent mode on, the app shows a notice with two choices:
+
+- **Turn off** clears transparent mode and leaves every other LoRa setting as it was. This stops any host that is using the node as its radio. The app reports success once the node confirms the setting is off. If the node still reports it on, or does not answer, the notice says so and offers **Retry**.
+- **Leave on** closes the notice. A **Transparent mode is on** card stays on the **Connections** tab for the rest of the connection; tap it to open the notice again. The notice also returns the next time you connect to the node.
+
+While transparent mode is on, the message composer is replaced by a line saying that sending is off, and a resend or a reaction is refused with the same reason.
+
+You can also change the setting on **Settings → LoRa**, on the **Advanced** card.
 
 ## Live Update
 

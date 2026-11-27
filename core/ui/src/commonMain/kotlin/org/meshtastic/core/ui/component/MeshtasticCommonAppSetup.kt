@@ -46,5 +46,6 @@ fun MeshtasticCommonAppSetup(
         onUpdateFirmware = onUpdateFirmware,
     )
     AlertHost(alertManager = uiViewModel.alertManager)
+    TransparentModeNoticeHost()
     TracerouteAlertHandler(uiViewModel = uiViewModel, onNavigateToMap = onNavigateToTracerouteMap)
 }
