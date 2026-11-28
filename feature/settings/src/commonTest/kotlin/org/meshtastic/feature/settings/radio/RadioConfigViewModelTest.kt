@@ -1169,28 +1169,16 @@ class RadioConfigViewModelTest {
                 }
                 .build()
         val writtenIndexes = mutableListOf<Int>()
-        val registeredRequestIds = mutableListOf<Int>()
         val delays = mutableListOf<Duration>()
 
-        val result =
-            applyManualChannelUpdatePlan(
-                updatePlan = listOf(channelA, channelB, channelC),
-                currentSettings = listOf(ChannelSettings.Builder().also { wb -> wb.name = "old" }.build()),
-                finalSettings = listOf(ChannelSettings.Builder().also { wb -> wb.name = "new" }.build()),
-                writeChannel = { channel, onRequestId ->
-                    writtenIndexes.add(channel.index)
-                    val id = channel.index + 100
-                    onRequestId(id)
-                    id
-                },
-                registerRequestId = { registeredRequestIds.add(it) },
-                delayFn = { delays.add(it) },
-            )
+        applyManualChannelUpdatePlan(
+            updatePlan = listOf(channelA, channelB, channelC),
+            currentSettings = listOf(ChannelSettings.Builder().also { wb -> wb.name = "old" }.build()),
+            writeChannel = { channel -> writtenIndexes.add(channel.index) },
+            delayFn = { delays.add(it) },
+        )
 
         assertEquals(listOf(1, 2, 3), writtenIndexes)
-        assertEquals(listOf(101, 102, 103), result.packetIds)
-        assertEquals(listOf(ChannelSettings.Builder().also { wb -> wb.name = "new" }.build()), result.finalSettings)
-        assertEquals(listOf(101, 102, 103), registeredRequestIds)
         assertEquals(listOf(MANUAL_CHANNEL_WRITE_DELAY, MANUAL_CHANNEL_WRITE_DELAY), delays)
     }
 
@@ -1229,15 +1217,10 @@ class RadioConfigViewModelTest {
                 applyManualChannelUpdatePlan(
                     updatePlan = listOf(channelA, channelB, channelC),
                     currentSettings = listOf(ChannelSettings.Builder().also { wb -> wb.name = "old" }.build()),
-                    finalSettings = listOf(ChannelSettings.Builder().also { wb -> wb.name = "new" }.build()),
-                    writeChannel = { channel, onRequestId ->
+                    writeChannel = { channel ->
                         writtenIndexes.add(channel.index)
                         if (channel.index == 2) throw IllegalStateException("boom")
-                        val id = channel.index + 100
-                        onRequestId(id)
-                        id
                     },
-                    registerRequestId = {},
                     onInterrupted = { interrupted = it },
                     delayFn = {},
                 )
@@ -2420,7 +2403,7 @@ class RadioConfigViewModelTest {
     }
 
     @Test
-    fun `registerRequestId timeout clears request and sets error`() = runTest {
+    fun `a request without an answer times out with an error`() = runTest {
         val node = Node(num = 123, user = User.Builder().also { wb -> wb.id = "!123" }.build())
         nodeRepository.setNodes(listOf(node))
         viewModel = createViewModel()
@@ -2437,6 +2420,59 @@ class RadioConfigViewModelTest {
         runCurrent()
 
         assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Error)
+    }
+
+    // Regression: the restart-won branch of the request deadline lost or inverted, so a save whose ACK the reboot ate
+    // ends in a timeout error instead of restarting.
+    @Test
+    fun `a reboot-applying save with no answer settles as restarting at the deadline`() = runTest {
+        val node = Node(num = 123, user = User.Builder().also { wb -> wb.id = "!123" }.build())
+        nodeRepository.setNodes(listOf(node))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
+        viewModel = createViewModel()
+        runCurrent()
+
+        nodeRestartTracker.onConnected()
+        viewModel.setConfig(
+            Config.Builder()
+                .also { wb ->
+                    wb.network = Config.NetworkConfig.Builder().also { wb -> wb.wifi_enabled = true }.build()
+                }
+                .build(),
+        )
+        runCurrent()
+        assertTrue(nodeRestartTracker.restartExpected.value)
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Loading)
+
+        advanceTimeBy(31_000)
+        runCurrent()
+
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Success)
+    }
+
+    // Regression: the batch exclusion in the deadline's restart-won rule dropped, which would report an incomplete
+    // channel write as success inside a stale restart window.
+    @Test
+    fun `a manual channel batch with no answer ends in a timeout error inside a stale restart window`() = runTest {
+        val node = Node(num = 123, user = User.Builder().also { wb -> wb.id = "!123" }.build())
+        nodeRepository.setNodes(listOf(node))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
+        viewModel = createViewModel()
+        runCurrent()
+
+        nodeRestartTracker.expectRestart()
+        viewModel.updateChannels(
+            listOf(ChannelSettings.Builder().also { wb -> wb.name = "New" }.build()),
+            listOf(ChannelSettings.Builder().also { wb -> wb.name = "Old" }.build()),
+        )
+        runCurrent()
+        assertTrue(nodeRestartTracker.restartExpected.value)
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Loading)
+
+        advanceTimeBy(31_000)
+        runCurrent()
+
+        assertEquals(timeoutError, viewModel.radioConfigState.value.responseState)
     }
 
     @Test
