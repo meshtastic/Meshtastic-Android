@@ -177,6 +177,7 @@ class MeshDataHandlerTest {
             )
 
         every { radioInterfaceService.sessionScope(any()) } returns testScope.backgroundScope
+        every { radioInterfaceService.isSessionActive(any()) } returns true
         // Default: mapper returns null for empty packets, which is the safe default
         every { dataMapper.toDataPacket(any()) } returns null
         // Stub commonly accessed properties to avoid NPE from autofill
@@ -774,6 +775,7 @@ class MeshDataHandlerTest {
     @Test
     fun `routing ack from a retired generation cannot update the replacement database`() = testScope.runTest {
         every { radioInterfaceService.sessionScope(session) } returns null
+        every { radioInterfaceService.isSessionActive(session) } returns false
 
         handler.handleRoutingReport(routingReport(Routing.Error.NONE), session)
         advanceUntilIdle()
@@ -948,6 +950,7 @@ class MeshDataHandlerTest {
             )
         every { dataMapper.toDataPacket(packet) } returns dataPacket
         every { radioInterfaceService.sessionScope(session) } returns null
+        every { radioInterfaceService.isSessionActive(session) } returns false
 
         handler.handleReceivedData(packet, 123)
         advanceUntilIdle()

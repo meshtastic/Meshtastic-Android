@@ -61,17 +61,20 @@ internal fun RadioInterfaceService.launchSessionWork(
     onRejected: () -> Unit = {},
     block: suspend () -> Unit,
 ): Job {
-    if (session == null) return scope.handledLaunch { block() }
-    val sessionScope = sessionScope(session)
-    if (sessionScope == null) {
-        onRejected()
-        return Job().apply { complete() }
-    }
-    return sessionScope.handledLaunch(start = CoroutineStart.UNDISPATCHED) {
-        if (!isActive) {
+    val admitted = session?.let { sessionScope(it) }
+    return when {
+        session == null -> scope.handledLaunch { block() }
+        admitted == null -> {
             onRejected()
-            return@handledLaunch
+            Job().apply { complete() }
         }
-        withContext(NonCancellable) { block() }
+        else ->
+            admitted.handledLaunch(start = CoroutineStart.UNDISPATCHED) {
+                if (!isActive) {
+                    onRejected()
+                    return@handledLaunch
+                }
+                withContext(NonCancellable) { block() }
+            }
     }
 }

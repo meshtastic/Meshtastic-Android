@@ -75,9 +75,11 @@ suspend fun RadioSessionAuthority.runInSession(session: RadioSessionContext, blo
     val failure = work.getCompletionExceptionOrNull()
     // The session closed under a caller that is still running: report it. A cancellation or failure the block raised
     // while the session is open reaches the caller.
-    if (failure is CancellationException && !scope.isActive) return false
-    if (failure != null) throw failure
-    return work.await()
+    return when {
+        failure is CancellationException && !scope.isActive -> false
+        failure != null -> throw failure
+        else -> work.await()
+    }
 }
 
 /**

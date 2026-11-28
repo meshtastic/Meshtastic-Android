@@ -378,7 +378,7 @@ class NodeManagerImplTest {
         assertTrue(persisted.isEmpty(), "later writes must queue behind the first on the node's lane")
 
         releaseFirstWrite.complete(Unit)
-        advanceUntilIdle()
+        runCurrent()
 
         assertEquals(listOf(1, 3), persisted.map(Node::lastHeard))
         assertEquals(3, nodeManager.nodeDBbyNodeNum[nodeNum]?.lastHeard)
@@ -404,7 +404,7 @@ class NodeManagerImplTest {
 
         verify(exactly(1)) { radioInterfaceService.sessionScope(newSession) }
         releaseFirstWrite.complete(Unit)
-        advanceUntilIdle()
+        runCurrent()
     }
 
     @Test
