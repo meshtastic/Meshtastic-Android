@@ -34,8 +34,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -300,6 +298,7 @@ class SharedRadioInterfaceService(
         return true
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     override suspend fun runWithSessionLease(
         session: RadioSessionContext,
         block: suspend (RadioSessionLease) -> Unit,
@@ -322,13 +321,11 @@ class SharedRadioInterfaceService(
                     }
                 }
             }
-        try {
-            work.await()
-        } catch (cancelled: CancellationException) {
-            // Teardown cancels the child, which hides its outcome; a cancelled caller still unwinds.
-            currentCoroutineContext().ensureActive()
-            if (!ran && open.scope.isActive) throw cancelled
-        }
+        // join throws only for a cancelled caller. Teardown's cancellation of the child hides its outcome; a failure or
+        // cancellation the block raised while the session is open reaches the caller.
+        work.join()
+        val failure = work.getCompletionExceptionOrNull()
+        if (failure != null && !(failure is CancellationException && (ran || !open.scope.isActive))) throw failure
         return ran
     }
 
