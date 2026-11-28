@@ -43,8 +43,9 @@ import org.meshtastic.proto.Config
  * The connect label for [node], the radio connected at [address], or null when that connection is not one to share (a
  * serial port, a demo transport), when [address], the selection, is not [connectedAddress], the radio this session's
  * handshake came from, or when [nodeIsThisSession] is false: until the radio has reported itself in this session,
- * [node] and [bluetooth] can be the previous radio's. Its QR carries the PIN only when [bluetooth], the radio's own
- * config, reports fixed PIN pairing with a PIN a connect link accepts.
+ * [node] can be the previous radio's. Its QR carries the PIN only when [configIsThisSession], this session's config
+ * stream having completed, and [bluetooth], the radio's own config, reports fixed PIN pairing with a PIN a connect link
+ * accepts: until then [bluetooth] can still be the previous radio's.
  */
 internal fun connectLabelSpec(
     node: Node,
@@ -53,10 +54,11 @@ internal fun connectLabelSpec(
     bluetooth: Config.BluetoothConfig?,
     band: String,
     nodeIsThisSession: Boolean,
+    configIsThisSession: Boolean,
 ): LabelSpec.Connect? = connectLink(address)
     .takeIf { nodeIsThisSession && address == connectedAddress }
     ?.let { plain ->
-        val link = connectLink(address, fixedPairingPin(bluetooth)) ?: plain
+        val link = connectLink(address, fixedPairingPin(bluetooth.takeIf { configIsThisSession })) ?: plain
         LabelSpec.Connect(
             content =
             NameTagContent(
@@ -78,11 +80,12 @@ internal fun rememberConnectLabel(
     connectedAddress: String?,
     bluetooth: Config.BluetoothConfig?,
     nodeIsThisSession: Boolean,
+    configIsThisSession: Boolean,
+    supported: Boolean = isLabelPrintSupported(),
 ): LabelSpec.Connect? {
-    val supported = isLabelPrintSupported()
     val band = stringResource(Res.string.label_print_band_connect)
     return if (supported) {
-        connectLabelSpec(node, address, connectedAddress, bluetooth, band, nodeIsThisSession)
+        connectLabelSpec(node, address, connectedAddress, bluetooth, band, nodeIsThisSession, configIsThisSession)
     } else {
         null
     }

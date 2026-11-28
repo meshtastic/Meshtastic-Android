@@ -134,6 +134,7 @@ class ConnectLinkTest {
                 bluetooth(PairingMode.FIXED_PIN, 123456),
                 "SCAN TO CONNECT",
                 nodeIsThisSession = true,
+                configIsThisSession = true,
             )
         val random =
             connectLabelSpec(
@@ -143,6 +144,7 @@ class ConnectLinkTest {
                 bluetooth(PairingMode.RANDOM_PIN, 123456),
                 "SCAN TO CONNECT",
                 nodeIsThisSession = true,
+                configIsThisSession = true,
             )
 
         assertEquals("meshtastic://meshtastic/connections?address=xAA:BB:CC:DD:EE:FF&pin=123456", fixed?.link)
@@ -167,6 +169,7 @@ class ConnectLinkTest {
                 bluetooth(PairingMode.FIXED_PIN, 123456),
                 "SCAN TO CONNECT",
                 nodeIsThisSession = true,
+                configIsThisSession = true,
             ),
         )
     }
@@ -182,9 +185,31 @@ class ConnectLinkTest {
                 bluetooth(PairingMode.FIXED_PIN, 123456),
                 "SCAN TO CONNECT",
                 nodeIsThisSession = false,
+                configIsThisSession = true,
             )
 
         assertNull(label)
+    }
+
+    // The new radio's identity and node arrive before its config stream completes, and until then the Bluetooth config
+    // on hand can be the previous radio's, fixed PIN included.
+    @Test
+    fun `the connect label carries no PIN before the config stream of the session completes`() {
+        val label =
+            connectLabelSpec(
+                node,
+                ble,
+                ble,
+                bluetooth(PairingMode.FIXED_PIN, 123456),
+                "SCAN TO CONNECT",
+                nodeIsThisSession = true,
+                configIsThisSession = false,
+            )
+
+        assertEquals(
+            "meshtastic://meshtastic/connections?address=xAA:BB:CC:DD:EE:FF" to null,
+            label?.link to label?.linkWithoutPin,
+        )
     }
 
     // Just after the user picks another radio the selection moves first, while the node, its config and the session
@@ -199,6 +224,7 @@ class ConnectLinkTest {
                 bluetooth(PairingMode.FIXED_PIN, 123456),
                 "SCAN TO CONNECT",
                 nodeIsThisSession = true,
+                configIsThisSession = true,
             )
 
         assertNull(label)

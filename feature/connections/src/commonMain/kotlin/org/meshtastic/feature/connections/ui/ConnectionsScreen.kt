@@ -483,7 +483,14 @@ fun ConnectionsScreen(
     // its sheet is open it keeps the label it was opened with and stays up whatever the radio's connection does: a
     // radio that drops must not cut a print short.
     val connectLabel = ourNode?.let {
-        rememberConnectLabel(it, selectedDevice, connectionAddress, localConfig.bluetooth, activeNodeInfoReady)
+        rememberConnectLabel(
+            node = it,
+            address = selectedDevice,
+            connectedAddress = connectionAddress,
+            bluetooth = localConfig.bluetooth,
+            nodeIsThisSession = activeNodeInfoReady,
+            configIsThisSession = connectionState is ConnectionState.Connected,
+        )
     }
     var printingLabel by remember { mutableStateOf<LabelSpec.Connect?>(null) }
     printingLabel?.let { LabelPrintSheet(spec = it, onDismiss = { printingLabel = null }) }
