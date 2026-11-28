@@ -117,16 +117,7 @@ internal class AdminControllerImpl(
             Logger.w { "Ignoring setHamMode for node $destNum — ham onboarding targets the local node only" }
             return AdminResult.Failed(Routing.Error.BAD_REQUEST)
         }
-        val client = sessionAdmin.activeClient() ?: return AdminResult.NodeUnreachable
-        // The SDK echoes tx_power and frequency from its live LoRa config, or fails without sending when it has none.
-        val result: AdminResult<Unit> =
-            try {
-                client.enableHamMode(hamParameters.call_sign, hamParameters.short_name, hamParameters.long_name)
-            } catch (e: MeshtasticException) {
-                Logger.w(e) { "Ham mode ended with the radio session" }
-                AdminResult.NodeUnreachable
-            }
-        return result.onSuccess {
+        return sendHamMode(hamParameters).onSuccess {
             val currentUser = nodeManager.nodeDBbyNodeNum[destNum]?.user ?: User.Builder().build()
             nodeManager.handleReceivedUser(
                 destNum,
@@ -139,6 +130,17 @@ internal class AdminControllerImpl(
                     }
                     .build(),
             )
+        }
+    }
+
+    private suspend fun sendHamMode(hamParameters: HamParameters): AdminResult<Unit> {
+        val client = sessionAdmin.activeClient() ?: return AdminResult.NodeUnreachable
+        // The SDK echoes tx_power and frequency from its live LoRa config, or fails without sending when it has none.
+        return try {
+            client.enableHamMode(hamParameters.call_sign, hamParameters.short_name, hamParameters.long_name)
+        } catch (e: MeshtasticException) {
+            Logger.w(e) { "Ham mode ended with the radio session" }
+            AdminResult.NodeUnreachable
         }
     }
 
