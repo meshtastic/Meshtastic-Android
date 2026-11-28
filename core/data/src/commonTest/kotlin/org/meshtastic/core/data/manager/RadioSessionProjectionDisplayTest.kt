@@ -37,6 +37,8 @@ import kotlin.test.assertEquals
 /**
  * Pins the display mirror admission check: a frame or palette for a session that is no longer admitted must not reach
  * the mirror, and one for the open session must.
+ *
+ * Regression: dropping or inverting the `isSessionActive` check in `onDisplayFrame` or `onDisplayPalette`.
  */
 class RadioSessionProjectionDisplayTest {
 
