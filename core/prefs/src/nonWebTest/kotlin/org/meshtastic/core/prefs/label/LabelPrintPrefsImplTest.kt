@@ -17,6 +17,8 @@
 package org.meshtastic.core.prefs.label
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -25,7 +27,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import okio.FileSystem
 import okio.Path
-import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.common.di.ApplicationCoroutineScope
 import org.meshtastic.core.prefs.di.asUiDataStore
 import org.meshtastic.core.prefs.store.PrefsStore
 import org.meshtastic.core.prefs.store.asPrefsStore
@@ -41,7 +43,6 @@ import kotlin.uuid.Uuid
 class LabelPrintPrefsImplTest {
     private val dispatcher = StandardTestDispatcher()
     private val testScope = TestScope(dispatcher)
-    private val dispatchers = CoroutineDispatchers(dispatcher, dispatcher, dispatcher)
     private lateinit var tmpDir: Path
     private lateinit var store: PrefsStore
 
@@ -56,11 +57,15 @@ class LabelPrintPrefsImplTest {
 
     @AfterTest
     fun tearDown() {
+        appScope.cancel()
         testScope.cancel()
         FileSystem.SYSTEM.deleteRecursively(tmpDir)
     }
 
-    private fun prefs() = LabelPrintPrefsImpl(store.asUiDataStore(), dispatchers)
+    private val appScope =
+        object : ApplicationCoroutineScope, CoroutineScope by CoroutineScope(SupervisorJob() + dispatcher) {}
+
+    private fun prefs() = LabelPrintPrefsImpl(store.asUiDataStore(), appScope)
 
     @Test
     fun `a label length never set reads as 40 mm and no printer is remembered`() = testScope.runTest {

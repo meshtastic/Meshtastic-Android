@@ -16,23 +16,21 @@
  */
 package org.meshtastic.core.prefs.label
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
-import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.common.di.ApplicationCoroutineScope
 import org.meshtastic.core.prefs.di.UiDataStore
 import org.meshtastic.core.prefs.store.intPrefsKey
 import org.meshtastic.core.prefs.store.stringPrefsKey
 import org.meshtastic.core.repository.LabelPrintPrefs
 
 @Single
-class LabelPrintPrefsImpl(private val dataStore: UiDataStore, dispatchers: CoroutineDispatchers) : LabelPrintPrefs {
-    private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
+class LabelPrintPrefsImpl(private val dataStore: UiDataStore, private val scope: ApplicationCoroutineScope) :
+    LabelPrintPrefs {
 
     override val labelLengthMm: StateFlow<Int> =
         dataStore.data

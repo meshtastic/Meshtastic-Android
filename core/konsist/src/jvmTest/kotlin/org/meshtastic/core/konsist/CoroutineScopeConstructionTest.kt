@@ -52,7 +52,6 @@ class CoroutineScopeConstructionTest {
             "core/prefs/commonMain/DiscoveryPrefsImpl.kt",
             "core/prefs/commonMain/FilterPrefsImpl.kt",
             "core/prefs/commonMain/HomoglyphPrefsImpl.kt",
-            "core/prefs/commonMain/LabelPrintPrefsImpl.kt",
             "core/prefs/commonMain/MapConsentPrefsImpl.kt",
             "core/prefs/commonMain/MapPrefsImpl.kt",
             "core/prefs/commonMain/MapTileProviderPrefsImpl.kt",
