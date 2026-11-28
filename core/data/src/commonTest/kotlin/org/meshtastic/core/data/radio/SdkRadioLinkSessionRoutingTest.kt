@@ -31,6 +31,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.data.manager.MeshConfigFlowManagerImpl
 import org.meshtastic.core.data.manager.NodeManagerImpl
@@ -48,11 +49,12 @@ import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeNotificationPrefs
 import org.meshtastic.core.testing.FakeRadioConfigRepository
 import org.meshtastic.core.testing.FakeRadioInterfaceService
+import org.meshtastic.proto.DisplayFrame
 import org.meshtastic.proto.DisplayPalette
 import org.meshtastic.proto.LockdownStatus
 import org.meshtastic.proto.LogRecord
 import org.meshtastic.proto.MyNodeInfo
-import org.meshtastic.sdk.DisplayMirrorFrame
+import org.meshtastic.sdk.DisplayImage
 import org.meshtastic.sdk.InMemoryStorageProvider
 import org.meshtastic.sdk.RadioClient
 import org.meshtastic.sdk.RadioSessionEvent
@@ -109,6 +111,7 @@ class SdkRadioLinkSessionRoutingTest {
         val radio = FakeRadioInterfaceService(scope.backgroundScope).apply { setDeviceAddress("tfake") }
         val logs = FakeMeshLogRepository()
         val palettes = mutableListOf<DisplayPalette>()
+        val images = mutableListOf<DisplayImage>()
         val lockdown =
             mock<LockdownCoordinator>(MockMode.autofill).also {
                 every { it.onConnect() } calls { log += "lockdown-connect" }
@@ -119,7 +122,9 @@ class SdkRadioLinkSessionRoutingTest {
                 override val frame = MutableStateFlow<MirrorFrame?>(null)
                 override val palette = MutableStateFlow<MirrorPalette?>(null)
 
-                override fun handleFrame(frame: DisplayMirrorFrame) = Unit
+                override fun handleImage(image: DisplayImage) {
+                    images += image
+                }
 
                 override fun handlePalette(palette: DisplayPalette) {
                     palettes += palette
@@ -296,6 +301,27 @@ class SdkRadioLinkSessionRoutingTest {
         send(events, RadioSessionEvent.Ended(1))
         link.routeDisplayPalette(palette)
         assertEquals(1, rig.palettes.size, "a palette after Ended(1) has no session to reach")
+    }
+
+    // Regression: the untagged display image was routed to a closed or absent session.
+    @Test
+    fun `displayImage reaches the open session and is dropped after its Ended`() = runTest {
+        val rig = Rig(this)
+        val events = MutableSharedFlow<RadioSessionEvent>()
+        val link = rig.link()
+        pump(rig, link, events)
+        val image = DisplayImage(8, 4, DisplayFrame.Format.RGB565, 1, 0, ByteArray(64).toByteString())
+
+        link.routeDisplayImage(image)
+        assertTrue(rig.images.isEmpty(), "no session is open yet")
+
+        send(events, lockdown(1))
+        link.routeDisplayImage(image)
+        assertEquals(1, rig.images.size)
+
+        send(events, RadioSessionEvent.Ended(1))
+        link.routeDisplayImage(image)
+        assertEquals(1, rig.images.size, "an image after Ended(1) has no session to reach")
     }
 
     // Regression: cancelling the pump left its app session open.

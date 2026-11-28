@@ -30,7 +30,7 @@ import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioInterfaceService
 import org.meshtastic.proto.DisplayFrame
 import org.meshtastic.proto.DisplayPalette
-import org.meshtastic.sdk.DisplayMirrorFrame
+import org.meshtastic.sdk.DisplayImage
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -38,18 +38,18 @@ import kotlin.test.assertEquals
  * Pins the display mirror admission check: a frame or palette for a session that is no longer admitted must not reach
  * the mirror, and one for the open session must.
  *
- * Regression: dropping or inverting the `isSessionActive` check in `onDisplayFrame` or `onDisplayPalette`.
+ * Regression: dropping or inverting the `isSessionActive` check in `onDisplayImage` or `onDisplayPalette`.
  */
 class RadioSessionProjectionDisplayTest {
 
     private class RecordingMirror : DisplayMirrorManager {
         override val frame: StateFlow<MirrorFrame?> = MutableStateFlow(null)
         override val palette: StateFlow<MirrorPalette?> = MutableStateFlow(null)
-        val frames = mutableListOf<DisplayMirrorFrame>()
+        val frames = mutableListOf<DisplayImage>()
         val palettes = mutableListOf<DisplayPalette>()
 
-        override fun handleFrame(frame: DisplayMirrorFrame) {
-            frames += frame
+        override fun handleImage(image: DisplayImage) {
+            frames += image
         }
 
         override fun handlePalette(palette: DisplayPalette) {
@@ -59,14 +59,7 @@ class RadioSessionProjectionDisplayTest {
         override fun reset() = Unit
     }
 
-    private fun frame() = DisplayMirrorFrame(
-        width = 128,
-        height = 64,
-        format = DisplayFrame.Format.MONO_VLSB,
-        frameId = 1,
-        data = ByteArray(1024).toByteString(),
-        paletteSignature = 0,
-    )
+    private fun frame() = DisplayImage(8, 4, DisplayFrame.Format.RGB565, 1, 0, ByteArray(64).toByteString())
 
     private fun palette() = DisplayPalette.Builder().also { it.signature = 7 }.build()
 
@@ -79,7 +72,7 @@ class RadioSessionProjectionDisplayTest {
         val projection = projection(radio, mirror)
         radio.disconnect()
 
-        projection.onDisplayFrame(frame(), session)
+        projection.onDisplayImage(frame(), session)
 
         assertEquals(emptyList(), mirror.frames)
     }
@@ -93,7 +86,7 @@ class RadioSessionProjectionDisplayTest {
         val projection = projection(radio, mirror)
         val sent = frame()
 
-        projection.onDisplayFrame(sent, session)
+        projection.onDisplayImage(sent, session)
 
         assertEquals(listOf(sent), mirror.frames)
     }

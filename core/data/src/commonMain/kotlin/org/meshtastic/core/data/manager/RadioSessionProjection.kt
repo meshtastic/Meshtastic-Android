@@ -50,7 +50,7 @@ import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.NodeInfo
 import org.meshtastic.proto.PortNum
 import org.meshtastic.sdk.ConfigBundle
-import org.meshtastic.sdk.DisplayMirrorFrame
+import org.meshtastic.sdk.DisplayImage
 import org.meshtastic.sdk.MeshEvent
 import org.meshtastic.sdk.NodeChange
 import org.meshtastic.sdk.RadioSessionEvent
@@ -183,8 +183,8 @@ class RadioSessionProjection(
         )
     }
 
-    fun onDisplayFrame(frame: DisplayMirrorFrame, session: RadioSessionContext) {
-        if (radioInterfaceService.isSessionActive(session)) displayMirrorManager.value.handleFrame(frame)
+    fun onDisplayImage(image: DisplayImage, session: RadioSessionContext) {
+        if (radioInterfaceService.isSessionActive(session)) displayMirrorManager.value.handleImage(image)
     }
 
     fun onDisplayPalette(palette: DisplayPalette, session: RadioSessionContext) {

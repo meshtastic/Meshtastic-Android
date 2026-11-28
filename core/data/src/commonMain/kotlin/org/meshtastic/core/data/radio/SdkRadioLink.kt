@@ -41,6 +41,7 @@ import org.meshtastic.core.repository.TransportDisconnectReason
 import org.meshtastic.proto.DisplayPalette
 import org.meshtastic.proto.LogRecord
 import org.meshtastic.sdk.AutoReconnectConfig
+import org.meshtastic.sdk.DisplayImage
 import org.meshtastic.sdk.InMemoryStorageProvider
 import org.meshtastic.sdk.MeshEvent
 import org.meshtastic.sdk.MeshtasticException
@@ -236,9 +237,13 @@ internal class SdkRadioLink(
         current.value?.context?.let { pipeline.sessionProjection.onDisplayPalette(palette, it) }
     }
 
+    internal fun routeDisplayImage(image: DisplayImage) {
+        current.value?.context?.let { pipeline.sessionProjection.onDisplayImage(image, it) }
+    }
+
     /**
-     * Tagged streams go to the open session when their ID matches it. The palette and queue status carry no session ID
-     * and go to the open session, if any.
+     * Tagged streams go to the open session when their ID matches it. The palette, the display image and queue status
+     * carry no session ID and go to the open session, if any.
      */
     private suspend fun collectSideFlows() = coroutineScope {
         val projection = pipeline.sessionProjection
@@ -252,15 +257,7 @@ internal class SdkRadioLink(
                     }
             }
         }
-        launch {
-            client.displayFrames.collectGuarded("display frame") { item ->
-                current.value
-                    ?.takeIf { it.sdkId == item.sessionId }
-                    ?.let {
-                        projection.onDisplayFrame(item.value, it.context)
-                    }
-            }
-        }
+        launch { client.displayImage.filterNotNull().collectGuarded("display image") { routeDisplayImage(it) } }
         launch {
             client.displayPalette.filterNotNull().collectGuarded("display palette") { routeDisplayPalette(it) }
         }
