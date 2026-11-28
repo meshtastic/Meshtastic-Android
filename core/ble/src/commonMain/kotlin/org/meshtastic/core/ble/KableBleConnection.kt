@@ -120,6 +120,12 @@ private suspend fun Peripheral.queryMaxWriteLength(): Int? = try {
     null
 }
 
+/** Builds the Kable peripheral for a connect: from the scan's advertisement when there is one, else by address. */
+internal typealias PeripheralFactory = (MeshtasticBleDevice, PeripheralBuilder.() -> Unit) -> Peripheral
+
+private fun platformPeripheral(device: MeshtasticBleDevice, builder: PeripheralBuilder.() -> Unit): Peripheral =
+    device.advertisement?.let { Peripheral(it, builder) } ?: createPeripheral(device.address, builder)
+
 /**
  * [BleConnection] implementation using Kable for cross-platform BLE communication.
  *
@@ -130,11 +136,19 @@ private suspend fun Peripheral.queryMaxWriteLength(): Int? = try {
  * the `autoConnect` path. At most two attempts are made per [connect] call — the caller ([BleRadioTransport]) owns the
  * macro-level retry/backoff loop.
  */
-class KableBleConnection(
+class KableBleConnection
+internal constructor(
     private val scope: CoroutineScope,
     private val loggingConfig: BleLoggingConfig,
-    private val tracksActiveConnection: Boolean = true,
+    /** False for a second device, such as a label printer, which must never stand in for the radio. */
+    internal val tracksActiveConnection: Boolean,
+    private val newPeripheral: PeripheralFactory,
 ) : BleConnection {
+    constructor(
+        scope: CoroutineScope,
+        loggingConfig: BleLoggingConfig,
+        tracksActiveConnection: Boolean = true,
+    ) : this(scope, loggingConfig, tracksActiveConnection, ::platformPeripheral)
 
     @Volatile private var peripheral: Peripheral? = null
 
@@ -181,8 +195,7 @@ class KableBleConnection(
 
         val p =
             try {
-                meshtasticDevice.advertisement?.let { adv -> Peripheral(adv) { commonConfig() } }
-                    ?: createPeripheral(device.address) { commonConfig() }
+                newPeripheral(meshtasticDevice) { commonConfig() }
             } catch (ex: IllegalStateException) {
                 throw ex.asBluetoothUnsupportedExceptionOrNull() ?: ex
             }
