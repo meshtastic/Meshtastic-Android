@@ -900,7 +900,7 @@ class RadioControllerImplTest {
         val admin = recordingAdmin()
         val controller = editController(backgroundScope, admin)
 
-        controller.removeByNodenum(packetId = 1, nodeNum = 55)
+        controller.removeByNodenum(nodeNum = 55)
         advanceUntilIdle()
 
         verifySuspend { nodeManager.removeByNodenum(55) }
@@ -914,7 +914,7 @@ class RadioControllerImplTest {
         val admin = recordingAdmin().apply { removeResult = AdminResult.Unauthorized }
         val controller = editController(backgroundScope, admin)
 
-        controller.removeByNodenum(packetId = 1, nodeNum = 55)
+        controller.removeByNodenum(nodeNum = 55)
         advanceUntilIdle()
 
         verify { nodeManager.cancelPendingRemoval(55) }
@@ -934,7 +934,7 @@ class RadioControllerImplTest {
         val admin = recordingAdmin()
         val controller = editController(backgroundScope, admin, activeSession = MutableStateFlow(null))
 
-        controller.removeByNodenum(packetId = 1, nodeNum = 55)
+        controller.removeByNodenum(nodeNum = 55)
 
         verifySuspend { nodeManager.removeByNodenum(55) }
         assertTrue(admin.commands.isEmpty())
@@ -958,7 +958,7 @@ class RadioControllerImplTest {
         val admin = recordingAdmin()
         val controller = editController(backgroundScope, admin, myNodeNum = null)
 
-        controller.removeByNodenum(packetId = 1, nodeNum = 55)
+        controller.removeByNodenum(nodeNum = 55)
 
         verifySuspend { nodeManager.removeByNodenum(55) }
         assertTrue(admin.commands.isEmpty())

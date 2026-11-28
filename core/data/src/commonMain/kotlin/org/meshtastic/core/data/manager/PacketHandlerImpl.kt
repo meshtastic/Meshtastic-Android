@@ -190,11 +190,12 @@ class PacketHandlerImpl(
                 ?: throw IllegalArgumentException("Unknown node ID ${address.id}")
     }
 
-    override suspend fun sendTracked(packet: MeshPacket): PacedMessageHandle? {
-        if (packet.id == 0) return null
-        return safeCatching { submit(packet)?.takeIf { it.awaitAdmission() } }
+    /** Queues [packet] and returns whether the SDK admitted it; a duplicate ID still in flight is refused. */
+    internal suspend fun sendToRadio(packet: MeshPacket): Boolean {
+        if (packet.id == 0) return false
+        return safeCatching { submit(packet)?.awaitAdmission() == true }
             .onFailure { Logger.w(it) { "SDK send submission failed for packet ${packet.id.toUInt()}" } }
-            .getOrNull()
+            .getOrDefault(false)
     }
 
     private fun isSelected(database: MeshtasticDatabase): Boolean = databaseProvider.currentDb.value === database

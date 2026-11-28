@@ -491,7 +491,7 @@ class FakeRadioController :
 
     override suspend fun nodedbReset(destNum: Int, preserveFavorites: Boolean): AdminResult<Unit> = writeResult
 
-    override suspend fun removeByNodenum(packetId: Int, nodeNum: Int) {}
+    override suspend fun removeByNodenum(nodeNum: Int) {}
 
     override suspend fun requestPosition(destNum: Int, currentPosition: Position): NodeRequest = NodeRequest.NONE
 
