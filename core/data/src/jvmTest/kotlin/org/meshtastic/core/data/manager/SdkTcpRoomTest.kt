@@ -20,6 +20,7 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
+import androidx.lifecycle.coroutineScope
 import dev.mokkery.MockMode
 import dev.mokkery.answering.calls
 import dev.mokkery.answering.returns
@@ -31,6 +32,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.cancelAndJoin
@@ -589,8 +591,12 @@ class SdkTcpRoomTest {
     private class TestLifecycleOwner : LifecycleOwner {
         override val lifecycle = LifecycleRegistry.createUnsafe(this).apply { currentState = Lifecycle.State.STARTED }
 
-        fun destroy() {
+        suspend fun destroy() {
+            val scope = lifecycle.coroutineScope
             lifecycle.currentState = Lifecycle.State.DESTROYED
+            // Collectors finish cancelling on Room's threads; one still running would resume on a reset main
+            // dispatcher.
+            scope.coroutineContext[Job]?.join()
         }
     }
 
