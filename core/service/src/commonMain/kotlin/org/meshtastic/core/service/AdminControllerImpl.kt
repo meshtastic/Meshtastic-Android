@@ -20,7 +20,6 @@ import co.touchlab.kermit.Logger
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
 import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.withContext
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
@@ -35,7 +34,6 @@ import org.meshtastic.core.repository.LocalNodeUnavailableException
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.REMOTE_READ_TIMEOUT
-import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.toFixedPositionProto
 import org.meshtastic.proto.AdminMessage
@@ -55,6 +53,7 @@ import org.meshtastic.sdk.AdminResult
 import org.meshtastic.sdk.ChannelIndex
 import org.meshtastic.sdk.MeshtasticException
 import org.meshtastic.sdk.NodeId
+import org.meshtastic.sdk.enableHamMode
 import org.meshtastic.sdk.onSuccess
 import kotlin.time.Duration.Companion.seconds
 
@@ -74,13 +73,15 @@ internal fun editSettingsFailureMessage(result: AdminResult<*>): String =
 @Suppress("TooManyFunctions")
 internal class AdminControllerImpl(
     private val nodeManager: NodeManager,
-    private val radioConfigRepository: RadioConfigRepository,
     private val radio: RadioInterfaceService,
     private val sessionAdmin: SessionAdmin,
     private val heardOnCurrentLoraRefresher: HeardOnCurrentLoraRefresher,
 ) : AdminController {
 
     private fun isLocal(destNum: Int): Boolean = destNum == nodeManager.myNodeNum.value
+
+    /** The session API for [destNum]: the root API for the connected node, `forNode` for any other. */
+    private fun AdminApi.at(destNum: Int): AdminApi = if (isLocal(destNum)) this else forNode(NodeId(destNum))
 
     /** Runs [command] on [destNum] through the session's SDK admin API; a remote read waits [REMOTE_READ_TIMEOUT]. */
     private suspend fun <T> onNode(
@@ -89,21 +90,16 @@ internal class AdminControllerImpl(
         command: suspend AdminApi.() -> AdminResult<T>,
     ): AdminResult<T> {
         val local = isLocal(destNum)
+        val remoteRead = read && !local
         return sessionAdmin.run {
-            val target =
-                when {
-                    local -> this
-                    read -> forNode(NodeId(destNum)).withRpcTimeout(REMOTE_READ_TIMEOUT)
-                    else -> forNode(NodeId(destNum))
-                }
-            target.command()
+            val target = if (local) this else forNode(NodeId(destNum))
+            (if (remoteRead) target.withRpcTimeout(REMOTE_READ_TIMEOUT) else target).command()
         }
     }
 
     /** Starts [command] on [destNum] without waiting for its answer; see [SessionAdmin.launch]. */
     private fun launchOnNode(operation: String, destNum: Int, command: suspend AdminApi.() -> AdminResult<*>) {
-        val local = isLocal(destNum)
-        sessionAdmin.launch(operation) { (if (local) this else forNode(NodeId(destNum))).command() }
+        sessionAdmin.launch(operation) { at(destNum).command() }
     }
 
     // ── Owner ───────────────────────────────────────────────────────────────
@@ -117,39 +113,33 @@ internal class AdminControllerImpl(
     override suspend fun getOwner(destNum: Int): AdminResult<User> = onNode(destNum, read = true) { getOwner() }
 
     override suspend fun setHamMode(destNum: Int, hamParameters: HamParameters): AdminResult<Unit> {
-        // Firmware applies tx_power/frequency to the LoRa config verbatim, so echo the node's current values;
-        // with no LoRa config loaded there is nothing to echo, and zeros would wipe the overrides.
-        val local = isLocal(destNum)
-        val lora = if (local) radioConfigRepository.localConfigFlow.firstOrNull()?.lora else null
-        if (lora == null) {
-            if (!local) {
-                Logger.w { "Ignoring setHamMode for node $destNum — ham onboarding targets the local node only" }
-            }
+        if (!isLocal(destNum)) {
+            Logger.w { "Ignoring setHamMode for node $destNum — ham onboarding targets the local node only" }
             return AdminResult.Failed(Routing.Error.BAD_REQUEST)
         }
-        val params =
-            hamParameters
-                .newBuilder()
-                .also { wb ->
-                    wb.tx_power = lora.tx_power
-                    wb.frequency = lora.override_frequency
-                }
-                .build()
-        return onNode(destNum) { setHamMode(params) }
-            .onSuccess {
-                val currentUser = nodeManager.nodeDBbyNodeNum[destNum]?.user ?: User.Builder().build()
-                nodeManager.handleReceivedUser(
-                    destNum,
-                    currentUser
-                        .newBuilder()
-                        .also { wb ->
-                            wb.long_name = HamName.compose(hamParameters.call_sign, hamParameters.long_name)
-                            wb.short_name = hamParameters.short_name
-                            wb.is_licensed = true
-                        }
-                        .build(),
-                )
+        val client = sessionAdmin.activeClient() ?: return AdminResult.NodeUnreachable
+        // The SDK echoes tx_power and frequency from its live LoRa config, or fails without sending when it has none.
+        val result: AdminResult<Unit> =
+            try {
+                client.enableHamMode(hamParameters.call_sign, hamParameters.short_name, hamParameters.long_name)
+            } catch (e: MeshtasticException) {
+                Logger.w(e) { "Ham mode ended with the radio session" }
+                AdminResult.NodeUnreachable
             }
+        return result.onSuccess {
+            val currentUser = nodeManager.nodeDBbyNodeNum[destNum]?.user ?: User.Builder().build()
+            nodeManager.handleReceivedUser(
+                destNum,
+                currentUser
+                    .newBuilder()
+                    .also { wb ->
+                        wb.long_name = HamName.compose(hamParameters.call_sign, hamParameters.long_name)
+                        wb.short_name = hamParameters.short_name
+                        wb.is_licensed = true
+                    }
+                    .build(),
+            )
+        }
     }
 
     // ── Configuration ─────────────────────────────────────────────────────────
@@ -354,7 +344,7 @@ internal class AdminControllerImpl(
         val sessionAdmin =
             session?.let(radio::adminForSession)
                 ?: throw EditSettingsTransactionException(editSettingsFailureMessage(AdminResult.NodeUnreachable))
-        val admin = if (isLocalDestination) sessionAdmin else sessionAdmin.forNode(NodeId(destNum))
+        val admin = sessionAdmin.at(destNum)
 
         val projections = StagedProjections()
         val result =

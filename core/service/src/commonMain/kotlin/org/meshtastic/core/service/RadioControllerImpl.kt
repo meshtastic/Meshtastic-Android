@@ -133,7 +133,6 @@ class RadioControllerImpl(
 ) : RadioController,
     AdminController by AdminControllerImpl(
         nodeManager = nodeManager,
-        radioConfigRepository = radioConfigRepository,
         radio = radioInterfaceService,
         sessionAdmin = SessionAdmin(radioInterfaceService, scope),
         heardOnCurrentLoraRefresher =
