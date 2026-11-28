@@ -184,6 +184,7 @@ class RadioControllerImplTest {
             packetHandler = packetHandler,
             nodeManager = nodeManager,
             radioInterfaceService = radioInterfaceService,
+            sessionAdmin = SessionAdmin(radioInterfaceService, scope.asServiceScope()),
             locationManager = locationManager,
             packetRepository = lazy { packetRepository },
             dataHandler = lazy { dataHandler },

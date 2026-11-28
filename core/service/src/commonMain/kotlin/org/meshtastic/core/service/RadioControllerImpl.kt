@@ -109,7 +109,7 @@ internal suspend fun restoreLocalConfigurationIfOwned(
         QueryController::class,
     ],
 )
-class RadioControllerImpl(
+internal class RadioControllerImpl(
     private val serviceRepository: ServiceRepository,
     nodeRepository: NodeRepository,
     private val packetHandler: PacketHandler,
@@ -117,6 +117,7 @@ class RadioControllerImpl(
     neighborInfoHandler: NeighborInfoHandler,
     private val nodeManager: NodeManager,
     private val radioInterfaceService: RadioInterfaceService,
+    sessionAdmin: SessionAdmin,
     private val locationManager: MeshLocationManager,
     packetRepository: Lazy<PacketRepository>,
     dataHandler: Lazy<MeshDataHandler>,
@@ -135,7 +136,7 @@ class RadioControllerImpl(
         nodeManager = nodeManager,
         radioConfigRepository = radioConfigRepository,
         radio = radioInterfaceService,
-        sessionAdmin = SessionAdmin(radioInterfaceService, scope),
+        sessionAdmin = sessionAdmin,
         heardOnCurrentLoraRefresher =
         HeardOnCurrentLoraRefresher(
             nodeManager = nodeManager,
@@ -148,7 +149,7 @@ class RadioControllerImpl(
     ),
     MessagingController by MessagingControllerImpl(
         packetHandler,
-        SessionAdmin(radioInterfaceService, scope),
+        sessionAdmin,
         nodeManager,
         nodeRepository,
         dataHandler,
@@ -156,7 +157,7 @@ class RadioControllerImpl(
         packetRepository,
     ),
     NodeController by NodeControllerImpl(
-        SessionAdmin(radioInterfaceService, scope),
+        sessionAdmin,
         nodeManager,
         serviceNotifications,
         packetRepository,

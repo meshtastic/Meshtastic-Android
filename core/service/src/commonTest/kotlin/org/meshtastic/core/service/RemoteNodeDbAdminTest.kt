@@ -26,6 +26,7 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
+import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.MeshConfigFlowManager
@@ -93,7 +94,7 @@ class RemoteNodeDbAdminTest {
         nodeManager = nodeManager,
         radioConfigRepository = radioConfigRepository,
         radio = radio,
-        sessionAdmin = SessionAdmin(radio, backgroundScope),
+        sessionAdmin = SessionAdmin(radio, backgroundScope.asServiceScope()),
         heardOnCurrentLoraRefresher =
         HeardOnCurrentLoraRefresher(
             nodeManager = nodeManager,
