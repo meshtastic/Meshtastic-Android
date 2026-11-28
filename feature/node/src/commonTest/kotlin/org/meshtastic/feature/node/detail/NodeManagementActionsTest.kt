@@ -19,7 +19,6 @@ package org.meshtastic.feature.node.detail
 import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
 import dev.mokkery.answering.throws
-import dev.mokkery.every
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
@@ -147,8 +146,7 @@ class NodeManagementActionsTest {
         val node = Node(num = 123, user = User.Builder().also { wb -> wb.long_name = "Test Node" }.build())
         var afterRemoveCalled = false
         nodeRepository.setNodes(listOf(node))
-        every { rejectedRadio.generatePacketId() } returns 7
-        everySuspend { rejectedRadio.removeByNodenum(7, 123) } throws PacketQueueRejectedException("Remove node")
+        everySuspend { rejectedRadio.removeByNodenum(123) } throws PacketQueueRejectedException("Remove node")
 
         rejectedActions.requestRemoveNode(testScope, node) { afterRemoveCalled = true }
         realAlertManager.currentAlert.value?.onConfirm?.invoke()
@@ -167,8 +165,7 @@ class NodeManagementActionsTest {
         val node = Node(num = 123, user = User.Builder().also { wb -> wb.long_name = "Test Node" }.build())
         var afterRemoveCalled = false
         nodeRepository.setNodes(listOf(node))
-        every { unavailableRadio.generatePacketId() } returns 7
-        everySuspend { unavailableRadio.removeByNodenum(7, 123) } throws LocalNodeUnavailableException("Remove node")
+        everySuspend { unavailableRadio.removeByNodenum(123) } throws LocalNodeUnavailableException("Remove node")
 
         unavailableActions.requestRemoveNode(testScope, node) { afterRemoveCalled = true }
         realAlertManager.currentAlert.value?.onConfirm?.invoke()

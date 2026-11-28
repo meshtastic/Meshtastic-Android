@@ -86,8 +86,7 @@ constructor(
 
     open suspend fun removeNode(nodeNum: Int) {
         Logger.i { "Removing node '$nodeNum'" }
-        val packetId = radioController.generatePacketId()
-        radioController.removeByNodenum(packetId, nodeNum)
+        radioController.removeByNodenum(nodeNum)
         nodeRepository.deleteNode(nodeNum)
     }
 

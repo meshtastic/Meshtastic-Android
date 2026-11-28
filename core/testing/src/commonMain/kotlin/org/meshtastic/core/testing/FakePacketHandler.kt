@@ -21,8 +21,6 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketQueueRejectedException
-import org.meshtastic.proto.MeshPacket
-import org.meshtastic.sdk.PacedMessageHandle
 
 /** Recording [PacketHandler] for tests that send data packets without a radio session. */
 class FakePacketHandler :
@@ -63,8 +61,6 @@ class FakePacketHandler :
     }
 
     private fun DataPacket.snapshot(): DataPacket = copy().also { it.errorMessage = errorMessage }
-
-    override suspend fun sendTracked(packet: MeshPacket): PacedMessageHandle? = null
 
     override fun rearmSendAckTimeouts() = Unit
 }

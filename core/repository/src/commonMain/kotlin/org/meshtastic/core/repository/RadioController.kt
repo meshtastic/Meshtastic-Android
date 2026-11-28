@@ -57,9 +57,8 @@ interface RadioController :
     fun clearClientNotification()
 
     /**
-     * Generates a unique packet ID for a new request.
-     *
-     * @return A unique 32-bit integer.
+     * A fresh non-zero ID from the active session's SDK client, or a random non-zero one without a session, for an
+     * object that needs a mesh-unique id, such as a waypoint.
      */
     fun generatePacketId(): Int
 

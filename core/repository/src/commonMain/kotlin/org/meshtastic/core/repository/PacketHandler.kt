@@ -17,8 +17,6 @@
 package org.meshtastic.core.repository
 
 import org.meshtastic.core.model.DataPacket
-import org.meshtastic.proto.MeshPacket
-import org.meshtastic.sdk.PacedMessageHandle
 
 /**
  * Sends packets through the session's SDK paced queue and projects each send's delivery status onto its durable Room
@@ -38,20 +36,6 @@ interface PacketHandler {
      * of treating a normal return as successful admission.
      */
     suspend fun sendData(p: DataPacket)
-
-    /**
-     * Adds a mesh packet to the queue for sending.
-     *
-     * A completed packet ID may be reused by a later retry. A duplicate is rejected only while that ID is still queued
-     * or in flight, preserving single ownership of its response.
-     *
-     * @return `true` when the packet's non-zero ID was reserved and queued, or `false` when the packet was invalid, its
-     *   ID was already reserved, the radio is not connected, or the owning service scope has shut down.
-     */
-    suspend fun sendToRadio(packet: MeshPacket): Boolean = sendTracked(packet) != null
-
-    /** Queues [packet] as [sendToRadio] does and returns its SDK handle, or null when admission fails. */
-    suspend fun sendTracked(packet: MeshPacket): PacedMessageHandle?
 
     /**
      * Re-arms the send-ACK timeout for every persisted packet still awaiting its routing ACK/NAK, so sends orphaned by

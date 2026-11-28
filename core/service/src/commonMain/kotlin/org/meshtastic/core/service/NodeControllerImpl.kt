@@ -70,7 +70,7 @@ internal class NodeControllerImpl(
         nodeManager.updateNode(node.num) { it.copy(isMuted = !node.isMuted) }
     }
 
-    override suspend fun removeByNodenum(packetId: Int, nodeNum: Int) {
+    override suspend fun removeByNodenum(nodeNum: Int) {
         nodeManager.removeByNodenum(nodeNum)
         nodeManager.myNodeNum.value ?: return
         try {

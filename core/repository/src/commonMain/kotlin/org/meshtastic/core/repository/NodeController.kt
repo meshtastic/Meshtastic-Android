@@ -45,5 +45,5 @@ interface NodeController {
     suspend fun toggleMuted(nodeNum: Int)
 
     /** Removes a node from the mesh by its node number. */
-    suspend fun removeByNodenum(packetId: Int, nodeNum: Int)
+    suspend fun removeByNodenum(nodeNum: Int)
 }
