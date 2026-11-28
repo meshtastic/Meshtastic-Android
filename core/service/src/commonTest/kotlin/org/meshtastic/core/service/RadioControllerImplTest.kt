@@ -33,9 +33,11 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -77,10 +79,13 @@ import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Config
+import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.HamParameters
 import org.meshtastic.proto.LocalConfig
+import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.OTAMode
+import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Routing
 import org.meshtastic.proto.SharedContact
 import org.meshtastic.proto.User
@@ -89,16 +94,23 @@ import org.meshtastic.sdk.AdminEdit
 import org.meshtastic.sdk.AdminResult
 import org.meshtastic.sdk.ChannelIndex
 import org.meshtastic.sdk.ConnectionState
+import org.meshtastic.sdk.InMemoryStorageProvider
 import org.meshtastic.sdk.MeshtasticException
 import org.meshtastic.sdk.NodeId
+import org.meshtastic.sdk.RadioClient
+import org.meshtastic.sdk.TransportIdentity
+import org.meshtastic.sdk.testing.FakeRadioTransport
+import org.meshtastic.sdk.testing.toFrame
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 private val TEST_PUBLIC_KEY = ByteArray(32) { 0x2B.toByte() }.toByteString()
 
@@ -1022,7 +1034,6 @@ class RadioControllerImplTest {
         val commands = mutableListOf<String>()
         val rpcTimeouts = mutableListOf<Duration>()
         var contactResult: AdminResult<Unit> = AdminResult.Success(Unit)
-        var sentHam: HamParameters? = null
 
         override fun forNode(dest: NodeId): AdminApi = also { targets += dest }
 
@@ -1047,11 +1058,6 @@ class RadioControllerImplTest {
 
         override suspend fun getDeviceMetadata() =
             read("metadata", org.meshtastic.proto.DeviceMetadata.Builder().build())
-
-        override suspend fun setHamMode(params: HamParameters): AdminResult<Unit> {
-            sentHam = params
-            return record("ham")
-        }
 
         override suspend fun setTime(at: kotlin.time.Instant?) = record("time")
 
@@ -1179,6 +1185,54 @@ class RadioControllerImplTest {
     }
 
     private fun recordingAdmin() = RecordingSdkAdmin(mock(MockMode.autofill))
+
+    private fun TestScope.hamClient(lora: Config.LoRaConfig? = null): Pair<FakeRadioTransport, RadioClient> {
+        val frames =
+            listOfNotNull(
+                lora?.let { l ->
+                    FromRadio.Builder()
+                        .also { fr -> fr.config = Config.Builder().also { c -> c.lora = l }.build() }
+                        .build()
+                        .toFrame()
+                },
+            )
+        val transport =
+            FakeRadioTransport(
+                identity = TransportIdentity("fake:ham"),
+                frames = frames,
+                autoHandshake = true,
+                autoQueueStatus = true,
+                nodeNum = 123,
+            )
+        val client =
+            RadioClient.Builder()
+                .transport(transport)
+                .storage(InMemoryStorageProvider())
+                .autoSyncTimeOnConnect(false)
+                .coroutineContext(backgroundScope.coroutineContext)
+                .rpcTimeout(60.seconds)
+                .sendAckTimeout(60.seconds)
+                .build()
+        return transport to client
+    }
+
+    private fun hamAdminOf(packet: MeshPacket): AdminMessage? =
+        packet.decoded?.takeIf { it.portnum == PortNum.ADMIN_APP }?.let { AdminMessage.ADAPTER.decode(it.payload) }
+
+    private suspend fun TestScope.setHamAcked(
+        controller: RadioControllerImpl,
+        transport: FakeRadioTransport,
+        destNum: Int,
+        params: HamParameters,
+    ): AdminResult<Unit> {
+        val result = async { controller.setHamMode(destNum, params) }
+        runCurrent()
+        transport.outboundPackets()
+            .lastOrNull { hamAdminOf(it)?.set_ham_mode != null }
+            ?.let { transport.injectRoutingAck(it.id) }
+        runCurrent()
+        return result.await()
+    }
 
     private fun channel(index: Int, role: Channel.Role) = Channel.Builder()
         .also { wb ->
@@ -1482,10 +1536,41 @@ class RadioControllerImplTest {
         verify { nodeManager.handleReceivedUser(42, any(), any(), true) }
     }
 
-    @Test
-    fun setHamModeSendsAdminWithEchoedLoraValuesAndUpdatesUser() = runTest {
+    private fun hamParams(longName: String? = null) =
+        HamParameters.Builder()
+            .also { wb ->
+                wb.call_sign = "KK7ABC"
+                wb.short_name = "KK7A"
+                if (longName != null) wb.long_name = longName
+            }
+            .build()
+
+    private fun TestScope.connectedHam(
+        lora: Config.LoRaConfig?,
+        myNodeNum: Int = 123,
+    ): Triple<RadioControllerImpl, FakeRadioTransport, RadioClient> {
         val admin = recordingAdmin()
-        val controller = editController(backgroundScope, admin, myNodeNum = 123)
+        val controller = editController(backgroundScope, admin, myNodeNum = myNodeNum)
+        val (transport, client) = hamClient(lora = lora)
+        every { radioInterfaceService.clientForSession(any()) } returns client
+        return Triple(controller, transport, client)
+    }
+
+    // Regression: sending the caller's zero tx_power/frequency instead of the radio's LoRa values.
+    // Oracle: firmware AdminModule.cpp:1942-1943 applies both verbatim.
+    @Test
+    fun setHamModeEchoesTheLiveSdkLoraValues() = runTest {
+        val (controller, transport, client) =
+            connectedHam(
+                Config.LoRaConfig.Builder()
+                    .also { wb ->
+                        wb.tx_power = 20
+                        wb.override_frequency = 915.5f
+                    }
+                    .build(),
+            )
+        client.connect()
+        runCurrent()
         val existingUser =
             User.Builder()
                 .also { wb ->
@@ -1495,39 +1580,15 @@ class RadioControllerImplTest {
                 }
                 .build()
         every { nodeManager.nodeDBbyNodeNum } returns mapOf(123 to Node(num = 123, user = existingUser))
-        every { radioConfigRepository.localConfigFlow } returns
-            MutableStateFlow(
-                LocalConfig.Builder()
-                    .also { wb ->
-                        wb.lora =
-                            Config.LoRaConfig.Builder()
-                                .also { wb ->
-                                    wb.tx_power = 20
-                                    wb.override_frequency = 915.5f
-                                }
-                                .build()
-                    }
-                    .build(),
-            )
 
-        controller.setHamMode(
-            123,
-            HamParameters.Builder()
-                .also { wb ->
-                    wb.call_sign = "KK7ABC"
-                    wb.short_name = "KK7A"
-                    wb.long_name = "Attic Heltec"
-                }
-                .build(),
-        )
+        setHamAcked(controller, transport, 123, hamParams(longName = "Attic Heltec"))
 
-        val ham = admin.sentHam
-        assertEquals("KK7ABC", ham?.call_sign)
-        assertEquals("KK7A", ham?.short_name)
-        assertEquals("Attic Heltec", ham?.long_name)
-        // Current LoRa values are echoed so a re-send never wipes the node's overrides.
-        assertEquals(20, ham?.tx_power)
-        assertEquals(915.5f, ham?.frequency)
+        val ham = assertNotNull(transport.outboundPackets().mapNotNull { hamAdminOf(it)?.set_ham_mode }.lastOrNull())
+        assertEquals("KK7ABC", ham.call_sign)
+        assertEquals("KK7A", ham.short_name)
+        assertEquals("Attic Heltec", ham.long_name)
+        assertEquals(20, ham.tx_power)
+        assertEquals(915.5f, ham.frequency)
         // The optimistic name has to match what firmware composes, or the node reads as renamed until its NodeInfo
         // lands and silently corrects it.
         verify {
@@ -1549,8 +1610,9 @@ class RadioControllerImplTest {
 
     @Test
     fun setHamModeWithoutALongNameNamesTheNodeAfterTheCallSignAlone() = runTest {
-        val admin = recordingAdmin()
-        val controller = editController(backgroundScope, admin, myNodeNum = 123)
+        val (controller, transport, client) = connectedHam(Config.LoRaConfig.Builder().build())
+        client.connect()
+        runCurrent()
         val existingUser =
             User.Builder()
                 .also { wb ->
@@ -1560,17 +1622,8 @@ class RadioControllerImplTest {
                 }
                 .build()
         every { nodeManager.nodeDBbyNodeNum } returns mapOf(123 to Node(num = 123, user = existingUser))
-        every { radioConfigRepository.localConfigFlow } returns
-            MutableStateFlow(LocalConfig.Builder().also { wb -> wb.lora = Config.LoRaConfig.Builder().build() }.build())
-        controller.setHamMode(
-            123,
-            HamParameters.Builder()
-                .also { wb ->
-                    wb.call_sign = "KK7ABC"
-                    wb.short_name = "KK7A"
-                }
-                .build(),
-        )
+
+        setHamAcked(controller, transport, 123, hamParams())
 
         // long_name is optional: firmware leaves the bare call sign rather than a dangling "//".
         verify {
@@ -1590,49 +1643,30 @@ class RadioControllerImplTest {
         }
     }
 
-    // Regression: with no LoRa config loaded, zeros were sent and firmware applied them verbatim (AdminModule.cpp).
+    // Regression: with no LoRa config in the SDK, zeros were sent and firmware applied them verbatim (AdminModule.cpp).
     @Test
-    fun setHamModeWithNoCachedLoraConfigFailsBadRequestAndWritesNothing() = runTest {
-        val admin = recordingAdmin()
-        val controller = editController(backgroundScope, admin, myNodeNum = 123)
+    fun setHamModeWithNoLoraConfigInTheSdkFailsBadRequestAndWritesNothing() = runTest {
+        val (controller, transport, client) = connectedHam(lora = null)
+        client.connect()
+        runCurrent()
         every { nodeManager.nodeDBbyNodeNum } returns emptyMap()
-        every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(LocalConfig.Builder().build())
 
-        val result =
-            controller.setHamMode(
-                123,
-                HamParameters.Builder()
-                    .also { wb ->
-                        wb.call_sign = "KK7ABC"
-                        wb.short_name = "KK7A"
-                    }
-                    .build(),
-            )
+        val result = controller.setHamMode(123, hamParams())
 
         assertEquals(AdminResult.Failed(Routing.Error.BAD_REQUEST), result)
-        assertNull(admin.sentHam)
-        assertTrue(admin.commands.isEmpty())
+        assertTrue(transport.outboundPackets().none { hamAdminOf(it)?.set_ham_mode != null })
         verify(exactly(0)) { nodeManager.handleReceivedUser(any(), any(), any(), any(), any()) }
     }
 
     // Regression: a ham send to a node absent from the node DB must still seed a user from the proto defaults.
     @Test
     fun setHamModeForAnUnknownNodeSeedsTheUserFromTheHamParameters() = runTest {
-        val admin = recordingAdmin()
-        val controller = editController(backgroundScope, admin, myNodeNum = 123)
+        val (controller, transport, client) = connectedHam(Config.LoRaConfig.Builder().build())
+        client.connect()
+        runCurrent()
         every { nodeManager.nodeDBbyNodeNum } returns emptyMap()
-        every { radioConfigRepository.localConfigFlow } returns
-            MutableStateFlow(LocalConfig.Builder().also { wb -> wb.lora = Config.LoRaConfig.Builder().build() }.build())
 
-        controller.setHamMode(
-            123,
-            HamParameters.Builder()
-                .also { wb ->
-                    wb.call_sign = "KK7ABC"
-                    wb.short_name = "KK7A"
-                }
-                .build(),
-        )
+        setHamAcked(controller, transport, 123, hamParams())
 
         verify {
             nodeManager.handleReceivedUser(
@@ -1650,23 +1684,38 @@ class RadioControllerImplTest {
         }
     }
 
+    // Regression: dropping the local-only guard sends ham mode to a remote node.
     @Test
     fun setHamModeIgnoresRemoteDestinations() = runTest {
-        val admin = recordingAdmin()
-        val controller = editController(backgroundScope, admin, myNodeNum = 123)
+        val (controller, transport, client) =
+            connectedHam(
+                Config.LoRaConfig.Builder()
+                    .also { wb ->
+                        wb.tx_power = 20
+                        wb.override_frequency = 915.5f
+                    }
+                    .build(),
+            )
+        client.connect()
+        runCurrent()
 
-        controller.setHamMode(
-            456,
-            HamParameters.Builder()
-                .also { wb ->
-                    wb.call_sign = "KK7ABC"
-                    wb.short_name = "KK7A"
-                }
-                .build(),
-        )
+        controller.setHamMode(456, hamParams())
+        runCurrent()
 
-        assertTrue(admin.commands.isEmpty())
+        assertTrue(transport.outboundPackets().none { hamAdminOf(it)?.set_ham_mode != null })
         verify(exactly(0)) { nodeManager.handleReceivedUser(any(), any(), any(), any()) }
+    }
+
+    // Regression: a null client treated as success would show the user as licensed on a radio that was never told.
+    @Test
+    fun setHamModeWithoutASessionIsUnreachableAndProjectsNothing() = runTest {
+        val controller =
+            editController(backgroundScope, recordingAdmin(), myNodeNum = 123, activeSession = MutableStateFlow(null))
+
+        val result = controller.setHamMode(123, hamParams())
+
+        assertEquals(AdminResult.NodeUnreachable, result)
+        verify(exactly(0)) { nodeManager.handleReceivedUser(any(), any(), any(), any(), any()) }
     }
 
     @Test

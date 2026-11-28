@@ -92,7 +92,6 @@ class HeardOnCurrentLoraRefresherTest {
 
     private fun TestScope.controller() = AdminControllerImpl(
         nodeManager = nodeManager,
-        radioConfigRepository = radioConfigRepository,
         radio = radio,
         sessionAdmin = SessionAdmin(radio, backgroundScope),
         heardOnCurrentLoraRefresher =
