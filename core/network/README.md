@@ -18,7 +18,7 @@ The [Meshtastic SDK](https://github.com/meshtastic/meshtastic-sdk) owns framing,
 
 ### 4. Repositories
 - **`MQTTRepository`**: The MQTT client used to proxy mesh traffic to and from a broker, over TCP or WebSockets. A downlink message whose encoded `ToRadio` exceeds the 512-byte phone API frame limit is dropped, and a channel whose name holds `+`, `#` or `/` gets no subscription. A publish is sent only when its topic is the connection's root topic, a `/` and a non-empty remainder, with no wildcard; the root is compared as configured, the same string the subscriptions use.
-- **`NetworkRepository`**: Network availability and discovered Meshtastic services (Android NSD, JmDNS on Desktop).
+- **`NetworkRepository`**: Network availability and discovered Meshtastic services (the SDK's `TcpDiscovery`: `NsdManager` on Android, JmDNS on Desktop).
 
 > **BLE:** the SDK's BLE transport runs the link; pairing, scanning and GATT repair come from the Kable primitives in [`:core:ble`](../ble/README.md). An address with the `x` (or `!`) prefix selects it.
 

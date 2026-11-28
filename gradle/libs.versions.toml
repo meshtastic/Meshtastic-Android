@@ -115,7 +115,6 @@ sceneview = "4.76.0"
 vico = "3.4.0-next.1"
 kable = "0.46.0"
 mqttastic = "0.9.1"
-jmdns = "3.6.5"
 # Desktop-only: speaks StatusNotifierItem over D-Bus so the Linux tray icon is clickable (MIT).
 dbus-java = "5.2.2"
 qrcode-kotlin = "4.5.0"
@@ -382,7 +381,6 @@ ccud-gradlePlugin = { module = "com.gradle:common-custom-user-data-gradle-plugin
 develocity-gradlePlugin = { module = "com.gradle:develocity-gradle-plugin", version.ref = "develocity" }
 aboutlibraries-gradlePlugin = { module = "com.mikepenz.aboutlibraries.plugin:aboutlibraries-plugin", version.ref = "aboutlibraries" }
 
-jmdns = { module = "org.jmdns:jmdns", version.ref = "jmdns" }
 jna = { module = "net.java.dev.jna:jna", version = "5.19.1" }
 
 # D-Bus client for the desktop app's Linux system tray. Pure Java — the native-unixsocket transport

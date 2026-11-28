@@ -15,124 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 package org.meshtastic.core.network.repository
+package org.meshtastic.core.network.repository
 
-import co.touchlab.kermit.Logger
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.flowOn
 import org.koin.core.annotation.Single
-import org.meshtastic.core.common.util.safeCatching
-import org.meshtastic.core.di.CoroutineDispatchers
-import java.io.IOException
-import java.net.InetAddress
-import java.net.NetworkInterface
-import javax.jmdns.JmDNS
-import javax.jmdns.ServiceEvent
-import javax.jmdns.ServiceListener
+import org.meshtastic.sdk.transport.tcp.JvmTcpDiscovery
 
 @Single(binds = [ServiceDiscovery::class])
-class JvmServiceDiscovery(private val dispatchers: CoroutineDispatchers) : ServiceDiscovery {
-    @Suppress("TooGenericExceptionCaught")
-    override val resolvedServices: Flow<List<DiscoveredService>> =
-        callbackFlow {
-            trySend(emptyList()) // Emit initial empty list so downstream combine() is not blocked
-
-            val bindAddress = findLanAddress() ?: InetAddress.getLocalHost()
-            val interfaceName = safeCatching { NetworkInterface.getByInetAddress(bindAddress)?.name }.getOrNull()
-            Logger.i { "JmDNS binding to interface ${interfaceName ?: "unknown"}" }
-
-            val jmdns =
-                try {
-                    JmDNS.create(bindAddress)
-                } catch (e: IOException) {
-                    Logger.e(e) { "Failed to create JmDNS" }
-                    null
-                } catch (e: kotlinx.coroutines.CancellationException) {
-                    throw e
-                } catch (e: Exception) {
-                    Logger.e(e) { "Unexpected error creating JmDNS" }
-                    null
-                }
-
-            val services = mutableMapOf<String, DiscoveredService>()
-
-            val listener =
-                object : ServiceListener {
-                    override fun serviceAdded(event: ServiceEvent) {
-                        // persistent=true: keep calling serviceResolved as fresh records arrive (re-announcements,
-                        // IP changes) instead of only once — otherwise a resolved device's address goes stale until
-                        // it's fully removed and rediscovered from scratch.
-                        jmdns?.requestServiceInfo(event.type, event.name, true)
-                    }
-
-                    override fun serviceRemoved(event: ServiceEvent) {
-                        services.remove(event.name)
-                        trySend(services.values.toList())
-                    }
-
-                    override fun serviceResolved(event: ServiceEvent) {
-                        val info = event.info
-                        val txtMap = mutableMapOf<String, ByteArray>()
-                        info.propertyNames.toList().forEach { key ->
-                            info.getPropertyBytes(key)?.let { value -> txtMap[key] = value }
-                        }
-                        val discovered =
-                            DiscoveredService(
-                                name = info.name,
-                                // Prefer IPv4: jmdns's IPv6 candidates are often link-local
-                                // (fe80::/10) addresses that need a zone/scope ID to be
-                                // routable, which jmdns doesn't supply. Fall back to a raw
-                                // (unbracketed) IPv6 literal via inet6Addresses rather than
-                                // jmdns's own hostAddresses array, which already brackets
-                                // IPv6 strings ("[fe80::1]") -- toAddressString() below adds
-                                // its own brackets, so starting from an already-bracketed
-                                // value would double-bracket and break parsing downstream.
-                                hostAddress =
-                                info.inet4Addresses.firstOrNull()?.hostAddress
-                                    ?: info.inet6Addresses.firstOrNull()?.hostAddress
-                                    ?: "",
-                                port = info.port,
-                                txt = txtMap,
-                            )
-                        services[info.name] = discovered
-                        trySend(services.values.toList())
-                    }
-                }
-
-            val type = "${NetworkConstants.SERVICE_TYPE}.local."
-            jmdns?.addServiceListener(type, listener)
-
-            awaitClose {
-                jmdns?.removeServiceListener(type, listener)
-                try {
-                    jmdns?.close()
-                } catch (e: IOException) {
-                    Logger.e(e) { "Failed to close JmDNS" }
-                } catch (e: Exception) {
-                    Logger.e(e) { "Unexpected error closing JmDNS" }
-                }
-            }
-        }
-            .flowOn(dispatchers.io)
-
-    companion object {
-        /**
-         * Finds a non-loopback, up, IPv4 LAN address for JmDNS to bind to. On many systems (especially Windows),
-         * [InetAddress.getLocalHost] resolves to `127.0.0.1` or `::1`, which prevents JmDNS from seeing multicast
-         * traffic on the actual LAN interface.
-         */
-        @Suppress("TooGenericExceptionCaught", "LoopWithTooManyJumpStatements")
-        internal fun findLanAddress(): InetAddress? = try {
-            NetworkInterface.getNetworkInterfaces()
-                ?.toList()
-                .orEmpty()
-                .filter { it.isUp && !it.isLoopback }
-                .flatMap { it.inetAddresses.toList() }
-                .firstOrNull { !it.isLoopbackAddress && it is java.net.Inet4Address }
-        } catch (e: Exception) {
-            Logger.w(e) { "Failed to enumerate network interfaces, falling back to getLocalHost()" }
-            null
-        }
-    }
+class JvmServiceDiscovery : ServiceDiscovery {
+    override val resolvedServices: Flow<List<DiscoveredService>> = JvmTcpDiscovery().discover().toServiceList()
 }

@@ -3,11 +3,7 @@
   <ManuallySuppressedIssues/>
   <CurrentIssues>
     <ID>UnusedPrivateProperty:AndroidNetworkMonitor.kt:AndroidNetworkMonitor$private val connectivityManager: ConnectivityManager</ID>
-    <ID>UnusedPrivateProperty:AndroidServiceDiscovery.kt:AndroidServiceDiscovery$private val nsdManager: NsdManager</ID>
-    <ID>UnusedPrivateProperty:JvmServiceDiscovery.kt:JvmServiceDiscovery$private val dispatchers: CoroutineDispatchers</ID>
     <ID>UnusedPrivateProperty:UsbRepository.kt:UsbRepository$private val usbSerialProberLazy: Lazy&lt;UsbSerialProber&gt;</ID>
-    <ID>UseOrEmpty:AndroidServiceDiscovery.kt:AndroidServiceDiscovery$info.host?.hostAddress ?: ""</ID>
-    <ID>UseOrEmpty:JvmServiceDiscovery.kt:JvmServiceDiscovery.&lt;no name provided&gt;$info.inet4Addresses.firstOrNull()?.hostAddress ?: info.inet6Addresses.firstOrNull()?.hostAddress ?: ""</ID>
     <ID>UseOrEmpty:MQTTRepositoryImpl.kt:MQTTRepositoryImpl$state.lastError?.message?.let { ": $it" } ?: ""</ID>
     <ID>UseOrEmpty:UsbRepository.kt:UsbRepository$usbManagerLazy.value?.deviceList ?: emptyMap()</ID>
   </CurrentIssues>

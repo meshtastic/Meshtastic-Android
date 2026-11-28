@@ -59,7 +59,7 @@ the granted browser streams and feeds the shared SDK frame assembler.
 Network-based transport for Wi-Fi-enabled nodes:
 - TCP socket connection to the node's IP address
 - Default port: 4403
-- Nodes on the local network found through mDNS (`_meshtastic._tcp`): `NsdManager` on Android, JmDNS on Desktop
+- Nodes on the local network found through the SDK's `TcpDiscovery` (mDNS, `_meshtastic._tcp`)
 - Used for development with meshtasticd and simulated nodes
 - Available when BLE/USB is impractical
 
