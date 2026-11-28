@@ -2443,10 +2443,9 @@ class RadioConfigViewModelTest {
         assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Error)
     }
 
-    // Regression: a read past its deadline kept its call waiting after nothing could use the answer. Main cancelled it
-    // when the screen closed.
+    // Regression: a read past its deadline kept its call waiting after nothing could use the answer.
     @Test
-    fun `leaving the screen stops a read that timed out`() = runTest {
+    fun `a read past its deadline that nothing retains stops its call`() = runTest {
         val node = Node(num = 123, user = User.Builder().also { wb -> wb.id = "!123" }.build())
         nodeRepository.setNodes(listOf(node))
         nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
@@ -2465,6 +2464,40 @@ class RadioConfigViewModelTest {
         runCurrent()
         advanceTimeBy(31_000)
         runCurrent()
+
+        assertTrue(readCancelled)
+    }
+
+    // Regression: leaving the screen stopped tracking a retained remote read but left its call waiting. Main cancelled
+    // the read's job when the screen closed.
+    @Test
+    fun `leaving the screen stops a retained remote read`() = runTest {
+        val localNode = Node(num = 100, user = User.Builder().also { wb -> wb.id = "!100" }.build())
+        val remoteNode =
+            Node(
+                num = 456,
+                user = User.Builder().also { wb -> wb.id = "!456" }.build(),
+                metadata = DeviceMetadata.Builder().also { wb -> wb.firmware_version = "2.7.19" }.build(),
+            )
+        var readCancelled = false
+        everySuspend { adminController.getOwner(any()) } calls
+            {
+                try {
+                    awaitCancellation()
+                } finally {
+                    readCancelled = true
+                }
+            }
+        nodeRepository.setNodes(listOf(localNode, remoteNode))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100))
+        viewModel = createViewModel(destNum = 456)
+
+        viewModel.loadConfigRoute(ConfigRoute.USER)
+        runCurrent()
+        advanceTimeBy(30_001)
+        runCurrent()
+        assertFalse(readCancelled, "a single-response remote read is retained past its deadline")
+
         viewModel.clearPacketResponse()
         runCurrent()
 

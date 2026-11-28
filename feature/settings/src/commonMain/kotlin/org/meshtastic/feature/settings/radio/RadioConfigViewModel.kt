@@ -1259,7 +1259,6 @@ open class RadioConfigViewModel(
                     return@safeLaunch
                 }
                 outcome.join()
-                if (!request.late) return@safeLaunch
                 if (outcome.isCancelled) {
                     pending.remove(request)
                 } else {
