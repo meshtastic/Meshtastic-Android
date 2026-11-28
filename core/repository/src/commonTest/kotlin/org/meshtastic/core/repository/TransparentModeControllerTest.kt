@@ -76,8 +76,9 @@ class TransparentModeControllerTest {
 
     /**
      * The connected node behind [AdminController]: a LoRa read waits until the test answers it, a session-bound write
-     * is recorded. An acknowledged write reaches the cache, as the SDK mirrors an acknowledged local write onto the
-     * session's config (`AdminApiImpl.submitLocalWrite`) and the app caches that; a read answer reaches no cache.
+     * is recorded. An acknowledged write and a read answer both reach the cache before the call returns, as the SDK folds
+     * them into the session's config (`AdminApiImpl.submitLocalWrite`, `MeshEngine.mergeLocalReadAnswer`) and the app
+     * caches that.
      */
     private inner class NodeRadio : AdminController by FakeRadioController() {
         val reads = mutableListOf<Pair<Int, Int>>()
@@ -88,6 +89,7 @@ class TransparentModeControllerTest {
         override suspend fun getConfig(destNum: Int, configType: Int): AdminResult<Config> {
             reads += destNum to configType
             val lora = CompletableDeferred<Config.LoRaConfig>().also { answers += it }.await()
+            cache(lora)
             return AdminResult.Success(config(lora))
         }
 
@@ -447,6 +449,8 @@ class TransparentModeControllerTest {
         nodeAnswers(normalLora)
 
         assertEquals(false, confirmed.await())
+        // The read answer reached the cache, so the node no longer counts as transparent.
+        assertEquals(false, controller.active.first())
 
         // Turned on later in this session, by another client say, the notice still asks.
         cache(transparentLora)

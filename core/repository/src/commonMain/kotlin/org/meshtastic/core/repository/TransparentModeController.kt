@@ -101,8 +101,8 @@ internal fun Config.LoRaConfig.withTransparentModeOff(): Config =
  * Tracks whether the connected node is in transparent mode (a raw LoRa modem for a host such as meshtasticd), what the
  * user chose to do about it for this connection, and turns it off on request.
  *
- * It writes no cache: the local config cache follows the SDK session's config, which takes the handshake and the writes
- * acknowledged on that session's link.
+ * It writes no cache: the local config cache follows the SDK session's config, which takes the handshake, the writes
+ * acknowledged on that session's link and the connected node's answers to reads.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class TransparentModeController(
