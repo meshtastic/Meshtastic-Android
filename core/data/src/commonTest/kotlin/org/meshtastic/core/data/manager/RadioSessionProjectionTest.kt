@@ -30,6 +30,7 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import okio.ByteString
+import okio.ByteString.Companion.encodeUtf8
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.common.util.nowSeconds
@@ -45,8 +46,12 @@ import org.meshtastic.core.testing.FakeRadioInterfaceService
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSettings
+import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.Data
+import org.meshtastic.proto.DeviceUIConfig
+import org.meshtastic.proto.KeyVerificationFinal
+import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.FirmwareEdition
 import org.meshtastic.proto.FromRadio
@@ -60,6 +65,7 @@ import org.meshtastic.sdk.AdminResult
 import org.meshtastic.sdk.ConfigBundle
 import org.meshtastic.sdk.Frame
 import org.meshtastic.sdk.InMemoryStorageProvider
+import org.meshtastic.sdk.MeshEvent
 import org.meshtastic.sdk.NodeChange
 import org.meshtastic.sdk.NodeId
 import org.meshtastic.sdk.RadioClient
@@ -382,6 +388,54 @@ class RadioSessionProjectionTest {
         assertEquals(SECRET_PIN, harness.radioConfig.lastSetLocalConfig?.bluetooth?.fixed_pin)
     }
 
+    // Regression: a log site that skipped redaction wrote the MQTT password, the device UI PIN, a channel PSK or a
+    // key-verification code into MeshLog rows.
+    @Test
+    fun `module config, device UI config, channel and notification rows are logged redacted`() = runTest {
+        val harness = Harness(backgroundScope)
+        val mqtt =
+            ModuleConfig.Builder()
+                .also { m -> m.mqtt = ModuleConfig.MQTTConfig.Builder().also { it.password = SECRET_TEXT }.build() }
+                .build()
+        val bundle =
+            ConfigBundle(
+                myInfo = MyNodeInfo.Builder().also { it.my_node_num = LOCAL }.build(),
+                metadata = DeviceMetadata.Builder().build(),
+                configs = emptyList(),
+                moduleConfigs = listOf(mqtt),
+                deviceUIConfig = DeviceUIConfig.Builder().also { it.pin_code = SECRET_PIN }.build(),
+            )
+        val channel =
+            Channel.Builder()
+                .also { c ->
+                    c.role = Channel.Role.PRIMARY
+                    c.settings = ChannelSettings.Builder().also { it.psk = SECRET_PSK }.build()
+                }
+                .build()
+        val notification =
+            ClientNotification.Builder()
+                .also { n ->
+                    n.message = SECRET_TEXT
+                    n.key_verification_final = KeyVerificationFinal.Builder().build()
+                }
+                .build()
+
+        harness.projection.project(RadioSessionEvent.ConfigChanged(SDK_SESSION, sequence = 1, bundle), harness.session)
+        harness.projection.project(RadioSessionEvent.ChannelsChanged(SDK_SESSION, 2, listOf(channel)), harness.session)
+        harness.projection.project(
+            RadioSessionEvent.Event(SDK_SESSION, 3, MeshEvent.Notification(notification)),
+            harness.session,
+        )
+        runCurrent()
+
+        val rows = harness.logs.currentLogs
+        assertEquals("", rows.single { it.message_type == "ModuleConfig" }.fromRadio.moduleConfig?.mqtt?.password)
+        assertEquals(0, rows.single { it.message_type == "DeviceUIConfig" }.fromRadio.deviceuiConfig?.pin_code)
+        assertEquals(ByteString.EMPTY, rows.single { it.message_type == "Channel" }.fromRadio.channel?.settings?.psk)
+        assertEquals("", rows.single { it.message_type == "ClientNotification" }.fromRadio.clientNotification?.message)
+        assertTrue(rows.none { SECRET_TEXT in it.raw_message || SECRET_PIN.toString() in it.raw_message })
+    }
+
     @Test
     fun `an acknowledged local config write reaches the radio config through the SDK session`() = runTest {
         val harness = Harness(backgroundScope)
@@ -579,5 +633,7 @@ class RadioSessionProjectionTest {
         const val RELAYED_PEER = 0x2003
         const val SDK_SESSION = 1L
         const val SECRET_PIN = 424242
+        const val SECRET_TEXT = "hunter2-424242"
+        val SECRET_PSK = "0123456789abcdef".encodeUtf8()
     }
 }

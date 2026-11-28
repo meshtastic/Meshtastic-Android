@@ -445,6 +445,8 @@ class TransparentModeControllerTest {
 
         val confirmed = async { controller.confirmTurnedOnByUser(session()) }
         runCurrent()
+        // The turn-on write's acknowledgement cached transparent mode on while the read-back is out.
+        cache(transparentLora)
         // Firmware without field 108 accepts the write and drops the flag.
         nodeAnswers(normalLora)
 

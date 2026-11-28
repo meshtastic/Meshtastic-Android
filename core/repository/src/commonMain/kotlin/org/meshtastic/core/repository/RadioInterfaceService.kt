@@ -39,7 +39,10 @@ import org.meshtastic.sdk.RadioClient
 
 /** Owns admission and revocation for work bound to one transport session. */
 interface RadioSessionAuthority {
-    /** The transport session that still owns lifecycle completion, or null once teardown has joined its work. */
+    /**
+     * The transport session that still owns lifecycle completion, or null once teardown has joined its scope's work.
+     * The session collector's inline handlers can still be finishing then; they are joined when the link closes.
+     */
     val activeSession: StateFlow<RadioSessionContext?>
 
     /** Whether [session] still owns admission; false once teardown starts, while [activeSession] still holds it. */

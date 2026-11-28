@@ -361,8 +361,9 @@ class SharedRadioInterfaceService(
         revokeSession(activeRadioSession)
         try {
             active.link.disconnect()
-            active.pipeline?.cancelAndJoin()
         } finally {
+            // The session collector's inline handlers stop here, before a caller switches the database.
+            active.pipeline?.cancelAndJoin()
             idleState.value = ConnectionState.Disconnected
             activeLink.value = null
             ignoreExceptionSuspend { active.link.close() }
