@@ -44,7 +44,7 @@ object DatabaseMerger {
      * Folds [source] into [dest], skipping the work if [sourceName] was already merged into [dest]. [sourceName] is the
      * source database's file name — the stable key under which the merge is recorded (see [MergeMarkerEntity]).
      *
-     * The caller owns the transport-session lifecycle lease through this method's return. That lease makes transaction
+     * The caller runs this method as radio-session work that teardown joins before rollover, which makes transaction
      * commit and session rollover mutually exclusive; [isAssociationActive] remains a defensive check for authority
      * lost before the merge entered its commit phase.
      */
@@ -83,10 +83,9 @@ object DatabaseMerger {
                 mergeDiscovery(source, dest)
                 mergeSignalSurveys(source, dest)
                 dest.mergeMarkerDao().insertMarker(MergeMarkerEntity(sourceDbName = sourceName, mergedAt = nowMillis))
-                // Keep the defensive authority check as the final transaction statement. The caller-held lifecycle
-                // lease prevents rollover until commit returns; this check still rolls back if authority was lost
-                // before
-                // the transaction entered the lease-protected commit phase.
+                // Keep the defensive authority check as the final transaction statement. Teardown joins the caller's
+                // session work, so rollover waits until commit returns; this check still rolls back if authority was
+                // lost before the transaction entered its commit phase.
                 ensureAssociationActive(isAssociationActive)
             }
         }

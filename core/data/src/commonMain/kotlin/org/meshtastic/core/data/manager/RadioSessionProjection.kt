@@ -18,11 +18,9 @@ package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
 import kotlinx.atomicfu.atomic
-import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.di.ServiceScope
-import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.common.util.safeCatching
@@ -235,7 +233,7 @@ class RadioSessionProjection(
                 fromRadio = FromRadio.Builder().also { wb -> wb.packet = loggedPacket }.build(),
             )
         val logJob = insertMeshLog(log, session)
-        launchSessionBound(session, "mesh-packet emission") { serviceStateWriter.emitMeshPacket(packet) }
+        radioInterfaceService.launchSessionWork(scope, session) { serviceStateWriter.emitMeshPacket(packet) }
 
         if (packet.from != myNodeNum) refreshLocalNodeLastHeard(session, myNodeNum)
         if (packet.from != 0) {
@@ -301,7 +299,7 @@ class RadioSessionProjection(
             is NodeChange.Removed -> {
                 val nodeNum = change.nodeId.raw
                 nodeManager.applySessionNodeRemoved(nodeNum)
-                launchSessionBound(session, "node removal") { nodeRepository.deleteNode(nodeNum) }
+                radioInterfaceService.launchSessionWork(scope, session) { nodeRepository.deleteNode(nodeNum) }
             }
 
             is NodeChange.Snapshot,
@@ -384,18 +382,15 @@ class RadioSessionProjection(
     )
 
     private suspend fun runForSession(session: RadioSessionContext, label: String, block: suspend () -> Unit) {
-        val admitted = radioInterfaceService.runWithSessionLease(session) { withHandlerTimeout("SDK $label", block) }
-        if (!admitted) Logger.d { "Dropping SDK $label from stale transport session gen=${session.generation}" }
+        if (!radioInterfaceService.isSessionActive(session)) {
+            Logger.d { "Dropping SDK $label from stale transport session gen=${session.generation}" }
+            return
+        }
+        withHandlerTimeout("SDK $label", block)
     }
 
     private fun insertMeshLog(log: MeshLog, session: RadioSessionContext): Job =
-        launchSessionBound(session, "mesh-log insert") { meshLogRepository.value.insert(log) }
-
-    private fun launchSessionBound(session: RadioSessionContext, operation: String, block: suspend () -> Unit): Job =
-        scope.handledLaunch(start = CoroutineStart.UNDISPATCHED) {
-            val admitted = radioInterfaceService.runWithSessionLease(session) { block() }
-            if (!admitted) Logger.d { "Skipping $operation from stale transport session gen=${session.generation}" }
-        }
+        radioInterfaceService.launchSessionWork(scope, session) { meshLogRepository.value.insert(log) }
 
     private companion object {
         /** One local-node write per SDK heartbeat interval keeps the node fresh without database churn. */

@@ -36,6 +36,7 @@ import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.REMOTE_READ_TIMEOUT
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
+import org.meshtastic.core.repository.runInSession
 import org.meshtastic.core.repository.toFixedPositionProto
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Channel
@@ -373,7 +374,7 @@ internal class AdminControllerImpl(
                 AdminResult.NodeUnreachable
             }
         if (result !is AdminResult.Success) throw EditSettingsTransactionException(editSettingsFailureMessage(result))
-        radio.runWithSessionLease(session) { projections.apply() }
+        radio.runInSession(session) { withContext(NonCancellable) { projections.apply() } }
     }
 
     override suspend fun editLocalSettings(block: suspend AdminEditScope.() -> Unit) {

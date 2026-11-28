@@ -43,8 +43,8 @@ import org.meshtastic.proto.ClientNotification
 import org.meshtastic.sdk.MeshEvent
 
 /**
- * Applies the [MeshEvent]s an SDK session delivers after Ready. Callers hold the session's lease, so each synchronous
- * effect lands in the session that raised it.
+ * Applies the [MeshEvent]s an SDK session delivers after Ready. Callers run it on the session collector only while the
+ * session is active, so each synchronous effect lands in the session that raised it.
  */
 @Single
 class RadioSessionEventHandler(

@@ -294,7 +294,7 @@ class MeshDataHandlerImpl(
             // Persisted-owner enforcement: a stored, locked waypoint may only be modified by the node it is locked to.
             // The inbound check above only validates the incoming payload, so without this a non-owner could hijack a
             // stored locked waypoint by replaying its id with locked_to = 0 (unlock) or their own num (takeover). The
-            // read and the write share this one lease so the check sees a committed snapshot (see [persistDataPacket]).
+            // read and the write share one launch so the check sees a committed snapshot (see [persistDataPacket]).
             if (!storedWaypointModifiableBy(u.id, packet.from)) return@launchSessionWork
             persistDataPacket(dataPacket, myNodeNum, updateNotification)
         }
@@ -448,9 +448,9 @@ class MeshDataHandlerImpl(
 
     /**
      * Deduplicates, filters, persists, and (when appropriate) notifies for a single [dataPacket]. Runs inside a session
-     * lease — callers must launch it via [RadioInterfaceService.launchSessionWork] and must have already confirmed the
+     * scope: callers must launch it via [RadioInterfaceService.launchSessionWork] and must have already confirmed the
      * packet's [DataPacket.dataType] is one of [PERSISTED_DATA_PORT_NUMBERS]. Split out from [rememberDataPacket] so
-     * the waypoint path can gate persistence on a repository read within the same lease (see [handleWaypoint]).
+     * the waypoint path can gate persistence on a repository read within the same launch (see [handleWaypoint]).
      */
     private suspend fun persistDataPacket(dataPacket: DataPacket, myNodeNum: Int, updateNotification: Boolean) {
         val fromLocal = dataPacket.isFromLocal(myNodeNum)

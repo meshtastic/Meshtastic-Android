@@ -19,7 +19,6 @@ package org.meshtastic.core.data.manager
 import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
 import dev.mokkery.every
-import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.matcher.capture.capture
 import dev.mokkery.mock
@@ -307,7 +306,7 @@ class StoreForwardPacketHandlerImplTest {
                 }
                 .build()
         val packet = makeSfppPacket(999, sfpp)
-        everySuspend { radioInterfaceService.runWithSessionLease(oldSession, any()) } returns false
+        every { radioInterfaceService.sessionScope(oldSession) } returns null
 
         handler.handleStoreForwardPlusPlus(packet, oldSession)
         advanceUntilIdle()

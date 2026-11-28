@@ -17,12 +17,19 @@
 package org.meshtastic.core.testing
 
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
+import org.meshtastic.core.repository.runInSession
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -61,31 +68,115 @@ class FakeRadioInterfaceServiceSessionTest {
         val session = requireNotNull(service.activeSession.value)
         val workStarted = CompletableDeferred<Unit>()
         val releaseWork = CompletableDeferred<Unit>()
-        val leaseStillCurrent = CompletableDeferred<Boolean>()
+        val sessionStillCurrent = CompletableDeferred<Boolean>()
+        var workDone = false
 
-        var returned: Boolean? = null
-        val work = launch {
-            returned =
-                service.runWithSessionLease(session) { lease ->
+        val work =
+            assertNotNull(service.sessionScope(session)).launch(start = CoroutineStart.UNDISPATCHED) {
+                withContext(NonCancellable) {
                     workStarted.complete(Unit)
                     releaseWork.await()
-                    leaseStillCurrent.complete(lease.isCurrent())
+                    sessionStillCurrent.complete(service.activeSession.value == session)
+                    workDone = true
                 }
-        }
+            }
         workStarted.await()
 
         val disconnect = launch { service.disconnect() }
         runCurrent()
 
-        assertFalse(disconnect.isCompleted, "disconnect must drain the admitted fake session lease")
+        assertFalse(disconnect.isCompleted, "disconnect must drain the admitted fake session work")
         assertFalse(service.isSessionActive(session), "disconnect must reject late fake-session work immediately")
         assertEquals(session, service.activeSession.value, "lifecycle completion remains published while work drains")
 
         releaseWork.complete(Unit)
         work.join()
-        assertEquals(true, returned, "a fake lease whose block ran reports that it ran, like the real service")
-        assertTrue(leaseStillCurrent.await(), "admitted fake work retains its lifecycle lease until return")
+        assertTrue(workDone, "teardown joins admitted fake work instead of cancelling it")
+        assertTrue(sessionStillCurrent.await(), "admitted fake work keeps its session published until it returns")
         disconnect.join()
         assertNull(service.activeSession.value)
+    }
+
+    @Test
+    fun `runInSession is rejected for a closed session and never runs`() = runTest {
+        val service = FakeRadioInterfaceService(serviceScope = backgroundScope)
+        service.setDeviceAddress("ble:test")
+        service.connect()
+        val session = requireNotNull(service.activeSession.value)
+        service.disconnect()
+        var ran = false
+
+        val result = service.runInSession(session) { ran = true }
+
+        assertFalse(result)
+        assertFalse(ran)
+    }
+
+    @Test
+    fun `a caller cancelled mid-block cancels the block`() = runTest {
+        val service = FakeRadioInterfaceService(serviceScope = backgroundScope)
+        service.setDeviceAddress("ble:test")
+        service.connect()
+        val session = requireNotNull(service.activeSession.value)
+        val blockStarted = CompletableDeferred<Unit>()
+        var cancelled = false
+
+        val caller = launch {
+            service.runInSession(session) {
+                try {
+                    blockStarted.complete(Unit)
+                    awaitCancellation()
+                } finally {
+                    cancelled = true
+                }
+            }
+        }
+        runCurrent()
+        assertTrue(blockStarted.isCompleted)
+
+        caller.cancel()
+        runCurrent()
+
+        assertTrue(cancelled, "a cancelled caller must not leave its block running in the session scope")
+    }
+
+    @Test
+    fun `a session closing mid-block returns false to a caller that is still active`() = runTest {
+        val service = FakeRadioInterfaceService(serviceScope = backgroundScope)
+        service.setDeviceAddress("ble:test")
+        service.connect()
+        val session = requireNotNull(service.activeSession.value)
+        val blockStarted = CompletableDeferred<Unit>()
+        var result: Boolean? = null
+
+        val caller = launch {
+            result =
+                service.runInSession(session) {
+                    blockStarted.complete(Unit)
+                    awaitCancellation()
+                }
+        }
+        runCurrent()
+        assertTrue(blockStarted.isCompleted)
+
+        service.disconnect()
+        runCurrent()
+
+        assertEquals(false, result)
+        assertFalse(caller.isCancelled, "a session closing under the block must not cancel its caller")
+        assertTrue(caller.isCompleted)
+    }
+
+    @Test
+    fun `a failure in the block reaches the caller`() = runTest {
+        val service = FakeRadioInterfaceService(serviceScope = backgroundScope)
+        service.setDeviceAddress("ble:test")
+        service.connect()
+        val session = requireNotNull(service.activeSession.value)
+
+        val failure = assertFailsWith<IllegalStateException> { service.runInSession(session) { error("block failed") } }
+
+        assertEquals("block failed", failure.message)
+        assertTrue(service.isSessionActive(session), "a block failure must not close the session")
     }
 }

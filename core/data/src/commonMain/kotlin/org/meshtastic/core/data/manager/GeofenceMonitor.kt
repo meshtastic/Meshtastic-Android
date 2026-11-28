@@ -98,12 +98,8 @@ class GeofenceMonitor(
                 try {
                     if (sample.session == null) {
                         evaluate(sample.nodeNum, sample.lat, sample.lon)
-                    } else {
-                        radioInterfaceService.runWithSessionLease(sample.session) {
-                            withHandlerTimeout("geofence evaluation") {
-                                evaluate(sample.nodeNum, sample.lat, sample.lon)
-                            }
-                        }
+                    } else if (radioInterfaceService.isSessionActive(sample.session)) {
+                        withHandlerTimeout("geofence evaluation") { evaluate(sample.nodeNum, sample.lat, sample.lon) }
                     }
                 } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                     if (e is CancellationException) currentCoroutineContext().ensureActive()
