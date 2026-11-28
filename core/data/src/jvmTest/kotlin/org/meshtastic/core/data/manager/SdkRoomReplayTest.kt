@@ -306,16 +306,6 @@ class SdkRoomReplayTest {
         private fun bindSessionAdmission() {
             every { radio.reportReceiveActivity() } calls { receiveActivityReports++ }
             every { radio.isSessionActive(any()) } calls { selectedSession.value == it.args[0] }
-            everySuspend { radio.runWhileSessionActive(any(), any(), any()) } calls
-                {
-                    val admitted = selectedSession.value == it.args[0]
-                    if (admitted) {
-                        @Suppress("UNCHECKED_CAST")
-                        val block = it.args[2] as suspend () -> Unit
-                        block()
-                    }
-                    admitted
-                }
             everySuspend { radio.runWithSessionLease(any(), any()) } calls
                 {
                     val requested = it.args[0] as RadioSessionContext

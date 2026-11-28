@@ -63,7 +63,7 @@ class MeshConfigFlowManagerImpl(
         session: RadioSessionContext,
         label: String,
         block: suspend () -> Unit,
-    ): Boolean = radioInterfaceService.runWhileSessionActive(session, label, block)
+    ): Boolean = radioInterfaceService.runWithSessionLease(session) { withHandlerTimeout(label, block) }
 
     private fun isActiveSession(session: RadioSessionContext): Boolean = radioInterfaceService.isSessionActive(session)
 

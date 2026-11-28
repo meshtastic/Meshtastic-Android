@@ -20,7 +20,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import co.touchlab.kermit.Severity
 import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
 import dev.mokkery.every
@@ -33,7 +32,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -45,7 +43,6 @@ import org.meshtastic.core.network.repository.SerialDevicePresence
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.TransportDisconnectReason
-import org.meshtastic.core.testing.CapturingLogWriter
 import org.meshtastic.core.testing.FakeBluetoothRepository
 import org.meshtastic.core.testing.FakeRadioPrefs
 import org.meshtastic.core.testing.FakeServiceRepository
@@ -417,98 +414,6 @@ class SharedRadioInterfaceServiceTest {
         prefs.devAddr.value = "xAA:AA:AA:AA:AA:AA"
 
         assertEquals("xAA:AA:AA:AA:AA:AA", service.currentDeviceAddressFlow.value)
-    }
-
-    @Test
-    fun `ordered session lane serializes handshake work while independent leases remain concurrent`() =
-        runTest(testDispatcher) {
-            val (service, _) = connectedService()
-            val session = assertNotNull(service.activeSession.value)
-            val firstStarted = CompletableDeferred<Unit>()
-            val releaseFirst = CompletableDeferred<Unit>()
-            val secondStarted = CompletableDeferred<Unit>()
-            val independentStarted = CompletableDeferred<Unit>()
-
-            val first = launch {
-                service.runWhileSessionActive(session, "first") {
-                    firstStarted.complete(Unit)
-                    releaseFirst.await()
-                }
-            }
-            firstStarted.await()
-            val second = launch { service.runWhileSessionActive(session, "second") { secondStarted.complete(Unit) } }
-            val independent = launch { service.runWithSessionLease(session) { independentStarted.complete(Unit) } }
-
-            assertFalse(secondStarted.isCompleted, "ordered work must wait for the current lane owner")
-            assertTrue(independentStarted.isCompleted, "independent deferred work must acquire its own lease")
-
-            releaseFirst.complete(Unit)
-            first.join()
-            second.join()
-            independent.join()
-            assertTrue(secondStarted.isCompleted)
-        }
-
-    @Test
-    fun `wedged session handler is cancelled at the timeout and the pipeline continues`() = runTest(testDispatcher) {
-        val (service, _) = connectedService()
-        val session = assertNotNull(service.activeSession.value)
-        val wedgeStarted = CompletableDeferred<Unit>()
-        val neverReleased = CompletableDeferred<Unit>()
-        var wedgeRanToCompletion = false
-
-        val logs = CapturingLogWriter.install()
-        try {
-            val wedged = launch {
-                service.runWhileSessionActive(session, "FromRadio packet TEXT_MESSAGE_APP") {
-                    wedgeStarted.complete(Unit)
-                    neverReleased.await()
-                    wedgeRanToCompletion = true
-                }
-            }
-            wedgeStarted.await()
-            val nextStarted = CompletableDeferred<Unit>()
-            val next = launch { service.runWhileSessionActive(session, "next") { nextStarted.complete(Unit) } }
-            assertFalse(nextStarted.isCompleted, "ordered work is serialized behind the wedged handler")
-
-            advanceTimeBy(121_000L)
-            wedged.join()
-            next.join()
-
-            assertFalse(wedgeRanToCompletion, "the wedged handler must have been cancelled, not completed")
-            assertTrue(nextStarted.isCompleted, "the handler timeout must release the pipeline for queued work")
-            val timeoutLines = logs.messages(Severity.Error).filter { "Session handler exceeded" in it }
-            assertEquals(1, timeoutLines.size, "one timeout line: $timeoutLines")
-            assertTrue("(handler=FromRadio packet TEXT_MESSAGE_APP)" in timeoutLines.single())
-        } finally {
-            CapturingLogWriter.uninstall()
-            neverReleased.complete(Unit)
-        }
-    }
-
-    @Test
-    fun `disconnect completes after a wedged handler is timed out`() = runTest(testDispatcher) {
-        val (service, _) = connectedService()
-        val session = assertNotNull(service.activeSession.value)
-        val wedgeStarted = CompletableDeferred<Unit>()
-        val neverReleased = CompletableDeferred<Unit>()
-        val wedged = launch {
-            service.runWhileSessionActive(session, "wedged") {
-                wedgeStarted.complete(Unit)
-                neverReleased.await()
-            }
-        }
-        wedgeStarted.await()
-
-        val disconnect = launch { service.disconnect() }
-        assertFalse(disconnect.isCompleted, "disconnect must wait while the lease is admitted")
-
-        advanceTimeBy(121_000L)
-        disconnect.join()
-        wedged.join()
-
-        assertNull(service.activeSession.value, "teardown must complete once the wedged lease is released")
-        neverReleased.complete(Unit)
     }
 
     /** A lifecycle without LifecycleRegistry's main-thread checks, which fail under Robolectric host tests. */

@@ -69,15 +69,6 @@ interface RadioSessionAuthority {
      * the block bounded and must not invoke transport lifecycle methods from inside it.
      */
     suspend fun runWithSessionLease(session: RadioSessionContext, block: suspend (RadioSessionLease) -> Unit): Boolean
-
-    /**
-     * Runs [block] while holding the same lifecycle lease, without exposing the lease token. Implementations may
-     * serialize this convenience path to preserve handshake ordering; independently deferred work should use
-     * [runWithSessionLease] so it can acquire its own lease before its parent operation returns. [label] names the
-     * operation in diagnostics and must not carry packet contents or identifiers.
-     */
-    suspend fun runWhileSessionActive(session: RadioSessionContext, label: String, block: suspend () -> Unit): Boolean =
-        runWithSessionLease(session) { block() }
 }
 
 /**

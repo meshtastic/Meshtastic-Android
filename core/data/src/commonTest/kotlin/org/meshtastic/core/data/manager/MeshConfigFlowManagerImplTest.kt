@@ -39,6 +39,7 @@ import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
+import org.meshtastic.core.repository.RadioSessionLease
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.FileInfo
@@ -118,14 +119,20 @@ class MeshConfigFlowManagerImplTest {
                     false
                 }
             }
-        everySuspend { radioInterfaceService.runWhileSessionActive(any(), any(), any()) } calls
+        everySuspend { radioInterfaceService.runWithSessionLease(any(), any()) } calls
             {
                 val session = it.args[0] as RadioSessionContext
 
                 @Suppress("UNCHECKED_CAST")
-                val block = it.args[2] as (suspend () -> Unit)
+                val block = it.args[1] as (suspend (RadioSessionLease) -> Unit)
                 if (activeSessionFlow.value == session) {
-                    block()
+                    block(
+                        object : RadioSessionLease {
+                            override val session = session
+
+                            override fun isCurrent() = true
+                        },
+                    )
                     true
                 } else {
                     false
