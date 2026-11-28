@@ -168,19 +168,25 @@ class RadioDeviceSwitchRoomTest {
         val network = mock<NetworkRepository>(MockMode.autofill)
         every { network.networkAvailable } returns MutableStateFlow(true)
         every { network.resolvedList } returns MutableSharedFlow()
+        val lock = RadioOperationLock()
         return SharedRadioInterfaceService(
             dispatchers = dispatchers,
-            bluetoothRepository = FakeBluetoothRepository(),
-            networkRepository = network,
-            serialDevicePresence =
-            object : SerialDevicePresence {
-                override val deviceKeys = MutableStateFlow(emptySet<String>())
-            },
+            environment =
+            LinkEnvironmentObserver(
+                bluetoothRepository = FakeBluetoothRepository(),
+                networkRepository = network,
+                serialDevicePresence =
+                object : SerialDevicePresence {
+                    override val deviceKeys = MutableStateFlow(emptySet<String>())
+                },
+                radioOperationLock = lock,
+                processLifecycle = lifecycle,
+            ),
             processLifecycle = lifecycle,
             radioPrefs = FakeRadioPrefs().apply { setDevAddr(FIRST_ADDRESS) },
             links = links,
             analytics = mock(MockMode.autofill),
-            radioOperationLock = RadioOperationLock(),
+            radioOperationLock = lock,
             serviceStateWriter = FakeServiceRepository(),
         )
     }

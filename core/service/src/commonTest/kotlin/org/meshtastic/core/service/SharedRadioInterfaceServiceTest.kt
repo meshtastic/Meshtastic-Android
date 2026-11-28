@@ -107,12 +107,17 @@ class SharedRadioInterfaceServiceTest {
         if (prefs === radioPrefs) radioPrefs.setDevAddr(address)
         return SharedRadioInterfaceService(
             dispatchers = dispatchers,
-            bluetoothRepository = bluetoothRepository,
-            networkRepository = network,
-            serialDevicePresence =
-            object : SerialDevicePresence {
-                override val deviceKeys: StateFlow<Set<String>> = serialDeviceKeys
-            },
+            environment =
+            LinkEnvironmentObserver(
+                bluetoothRepository = bluetoothRepository,
+                networkRepository = network,
+                serialDevicePresence =
+                object : SerialDevicePresence {
+                    override val deviceKeys: StateFlow<Set<String>> = serialDeviceKeys
+                },
+                radioOperationLock = radioOperationLock,
+                processLifecycle = lifecycleOwner.lifecycle,
+            ),
             processLifecycle = lifecycleOwner.lifecycle,
             radioPrefs = prefs,
             links = links,
