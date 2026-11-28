@@ -479,10 +479,11 @@ fun ConnectionsScreen(
             loraSummary = loraSummaryText,
         )
 
-    // The label is offered only for the node this session reported. Once its sheet is open it keeps the label it was
-    // opened with and stays up whatever the radio's connection does: a radio that drops must not cut a print short.
+    // The label is offered only for the radio this session's handshake came from, once the selection matches it. Once
+    // its sheet is open it keeps the label it was opened with and stays up whatever the radio's connection does: a
+    // radio that drops must not cut a print short.
     val connectLabel = ourNode?.let {
-        rememberConnectLabel(it, selectedDevice, localConfig.bluetooth, activeNodeInfoReady)
+        rememberConnectLabel(it, selectedDevice, connectionAddress, localConfig.bluetooth, activeNodeInfoReady)
     }
     var printingLabel by remember { mutableStateOf<LabelSpec.Connect?>(null) }
     printingLabel?.let { LabelPrintSheet(spec = it, onDismiss = { printingLabel = null }) }

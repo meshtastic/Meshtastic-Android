@@ -41,18 +41,20 @@ import org.meshtastic.proto.Config
 
 /**
  * The connect label for [node], the radio connected at [address], or null when that connection is not one to share (a
- * serial port, a demo transport) or [nodeIsThisSession] is false: until the radio has reported itself in this session,
- * [node] can be the previous radio's, cached. Its QR carries the PIN only when [bluetooth], the radio's own config,
- * reports fixed PIN pairing with a PIN a connect link accepts.
+ * serial port, a demo transport), when [address], the selection, is not [connectedAddress], the radio this session's
+ * handshake came from, or when [nodeIsThisSession] is false: until the radio has reported itself in this session,
+ * [node] and [bluetooth] can be the previous radio's. Its QR carries the PIN only when [bluetooth], the radio's own
+ * config, reports fixed PIN pairing with a PIN a connect link accepts.
  */
 internal fun connectLabelSpec(
     node: Node,
     address: String,
+    connectedAddress: String?,
     bluetooth: Config.BluetoothConfig?,
     band: String,
     nodeIsThisSession: Boolean,
 ): LabelSpec.Connect? = connectLink(address)
-    .takeIf { nodeIsThisSession }
+    .takeIf { nodeIsThisSession && address == connectedAddress }
     ?.let { plain ->
         val link = connectLink(address, fixedPairingPin(bluetooth)) ?: plain
         LabelSpec.Connect(
@@ -73,12 +75,17 @@ internal fun connectLabelSpec(
 internal fun rememberConnectLabel(
     node: Node,
     address: String,
+    connectedAddress: String?,
     bluetooth: Config.BluetoothConfig?,
     nodeIsThisSession: Boolean,
 ): LabelSpec.Connect? {
     val supported = isLabelPrintSupported()
     val band = stringResource(Res.string.label_print_band_connect)
-    return if (supported) connectLabelSpec(node, address, bluetooth, band, nodeIsThisSession) else null
+    return if (supported) {
+        connectLabelSpec(node, address, connectedAddress, bluetooth, band, nodeIsThisSession)
+    } else {
+        null
+    }
 }
 
 /** Print label for the connected radio. The sheet it opens belongs to the screen, not to the connection card. */

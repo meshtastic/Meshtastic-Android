@@ -130,6 +130,7 @@ class ConnectLinkTest {
             connectLabelSpec(
                 node,
                 ble,
+                ble,
                 bluetooth(PairingMode.FIXED_PIN, 123456),
                 "SCAN TO CONNECT",
                 nodeIsThisSession = true,
@@ -137,6 +138,7 @@ class ConnectLinkTest {
         val random =
             connectLabelSpec(
                 node,
+                ble,
                 ble,
                 bluetooth(PairingMode.RANDOM_PIN, 123456),
                 "SCAN TO CONNECT",
@@ -161,6 +163,7 @@ class ConnectLinkTest {
             connectLabelSpec(
                 node,
                 "s/dev/ttyUSB0",
+                "s/dev/ttyUSB0",
                 bluetooth(PairingMode.FIXED_PIN, 123456),
                 "SCAN TO CONNECT",
                 nodeIsThisSession = true,
@@ -175,9 +178,27 @@ class ConnectLinkTest {
             connectLabelSpec(
                 node,
                 ble,
+                ble,
                 bluetooth(PairingMode.FIXED_PIN, 123456),
                 "SCAN TO CONNECT",
                 nodeIsThisSession = false,
+            )
+
+        assertNull(label)
+    }
+
+    // Just after the user picks another radio the selection moves first, while the node, its config and the session
+    // still describe the radio connected before.
+    @Test
+    fun `no connect label is made while the selected radio is not the one connected`() {
+        val label =
+            connectLabelSpec(
+                node,
+                ble,
+                "x11:22:33:44:55:66",
+                bluetooth(PairingMode.FIXED_PIN, 123456),
+                "SCAN TO CONNECT",
+                nodeIsThisSession = true,
             )
 
         assertNull(label)
