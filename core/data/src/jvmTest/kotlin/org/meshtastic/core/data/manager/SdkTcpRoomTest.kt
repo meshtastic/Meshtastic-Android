@@ -371,7 +371,6 @@ class SdkTcpRoomTest {
                 nodeManager,
                 nodeRepository,
                 config,
-                state,
                 mock(MockMode.autofill),
                 FakeNotificationPrefs(),
                 radio,
@@ -500,7 +499,7 @@ class SdkTcpRoomTest {
         init {
             everySuspend { notifications.updateMessageNotification(any(), any(), any(), any(), any(), any()) } calls
                 {
-                    check(state.connectionState.value == ConnectionState.Connected)
+                    check(nodeManager.isNodeDbReady.value)
                     notified.complete(it.args[2] as String)
                 }
         }
@@ -533,7 +532,7 @@ class SdkTcpRoomTest {
                     when (event) {
                         is RadioSessionEvent.Ready -> {
                             assertTrue(installSnapshot(session, event))
-                            assertEquals(ConnectionState.Connected, state.connectionState.value)
+                            assertTrue(nodeManager.isNodeDbReady.value)
                             sdkSession = event.sessionId
                             installed.complete(event)
                         }
@@ -554,7 +553,7 @@ class SdkTcpRoomTest {
                         is RadioSessionEvent.NodeDbRefreshed -> {
                             assertEquals(sdkSession, event.sessionId)
                             installer.installRefreshedNodes(session, event.nodes.values.toList())
-                            assertEquals(ConnectionState.Connected, state.connectionState.value)
+                            assertTrue(nodeManager.isNodeDbReady.value)
                             refreshed.complete(Unit)
                         }
 

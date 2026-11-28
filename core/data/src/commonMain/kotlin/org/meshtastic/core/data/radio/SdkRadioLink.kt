@@ -200,6 +200,7 @@ internal class SdkRadioLink(
         }
         Logger.i { "SDK session snapshot installed for app session ${session.generation}" }
         if (!host.isSessionActive(session)) return
+        host.onSnapshotInstalled(session)
         safeCatching { pipeline.connections.onRadioConfigLoaded() }
             .onFailure { e -> Logger.w(e) { "App radio-config readiness callback failed" } }
         safeCatching { pipeline.connections.onNodeDbReady() }

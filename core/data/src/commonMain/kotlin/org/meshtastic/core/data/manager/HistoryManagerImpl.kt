@@ -19,12 +19,12 @@ package org.meshtastic.core.data.manager
 import co.touchlab.kermit.Logger
 import org.koin.core.annotation.Single
 import org.meshtastic.core.model.util.anonymize
-import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.HistoryManager
 import org.meshtastic.core.repository.LocalNodeUnavailableException
 import org.meshtastic.core.repository.MeshPrefs
 import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.sdk.MeshtasticException
 
@@ -32,7 +32,6 @@ import org.meshtastic.sdk.MeshtasticException
 class HistoryManagerImpl(
     private val meshPrefs: MeshPrefs,
     private val radioInterfaceService: RadioInterfaceService,
-    private val connectionStateProvider: ConnectionStateProvider,
 ) : HistoryManager {
 
     companion object {
@@ -60,7 +59,7 @@ class HistoryManagerImpl(
         myNodeNum: Int?,
         storeForwardConfig: ModuleConfig.StoreForwardConfig?,
         transport: String,
-        expectedConnectionVersion: Long,
+        session: RadioSessionContext,
     ) {
         val address = activeDeviceAddress()
         if (address == null || myNodeNum == null) throw LocalNodeUnavailableException("History replay")
@@ -77,15 +76,13 @@ class HistoryManagerImpl(
                 "lastRequest=$lastRequest window=$window max=$max",
         )
 
-        sendHistoryRequest(expectedConnectionVersion, lastRequest, window, max)
+        sendHistoryRequest(session, lastRequest, window, max)
     }
 
-    /** Asks our own node for its history, only while [expectedConnectionVersion] still owns the connection. */
-    private fun sendHistoryRequest(expectedConnectionVersion: Long, lastRequest: Int, window: Int, max: Int) {
+    /** Asks our own node for its history, only while [session] is still active. */
+    private fun sendHistoryRequest(session: RadioSessionContext, lastRequest: Int, window: Int, max: Int) {
         val client =
-            radioInterfaceService.activeSession.value
-                ?.takeIf { connectionStateProvider.connectionLifecycle.value.version == expectedConnectionVersion }
-                ?.let(radioInterfaceService::clientForSession) ?: throw PacketQueueRejectedException("History replay")
+            radioInterfaceService.clientForSession(session) ?: throw PacketQueueRejectedException("History replay")
         try {
             client.storeForward.requestLocalHistory(lastRequest, window, max)
         } catch (e: MeshtasticException) {

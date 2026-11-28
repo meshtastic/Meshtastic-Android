@@ -34,7 +34,6 @@ import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NotificationPrefs
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
-import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.testing.CapturingLogWriter
 import org.meshtastic.core.testing.FakeRadioConfigRepository
 import org.meshtastic.core.testing.FakeRadioInterfaceService
@@ -134,7 +133,6 @@ class SessionHandlerTimeoutTest {
                 nodeManager = mock<NodeManager>(MockMode.autofill),
                 nodeRepository = mock<NodeRepository>(MockMode.autofill),
                 radioConfigRepository = repo,
-                serviceStateWriter = mock<ServiceRepository>(MockMode.autofill),
                 analytics = mock<PlatformAnalytics>(MockMode.autofill),
                 notificationPrefs = notificationPrefs,
                 radioInterfaceService = radio,

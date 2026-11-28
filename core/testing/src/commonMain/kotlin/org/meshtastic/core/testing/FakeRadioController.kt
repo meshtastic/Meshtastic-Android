@@ -17,14 +17,15 @@
 package org.meshtastic.core.testing
 
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.repository.AdminEditScope
-import org.meshtastic.core.repository.ConnectionStateHolder
 import org.meshtastic.core.repository.EditSettingsTransactionException
 import org.meshtastic.core.repository.NodeRequest
 import org.meshtastic.core.repository.PacketQueueRejectedException
@@ -57,9 +58,8 @@ class FakeRadioController :
     }
 
     /** Canonical app-level connection state, mirroring [ServiceRepository][connectionState] semantics. */
-    private val connectionStateHolder = ConnectionStateHolder()
-    override val connectionLifecycle = connectionStateHolder.connectionLifecycle
-    override val connectionState = connectionStateHolder.connectionState
+    private val _connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
+    override val connectionState: StateFlow<ConnectionState> = _connectionState.asStateFlow()
 
     private val _clientNotification = mutableStateFlow<ClientNotification?>(null)
     override val clientNotification: StateFlow<ClientNotification?> = _clientNotification
@@ -208,7 +208,7 @@ class FakeRadioController :
 
     init {
         registerResetAction {
-            connectionStateHolder.reset()
+            _connectionState.value = ConnectionState.Disconnected
             sentPackets.clear()
             favoritedNodes.clear()
             sentSharedContacts.clear()
@@ -592,7 +592,9 @@ class FakeRadioController :
 
     // --- Helper methods for testing ---
 
-    fun setConnectionState(state: ConnectionState) = connectionStateHolder.setConnectionState(state)
+    fun setConnectionState(state: ConnectionState) {
+        _connectionState.value = state
+    }
 
     fun setSessionGeneration(generation: Long) {
         _sessionGeneration.value = generation

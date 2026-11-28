@@ -48,7 +48,6 @@ import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeNotificationPrefs
 import org.meshtastic.core.testing.FakeRadioConfigRepository
 import org.meshtastic.core.testing.FakeRadioInterfaceService
-import org.meshtastic.core.testing.FakeServiceRepository
 import org.meshtastic.proto.DisplayPalette
 import org.meshtastic.proto.LockdownStatus
 import org.meshtastic.proto.LogRecord
@@ -96,6 +95,10 @@ class SdkRadioLinkSessionRoutingTest {
             closeFailure?.let { throw it }
         }
 
+        override fun onSnapshotInstalled(session: RadioSessionContext) {
+            log += "snapshot-installed ${session.generation}"
+        }
+
         override fun onSnapshotInstallFailed(session: RadioSessionContext) {
             log += "install-failed ${session.generation}"
         }
@@ -141,7 +144,6 @@ class SdkRadioLinkSessionRoutingTest {
                 nodeManager = nodeManager,
                 nodeRepository = nodeRepository,
                 radioConfigRepository = FakeRadioConfigRepository(),
-                serviceStateWriter = FakeServiceRepository(),
                 analytics = mock(MockMode.autofill),
                 notificationPrefs = FakeNotificationPrefs(),
                 radioInterfaceService = radio,
@@ -371,5 +373,24 @@ class SdkRadioLinkSessionRoutingTest {
         )
 
         assertTrue("node-db-ready" in rig.log, "onNodeDbReady must run after onRadioConfigLoaded threw: ${rig.log}")
+    }
+
+    // Regression: a dropped or late onSnapshotInstalled would run post-handshake requests before Connected shows.
+    @Test
+    fun `a handshake snapshot that installs is reported to the host before onNodeDbReady`() = runTest {
+        val rig = Rig(this)
+        val events = MutableSharedFlow<RadioSessionEvent>()
+        pump(rig, rig.link(), events)
+        val myInfo = MyNodeInfo.Builder().also { it.my_node_num = 1 }.build()
+
+        send(
+            events,
+            RadioSessionEvent.Ready(1, myInfo, configBundle = null, channels = emptyList(), nodes = emptyMap()),
+        )
+
+        val installed = rig.log.indexOf("snapshot-installed 1")
+        val ready = rig.log.indexOf("node-db-ready")
+        assertTrue(installed >= 0, "the host must be told the snapshot installed: ${rig.log}")
+        assertTrue(installed < ready, "snapshot-installed must precede node-db-ready: ${rig.log}")
     }
 }

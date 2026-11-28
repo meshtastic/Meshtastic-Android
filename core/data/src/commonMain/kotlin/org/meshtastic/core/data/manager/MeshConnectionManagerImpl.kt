@@ -59,6 +59,7 @@ import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.proto.LocalStats
@@ -285,8 +286,8 @@ class MeshConnectionManagerImpl(
         postHandshakeRequestsJob?.cancelAndJoin()
         postHandshakeRequestsJob = null
         val myNodeNum = nodeManager.myNodeNum.value
-        val connectedLifecycle = serviceRepository.connectionLifecycle.value
-        if (myNodeNum == null || connectedLifecycle.state !is ConnectionState.Connected) {
+        val session = radioInterfaceService.activeSession.value
+        if (myNodeNum == null || session == null) {
             Logger.w { "Skipping post-handshake requests because the connected local-node state is unavailable" }
             return@withLock
         }
@@ -299,9 +300,9 @@ class MeshConnectionManagerImpl(
                         retryPostHandshakeRequest(
                             label = "$type telemetry request",
                             myNodeNum = myNodeNum,
-                            connectedVersion = connectedLifecycle.version,
+                            session = session,
                         ) {
-                            requestLocalTelemetry(type, myNodeNum, connectedLifecycle.version)
+                            requestLocalTelemetry(type, myNodeNum, session)
                         }
                     }
                 }
@@ -310,14 +311,14 @@ class MeshConnectionManagerImpl(
                     retryPostHandshakeRequest(
                         label = "History replay",
                         myNodeNum = myNodeNum,
-                        connectedVersion = connectedLifecycle.version,
+                        session = session,
                     ) {
                         historyManager.requestHistoryReplay(
                             trigger = "onNodeDbReady",
                             myNodeNum = myNodeNum,
                             storeForwardConfig = config,
                             transport = "Unknown",
-                            expectedConnectionVersion = connectedLifecycle.version,
+                            session = session,
                         )
                     }
                 }
@@ -333,11 +334,10 @@ class MeshConnectionManagerImpl(
         }
     }
 
-    /** The session's client, while [connectedVersion], when given, still owns the connection. */
-    private fun activeClient(operation: String, connectedVersion: Long? = null): RadioClient {
-        val owned = connectedVersion == null || connectedVersion == serviceRepository.connectionLifecycle.value.version
-        return radioInterfaceService.activeSession.value?.takeIf { owned }?.let(radioInterfaceService::clientForSession)
-            ?: throw PacketQueueRejectedException(operation)
+    /** The client of [session], or of the active session when none is given, while that session is active. */
+    private fun activeClient(operation: String, session: RadioSessionContext? = null): RadioClient {
+        val target = session ?: radioInterfaceService.activeSession.value
+        return target?.let(radioInterfaceService::clientForSession) ?: throw PacketQueueRejectedException(operation)
     }
 
     /** Sends the phone's fix to our own node with the send builder, so its time and precision survive. */
@@ -358,10 +358,10 @@ class MeshConnectionManagerImpl(
         }
     }
 
-    /** Asks our own node for [type] telemetry, only while [connectedVersion] still owns the connection. */
-    private suspend fun requestLocalTelemetry(type: TelemetryType, myNodeNum: Int, connectedVersion: Long) {
+    /** Asks our own node for [type] telemetry, only while [session] is still active. */
+    private suspend fun requestLocalTelemetry(type: TelemetryType, myNodeNum: Int, session: RadioSessionContext) {
         val operation = "$type telemetry request"
-        val telemetry = activeClient(operation, connectedVersion).telemetry
+        val telemetry = activeClient(operation, session).telemetry
         val local = type == TelemetryType.LOCAL_STATS
         val result =
             try {
@@ -373,23 +373,19 @@ class MeshConnectionManagerImpl(
         if (result !is AdminResult.Success) throw PacketQueueRejectedException(operation)
     }
 
-    private fun ownsPostHandshakeRequests(myNodeNum: Int, connectedVersion: Long): Boolean =
-        serviceRepository.connectionLifecycle.value.let { lifecycle ->
-            lifecycle.version == connectedVersion &&
-                lifecycle.state is ConnectionState.Connected &&
-                nodeManager.myNodeNum.value == myNodeNum
-        }
+    private fun ownsPostHandshakeRequests(myNodeNum: Int, session: RadioSessionContext): Boolean =
+        radioInterfaceService.isSessionActive(session) && nodeManager.myNodeNum.value == myNodeNum
 
     private suspend fun retryPostHandshakeRequest(
         label: String,
         myNodeNum: Int,
-        connectedVersion: Long,
+        session: RadioSessionContext,
         send: suspend () -> Unit,
     ) {
         var rejectionCount = 0
         var rejectionLogged = false
         var complete = false
-        while (!complete && ownsPostHandshakeRequests(myNodeNum, connectedVersion)) {
+        while (!complete && ownsPostHandshakeRequests(myNodeNum, session)) {
             try {
                 send()
                 complete = true

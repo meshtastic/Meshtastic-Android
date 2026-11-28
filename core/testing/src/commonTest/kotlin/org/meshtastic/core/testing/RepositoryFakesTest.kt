@@ -190,7 +190,6 @@ class RepositoryFakesTest {
         assertEquals(listOf(7), controller.moduleConfigDestinations)
         assertEquals(listOf(position), controller.fixedPositions)
         assertEquals(ConnectionState.Connected, controller.connectionState.value)
-        assertEquals(1L, controller.connectionLifecycle.value.version)
 
         controller.reset()
 
@@ -201,7 +200,6 @@ class RepositoryFakesTest {
         assertTrue(controller.moduleConfigDestinations.isEmpty())
         assertTrue(controller.fixedPositions.isEmpty())
         assertEquals(ConnectionState.Disconnected, controller.connectionState.value)
-        assertEquals(2L, controller.connectionLifecycle.value.version)
     }
 
     @Test

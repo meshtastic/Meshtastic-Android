@@ -208,7 +208,7 @@ class PacketHandlerImpl(
         if (!scope.isActive) return null
         val database = databaseProvider.currentDb.value
         val session = radioInterfaceService.activeSession.value ?: return null
-        if (connectionStateProvider.connectionLifecycle.value.state != ConnectionState.Connected) return null
+        if (connectionStateProvider.connectionState.value != ConnectionState.Connected) return null
 
         val handle = radioInterfaceService.sendPaced(session, packet) ?: return null
         scope.handledLaunch { projectSend(session, database, packet, handle) }
