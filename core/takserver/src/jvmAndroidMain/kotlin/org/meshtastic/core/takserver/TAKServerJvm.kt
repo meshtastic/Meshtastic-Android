@@ -168,7 +168,7 @@ internal class TAKServerJvm(
                 if (running) {
                     Logger.w(e) { "TAK server accept loop iteration failed: ${e.message}" }
                 }
-                delay(TAK_ACCEPT_LOOP_DELAY_MS)
+                delay(TAK_ACCEPT_LOOP_DELAY)
             }
         }
     }

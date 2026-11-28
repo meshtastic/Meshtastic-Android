@@ -71,6 +71,7 @@ import org.meshtastic.proto.Telemetry
 import org.meshtastic.sdk.ConnectionState
 import org.meshtastic.sdk.LoRaFrequency
 import org.meshtastic.sdk.PositionUtils
+import kotlin.time.Duration.Companion.seconds
 import org.meshtastic.core.model.Channel as ChannelModel
 
 /**
@@ -301,7 +302,7 @@ class DiscoveryScanEngine(
     }
 
     private suspend fun readInitialConfigSnapshot(): Pair<Config.LoRaConfig?, ChannelSettings?>? =
-        withTimeoutOrNull(CONFIG_SNAPSHOT_TIMEOUT_MS) {
+        withTimeoutOrNull(CONFIG_SNAPSHOT_TIMEOUT) {
             radioConfigRepository.localConfigFlow.first().lora to
                 radioConfigRepository.channelSetFlow.first().settings.firstOrNull()
         }
@@ -676,7 +677,7 @@ class DiscoveryScanEngine(
 
     private suspend fun waitForConnection(): Boolean {
         val result =
-            withTimeoutOrNull(RECONNECT_TIMEOUT_MS) {
+            withTimeoutOrNull(RECONNECT_TIMEOUT) {
                 serviceRepository.connectionState.first { it is ConnectionState.Connected }
             }
         return result != null
@@ -716,7 +717,7 @@ class DiscoveryScanEngine(
                     )
                 canContinue = transitionScanState(dwellState)
                 if (canContinue) {
-                    delay(TICK_INTERVAL_MS)
+                    delay(TICK_INTERVAL)
                     remaining--
                 }
             }
@@ -1033,7 +1034,7 @@ class DiscoveryScanEngine(
     // endregion
 
     companion object {
-        private const val CONFIG_SNAPSHOT_TIMEOUT_MS = 5_000L
+        private val CONFIG_SNAPSHOT_TIMEOUT = 5.seconds
 
         /**
          * The default public channel is the empty name with the one-byte default key. Only the empty name moves with
@@ -1053,8 +1054,8 @@ class DiscoveryScanEngine(
             }
             .build()
 
-        private const val RECONNECT_TIMEOUT_MS = 60_000L
-        private const val TICK_INTERVAL_MS = 1_000L
+        private val RECONNECT_TIMEOUT = 60.seconds
+        private val TICK_INTERVAL = 1.seconds
         private const val POSITION_DIVISOR = 1e7
         private const val MIN_DEVICE_METRICS_PACKETS = 2
         private const val PERCENT_MULTIPLIER = 100.0
