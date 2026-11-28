@@ -391,7 +391,7 @@ class RadioSessionProjectionTest {
     // Regression: a log site that skipped redaction wrote the MQTT password, the device UI PIN, a channel PSK or a
     // key-verification code into MeshLog rows.
     @Test
-    fun `module config, device UI config, channel and notification rows are logged redacted`() = runTest {
+    fun `module config and device UI config and channel and notification rows are logged redacted`() = runTest {
         val harness = Harness(backgroundScope)
         val mqtt =
             ModuleConfig.Builder()

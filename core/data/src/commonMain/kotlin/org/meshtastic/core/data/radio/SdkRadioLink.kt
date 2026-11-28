@@ -38,10 +38,8 @@ import org.meshtastic.core.repository.RadioLink
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.RadioSessionHost
 import org.meshtastic.core.repository.TransportDisconnectReason
-import org.meshtastic.proto.DisplayPalette
 import org.meshtastic.proto.LogRecord
 import org.meshtastic.sdk.AutoReconnectConfig
-import org.meshtastic.sdk.DisplayImage
 import org.meshtastic.sdk.InMemoryStorageProvider
 import org.meshtastic.sdk.MeshEvent
 import org.meshtastic.sdk.MeshtasticException
@@ -233,12 +231,9 @@ internal class SdkRadioLink(
             }
     }
 
-    internal fun routeDisplayPalette(palette: DisplayPalette) {
-        current.value?.context?.let { pipeline.sessionProjection.onDisplayPalette(palette, it) }
-    }
-
-    internal fun routeDisplayImage(image: DisplayImage) {
-        current.value?.context?.let { pipeline.sessionProjection.onDisplayImage(image, it) }
+    /** Hands the open session, if any, to [deliver]: the route for streams that carry no session ID. */
+    internal fun toOpenSession(deliver: (RadioSessionContext) -> Unit) {
+        current.value?.context?.let(deliver)
     }
 
     /**
@@ -257,13 +252,19 @@ internal class SdkRadioLink(
                     }
             }
         }
-        launch { client.displayImage.filterNotNull().collectGuarded("display image") { routeDisplayImage(it) } }
         launch {
-            client.displayPalette.filterNotNull().collectGuarded("display palette") { routeDisplayPalette(it) }
+            client.displayImage.filterNotNull().collectGuarded("display image") { image ->
+                toOpenSession { projection.onDisplayImage(image, it) }
+            }
+        }
+        launch {
+            client.displayPalette.filterNotNull().collectGuarded("display palette") { palette ->
+                toOpenSession { projection.onDisplayPalette(palette, it) }
+            }
         }
         launch {
             client.events.filterIsInstance<MeshEvent.QueueStatusChanged>().collectGuarded("queue status") { _ ->
-                current.value?.context?.let { projection.refreshLocalNodeLastHeard(it) }
+                toOpenSession { projection.refreshLocalNodeLastHeard(it) }
             }
         }
     }

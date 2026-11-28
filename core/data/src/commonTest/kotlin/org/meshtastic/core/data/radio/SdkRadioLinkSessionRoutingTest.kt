@@ -282,45 +282,32 @@ class SdkRadioLinkSessionRoutingTest {
         )
     }
 
-    // Regression: the untagged palette stream was routed to a closed or absent session.
+    // Regression: the untagged palette and display image streams were routed to a closed or absent session.
     @Test
-    fun `displayPalette reaches the open session and is dropped after its Ended`() = runTest {
+    fun `display palette and image reach the open session and are dropped after its Ended`() = runTest {
         val rig = Rig(this)
         val events = MutableSharedFlow<RadioSessionEvent>()
         val link = rig.link()
         pump(rig, link, events)
+        val projection = rig.pipeline.sessionProjection
         val palette = DisplayPalette.Builder().build()
-
-        link.routeDisplayPalette(palette)
-        assertTrue(rig.palettes.isEmpty(), "no session is open yet")
-
-        send(events, lockdown(1))
-        link.routeDisplayPalette(palette)
-        assertEquals(1, rig.palettes.size)
-
-        send(events, RadioSessionEvent.Ended(1))
-        link.routeDisplayPalette(palette)
-        assertEquals(1, rig.palettes.size, "a palette after Ended(1) has no session to reach")
-    }
-
-    // Regression: the untagged display image was routed to a closed or absent session.
-    @Test
-    fun `displayImage reaches the open session and is dropped after its Ended`() = runTest {
-        val rig = Rig(this)
-        val events = MutableSharedFlow<RadioSessionEvent>()
-        val link = rig.link()
-        pump(rig, link, events)
         val image = DisplayImage(8, 4, DisplayFrame.Format.RGB565, 1, 0, ByteArray(64).toByteString())
+        val route = {
+            link.toOpenSession { projection.onDisplayPalette(palette, it) }
+            link.toOpenSession { projection.onDisplayImage(image, it) }
+        }
 
-        link.routeDisplayImage(image)
-        assertTrue(rig.images.isEmpty(), "no session is open yet")
+        route()
+        assertTrue(rig.palettes.isEmpty() && rig.images.isEmpty(), "no session is open yet")
 
         send(events, lockdown(1))
-        link.routeDisplayImage(image)
+        route()
+        assertEquals(1, rig.palettes.size)
         assertEquals(1, rig.images.size)
 
         send(events, RadioSessionEvent.Ended(1))
-        link.routeDisplayImage(image)
+        route()
+        assertEquals(1, rig.palettes.size, "a palette after Ended(1) has no session to reach")
         assertEquals(1, rig.images.size, "an image after Ended(1) has no session to reach")
     }
 
