@@ -20,8 +20,12 @@ import androidx.lifecycle.ViewModel
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.CommonUri
+import org.meshtastic.core.model.Channel
+import org.meshtastic.core.model.firstSetupDefaultFor
+import org.meshtastic.core.model.util.keepingTransparentModeOf
 import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.core.repository.DataPair
 import org.meshtastic.core.repository.PlatformAnalytics
@@ -34,6 +38,7 @@ import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Config
+import org.meshtastic.proto.LoRaRegionPresetMap
 import org.meshtastic.proto.LocalConfig
 
 @KoinViewModel
@@ -102,6 +107,29 @@ class ChannelViewModel(
         }
     }
 
+    /**
+     * Replaces the channels with the default one. The LoRa config is read from the repository here: [localConfig] holds
+     * its empty initial value unless something is collecting it, and the reset must keep the device's own settings. The
+     * default channel takes the region's first-setup preset (e.g. US -> LongTurbo) so its derived name, hash and
+     * frequency match what a freshly set-up node in that region would use.
+     */
+    fun resetToDefaults(regionPresetMap: LoRaRegionPresetMap?) {
+        safeLaunch(tag = "resetToDefaults") {
+            val current = radioConfigRepository.localConfigFlow.first().lora
+            val preset =
+                regionPresetMap.firstSetupDefaultFor(current?.region ?: Config.LoRaConfig.RegionCode.UNSET)
+                    ?: Channel.default.loraConfig.modem_preset
+            setChannels(
+                ChannelSet.Builder()
+                    .also { wb ->
+                        wb.settings = listOf(Channel.default.settings)
+                        wb.lora_config = defaultLoraConfigFor(current, preset)
+                    }
+                    .build(),
+            )
+        }
+    }
+
     // Set the radio config (also updates our saved copy in preferences)
     fun setConfig(config: Config) {
         safeLaunch(tag = "setConfig") { radioController.setLocalConfig(config) }
@@ -117,3 +145,20 @@ class ChannelViewModel(
         setConfig(Config.Builder().also { wb -> wb.lora = data }.build())
     }
 }
+
+/**
+ * The LoRa config "reset to defaults" sends: the app's default with [preset], keeping what a reset must not change on
+ * the device - its region, whether it transmits, and transparent mode.
+ */
+internal fun defaultLoraConfigFor(
+    current: Config.LoRaConfig?,
+    preset: Config.LoRaConfig.ModemPreset,
+): Config.LoRaConfig = Channel.default.loraConfig
+    .newBuilder()
+    .also { wb ->
+        wb.region = current?.region ?: Config.LoRaConfig.RegionCode.UNSET
+        wb.modem_preset = preset
+        wb.tx_enabled = current?.tx_enabled == true
+    }
+    .build()
+    .keepingTransparentModeOf(current)

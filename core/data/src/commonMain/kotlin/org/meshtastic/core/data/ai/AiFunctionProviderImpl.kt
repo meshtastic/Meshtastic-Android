@@ -105,6 +105,12 @@ class AiFunctionProviderImpl(
                         SendMessageResult.InvalidArgument(
                             "That conversation is retired: its channel is no longer on the radio.",
                         )
+
+                    SendMessageOutcome.TransparentMode ->
+                        SendMessageResult.NotConnected(
+                            "The connected node is in transparent mode, so it cannot send messages. " +
+                                "Turn transparent mode off in the app first.",
+                        )
                 }
             } catch (e: CancellationException) {
                 throw e

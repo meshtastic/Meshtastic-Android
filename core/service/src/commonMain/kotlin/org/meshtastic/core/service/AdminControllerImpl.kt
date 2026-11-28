@@ -40,8 +40,10 @@ import org.meshtastic.core.repository.AwaitedSendStatus
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.EditSettingsTransactionException
+import org.meshtastic.core.repository.LocalNodeConnection
 import org.meshtastic.core.repository.LocalNodeUnavailableException
 import org.meshtastic.core.repository.NodeManager
+import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.toFixedPositionAdminMessage
 import org.meshtastic.core.repository.toFixedPositionProto
@@ -145,6 +147,32 @@ internal class AdminControllerImpl(
             AdminMessage.Builder().also { wb -> wb.set_config = config }.build()
         }
         scope.handledLaunch { radioConfigRepository.setLocalConfig(config) }
+    }
+
+    override suspend fun sendLocalConfig(config: Config, expectedNodeNum: Int, expectedConnectionVersion: Long) {
+        sendLocalConfigOn(
+            config,
+            commandSender.generatePacketId(),
+            LocalNodeConnection(expectedNodeNum, expectedConnectionVersion),
+        )
+    }
+
+    override suspend fun setLocalConfigForConnection(config: Config, packetId: Int, connection: LocalNodeConnection) {
+        sendLocalConfigOn(config, packetId, connection)
+        scope.handledLaunch { radioConfigRepository.setLocalConfig(config) }
+    }
+
+    private suspend fun sendLocalConfigOn(config: Config, packetId: Int, connection: LocalNodeConnection) {
+        if (
+            nodeManager.myNodeNum.value != connection.nodeNum ||
+            connectionStateProvider.connectionLifecycle.value.version != connection.connectionVersion
+        ) {
+            throw PacketQueueRejectedException("Local config for another connection")
+        }
+        heardOnCurrentLoraRefresher.beforeLocalWrite(config, packetId)
+        commandSender.sendAdminForConnection(connection.nodeNum, connection.connectionVersion, packetId) {
+            AdminMessage.Builder().also { wb -> wb.set_config = config }.build()
+        }
     }
 
     override fun setDisplayMirror(enabled: Boolean) {

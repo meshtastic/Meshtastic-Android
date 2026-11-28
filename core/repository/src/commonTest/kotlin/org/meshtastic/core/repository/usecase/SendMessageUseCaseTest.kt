@@ -20,6 +20,7 @@ import dev.mokkery.MockMode
 import dev.mokkery.answering.calls
 import dev.mokkery.answering.returns
 import dev.mokkery.answering.throws
+import dev.mokkery.every
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
@@ -28,20 +29,29 @@ import dev.mokkery.verify.VerifyMode
 import dev.mokkery.verifySuspend
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.ContactKey
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
+import org.meshtastic.core.repository.ConnectionIdentity
 import org.meshtastic.core.repository.MessageQueue
+import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PersistedPacketId
 import org.meshtastic.core.repository.PlatformAnalytics
+import org.meshtastic.core.repository.TransparentModeController
 import org.meshtastic.core.testing.FakeAppPreferences
 import org.meshtastic.core.testing.FakeNodeRepository
+import org.meshtastic.core.testing.FakeRadioConfigRepository
 import org.meshtastic.core.testing.FakeRadioController
+import org.meshtastic.core.testing.FakeServiceRepository
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceMetadata
+import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.User
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -57,6 +67,19 @@ class SendMessageUseCaseTest {
     private lateinit var messageQueue: MessageQueue
     private lateinit var analytics: PlatformAnalytics
     private lateinit var useCase: SendMessageUseCase
+    private val radioConfigRepository = FakeRadioConfigRepository()
+    private val serviceRepository = FakeServiceRepository()
+    private val connectionIdentity = MutableStateFlow<ConnectionIdentity?>(null)
+    private val transparentMode =
+        TransparentModeController(
+            radioConfigRepository,
+            serviceRepository,
+            FakeRadioController(),
+            mock<NodeManager>(MockMode.autofill) {
+                every { connectionIdentity } returns this@SendMessageUseCaseTest.connectionIdentity
+            },
+            TestScope(),
+        )
 
     @BeforeTest
     fun setUp() {
@@ -78,7 +101,43 @@ class SendMessageUseCaseTest {
                 homoglyphEncodingPrefs = appPreferences.homoglyph,
                 messageQueue = messageQueue,
                 analytics = analytics,
+                transparentMode = transparentMode,
             )
+    }
+
+    private fun cacheTransparentNode(state: ConnectionState) {
+        val lora = Config.LoRaConfig.Builder().also { wb -> wb.transparent_mode = true }.build()
+        radioConfigRepository.setLocalConfigDirect(LocalConfig.Builder().also { wb -> wb.lora = lora }.build())
+        connectionIdentity.value = ConnectionIdentity(1L, "x12:34", 0x1234, deviceId = null)
+        serviceRepository.setConnectionState(state)
+    }
+
+    @Test
+    fun `a send through a node in transparent mode is refused by name and nothing is saved or queued`() = runTest {
+        nodeRepository.setOurNode(Node(num = 1))
+        cacheTransparentNode(ConnectionState.Connected)
+
+        useCase("Hello", "0${NodeAddress.ID_BROADCAST}", null) shouldBe SendMessageOutcome.TransparentMode
+
+        verifySuspend(VerifyMode.exactly(0)) { packetRepository.savePacket(any(), any(), any(), any(), any(), any()) }
+        verifySuspend(VerifyMode.exactly(0)) { messageQueue.enqueue(any()) }
+    }
+
+    @Test
+    fun `a resend through a node in transparent mode is refused by name without touching the row`() = runTest {
+        cacheTransparentNode(ConnectionState.Connected)
+
+        useCase.resend(77L, "0${NodeAddress.ID_BROADCAST}") shouldBe SendMessageOutcome.TransparentMode
+
+        verifySuspend(VerifyMode.exactly(0)) { packetRepository.resendMessage(any(), any(), any()) }
+    }
+
+    @Test
+    fun `a message written while disconnected from a transparent node is still queued`() = runTest {
+        nodeRepository.setOurNode(Node(num = 1))
+        cacheTransparentNode(ConnectionState.Disconnected)
+
+        assertIs<SendMessageOutcome.Queued>(useCase("Hello", "0${NodeAddress.ID_BROADCAST}", null))
     }
 
     @Test

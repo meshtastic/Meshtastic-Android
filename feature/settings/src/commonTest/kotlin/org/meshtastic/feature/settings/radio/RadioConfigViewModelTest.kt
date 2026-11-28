@@ -56,6 +56,7 @@ import org.meshtastic.core.domain.usecase.settings.InstallProfileUseCase
 import org.meshtastic.core.domain.usecase.settings.ProcessRadioResponseUseCase
 import org.meshtastic.core.domain.usecase.settings.RadioConfigUseCase
 import org.meshtastic.core.domain.usecase.settings.RadioResponseResult
+import org.meshtastic.core.model.ConnectionLifecycle
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.MqttProbeStatus
@@ -66,6 +67,7 @@ import org.meshtastic.core.repository.AnalyticsPrefs
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.HomoglyphPrefs
+import org.meshtastic.core.repository.LocalNodeConnection
 import org.meshtastic.core.repository.LocationRepository
 import org.meshtastic.core.repository.LocationService
 import org.meshtastic.core.repository.MapConsentPrefs
@@ -77,12 +79,17 @@ import org.meshtastic.core.repository.SecurityKeyBackupStore
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.StoredSecurityKeys
 import org.meshtastic.core.repository.UiPrefs
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.UiText
+import org.meshtastic.core.resources.transparent_mode_unsupported
 import org.meshtastic.core.testing.FakeLockdownCoordinator
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.ui.util.SnackbarManager
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.ModuleRoute
+import org.meshtastic.feature.settings.radio.component.LoraSaveTransparentMode
 import org.meshtastic.feature.settings.radio.component.loRaBandwidthSelection
+import org.meshtastic.feature.settings.radio.component.saveLora
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSet
@@ -413,6 +420,8 @@ class RadioConfigViewModelTest {
     private val securityKeyBackupStore: SecurityKeyBackupStore = mock(MockMode.autofill)
     private val snackbarManager: SnackbarManager = mock(MockMode.autofill)
     private val connectionManager: MeshConnectionManager = mock(MockMode.autofill)
+    private val connectionLifecycle =
+        MutableStateFlow(ConnectionLifecycle(version = SAVE_CONNECTION_VERSION, state = ConnectionState.Connected))
     private val trackerScope = CoroutineScope(SupervisorJob())
     private val nodeRestartTracker = NodeRestartTracker(trackerScope)
 
@@ -443,6 +452,7 @@ class RadioConfigViewModelTest {
         every { serviceRepository.meshPacketFlow } returns MutableSharedFlow()
         every { serviceRepository.connectionState } returns
             MutableStateFlow(org.meshtastic.core.model.ConnectionState.Connected)
+        every { serviceRepository.connectionLifecycle } returns connectionLifecycle
 
         every { mqttManager.mqttConnectionState } returns
             MutableStateFlow(org.meshtastic.core.model.MqttConnectionState.Inactive)
@@ -498,6 +508,194 @@ class RadioConfigViewModelTest {
         analytics = mock(MockMode.autofill),
     )
         .also { createdViewModels += it }
+
+    @Test
+    fun `a follow-up to a save runs only after the write was handed to the radio`() = runTest {
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
+        val events = mutableListOf<String>()
+        everySuspend { radioConfigUseCase.setLocalConfigForConnection(any(), any(), any()) } calls
+            {
+                events += "write sent"
+                77
+            }
+        viewModel = createViewModel()
+
+        viewModel.setLocalConfig(Config.Builder().build()) { events += "follow-up" }
+
+        runCurrent()
+
+        assertEquals(listOf("write sent", "follow-up"), events)
+    }
+
+    @Test
+    fun `a reconnect while a local save is sent leaves its follow-up on the connection the save started on`() =
+        runTest {
+            nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
+            val sentOn = mutableListOf<LocalNodeConnection>()
+            val followUpOn = mutableListOf<LocalNodeConnection>()
+            everySuspend { radioConfigUseCase.setLocalConfigForConnection(any(), any(), any()) } calls
+                {
+                    sentOn += it.args[0] as LocalNodeConnection
+                    connectionLifecycle.value =
+                        ConnectionLifecycle(version = SAVE_CONNECTION_VERSION + 1, state = ConnectionState.Connected)
+                    77
+                }
+            viewModel = createViewModel()
+
+            viewModel.setLocalConfig(Config.Builder().build()) { followUpOn += it }
+            runCurrent()
+
+            assertEquals(listOf(localSaveConnection), sentOn)
+            assertEquals(listOf(localSaveConnection), followUpOn)
+        }
+
+    private class CountingTransparentMode(private val events: MutableList<String>) : LoraSaveTransparentMode {
+        val readBack = CompletableDeferred<Boolean?>()
+        val turnOffs = mutableListOf<LocalNodeConnection>()
+        val confirms = mutableListOf<LocalNodeConnection>()
+
+        override fun turnOff(savedOn: LocalNodeConnection) {
+            turnOffs += savedOn
+            events += "turn off"
+        }
+
+        override suspend fun confirmTurnedOnByUser(savedOn: LocalNodeConnection): Boolean? {
+            confirms += savedOn
+            events += "read back"
+            return readBack.await()
+        }
+    }
+
+    private val localSaveConnection = LocalNodeConnection(nodeNum = 123, connectionVersion = SAVE_CONNECTION_VERSION)
+
+    private fun transparentLora(on: Boolean, hopLimit: Int = 3) = Config.LoRaConfig.Builder()
+        .also { wb ->
+            wb.hop_limit = hopLimit
+            wb.transparent_mode = on
+        }
+        .build()
+
+    /** A local LoRa save whose write is acked as request 77 once [ack] is emitted. */
+    private fun TestScope.saveLoraOnLocalNode(
+        events: MutableList<String>,
+        transparentMode: LoraSaveTransparentMode,
+        reported: Config.LoRaConfig,
+        saved: Config.LoRaConfig,
+    ): suspend () -> Unit {
+        nodeRepository.setNodes(listOf(Node(num = 123, user = User.Builder().also { wb -> wb.id = "!123" }.build())))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
+        val packetFlow = MutableSharedFlow<MeshPacket>()
+        every { serviceRepository.meshPacketFlow } returns packetFlow
+        everySuspend { radioConfigUseCase.setConfig(any(), any(), any()) } calls
+            {
+                events += "write sent"
+                it.args.onRequestIdArg()(77)
+                77
+            }
+        everySuspend { radioConfigUseCase.setLocalConfigForConnection(any(), any(), any()) } calls
+            {
+                events += "write sent on its connection"
+                it.args.onRequestIdArg()(77)
+                77
+            }
+        viewModel = createViewModel(processRadioResponseUseCase = ProcessRadioResponseUseCase())
+
+        saveLora(viewModel, transparentMode, isLocal = true, reported = reported, saved = saved)
+        runCurrent()
+        return {
+            packetFlow.emit(routingAck(requestId = 77, from = 123))
+            runCurrent()
+        }
+    }
+
+    @Test
+    fun `a LoRa save turning transparent mode off hands its result to the notice once the write is sent`() = runTest {
+        val events = mutableListOf<String>()
+        val transparentMode = CountingTransparentMode(events)
+        val ack =
+            saveLoraOnLocalNode(
+                events,
+                transparentMode,
+                reported = transparentLora(true),
+                saved = transparentLora(false),
+            )
+
+        assertEquals(listOf("write sent on its connection", "turn off"), events)
+        assertEquals(listOf(localSaveConnection), transparentMode.turnOffs)
+        assertEquals(emptyList(), transparentMode.confirms)
+
+        ack()
+        advanceTimeBy(31_000)
+        runCurrent()
+
+        assertEquals(ResponseState.Empty, viewModel.radioConfigState.value.responseState)
+    }
+
+    @Test
+    fun `a LoRa save turning transparent mode on succeeds only once the node reads it back on`() = runTest {
+        val events = mutableListOf<String>()
+        val transparentMode = CountingTransparentMode(events)
+        val ack =
+            saveLoraOnLocalNode(
+                events,
+                transparentMode,
+                reported = transparentLora(false),
+                saved = transparentLora(true),
+            )
+
+        assertEquals(listOf("write sent on its connection", "read back"), events)
+        assertEquals(emptyList(), transparentMode.turnOffs)
+
+        ack()
+
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Loading)
+
+        transparentMode.readBack.complete(true)
+        runCurrent()
+
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Success)
+        assertEquals(listOf(localSaveConnection), transparentMode.confirms)
+    }
+
+    @Test
+    fun `a LoRa save turning transparent mode on that the firmware drops says it is not supported`() = runTest {
+        val events = mutableListOf<String>()
+        val transparentMode = CountingTransparentMode(events)
+        val ack =
+            saveLoraOnLocalNode(
+                events,
+                transparentMode,
+                reported = transparentLora(false),
+                saved = transparentLora(true),
+            )
+
+        ack()
+        transparentMode.readBack.complete(false)
+        runCurrent()
+
+        assertEquals(
+            ResponseState.Error(UiText.Resource(Res.string.transparent_mode_unsupported)),
+            viewModel.radioConfigState.value.responseState,
+        )
+    }
+
+    @Test
+    fun `a LoRa save leaving transparent mode alone neither turns it off nor reads it back`() = runTest {
+        val events = mutableListOf<String>()
+        val transparentMode = CountingTransparentMode(events)
+        val ack =
+            saveLoraOnLocalNode(
+                events,
+                transparentMode,
+                reported = transparentLora(true),
+                saved = transparentLora(true, hopLimit = 5),
+            )
+
+        ack()
+
+        assertEquals(listOf("write sent"), events)
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Success)
+    }
 
     @Test
     fun `local save acked by a renumbered radio re-runs the handshake and completes the save`() = runTest {
@@ -3169,6 +3367,8 @@ class RadioConfigViewModelTest {
         assertFalse(nodeRestartTracker.restartExpected.value)
     }
 }
+
+private const val SAVE_CONNECTION_VERSION = 7L
 
 /** Extracts the trailing `onRequestId` callback from a mocked request method's args. */
 @Suppress("UNCHECKED_CAST")

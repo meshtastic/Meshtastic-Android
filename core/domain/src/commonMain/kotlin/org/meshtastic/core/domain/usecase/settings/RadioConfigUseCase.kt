@@ -18,6 +18,7 @@ package org.meshtastic.core.domain.usecase.settings
 
 import org.koin.core.annotation.Single
 import org.meshtastic.core.model.Position
+import org.meshtastic.core.repository.LocalNodeConnection
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.HamParameters
@@ -93,6 +94,28 @@ open class RadioConfigUseCase constructor(private val radioController: RadioCont
         val packetId = radioController.generatePacketId()
         onRequestId(packetId)
         radioController.setConfig(destNum, config, packetId)
+        return packetId
+    }
+
+    /**
+     * Updates a configuration section on the local node, sent only while [connection] is still the local node and
+     * connection.
+     *
+     * @param connection The local node and connection the save started on.
+     * @param config The new configuration.
+     * @param onRequestId Invoked with the request's packet ID before the send is issued.
+     * @return The packet ID of the request.
+     * @throws org.meshtastic.core.repository.PacketQueueRejectedException when the connection is no longer
+     *   [connection].
+     */
+    open suspend fun setLocalConfigForConnection(
+        connection: LocalNodeConnection,
+        config: Config,
+        onRequestId: (Int) -> Unit = {},
+    ): Int {
+        val packetId = radioController.generatePacketId()
+        onRequestId(packetId)
+        radioController.setLocalConfigForConnection(config, packetId, connection)
         return packetId
     }
 

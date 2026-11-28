@@ -2326,6 +2326,24 @@ translation_model_download_failed
 translation_not_required
 transmit_disabled
 transmit_disabled_summary
+### TRANSPARENT ###
+transparent_mode_banner_summary
+transparent_mode_banner_title
+transparent_mode_enable_confirm
+transparent_mode_enable_title
+transparent_mode_enable_warning
+transparent_mode_leave_on
+transparent_mode_notice_message
+transparent_mode_notice_title
+transparent_mode_send_blocked
+transparent_mode_still_on
+transparent_mode_summary
+transparent_mode_turn_off
+transparent_mode_turn_on_unconfirmed
+transparent_mode_turned_off
+transparent_mode_turning_off
+transparent_mode_unconfirmed
+transparent_mode_unsupported
 ### TRANSPORT ###
 transport
 transport_api

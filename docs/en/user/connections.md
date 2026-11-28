@@ -186,6 +186,19 @@ These cards appear only for the node you are connected to when it is not in mana
 
 For more information, see [Settings — Radio & User](settings-radio-user#lora-config).
 
+### Transparent mode
+
+A node in transparent mode is the radio for another program, such as meshtasticd. It passes raw LoRa frames to that program and does nothing else, so messaging, positions, node updates and remote admin do not work from the app.
+
+When you connect to a node that has transparent mode on, the app shows a notice with two choices:
+
+- **Turn off** clears transparent mode and leaves every other LoRa setting as it was. This stops any host that is using the node as its radio. The app reports success once the node confirms the setting is off. If the node still reports it on, or does not answer, the notice says so and offers **Retry**.
+- **Leave on** closes the notice. A **Transparent mode is on** card stays on the **Connections** tab for the rest of the connection; tap it to open the notice again. The notice also returns the next time you connect to the node.
+
+While transparent mode is on, the message composer is replaced by a line saying that sending is off, and a resend or a reaction is refused with the same reason. A reply typed into a message notification is refused too, and a notification says why.
+
+You can also change the setting on **Settings → LoRa**, on the **Advanced** card, for the node you are connected to. Turning it off there is confirmed the same way: the notice reads the setting back and reports the result. Turning it on is confirmed too: the save finishes once the node reports transparent mode on. Firmware that does not support transparent mode ignores the setting, and the save then says so.
+
 ## Live Update
 
 On Android 16 and newer, the **Connect** tab has a **Live Update** row while you are connected. It puts one thing you choose in the status bar and in the Meshtastic notification in the notification shade; nothing changes inside the app:

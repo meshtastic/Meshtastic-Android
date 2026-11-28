@@ -128,6 +128,7 @@ import org.meshtastic.core.ui.component.MeshtasticImportFAB
 import org.meshtastic.core.ui.component.PermissionRationaleDialog
 import org.meshtastic.core.ui.component.PermissionRecoveryCard
 import org.meshtastic.core.ui.component.RecoveryCard
+import org.meshtastic.core.ui.component.TransparentModeBanner
 import org.meshtastic.core.ui.component.isAdaptiveTwoPaneSplit
 import org.meshtastic.core.ui.icon.AppSettingsAlt
 import org.meshtastic.core.ui.icon.Bluetooth
@@ -155,6 +156,7 @@ import org.meshtastic.core.ui.util.rememberOpenWifiSettings
 import org.meshtastic.core.ui.util.shouldShowWifiUnavailableBanner
 import org.meshtastic.core.ui.viewmodel.ConnectionStatus
 import org.meshtastic.core.ui.viewmodel.ConnectionsViewModel
+import org.meshtastic.core.ui.viewmodel.TransparentModeViewModel
 import org.meshtastic.feature.connections.NO_DEVICE_SELECTED
 import org.meshtastic.feature.connections.ScannerViewModel
 import org.meshtastic.feature.connections.model.DeviceListEntry
@@ -265,6 +267,7 @@ internal fun ConfigurationWarningCards(
 fun ConnectionsScreen(
     connectionsViewModel: ConnectionsViewModel = koinViewModel(),
     scanModel: ScannerViewModel = koinViewModel(),
+    transparentModeViewModel: TransparentModeViewModel = koinViewModel(),
     onClickNodeChip: (Int) -> Unit,
     onNavigateToNodeDetails: (Int) -> Unit,
     onConfigNavigate: (Route) -> Unit,
@@ -283,6 +286,7 @@ fun ConnectionsScreen(
     val activeNodeInfoReady by connectionsViewModel.activeNodeInfoReady.collectAsStateWithLifecycle()
     val lockdownState by connectionsViewModel.lockdownState.collectAsStateWithLifecycle()
     val localConfig by connectionsViewModel.localConfig.collectAsStateWithLifecycle()
+    val transparentMode by transparentModeViewModel.state.collectAsStateWithLifecycle()
 
     val selectedDevice by scanModel.selectedNotNullFlow.collectAsStateWithLifecycle()
     val persistedDeviceName by scanModel.persistedDeviceName.collectAsStateWithLifecycle()
@@ -675,6 +679,10 @@ fun ConnectionsScreen(
                 onConfigNavigate = onConfigNavigate,
                 radioSetupAddress = connectionAddress,
             )
+
+            if (transparentMode.active) {
+                TransparentModeBanner(onClick = transparentModeViewModel::reopenNotice)
+            }
 
             LiveUpdateSection(connected = uiState == ConnectionUiState.CONNECTED_WITH_NODE)
 
