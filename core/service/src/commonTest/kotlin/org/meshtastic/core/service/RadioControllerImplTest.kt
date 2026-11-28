@@ -32,10 +32,14 @@ import dev.mokkery.verifySuspend
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -141,6 +145,7 @@ class RadioControllerImplTest {
         activeSession: MutableStateFlow<RadioSessionContext?>? = null,
         onDeviceAddressChanged: (() -> Unit)? = null,
         scope: CoroutineScope,
+        sessionScope: CoroutineScope = scope,
     ): RadioControllerImpl {
         every { nodeManager.myNodeNum } returns MutableStateFlow(myNodeNum)
         every { nodeManager.myDeviceId } returns MutableStateFlow(null)
@@ -156,7 +161,7 @@ class RadioControllerImplTest {
         every { radioInterfaceService.isSessionActive(any()) } calls { resolvedActiveSession.value == it.args[0] }
         every { radioInterfaceService.sessionScope(any()) } calls
             {
-                if (resolvedActiveSession.value == it.args[0]) scope else null
+                if (resolvedActiveSession.value == it.args[0]) sessionScope else null
             }
         every { meshPrefs.deviceAddress } returns deviceAddress
         every { radioInterfaceService.getDeviceAddress() } returns deviceAddress.value
@@ -341,6 +346,44 @@ class RadioControllerImplTest {
         assertTrue(associationCancelled.isCompleted)
         releaseAssociation.complete(Unit)
         verifySuspend(exactly(1)) { databaseManager.associateDevice("tcp:selected", 99, "device", any()) }
+    }
+
+    // Regression: association ran outside its session's scope, so teardown, which cancels that scope before the
+    // session stops being active, left it running to write for a closed session.
+    @Test
+    fun sessionTeardownCancelsInFlightAssociation() = runTest {
+        val selectedAddress = MutableStateFlow<String?>("tcp:selected")
+        val activeSession = MutableStateFlow<RadioSessionContext?>(RadioSessionContext(1L, "tcp:selected"))
+        val identity = MutableStateFlow<ConnectionIdentity?>(ConnectionIdentity(1L, "tcp:selected", 99, "device"))
+        val associationStarted = CompletableDeferred<Unit>()
+        val associationCancelled = CompletableDeferred<Unit>()
+        everySuspend { databaseManager.associateDevice("tcp:selected", 99, "device", any()) } calls
+            {
+                associationStarted.complete(Unit)
+                try {
+                    awaitCancellation()
+                } catch (cancellation: CancellationException) {
+                    associationCancelled.complete(Unit)
+                    throw cancellation
+                }
+            }
+        val sessionScope = CoroutineScope(backgroundScope.coroutineContext + Job(backgroundScope.coroutineContext.job))
+
+        createController(
+            scope = backgroundScope,
+            deviceAddress = selectedAddress,
+            connectionIdentity = identity,
+            sessionGeneration = MutableStateFlow(1L),
+            activeSession = activeSession,
+            sessionScope = sessionScope,
+        )
+        runCurrent()
+        assertTrue(associationStarted.isCompleted)
+
+        sessionScope.cancel()
+        runCurrent()
+
+        assertTrue(associationCancelled.isCompleted)
     }
 
     @Test
