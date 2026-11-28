@@ -93,6 +93,7 @@ import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config
+import org.meshtastic.proto.DeviceConnectionStatus
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.DeviceProfile
 import org.meshtastic.proto.ExcludedModules
@@ -1812,6 +1813,163 @@ class RadioConfigViewModelTest {
         viewModel.setResponseStateLoading(ConfigRoute.DEVICE)
         runCurrent()
         assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Error)
+    }
+
+    // Catches: the next-channel chain in applyChannel dropped, wrong index, or stopping early.
+    @Test
+    fun `channels route reads channels in order until the first disabled one`() = runTest {
+        val node = Node(num = 123, user = User.Builder().also { wb -> wb.id = "!123" }.build())
+        nodeRepository.setNodes(listOf(node))
+        everySuspend { adminController.getChannel(any(), any()) } calls
+            {
+                val index = it.args[1] as Int
+                AdminResult.Success(
+                    Channel.Builder()
+                        .also { wb ->
+                            wb.index = index
+                            wb.role =
+                                when (index) {
+                                    0 -> Channel.Role.PRIMARY
+                                    1 -> Channel.Role.SECONDARY
+                                    else -> Channel.Role.DISABLED
+                                }
+                            wb.settings =
+                                ChannelSettings.Builder()
+                                    .also { s -> s.name = listOf("Primary", "Second").getOrElse(index) { "" } }
+                                    .build()
+                        }
+                        .build(),
+                )
+            }
+        everySuspend { adminController.getConfig(any(), any()) } returns AdminResult.Success(Config.Builder().build())
+        viewModel = createViewModel()
+
+        viewModel.setResponseStateLoading(ConfigRoute.CHANNELS)
+        runCurrent()
+
+        assertEquals(listOf("Primary", "Second"), viewModel.radioConfigState.value.channelList.map { it.name })
+        verifySuspend { adminController.getChannel(123, 2) }
+        verifySuspend(exactly(0)) { adminController.getChannel(123, 3) }
+    }
+
+    // Catches: applyConnectionStatus writing the wrong field or being unwired.
+    @Test
+    fun `network route stores the connection status`() = runTest {
+        val node = Node(num = 123, user = User.Builder().also { wb -> wb.id = "!123" }.build())
+        nodeRepository.setNodes(listOf(node))
+        val status = DeviceConnectionStatus.Builder().build()
+        everySuspend { adminController.getDeviceConnectionStatus(any()) } returns AdminResult.Success(status)
+        everySuspend { adminController.getConfig(any(), any()) } returns AdminResult.Success(Config.Builder().build())
+        viewModel = createViewModel()
+
+        viewModel.setResponseStateLoading(ConfigRoute.NETWORK)
+        runCurrent()
+
+        assertEquals(status, viewModel.radioConfigState.value.deviceConnectionStatus)
+    }
+
+    // Catches: applyCannedMessages unwired.
+    @Test
+    fun `canned message route stores the canned messages`() = runTest {
+        val node = Node(num = 123, user = User.Builder().also { wb -> wb.id = "!123" }.build())
+        nodeRepository.setNodes(listOf(node))
+        everySuspend { adminController.getCannedMessages(any()) } returns AdminResult.Success("Hello|World")
+        everySuspend { adminController.getModuleConfig(any(), any()) } returns
+            AdminResult.Success(ModuleConfig.Builder().build())
+        viewModel = createViewModel()
+
+        viewModel.setResponseStateLoading(ModuleRoute.CANNED_MESSAGE)
+        runCurrent()
+
+        assertEquals("Hello|World", viewModel.radioConfigState.value.cannedMessageMessages)
+    }
+
+    // Catches: the DFU half of the deadline rule lost; a remote request never sets restartExpected, so only the DFU
+    // clause can settle it as success.
+    @Test
+    fun `a remote DFU request with no answer settles as success at the deadline`() = runTest {
+        val localNode = Node(num = 100, user = User.Builder().also { wb -> wb.id = "!100" }.build())
+        val remoteNode = Node(num = 456, user = User.Builder().also { wb -> wb.id = "!456" }.build())
+        nodeRepository.setNodes(listOf(localNode, remoteNode))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100))
+        everySuspend { adminController.getDeviceMetadata(any()) } returns
+            AdminResult.Success(DeviceMetadata.Builder().build())
+        viewModel = createViewModel(destNum = 456)
+
+        viewModel.setResponseStateLoading(AdminRoute.REBOOT_DFU)
+        runCurrent()
+        verifySuspend { adminActionsUseCase.rebootToDfu(456) }
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Loading)
+        assertFalse(nodeRestartTracker.restartExpected.value)
+
+        advanceTimeBy(31_000)
+        runCurrent()
+
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Success)
+    }
+
+    // Catches: a refusal that ends only its own request, leaving a sibling read's deadline to overwrite the specific
+    // failure with a timeout.
+    @Test
+    fun `a refused read stops its sibling read from timing out over the refusal`() = runTest {
+        val node = Node(num = 123, user = User.Builder().also { wb -> wb.id = "!123" }.build())
+        nodeRepository.setNodes(listOf(node))
+        val channelReply = CompletableDeferred<AdminResult<Channel>>()
+        everySuspend { adminController.getChannel(any(), any()) } calls { channelReply.await() }
+        viewModel = createViewModel()
+
+        viewModel.setResponseStateLoading(ConfigRoute.CHANNELS)
+        runCurrent()
+        verifySuspend { adminController.getConfig(123, AdminMessage.ConfigType.LORA_CONFIG.value) }
+
+        val failure = UiText.Resource(getStringResFrom(Routing.Error.MAX_RETRANSMIT.value))
+        channelReply.complete(AdminResult.Failed(Routing.Error.MAX_RETRANSMIT))
+        runCurrent()
+        assertEquals(ResponseState.Error(failure), viewModel.radioConfigState.value.responseState)
+
+        advanceTimeBy(31_000)
+        runCurrent()
+
+        assertEquals(ResponseState.Error(failure), viewModel.radioConfigState.value.responseState)
+    }
+
+    // Catches: a write acknowledged while a read route is open staying tracked forever, so every later save takes
+    // incrementCompleted instead of success.
+    @Test
+    fun `a save acknowledged while a read route is open does not block the next save`() = runTest {
+        val localNode = Node(num = 100, user = User.Builder().also { wb -> wb.id = "!100" }.build())
+        val remoteNode = Node(num = 456, user = User.Builder().also { wb -> wb.id = "!456" }.build())
+        val config =
+            Config.Builder()
+                .also { wb ->
+                    wb.device = Config.DeviceConfig.Builder().also { d -> d.node_info_broadcast_secs = 900 }.build()
+                }
+                .build()
+        val saveReply = CompletableDeferred<AdminResult<Unit>>()
+        val readReply = CompletableDeferred<AdminResult<Config>>()
+        everySuspend { adminController.setConfig(any(), any()) } calls { saveReply.await() }
+        everySuspend { adminController.getConfig(any(), any()) } calls { readReply.await() }
+        nodeRepository.setNodes(listOf(localNode, remoteNode))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100))
+        viewModel = createViewModel(destNum = 456)
+
+        viewModel.setConfig(config)
+        runCurrent()
+        viewModel.loadConfigRoute(ConfigRoute.DEVICE)
+        runCurrent()
+        saveReply.complete(AdminResult.Success(Unit))
+        runCurrent()
+        readReply.complete(AdminResult.Success(config))
+        runCurrent()
+
+        advanceTimeBy(31_000)
+        runCurrent()
+
+        everySuspend { adminController.setConfig(any(), any()) } returns AdminResult.Success(Unit)
+        viewModel.setConfig(config)
+        runCurrent()
+
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Success)
     }
 
     @Test

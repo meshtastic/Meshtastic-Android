@@ -53,8 +53,6 @@ import org.meshtastic.core.domain.usecase.settings.ExportProfileUseCase
 import org.meshtastic.core.domain.usecase.settings.ImportProfileUseCase
 import org.meshtastic.core.domain.usecase.settings.ImportSecurityConfigUseCase
 import org.meshtastic.core.domain.usecase.settings.InstallProfileUseCase
-import org.meshtastic.core.domain.usecase.settings.RadioResponseResult
-import org.meshtastic.core.domain.usecase.settings.toRadioResponseResult
 import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.HamName
 import org.meshtastic.core.model.MqttConnectionState
@@ -63,6 +61,7 @@ import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.excludes
+import org.meshtastic.core.model.getStringResFrom
 import org.meshtastic.core.model.util.MalformedMeshtasticUrlException
 import org.meshtastic.core.repository.AdminController
 import org.meshtastic.core.repository.AnalyticsPrefs
@@ -82,6 +81,7 @@ import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.SecurityKeyBackupStore
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.routingErrorOrNull
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.cant_shutdown
@@ -405,7 +405,7 @@ open class RadioConfigViewModel(
                     }
                 } else {
                     // Remote admin: clear local config once, then stay idle.
-                    // Remote responses arrive through processResponse.
+                    // Remote responses arrive through each read's apply function.
                     flowOf(Unit).onEach {
                         _radioConfigState.update {
                             it.copy(
@@ -561,11 +561,9 @@ open class RadioConfigViewModel(
                                 launchRequest(
                                     "setRemoteChannel",
                                     onRequestId,
-                                    {
-                                        adminController.setRemoteChannel(destNum, channel)
-                                    },
-                                ) {
-                                    RadioResponseResult.Success
+                                    { adminController.setRemoteChannel(destNum, channel) },
+                                ) { token, _ ->
+                                    completeWrite(token)
                                 }
                             },
                             registerRequestId = { packetId ->
@@ -738,8 +736,8 @@ open class RadioConfigViewModel(
                             dfuRequestIds.add(token)
                         },
                         call = { adminActionsUseCase.rebootToDfu(destNum) },
-                    ) {
-                        RadioResponseResult.Success
+                    ) { token, _ ->
+                        completeWrite(token)
                     }
                     trackAdminAction()
                 }
@@ -957,7 +955,7 @@ open class RadioConfigViewModel(
 
         when (route) {
             ConfigRoute.USER -> {
-                launchRead("getOwner", { adminController.getOwner(destNum) }, RadioResponseResult::Owner)
+                launchRead("getOwner", { adminController.getOwner(destNum) }, ::applyOwner)
                 // The status message is edited on the user screen, so it is read with the owner. Gated like the
                 // editor: firmware without the module never answers the get, leaving the overlay waiting.
                 val metadata = radioConfigState.value.metadata
@@ -974,7 +972,7 @@ open class RadioConfigViewModel(
                                 AdminMessage.ModuleConfigType.STATUSMESSAGE_CONFIG.value,
                             )
                         },
-                        RadioResponseResult::ModuleConfigResponse,
+                        ::applyModuleConfig,
                     )
                 }
             }
@@ -983,12 +981,12 @@ open class RadioConfigViewModel(
                 launchRead(
                     "getChannel0",
                     { adminController.getChannel(destNum, 0) },
-                    RadioResponseResult::ChannelResponse,
+                    ::applyChannel,
                 )
                 launchRead(
                     "getLoraConfig",
                     { adminController.getConfig(destNum, AdminMessage.ConfigType.LORA_CONFIG.value) },
-                    RadioResponseResult::ConfigResponse,
+                    ::applyConfig,
                 )
                 // channel editor is synchronous, so we don't use requestIds as total
                 setResponseStateTotal(maxChannels + 1)
@@ -998,7 +996,7 @@ open class RadioConfigViewModel(
                 launchRead(
                     "getDeviceMetadata",
                     { adminController.getDeviceMetadata(destNum) },
-                    RadioResponseResult::Metadata,
+                    ::applyMetadata,
                 )
                 setResponseStateTotal(2)
             }
@@ -1014,20 +1012,20 @@ open class RadioConfigViewModel(
             launchRead(
                 "getChannel0ForLora",
                 { adminController.getChannel(destNum, 0) },
-                RadioResponseResult::ChannelResponse,
+                ::applyChannel,
             )
         }
         if (route == ConfigRoute.NETWORK) {
             launchRead(
                 "getConnectionStatus",
                 { adminController.getDeviceConnectionStatus(destNum) },
-                RadioResponseResult::ConnectionStatus,
+                ::applyConnectionStatus,
             )
         }
         launchRead(
             "getConfig",
             { adminController.getConfig(destNum, route.type) },
-            RadioResponseResult::ConfigResponse,
+            ::applyConfig,
         )
     }
 
@@ -1036,11 +1034,11 @@ open class RadioConfigViewModel(
             launchRead(
                 "getCannedMessages",
                 { adminController.getCannedMessages(destNum) },
-                RadioResponseResult::CannedMessages,
+                ::applyCannedMessages,
             )
         }
         if (route == ModuleRoute.EXT_NOTIFICATION) {
-            launchRead("getRingtone", { adminController.getRingtone(destNum) }, RadioResponseResult::Ringtone)
+            launchRead("getRingtone", { adminController.getRingtone(destNum) }, ::applyRingtone)
         }
         if (route == ModuleRoute.MESH_BEACON) {
             // The beacon editor gates on the radio's LoRa region and offers its channels, neither of which a remote
@@ -1048,19 +1046,19 @@ open class RadioConfigViewModel(
             launchRead(
                 "getChannel0ForMeshBeacon",
                 { adminController.getChannel(destNum, 0) },
-                RadioResponseResult::ChannelResponse,
+                ::applyChannel,
             )
             launchRead(
                 "getLoraConfigForMeshBeacon",
                 { adminController.getConfig(destNum, AdminMessage.ConfigType.LORA_CONFIG.value) },
-                RadioResponseResult::ConfigResponse,
+                ::applyConfig,
             )
             if (!Capabilities(radioConfigState.value.metadata?.firmware_version).supportsMeshBeacon) return
         }
         launchRead(
             "getModuleConfig",
             { adminController.getModuleConfig(destNum, route.type) },
-            RadioResponseResult::ModuleConfigResponse,
+            ::applyModuleConfig,
         )
     }
 
@@ -1241,8 +1239,8 @@ open class RadioConfigViewModel(
     }
 
     /**
-     * Registers a request token through [register], runs [call] and hands its answer to [processResponse]. A lost link
-     * outside an expected restart and a thrown failure are reported at once; a timeout is left to the request's own
+     * Registers a request token through [register], runs [call] and hands a value to [onAnswer]. A refusal, a lost link
+     * outside an expected restart and a thrown failure end the flow at once; a timeout is left to the request's own
      * deadline.
      */
     private fun <T> launchRequest(
@@ -1250,7 +1248,7 @@ open class RadioConfigViewModel(
         register: (Int) -> Unit,
         call: suspend () -> AdminResult<T>,
         cancelWhenRetired: Boolean = false,
-        onSuccess: (T) -> RadioResponseResult,
+        onAnswer: suspend (token: Int, value: T) -> Unit,
     ): Int {
         val token = ++lastRequestToken
         register(token)
@@ -1258,38 +1256,50 @@ open class RadioConfigViewModel(
             safeLaunch(tag = tag) {
                 val outcome = safeCatching { call() }
                 requestJobs.remove(token)
-                val response =
-                    outcome.fold(
-                        onSuccess = { result ->
-                            if (result == AdminResult.NodeUnreachable && !nodeRestartTracker.restartExpected.value) {
-                                RadioResponseResult.Error(UiText.Resource(Res.string.not_connected))
-                            } else {
-                                result.toRadioResponseResult(onSuccess)
-                            }
-                        },
-                        onFailure = { failure ->
-                            Logger.w(failure) { "Radio request $tag failed" }
-                            val message = failure.message?.let(UiText::DynamicString)
-                            RadioResponseResult.Error(message ?: UiText.Resource(Res.string.unknown_error))
-                        },
-                    )
-                response?.let { processResponse(token, it) }
+                outcome.fold(
+                    onSuccess = { answer ->
+                        when {
+                            answer is AdminResult.Success -> onAnswer(token, answer.value)
+                            answer == AdminResult.NodeUnreachable && !nodeRestartTracker.restartExpected.value ->
+                                failRequest(token, UiText.Resource(Res.string.not_connected))
+                            else -> answer.refusalText()?.let { failRequest(token, it) }
+                        }
+                    },
+                    onFailure = { failure ->
+                        Logger.w(failure) { "Radio request $tag failed" }
+                        val message = failure.message?.let(UiText::DynamicString)
+                        failRequest(token, message ?: UiText.Resource(Res.string.unknown_error))
+                    },
+                )
             }
         // A write runs to its end even after its token is retired, so its local projection lands; only reads stop.
         if (cancelWhenRetired && job.isActive) requestJobs[token] = job
         return token
     }
 
-    private fun <T> launchRead(tag: String, call: suspend () -> AdminResult<T>, onSuccess: (T) -> RadioResponseResult) {
-        launchRequest(tag, ::registerReadRequestId, call, cancelWhenRetired = true, onSuccess = onSuccess)
+    /**
+     * The text for a refusal the radio reported; null for a timeout or a lost link, which the request's own deadline
+     * settles.
+     */
+    private fun AdminResult<*>.refusalText(): UiText? =
+        routingErrorOrNull()?.let { UiText.Resource(getStringResFrom(it)) }
+
+    private fun answerDestNum(): Int? = destNum ?: destNode.value?.num
+
+    private fun isOutstanding(token: Int): Boolean = token in requestIds.value || token in lateRemoteReads
+
+    private fun <T> launchRead(tag: String, call: suspend () -> AdminResult<T>, apply: (T, late: Boolean) -> Unit) {
+        launchRequest(tag, ::registerReadRequestId, call, cancelWhenRetired = true) { token, value ->
+            completeRead(token, value, apply)
+        }
     }
 
     private fun launchWrite(tag: String, call: suspend () -> AdminResult<Unit>) {
-        launchRequest(tag, ::registerWriteRequestId, call) { RadioResponseResult.Success }
+        launchRequest(tag, ::registerWriteRequestId, call) { token, _ -> completeWrite(token) }
     }
 
     private fun launchAction(tag: String, call: suspend () -> AdminResult<Unit>) {
-        launchRequest(tag, ::registerRequestId, call) { RadioResponseResult.Success }
+        launchRequest(tag, ::registerRequestId, call) { token, _ -> completeWrite(token) }
     }
 
     private fun cancelRequestJobs(tokens: Collection<Int>) {
@@ -1363,168 +1373,140 @@ open class RadioConfigViewModel(
         }
     }
 
-    /** Applies the answer to the request registered as [requestId]; an answer for a retired request is dropped. */
-    @Suppress("CyclomaticComplexMethod", "LongMethod", "ReturnCount")
-    private suspend fun processResponse(requestId: Int, result: RadioResponseResult) {
-        val destNum = destNum ?: destNode.value?.num ?: return
-        val lateRemoteReadRoute = lateRemoteReads[requestId]?.route
-        if (requestId !in requestIds.value && lateRemoteReadRoute == null) return
-        val route = radioConfigState.value.route
-        val isLateRemoteRead = lateRemoteReadRoute != null
-
-        // The SDK call behind a late read has finished, so a failure ends it.
-        if (isLateRemoteRead && result is RadioResponseResult.Error) {
-            removeLateRemoteRead(requestId)
-            return
-        }
-
-        when (result) {
-            is RadioResponseResult.Error -> {
-                val responseReadRoute = readRequestRoutes[requestId]
-                if (responseReadRoute != null && responseReadRoute != route) {
-                    removeRequestId(requestId)
-                    return
-                }
-                // A routing/admin error is terminal for the current request flow. Drop every outstanding request ID
-                // and cancel its timeout so a late timeout cannot overwrite the specific failure or block the next
-                // retry.
+    /** A refusal, a lost link outside a restart, or a thrown failure: terminal for the visible flow. */
+    private fun failRequest(token: Int, message: UiText) {
+        if (answerDestNum() == null || !isOutstanding(token)) return
+        val readRoute = readRequestRoutes[token]
+        when {
+            // The SDK call behind a late read has finished, so a failure ends it.
+            token in lateRemoteReads -> removeLateRemoteRead(token)
+            readRoute != null && readRoute != radioConfigState.value.route -> removeRequestId(token)
+            else -> {
+                // Drop every outstanding request and its timeout so a late timeout cannot overwrite the specific
+                // failure or block the next retry.
                 invalidateManualChannelBatch()
                 clearRequestIds()
-                sendError(result.message)
-                // Abort the AdminRoute flow — do not fire the destructive action
-                // (reboot/shutdown/factory_reset) if the metadata preflight failed.
-                return
+                sendError(message)
             }
+        }
+    }
 
-            is RadioResponseResult.Success -> {
-                if (!isLateRemoteRead && route.isEmpty() && requestId !in readRequestRoutes) {
-                    removeRequestId(requestId)
-                    if (!hasPendingRequestsForRoute(route)) {
+    /** A write, action or batch write was acknowledged. */
+    private fun completeWrite(token: Int) {
+        answerDestNum() ?: return
+        if (token !in requestIds.value) return
+        if (radioConfigState.value.route.isEmpty()) {
+            removeRequestId(token)
+            if (!hasPendingRequestsForRoute("")) completeSetRequestOrProgressBatch() else incrementCompleted()
+        }
+    }
+
+    /** A read answered: [apply] stores the value, then the flow advances or finishes. */
+    private fun <T> completeRead(token: Int, value: T, apply: (T, late: Boolean) -> Unit) {
+        val destNum = answerDestNum()
+        if (destNum == null || !isOutstanding(token)) return
+        val lateRoute = lateRemoteReads[token]?.route
+        val route = radioConfigState.value.route
+        apply(value, lateRoute != null)
+        if (lateRoute != null) {
+            removeLateRemoteRead(token)
+            // A late answer satisfies its single-response route, including any retry of that route.
+            retireReadRequestsForRoute(lateRoute)
+        } else {
+            if (AdminRoute.entries.any { it.name == route }) sendAdminRequest(destNum)
+            // Defer the removal so a chain continuation launched by [apply] registers first; launches run FIFO on
+            // the main dispatcher.
+            safeLaunch(tag = "completePacketResponse") {
+                removeRequestId(token)
+                if (requestIds.value.isEmpty()) {
+                    if (route.isNotEmpty() && !AdminRoute.entries.any { it.name == route }) {
+                        clearPacketResponse()
+                    } else if (route.isEmpty()) {
                         completeSetRequestOrProgressBatch()
-                    } else {
-                        incrementCompleted()
                     }
                 }
             }
+        }
+    }
 
-            is RadioResponseResult.Metadata -> {
-                _radioConfigState.update { it.copy(metadata = result.metadata) }
-                if (!isLateRemoteRead) incrementCompleted()
-            }
+    private fun applyMetadata(metadata: DeviceMetadata, late: Boolean) {
+        _radioConfigState.update { it.copy(metadata = metadata) }
+        if (!late) incrementCompleted()
+    }
 
-            is RadioResponseResult.ChannelResponse -> {
-                val response = result.channel
-                // Stop once we get to the first disabled entry
-                if (response.role != Channel.Role.DISABLED) {
-                    _radioConfigState.update { state ->
-                        state.copy(
-                            channelList =
-                            state.channelList.toMutableList().apply {
-                                val index = response.index
-                                val settings = response.settings ?: ChannelSettings.Builder().build()
-                                // Make sure list is large enough
-                                while (size <= index) add(ChannelSettings.Builder().build())
-                                set(index, settings)
-                            },
-                        )
+    private fun applyOwner(user: User, late: Boolean) {
+        _radioConfigState.update { it.copy(userConfig = user) }
+        if (!late) incrementCompleted()
+    }
+
+    private fun applyCannedMessages(messages: String, late: Boolean) {
+        _radioConfigState.update { it.copy(cannedMessageMessages = messages) }
+        if (!late) incrementCompleted()
+    }
+
+    private fun applyRingtone(ringtone: String, late: Boolean) {
+        _radioConfigState.update { it.copy(ringtone = ringtone) }
+        if (!late) incrementCompleted()
+    }
+
+    private fun applyConnectionStatus(status: DeviceConnectionStatus, late: Boolean) {
+        _radioConfigState.update { it.copy(deviceConnectionStatus = status) }
+        if (!late) incrementCompleted()
+    }
+
+    private fun applyModuleConfig(config: ModuleConfig, late: Boolean) {
+        _radioConfigState.update { state -> state.copy(moduleConfig = state.moduleConfig.mergedWith(config)) }
+        if (!late) incrementCompleted()
+    }
+
+    private fun applyConfig(response: Config, late: Boolean) {
+        _radioConfigState.update { state ->
+            state.copy(
+                radioConfig =
+                state.radioConfig
+                    .newBuilder()
+                    .also { wb ->
+                        wb.device = response.device ?: state.radioConfig.device
+                        wb.position = response.position ?: state.radioConfig.position
+                        wb.power = response.power ?: state.radioConfig.power
+                        wb.network = response.network ?: state.radioConfig.network
+                        wb.display = response.display ?: state.radioConfig.display
+                        wb.lora = response.lora ?: state.radioConfig.lora
+                        wb.bluetooth = response.bluetooth ?: state.radioConfig.bluetooth
+                        wb.security = response.security ?: state.radioConfig.security
                     }
-                    if (!isLateRemoteRead) incrementCompleted()
-                    val index = response.index
-                    if (!isLateRemoteRead && index + 1 < maxChannels && route == ConfigRoute.CHANNELS.name) {
-                        // Not done yet, request next channel
-                        launchRead(
-                            "getNextChannel",
-                            { adminController.getChannel(destNum, index + 1) },
-                            RadioResponseResult::ChannelResponse,
-                        )
-                    }
-                } else if (!isLateRemoteRead) {
-                    // Received last channel, update total and start channel editor
-                    setResponseStateTotal(response.index + 1)
-                }
-            }
-
-            is RadioResponseResult.Owner -> {
-                _radioConfigState.update { it.copy(userConfig = result.user) }
-                if (!isLateRemoteRead) incrementCompleted()
-            }
-
-            is RadioResponseResult.ConfigResponse -> {
-                val response = result.config
-                _radioConfigState.update { state ->
-                    state.copy(
-                        radioConfig =
-                        state.radioConfig
-                            .newBuilder()
-                            .also { wb ->
-                                wb.device = response.device ?: state.radioConfig.device
-                                wb.position = response.position ?: state.radioConfig.position
-                                wb.power = response.power ?: state.radioConfig.power
-                                wb.network = response.network ?: state.radioConfig.network
-                                wb.display = response.display ?: state.radioConfig.display
-                                wb.lora = response.lora ?: state.radioConfig.lora
-                                wb.bluetooth = response.bluetooth ?: state.radioConfig.bluetooth
-                                wb.security = response.security ?: state.radioConfig.security
-                            }
-                            .build(),
-                    )
-                }
-                if (!isLateRemoteRead) incrementCompleted()
-            }
-
-            is RadioResponseResult.ModuleConfigResponse -> {
-                _radioConfigState.update { state ->
-                    state.copy(moduleConfig = state.moduleConfig.mergedWith(result.config))
-                }
-                if (!isLateRemoteRead) incrementCompleted()
-            }
-
-            is RadioResponseResult.CannedMessages -> {
-                _radioConfigState.update { it.copy(cannedMessageMessages = result.messages) }
-                if (!isLateRemoteRead) incrementCompleted()
-            }
-
-            is RadioResponseResult.Ringtone -> {
-                _radioConfigState.update { it.copy(ringtone = result.ringtone) }
-                if (!isLateRemoteRead) incrementCompleted()
-            }
-
-            is RadioResponseResult.ConnectionStatus -> {
-                _radioConfigState.update { it.copy(deviceConnectionStatus = result.status) }
-                if (!isLateRemoteRead) incrementCompleted()
-            }
+                    .build(),
+            )
         }
+        if (!late) incrementCompleted()
+    }
 
-        if (isLateRemoteRead) {
-            removeLateRemoteRead(requestId)
-            // A late response satisfies its single-response route, including any retry of that route. Retire only
-            // redundant reads with the same route; a concurrently registered save owns no read route and is retained.
-            retireReadRequestsForRoute(checkNotNull(lateRemoteReadRoute))
-            return
-        }
-
-        // The Success branch retires a write's token itself.
-        if (result is RadioResponseResult.Success) return
-
-        if (AdminRoute.entries.any { it.name == route }) {
-            sendAdminRequest(destNum)
-        }
-
-        // Defer the removal so a chain continuation launched above (e.g. the next getChannel of a
-        // sequential channel fetch) registers its request id first — launches run FIFO on the main
-        // dispatcher, and registration is the continuation's first act before its send. Removing inline
-        // would observe a momentarily-empty request set in the gap between chained requests and tear the
-        // whole flow down (clearPacketResponse), stranding the rest of the chain.
-        safeLaunch(tag = "completePacketResponse") {
-            removeRequestId(requestId)
-
-            if (requestIds.value.isEmpty()) {
-                if (route.isNotEmpty() && !AdminRoute.entries.any { it.name == route }) {
-                    clearPacketResponse()
-                } else if (route.isEmpty()) {
-                    completeSetRequestOrProgressBatch()
-                }
+    private fun applyChannel(response: Channel, late: Boolean) {
+        val route = radioConfigState.value.route
+        // Stop once we get to the first disabled entry
+        if (response.role != Channel.Role.DISABLED) {
+            _radioConfigState.update { state ->
+                state.copy(
+                    channelList =
+                    state.channelList.toMutableList().apply {
+                        val index = response.index
+                        val settings = response.settings ?: ChannelSettings.Builder().build()
+                        // Make sure list is large enough
+                        while (size <= index) add(ChannelSettings.Builder().build())
+                        set(index, settings)
+                    },
+                )
             }
+            if (!late) incrementCompleted()
+            val index = response.index
+            val destNum = answerDestNum() ?: return
+            if (!late && index + 1 < maxChannels && route == ConfigRoute.CHANNELS.name) {
+                // Not done yet, request next channel
+                launchRead("getNextChannel", { adminController.getChannel(destNum, index + 1) }, ::applyChannel)
+            }
+        } else if (!late) {
+            // Received last channel, update total and start channel editor
+            setResponseStateTotal(response.index + 1)
         }
     }
 

@@ -36,7 +36,6 @@ src/commonMain/kotlin/org/meshtastic/core/domain/
         ├── ImportSecurityConfigUseCase.kt
         ├── InstallProfileUseCase.kt
         ├── IsOtaCapableUseCase.kt
-        ├── RadioResponseResult.kt  ← the answer type the settings screens consume, mapped from AdminResult
         └── SetMeshLogSettingsUseCase.kt
 ```
 
