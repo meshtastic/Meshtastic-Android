@@ -741,6 +741,7 @@
     <string name="key_verification_final_title">鍵の検証が完了しました</string>
     <string name="key_verification_request_title">鍵の検証リクエスト</string>
     <string name="key_verification_title">鍵の検証</string>
+    <!-- LABEL -->
     <string name="last_heard_filter_label">最後に受信した時間でフィルター: %1$s</string>
     <string name="last_position_update">最終位置更新</string>
     <string name="latest_alpha_firmware">最新のアルファ版</string>
@@ -1500,6 +1501,7 @@
     <string name="translation_failed">メッセージを翻訳できません</string>
     <string name="translation_model_download_failed">翻訳モデルのダウンロードに失敗しました</string>
     <string name="translation_not_required">メッセージはすでにあなたの言語です</string>
+    <!-- TRANSPARENT -->
     <!-- TRANSPORT -->
     <string name="transport">接続方式</string>
     <string name="transport_api">API</string>

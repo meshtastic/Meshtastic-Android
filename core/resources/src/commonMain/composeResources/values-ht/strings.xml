@@ -118,6 +118,7 @@
     <string name="intro_show">Montre entwodiksyon</string>
     <string name="ip_address">Adrès IP:</string>
     <!-- KEY -->
+    <!-- LABEL -->
     <!-- LAYER -->
     <!-- LICENSED -->
     <!-- LIVE -->
@@ -274,6 +275,7 @@
     <string name="traceroute_direct">Direk</string>
     <!-- TRAFFIC -->
     <!-- TRANSLATION -->
+    <!-- TRANSPARENT -->
     <!-- TRANSPORT -->
     <string name="two_days">48 Èdtan</string>
     <!-- UNITS -->

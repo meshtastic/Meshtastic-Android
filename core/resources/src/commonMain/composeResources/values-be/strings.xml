@@ -135,6 +135,7 @@
     <string name="ip_address">IP-адрас:</string>
     <string name="ip_port">Порт:</string>
     <!-- KEY -->
+    <!-- LABEL -->
     <!-- LAYER -->
     <!-- LICENSED -->
     <!-- LIVE -->
@@ -301,6 +302,7 @@
     <!-- TRACEROUTE -->
     <!-- TRAFFIC -->
     <!-- TRANSLATION -->
+    <!-- TRANSPARENT -->
     <!-- TRANSPORT -->
     <string name="transport_lora">LoRa</string>
     <string name="transport_mqtt">MQTT</string>

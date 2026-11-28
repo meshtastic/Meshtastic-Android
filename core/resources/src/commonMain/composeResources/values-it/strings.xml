@@ -739,6 +739,8 @@
     <string name="key_verification_final_title">Verifica della chiave completata</string>
     <string name="key_verification_request_title">Richiesta di verifica della chiave</string>
     <string name="key_verification_title">Verifica della chiave</string>
+    <!-- LABEL -->
+    <string name="label_print_print">Stampa</string>
     <string name="last_heard_filter_label">Filtra per orario di ricezione più recente: %1$s</string>
     <string name="last_position_update">Aggiornamento ultima posizione</string>
     <string name="latest_alpha_firmware">Ultima alfa</string>
@@ -1504,6 +1506,7 @@
     <string name="translation_failed">Impossibile tradurre il messaggio</string>
     <string name="translation_model_download_failed">Download del modello di traduzione non riuscito</string>
     <string name="translation_not_required">Il messaggio è già nella tua lingua</string>
+    <!-- TRANSPARENT -->
     <!-- TRANSPORT -->
     <string name="transport">Trasporto</string>
     <string name="transport_api">API</string>

@@ -122,6 +122,7 @@
     <string name="intro_show">Taispeáin Úvod</string>
     <string name="ip_address">Seoladh IP:</string>
     <!-- KEY -->
+    <!-- LABEL -->
     <!-- LAYER -->
     <!-- LICENSED -->
     <!-- LIVE -->
@@ -287,6 +288,7 @@
     <string name="traceroute_log">Céim rianadóireachta</string>
     <!-- TRAFFIC -->
     <!-- TRANSLATION -->
+    <!-- TRANSPARENT -->
     <!-- TRANSPORT -->
     <string name="two_days">48 Uair an chloig</string>
     <!-- UNITS -->

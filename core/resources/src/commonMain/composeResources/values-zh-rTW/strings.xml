@@ -598,6 +598,8 @@ You can find detailed instructions and documentation on the official Meshtastic 
     <string name="key_verification_final_title">金鑰驗證已完成</string>
     <string name="key_verification_request_title">金鑰驗證請求</string>
     <string name="key_verification_title">金鑰驗證</string>
+    <!-- LABEL -->
+    <string name="label_print_print">列印</string>
     <string name="last_heard_filter_label">依最後收到時間篩選：%1$s</string>
     <string name="last_position_update">最後位置更新</string>
     <string name="latest_alpha_firmware">最新測試版韌體</string>
@@ -1284,6 +1286,7 @@ You can find detailed instructions and documentation on the official Meshtastic 
     <string name="traffic_management_unknown_packet_threshold">不明封包閾值</string>
     <string name="translate">翻譯</string>
     <!-- TRANSLATION -->
+    <!-- TRANSPARENT -->
     <!-- TRANSPORT -->
     <string name="transport_ble">低功耗藍牙</string>
     <string name="transport_lora">LoRa</string>

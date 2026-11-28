@@ -486,6 +486,8 @@
     <string name="key_verification_final_title">Перевірку ключа завершено</string>
     <string name="key_verification_request_title">Запит ключа верифікації</string>
     <string name="key_verification_title">Ключ верифікації</string>
+    <!-- LABEL -->
+    <string name="label_print_print">Видрукувати</string>
     <string name="last_heard_filter_label">Фільтрувати за часом останньої активності:%1$s</string>
     <string name="last_position_update">Останнє оновлення позиції</string>
     <string name="latest_alpha_firmware">Остання альфа</string>
@@ -1071,6 +1073,7 @@
     <!-- TRAFFIC -->
     <string name="translate">Перекласти</string>
     <!-- TRANSLATION -->
+    <!-- TRANSPARENT -->
     <!-- TRANSPORT -->
     <string name="transport_api">API</string>
     <string name="transport_ble">BLE</string>

@@ -92,6 +92,7 @@
     <string name="intro_show">Sýna kynningu</string>
     <string name="ip_address">IP Tala:</string>
     <!-- KEY -->
+    <!-- LABEL -->
     <!-- LAYER -->
     <!-- LICENSED -->
     <!-- LIVE -->
@@ -210,6 +211,7 @@
     <string name="traceroute_log">Ferilkönnun</string>
     <!-- TRAFFIC -->
     <!-- TRANSLATION -->
+    <!-- TRANSPARENT -->
     <!-- TRANSPORT -->
     <!-- UNITS -->
     <string name="units_follow_system">Grunnstilling kerfis</string>

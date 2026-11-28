@@ -103,6 +103,7 @@
     <string name="ip_address">Enderezo IP:</string>
     <string name="ip_port">Porto:</string>
     <!-- KEY -->
+    <!-- LABEL -->
     <!-- LAYER -->
     <!-- LICENSED -->
     <!-- LIVE -->
@@ -242,6 +243,7 @@
     <string name="traceroute_log">Traza-ruta</string>
     <!-- TRAFFIC -->
     <!-- TRANSLATION -->
+    <!-- TRANSPARENT -->
     <!-- TRANSPORT -->
     <string name="two_days">48 Horas</string>
     <!-- UNITS -->

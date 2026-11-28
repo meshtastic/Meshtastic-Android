@@ -629,6 +629,8 @@
     <string name="key_verification_final_title">Проверката на ключа е завършена</string>
     <string name="key_verification_request_title">Заявка за проверка на ключ</string>
     <string name="key_verification_title">Проверка на ключ</string>
+    <!-- LABEL -->
+    <string name="label_print_print">Отпечатване</string>
     <string name="label_with_unit">%1$s (%2$s)</string>
     <string name="last_heard_filter_label">Филтриране по време на последното чуване: %1$s</string>
     <string name="last_position_update">Последна актуализация на позицията</string>
@@ -1328,6 +1330,7 @@
     <string name="translation_failed">Не може да се преведе съобщението</string>
     <string name="translation_model_download_failed">Изтеглянето на модела за превод не е успешно</string>
     <string name="transmit_disabled">Предаването е деактивирано</string>
+    <!-- TRANSPARENT -->
     <!-- TRANSPORT -->
     <string name="transport">Транспорт</string>
     <string name="transport_api">API</string>

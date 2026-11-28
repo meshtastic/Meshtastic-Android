@@ -626,6 +626,7 @@
     <string name="ip_address">Endereço IP:</string>
     <string name="ip_port">Porta:</string>
     <!-- KEY -->
+    <!-- LABEL -->
     <string name="latitude">Latitude</string>
     <!-- LAYER -->
     <string name="legacy_admin_channel">Canal de administração antigo</string>
@@ -890,6 +891,7 @@
     <string name="traceroute_log">Traçar rota</string>
     <!-- TRAFFIC -->
     <!-- TRANSLATION -->
+    <!-- TRANSPARENT -->
     <!-- TRANSPORT -->
     <string name="transport_lora">LoRa</string>
     <string name="transport_mqtt">MQTT</string>
