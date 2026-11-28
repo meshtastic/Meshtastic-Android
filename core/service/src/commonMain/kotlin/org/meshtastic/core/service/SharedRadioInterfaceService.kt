@@ -324,7 +324,7 @@ class SharedRadioInterfaceService(
         } catch (cancelled: CancellationException) {
             // Teardown cancels the child, which hides its outcome; a cancelled caller still unwinds.
             currentCoroutineContext().ensureActive()
-            if (!work.isCancelled) throw cancelled
+            if (!ran && open.scope.isActive) throw cancelled
         }
         return ran
     }
@@ -648,9 +648,10 @@ class SharedRadioInterfaceService(
 
     /** Runs [send] on [session]'s client while that session owns admission; teardown does not wait for the handoff. */
     private inline fun <T> withAdmittedClient(session: RadioSessionContext?, send: (ActiveLink) -> T?): T? {
-        val open = activeRadioSession ?: return null
-        val link = activeLink.value ?: return null
-        if (!open.scope.isActive || (session != null && open.active.context != session)) return null
+        val open =
+            activeRadioSession?.takeIf { it.scope.isActive && (session == null || it.active.context == session) }
+        val link = activeLink.value
+        if (open == null || link == null) return null
         return safeCatching { send(link) }.onFailure { Logger.w(it) { "Active session handoff failed" } }.getOrNull()
     }
 

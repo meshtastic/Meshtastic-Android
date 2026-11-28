@@ -49,8 +49,8 @@ interface RadioSessionAuthority {
     val activeSession: StateFlow<RadioSessionContext?>
 
     /**
-     * Returns whether [session] still owns transport admission. This reflects the admission gate, not only
-     * [activeSession], because the draining session may remain published after new work is rejected.
+     * Returns whether [session] still owns transport admission. Implementations must make this reflect the admission
+     * gate, not only [activeSession], because the draining session may remain published after new work is rejected.
      */
     fun isSessionActive(session: RadioSessionContext): Boolean
 
@@ -64,8 +64,8 @@ interface RadioSessionAuthority {
      * for this block to finish before publishing session completion or starting a replacement transport. [block] may
      * use [RadioSessionLease.isCurrent] for transaction-bound checks that must remain valid through commit even after
      * teardown has closed new admission. The block runs to completion under teardown's drain: it is not cancelled when
-     * the session closes. Callers must keep the block bounded and must not invoke transport lifecycle methods from
-     * inside it.
+     * the session closes, and a cancellation thrown by the block itself while the session is open propagates to the
+     * caller. Callers must keep the block bounded and must not invoke transport lifecycle methods from inside it.
      */
     suspend fun runWithSessionLease(session: RadioSessionContext, block: suspend (RadioSessionLease) -> Unit): Boolean
 }

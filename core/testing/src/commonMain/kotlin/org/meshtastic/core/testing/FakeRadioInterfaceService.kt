@@ -107,7 +107,7 @@ class FakeRadioInterfaceService(val serviceScope: CoroutineScope = MainScope()) 
             work.await()
         } catch (cancelled: CancellationException) {
             currentCoroutineContext().ensureActive()
-            if (!work.isCancelled) throw cancelled
+            if (!ran && admitted.scope.isActive) throw cancelled
         }
         return ran
     }
