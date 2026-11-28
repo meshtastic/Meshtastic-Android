@@ -55,8 +55,7 @@ interface RadioSessionAuthority {
     fun isSessionActive(session: RadioSessionContext): Boolean
 
     /**
-     * Runs [block] only while [session] owns transport admission. Implementations must make the admission check and
-     * synchronous side effect atomic with teardown.
+     * Runs [block] only while [session] owns admission. The check and the block are not atomic with teardown.
      */
     fun runIfSessionActive(session: RadioSessionContext, block: () -> Unit): Boolean
 
@@ -64,9 +63,9 @@ interface RadioSessionAuthority {
      * Acquires a lifecycle lease for suspend [block]. Once admitted, teardown closes admission to later work and waits
      * for this block to finish before publishing session completion or starting a replacement transport. [block] may
      * use [RadioSessionLease.isCurrent] for transaction-bound checks that must remain valid through commit even after
-     * teardown has closed new admission. Implementations must acquire and release the lease through the same admission
-     * state used by teardown; comparing only [activeSession] cannot satisfy the draining contract. Callers must keep
-     * the block bounded and must not invoke transport lifecycle methods from inside it.
+     * teardown has closed new admission. The block runs to completion under teardown's drain: it is not cancelled when
+     * the session closes, and a cancellation thrown by the block itself while the session is open propagates to the
+     * caller. Callers must keep the block bounded and must not invoke transport lifecycle methods from inside it.
      */
     suspend fun runWithSessionLease(session: RadioSessionContext, block: suspend (RadioSessionLease) -> Unit): Boolean
 }
