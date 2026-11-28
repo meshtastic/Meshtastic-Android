@@ -1260,8 +1260,10 @@ open class RadioConfigViewModel(
                     onSuccess = { answer ->
                         when {
                             answer is AdminResult.Success -> onAnswer(token, answer.value)
+
                             answer == AdminResult.NodeUnreachable && !nodeRestartTracker.restartExpected.value ->
                                 failRequest(token, UiText.Resource(Res.string.not_connected))
+
                             else -> answer.refusalText()?.let { failRequest(token, it) }
                         }
                     },
@@ -1380,7 +1382,9 @@ open class RadioConfigViewModel(
         when {
             // The SDK call behind a late read has finished, so a failure ends it.
             token in lateRemoteReads -> removeLateRemoteRead(token)
+
             readRoute != null && readRoute != radioConfigState.value.route -> removeRequestId(token)
+
             else -> {
                 // Drop every outstanding request and its timeout so a late timeout cannot overwrite the specific
                 // failure or block the next retry.

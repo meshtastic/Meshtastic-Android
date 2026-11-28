@@ -114,8 +114,7 @@ class RadioSessionProjectionDisplayTest {
 
     private fun projection(radio: FakeRadioInterfaceService, mirror: DisplayMirrorManager): RadioSessionProjection {
         val scope = radio.serviceScope
-        val nodeManager =
-            NodeManagerImpl(FakeNodeRepository(), mock(MockMode.autofill), radio, scope.asServiceScope())
+        val nodeManager = NodeManagerImpl(FakeNodeRepository(), mock(MockMode.autofill), radio, scope.asServiceScope())
         return radioSessionProjection(
             nodeManager = nodeManager,
             radio = radio,

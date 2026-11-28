@@ -50,39 +50,43 @@ class RadioSessionProjectionDisplayLockTest {
         val scope = CoroutineScope(SupervisorJob())
         val entered = CountDownLatch(1)
         val release = CountDownLatch(1)
-        val mirror = object : DisplayMirrorManager {
-            override val frame: StateFlow<MirrorFrame?> = MutableStateFlow(null)
-            override val palette: StateFlow<MirrorPalette?> = MutableStateFlow(null)
+        val mirror =
+            object : DisplayMirrorManager {
+                override val frame: StateFlow<MirrorFrame?> = MutableStateFlow(null)
+                override val palette: StateFlow<MirrorPalette?> = MutableStateFlow(null)
 
-            override fun handleFrame(frame: DisplayMirrorFrame) {
-                entered.countDown()
-                release.await(5, TimeUnit.SECONDS)
+                override fun handleFrame(frame: DisplayMirrorFrame) {
+                    entered.countDown()
+                    release.await(5, TimeUnit.SECONDS)
+                }
+
+                override fun handlePalette(palette: DisplayPalette) = Unit
+
+                override fun reset() = Unit
             }
-
-            override fun handlePalette(palette: DisplayPalette) = Unit
-
-            override fun reset() = Unit
-        }
-        val radio = FakeRadioInterfaceService(scope).apply {
-            setDeviceAddress("ble:a")
-            connect()
-        }
+        val radio =
+            FakeRadioInterfaceService(scope).apply {
+                setDeviceAddress("ble:a")
+                connect()
+            }
         val session = checkNotNull(radio.activeSession.value)
         val nodeManager = NodeManagerImpl(FakeNodeRepository(), mock(MockMode.autofill), radio, scope.asServiceScope())
-        val projection = radioSessionProjection(
-            nodeManager = nodeManager,
-            radio = radio,
-            scope = scope,
-            displayMirrorManager = mirror,
-        )
-        val frame = DisplayMirrorFrame(
-            width = 128,
-            height = 64,
-            format = DisplayFrame.Format.MONO_VLSB,
-            frameId = 1,
-            data = ByteArray(1024).toByteString(),
-            paletteSignature = 0,
-        )
+        val projection =
+            radioSessionProjection(
+                nodeManager = nodeManager,
+                radio = radio,
+                scope = scope,
+                displayMirrorManager = mirror,
+            )
+        val frame =
+            DisplayMirrorFrame(
+                width = 128,
+                height = 64,
+                format = DisplayFrame.Format.MONO_VLSB,
+                frameId = 1,
+                data = ByteArray(1024).toByteString(),
+                paletteSignature = 0,
+            )
         val compositor = Thread { projection.onDisplayFrame(frame, session) }
         try {
             compositor.start()

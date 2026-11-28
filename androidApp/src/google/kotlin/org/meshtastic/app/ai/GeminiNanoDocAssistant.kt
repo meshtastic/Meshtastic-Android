@@ -28,7 +28,6 @@ import com.google.firebase.ai.ai
 import com.google.firebase.ai.type.GenerativeBackend
 import com.google.firebase.ai.type.PublicPreviewAPI
 import com.google.firebase.ai.type.content
-import kotlin.math.roundToInt
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -45,6 +44,7 @@ import org.meshtastic.feature.docs.model.AIDocAssistantResult
 import org.meshtastic.feature.docs.model.DocPage
 import org.meshtastic.feature.docs.model.DocsAiError
 import org.meshtastic.feature.docs.model.ModelReadiness
+import kotlin.math.roundToInt
 
 /**
  * Gemini on-device AI assistant for the Google flavor.
