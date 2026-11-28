@@ -71,6 +71,7 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontFamily
@@ -127,6 +128,9 @@ import org.meshtastic.feature.messaging.component.QuickChatRow
 import org.meshtastic.feature.messaging.component.ReplySnippet
 import org.meshtastic.feature.messaging.component.ScrollToBottomFab
 import org.meshtastic.feature.messaging.component.TranslationModelDownloadDialog
+
+internal const val RETIRED_CHANNEL_NOTICE_TAG = "retired_channel_notice"
+internal const val TRANSPARENT_MODE_SEND_NOTICE_TAG = "transparent_mode_send_notice"
 
 private const val ROUNDED_CORNER_PERCENT = 100
 private const val MAX_LINES = 3
@@ -482,13 +486,10 @@ fun MessageScreen(
             }
         },
         bottomBar = {
-            // A retired channel is read-only: there is no slot left to send on, so the composer and the quick-chat
-            // row are replaced outright rather than merely disabled.
-            if (isRetiredChannel) {
-                RetiredChannelNotice()
-            } else if (sendBlockedByTransparentMode) {
-                TransparentModeSendNotice()
-            } else {
+            ComposerOrNotice(
+                isRetiredChannel = isRetiredChannel,
+                sendBlockedByTransparentMode = sendBlockedByTransparentMode,
+            ) {
                 Column {
                     AnimatedVisibility(visible = showQuickChat) {
                         QuickChatRow(
@@ -797,8 +798,25 @@ internal fun RetiredChannelNotice(modifier: Modifier = Modifier) {
     ComposerNotice(
         icon = MeshtasticIcons.History,
         text = stringResource(Res.string.archived_channel_read_only),
-        modifier = modifier,
+        modifier = modifier.testTag(RETIRED_CHANNEL_NOTICE_TAG),
     )
+}
+
+/**
+ * The composer, or the notice that replaces it outright where nothing can be sent. A retired channel wins over
+ * transparent mode: it stays read-only once the mode is off.
+ */
+@Composable
+internal fun ComposerOrNotice(
+    isRetiredChannel: Boolean,
+    sendBlockedByTransparentMode: Boolean,
+    composer: @Composable () -> Unit,
+) {
+    when {
+        isRetiredChannel -> RetiredChannelNotice()
+        sendBlockedByTransparentMode -> TransparentModeSendNotice()
+        else -> composer()
+    }
 }
 
 /**
@@ -810,7 +828,7 @@ internal fun TransparentModeSendNotice(modifier: Modifier = Modifier) {
     ComposerNotice(
         icon = MeshtasticIcons.Warning,
         text = stringResource(Res.string.transparent_mode_send_blocked),
-        modifier = modifier,
+        modifier = modifier.testTag(TRANSPARENT_MODE_SEND_NOTICE_TAG),
     )
 }
 
