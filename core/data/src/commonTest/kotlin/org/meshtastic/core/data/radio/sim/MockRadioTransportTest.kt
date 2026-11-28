@@ -640,7 +640,7 @@ class MockRadioTransportTest {
         /** Comfortably longer than the seed pass, but shorter than the first live-telemetry tick. */
         const val SEED_WINDOW_MS = 10_000L
 
-        /** Mirrors `MockRadioTransport.LIVE_TICK_MS`, which is private to the transport. */
+        /** Mirrors `MockRadioTransport.LIVE_TICK` in milliseconds; the transport's constant is private. */
         const val LIVE_TICK_MS = 20_000L
         const val LIVE_TICKS_AFTER_CLOSE = 5
         const val ACK_WINDOW_MS = 3_000L
