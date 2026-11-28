@@ -118,7 +118,7 @@ mqttastic = "0.9.1"
 dbus-java = "5.2.2"
 qrcode-kotlin = "4.5.0"
 takpacket-sdk = "0.10.0"
-meshtastic-sdk = "0.3.1"
+meshtastic-sdk = "0.3.2-SNAPSHOT"
 meshtastic-protobufs = "2.8.3"
 
 # Gradle Plugins
