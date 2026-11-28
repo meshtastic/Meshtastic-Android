@@ -86,8 +86,8 @@ suspend fun RadioSessionAuthority.runInSession(session: RadioSessionContext, blo
  * The selected radio and its SDK client: device selection, session admission and the per-session SDK clients.
  *
  * The SDK client owns connecting and reconnecting. This service builds one client per selected device, starts and stops
- * it, nudges it when the environment recovers, and publishes the client's [org.meshtastic.sdk.ConnectionState] as
- * [ServiceRepository.connectionState], which is what UI and features observe.
+ * it, nudges it when the environment recovers, and derives [ServiceRepository.connectionState] from the client's
+ * [org.meshtastic.sdk.ConnectionState] and the installed snapshot, which is what UI and features observe.
  */
 @Suppress("TooManyFunctions")
 interface RadioInterfaceService : RadioSessionAuthority {

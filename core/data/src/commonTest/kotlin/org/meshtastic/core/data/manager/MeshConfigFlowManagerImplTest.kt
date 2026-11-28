@@ -39,14 +39,12 @@ import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
-import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.FileInfo
 import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.NodeInfo
 import org.meshtastic.sdk.ConfigBundle
-import org.meshtastic.sdk.ConnectionState
 import org.meshtastic.sdk.NodeId
 import org.meshtastic.sdk.RadioSessionEvent
 import kotlin.test.BeforeTest
@@ -62,7 +60,6 @@ class MeshConfigFlowManagerImplTest {
     private val nodeManager = mock<NodeManager>(MockMode.autofill)
     private val nodeRepository = mock<NodeRepository>(MockMode.autofill)
     private val radioConfigRepository = mock<RadioConfigRepository>(MockMode.autofill)
-    private val serviceRepository = mock<ServiceRepository>(MockMode.autofill)
     private val analytics = mock<PlatformAnalytics>(MockMode.autofill)
     private val notificationPrefs = mock<NotificationPrefs>(MockMode.autofill)
     private val radioInterfaceService = mock<RadioInterfaceService>(MockMode.autofill)
@@ -116,7 +113,6 @@ class MeshConfigFlowManagerImplTest {
                 nodeManager = nodeManager,
                 nodeRepository = nodeRepository,
                 radioConfigRepository = radioConfigRepository,
-                serviceStateWriter = serviceRepository,
                 analytics = analytics,
                 notificationPrefs = notificationPrefs,
                 radioInterfaceService = radioInterfaceService,
@@ -151,7 +147,7 @@ class MeshConfigFlowManagerImplTest {
         verify { nodeManager.setFirmwareVersion(metadata.firmware_version, activeSession) }
         verify { notificationPrefs.applyEventFirmwareNodeEventDefault(false) }
         verifySuspend { nodeRepository.insertMetadata(myNodeNum, metadata) }
-        verify { serviceRepository.setConnectionState(ConnectionState.Connected) }
+        verify { nodeManager.setNodeDbReady(true) }
     }
 
     @Test
@@ -225,7 +221,7 @@ class MeshConfigFlowManagerImplTest {
 
         verify(VerifyMode.exactly(1)) { nodeManager.installNodeInfo(any()) }
         verifySuspend(VerifyMode.exactly(0)) { nodeRepository.installConfig(any(), any()) }
-        verify(VerifyMode.exactly(0)) { serviceRepository.setConnectionState(ConnectionState.Connected) }
+        verify(VerifyMode.exactly(0)) { nodeManager.setNodeDbReady(true) }
     }
 
     @Test
@@ -241,7 +237,7 @@ class MeshConfigFlowManagerImplTest {
         assertFalse(manager.installRadioSnapshot(activeSession, snapshot(myInfo = null)))
         verify(VerifyMode.exactly(0)) { nodeManager.setMyNodeNum(any()) }
         verifySuspend(VerifyMode.exactly(0)) { radioConfigRepository.clearLocalConfig() }
-        verify(VerifyMode.exactly(0)) { serviceRepository.setConnectionState(ConnectionState.Connected) }
+        verify(VerifyMode.exactly(0)) { nodeManager.setNodeDbReady(true) }
     }
 
     @Test
@@ -259,6 +255,6 @@ class MeshConfigFlowManagerImplTest {
 
             verifySuspend(VerifyMode.exactly(2)) { nodeRepository.installConfig(any(), any()) }
             verifySuspend(VerifyMode.exactly(1)) { radioConfigRepository.clearLocalConfig() }
-            verify(VerifyMode.exactly(1)) { serviceRepository.setConnectionState(ConnectionState.Connected) }
+            verify(VerifyMode.exactly(1)) { nodeManager.setNodeDbReady(true) }
         }
 }

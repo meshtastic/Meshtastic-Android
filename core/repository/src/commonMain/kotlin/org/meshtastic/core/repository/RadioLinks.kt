@@ -89,6 +89,9 @@ interface RadioSessionHost : RadioSessionAuthority {
     /** Closes admission for [session] and waits for its admitted work. */
     suspend fun closeSession(session: RadioSessionContext)
 
+    /** Reports that [session]'s handshake snapshot is installed, so the app may show it connected. */
+    fun onSnapshotInstalled(session: RadioSessionContext) = Unit
+
     /** Reports that [session]'s handshake snapshot was not installed, so the app cannot become connected on it. */
     fun onSnapshotInstallFailed(session: RadioSessionContext) = Unit
 }

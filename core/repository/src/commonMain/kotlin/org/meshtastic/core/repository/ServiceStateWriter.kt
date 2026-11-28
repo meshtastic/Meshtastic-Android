@@ -30,7 +30,7 @@ import org.meshtastic.sdk.ConnectionState
  * [NeighborInfoResponseProvider].
  */
 interface ServiceStateWriter {
-    /** Publishes the connection state. Only the radio service and the snapshot install write it. */
+    /** Publishes the connection state. Only the radio service writes it. */
     fun setConnectionState(connectionState: ConnectionState)
 
     /** Sets the current client notification. */

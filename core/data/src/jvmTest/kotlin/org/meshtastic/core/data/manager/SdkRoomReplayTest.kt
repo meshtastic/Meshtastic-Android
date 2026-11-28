@@ -271,7 +271,6 @@ class SdkRoomReplayTest {
                     nodeManager = nodeManager,
                     nodeRepository = FakeNodeRepository(),
                     radioConfigRepository = config,
-                    serviceStateWriter = mock(MockMode.autofill),
                     analytics = mock(MockMode.autofill),
                     notificationPrefs = FakeNotificationPrefs(),
                     radioInterfaceService = radio,

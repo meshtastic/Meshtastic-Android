@@ -36,7 +36,6 @@ import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.repository.AdminController
 import org.meshtastic.core.repository.AdminEditScope
 import org.meshtastic.core.repository.ConnectionIdentity
-import org.meshtastic.core.repository.ConnectionLifecycle
 import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.MeshLocationManager
@@ -264,9 +263,6 @@ internal class RadioControllerImpl(
     }
 
     // ── Connection State ────────────────────────────────────────────────────
-
-    override val connectionLifecycle: StateFlow<ConnectionLifecycle>
-        get() = serviceRepository.connectionLifecycle
 
     override val connectionState: StateFlow<ConnectionState>
         get() = serviceRepository.connectionState

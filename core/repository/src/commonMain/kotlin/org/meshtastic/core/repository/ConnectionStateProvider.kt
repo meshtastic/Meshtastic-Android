@@ -23,18 +23,11 @@ import org.meshtastic.sdk.ConnectionState
  * Read-only provider of the canonical app-level connection state.
  *
  * Inject this interface in ViewModels and feature modules that only need to **observe** connection state — never write
- * it. Only the radio service and the snapshot install write it, through [ServiceStateWriter.setConnectionState].
+ * it. Only the radio service writes it, through [ServiceStateWriter.setConnectionState].
  *
  * @see ServiceRepository for the full read/write interface
  */
 interface ConnectionStateProvider {
-    /**
-     * Atomically correlated canonical state and its snapshot version.
-     *
-     * Lifecycle-sensitive code must observe this flow rather than combining independent reads of [connectionState].
-     */
-    val connectionLifecycle: StateFlow<ConnectionLifecycle>
-
     /**
      * Canonical app-level connection state.
      *

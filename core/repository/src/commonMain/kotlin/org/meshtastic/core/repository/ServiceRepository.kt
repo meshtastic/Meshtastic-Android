@@ -33,8 +33,8 @@ import org.meshtastic.sdk.ConnectionState
  * maintains reactive flows for connection status, error messages, and incoming mesh traffic.
  *
  * **Connection state contract:** [connectionState] is the selected radio's SDK [ConnectionState], which all UI, feature
- * modules, and ViewModels observe. [RadioInterfaceService] publishes the SDK client's states, except that
- * [ConnectionState.Connected] is published by the snapshot install once the app holds the session's config and nodes.
+ * modules, and ViewModels observe. [RadioInterfaceService] derives it from the SDK client's state, showing
+ * [ConnectionState.Connected] only once the app holds the session's config and nodes.
  */
 @Suppress("TooManyFunctions")
 interface ServiceRepository :
@@ -51,7 +51,7 @@ interface ServiceRepository :
      */
     override val connectionState: StateFlow<ConnectionState>
 
-    /** Publishes the connection state. Only the radio service and the snapshot install write it. */
+    /** Publishes the connection state. Only the radio service writes it. */
     override fun setConnectionState(connectionState: ConnectionState)
 
     /**

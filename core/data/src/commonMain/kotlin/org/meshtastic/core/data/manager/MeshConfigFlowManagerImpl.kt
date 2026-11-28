@@ -29,14 +29,12 @@ import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
-import org.meshtastic.core.repository.ServiceStateWriter
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.FirmwareEdition
 import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.NodeInfo
 import org.meshtastic.sdk.ConfigBundle
-import org.meshtastic.sdk.ConnectionState
 import org.meshtastic.sdk.RadioSessionEvent
 import org.meshtastic.core.model.MyNodeInfo as SharedMyNodeInfo
 import org.meshtastic.proto.MyNodeInfo as ProtoMyNodeInfo
@@ -47,7 +45,6 @@ class MeshConfigFlowManagerImpl(
     private val nodeManager: NodeManager,
     private val nodeRepository: NodeRepository,
     private val radioConfigRepository: RadioConfigRepository,
-    private val serviceStateWriter: ServiceStateWriter,
     private val analytics: PlatformAnalytics,
     private val notificationPrefs: NotificationPrefs,
     private val radioInterfaceService: RadioInterfaceService,
@@ -185,7 +182,6 @@ class MeshConfigFlowManagerImpl(
             runForSession(session) {
                 nodeManager.setNodeDbReady(true)
                 nodeManager.setAllowNodeDbWrites(true)
-                serviceStateWriter.setConnectionState(ConnectionState.Connected)
             }
         if (!published) return false
 

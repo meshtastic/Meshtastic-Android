@@ -39,7 +39,6 @@ class ServiceRepositoryImplTest {
         val repository = ServiceRepositoryImpl()
 
         assertEquals(ConnectionState.Disconnected, repository.connectionState.value)
-        assertEquals(0L, repository.connectionLifecycle.value.version)
         assertNull(repository.clientNotification.value)
         assertNull(repository.errorMessage.value)
         assertNull(repository.tracerouteResponse.value)
@@ -63,17 +62,6 @@ class ServiceRepositoryImplTest {
 
         assertEquals(ConnectionState.Connecting(attempt = 1), emittedState.await())
         assertEquals(ConnectionState.Connecting(attempt = 1), repository.connectionState.value)
-    }
-
-    @Test
-    fun duplicateConnectionStatesDoNotAdvanceLifecycleVersion() = runTest {
-        val repository = ServiceRepositoryImpl()
-        repository.setConnectionState(ConnectionState.Connected)
-        val afterConnect = repository.connectionLifecycle.value.version
-
-        repository.setConnectionState(ConnectionState.Connected)
-
-        assertEquals(afterConnect, repository.connectionLifecycle.value.version)
     }
 
     @Test

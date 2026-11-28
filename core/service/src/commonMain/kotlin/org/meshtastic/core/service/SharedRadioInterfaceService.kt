@@ -99,6 +99,7 @@ import org.meshtastic.proto.LockdownAuth
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.MqttClientProxyMessage
 import org.meshtastic.sdk.AdminSessionStatus
+import org.meshtastic.sdk.ConfigPhase
 import org.meshtastic.sdk.ConnectionState
 import org.meshtastic.sdk.MeshtasticException
 import org.meshtastic.sdk.NodeId
@@ -187,8 +188,8 @@ private fun ActiveLink.failureReason(state: ConnectionState): TransportDisconnec
  * The SDK client owns connecting, backoff and reconnecting. This service builds one client per selected device through
  * the platform's [RadioLinks], connects and disconnects it, asks it to retry at once when Bluetooth, the network or the
  * selected USB device comes back, keeps it off the radio while a [RadioOperation] needs the port, and publishes its
- * [ConnectionState] to [ServiceStateWriter]. [ConnectionState.Connected] is published by the snapshot install instead,
- * once the app holds the session's config and nodes.
+ * [ConnectionState] to [ServiceStateWriter]. [ConnectionState.Connected] shows only once the app holds the session's
+ * config and nodes.
  */
 @Suppress("LargeClass", "LongParameterList", "TooManyFunctions")
 @Single
@@ -231,8 +232,11 @@ class SharedRadioInterfaceService(
 
     private val activeLink = MutableStateFlow<ActiveLink?>(null)
 
-    /** Serializes publication of the link's state with the link changing. */
-    private val stateLock = SynchronizedObject()
+    /** Shown when no link is open: Disconnected, or Failed for a selected radio whose link could not open. */
+    private val idleState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
+
+    /** The generation whose handshake snapshot the app has installed. */
+    private val installedGeneration = MutableStateFlow<Long?>(null)
 
     /**
      * True while the user wants the selected radio connected: set by [connect] and by selecting a radio, cleared by
@@ -263,9 +267,13 @@ class SharedRadioInterfaceService(
 
         /** The handshake stage a link failed at when the app could not install its snapshot. */
         private const val SNAPSHOT_INSTALL_STAGE = "snapshot install"
+
+        private val APP_CONFIGURING = ConnectionState.Configuring(ConfigPhase.Stage2, 1f)
     }
 
     init {
+        publishConnectionState()
+
         // Mirrors the saved selection so observers (MeshServiceOrchestrator switches the database) see it before any
         // link opens. It stops at the first setDeviceAddress(): prefs commit asynchronously, so a later emission can
         // carry an older selection than the one already published.
@@ -278,6 +286,22 @@ class SharedRadioInterfaceService(
         processLifecycle.coroutineScope.launch(dispatchers.default) {
             for (reason in connectionErrorReasons) _connectionError.emit(connectionErrorText(reason))
         }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun publishConnectionState() {
+        combine(
+            activeLink.flatMapLatest { it?.link?.connection ?: idleState },
+            installedGeneration,
+            _activeSession,
+        ) { sdk, installed, session ->
+            // The SDK's Connected is the app's only once the app holds this session's snapshot.
+            if (sdk is ConnectionState.Connected && installed != session?.generation) APP_CONFIGURING else sdk
+        }
+            .distinctUntilChanged()
+            .onEach { serviceStateWriter.setConnectionState(it) }
+            .catch { Logger.e(it) { "Connection state publication failed" } }
+            .launchIn(processLifecycle.coroutineScope)
     }
 
     // ── Session admission ───────────────────────────────────────────────────
@@ -342,8 +366,10 @@ class SharedRadioInterfaceService(
 
         override suspend fun closeSession(session: RadioSessionContext) {
             revokeSession(sessionFor(session))
-            // A snapshot install can publish Connected after the link dropped; the drop's state wins once it closes.
-            publishState(active)
+        }
+
+        override fun onSnapshotInstalled(session: RadioSessionContext) {
+            installedGeneration.value = session.generation
         }
 
         // The pipeline cannot close the link it runs on, so the close runs beside it.
@@ -352,7 +378,7 @@ class SharedRadioInterfaceService(
                 linkMutex.withLock {
                     if (activeLink.value !== active) return@withLock
                     ignoreExceptionSuspend { closeLinkLocked() }
-                    publishFailure(MeshtasticException.HandshakeTimeout(SNAPSHOT_INSTALL_STAGE))
+                    idleState.value = ConnectionState.Failed(MeshtasticException.HandshakeTimeout(SNAPSHOT_INSTALL_STAGE))
                     connectionErrorReasons.trySend(TransportDisconnectReason.HandshakeRecoveryExhausted)
                 }
             }
@@ -361,20 +387,7 @@ class SharedRadioInterfaceService(
 
     // ── The selected radio's link ───────────────────────────────────────────
 
-    /** Publishes [active]'s client state; the snapshot install publishes [ConnectionState.Connected] itself. */
-    private fun publishState(active: ActiveLink) = synchronized(stateLock) {
-        if (activeLink.value !== active) return@synchronized
-        val state = active.link.connection.value
-        if (state !is ConnectionState.Connected) serviceStateWriter.setConnectionState(state)
-    }
-
-    /** Leaves the connection failed for a selected radio with no usable link; Connect opens a fresh one. */
-    private fun publishFailure(cause: MeshtasticException) = synchronized(stateLock) {
-        if (activeLink.value == null) serviceStateWriter.setConnectionState(ConnectionState.Failed(cause))
-    }
-
     private fun onLinkState(active: ActiveLink, state: ConnectionState) {
-        publishState(active)
         if (state is ConnectionState.Connected) {
             active.connected = true
             active.shownReason = null
@@ -405,12 +418,13 @@ class SharedRadioInterfaceService(
             .getOrNull()
         if (link == null) {
             scope.cancel()
-            publishFailure(MeshtasticException.Transport("No link could be opened for the selected radio"))
+            idleState.value =
+                ConnectionState.Failed(MeshtasticException.Transport("No link could be opened for the selected radio"))
             return
         }
         if (gattRefreshPending.value && link.refreshGattCacheOnNextConnect()) gattRefreshPending.value = false
         val active = ActiveLink(address, link, scope)
-        synchronized(stateLock) { activeLink.value = active }
+        activeLink.value = active
         Logger.i { "Opened the link for ${address.anonymize}" }
         active.pipeline = scope.handledLaunch { link.run(LinkHost(active)) }
         link.connection
@@ -429,7 +443,7 @@ class SharedRadioInterfaceService(
         val active = activeLink.value
         if (active == null) {
             // A link that never opened, or one closed after its install failed, left Failed with nothing to close.
-            synchronized(stateLock) { serviceStateWriter.setConnectionState(ConnectionState.Disconnected) }
+            idleState.value = ConnectionState.Disconnected
             return@withContext
         }
         active.closing = true
@@ -438,10 +452,8 @@ class SharedRadioInterfaceService(
             active.link.disconnect()
             active.pipeline?.cancelAndJoin()
         } finally {
-            synchronized(stateLock) {
-                activeLink.value = null
-                serviceStateWriter.setConnectionState(ConnectionState.Disconnected)
-            }
+            idleState.value = ConnectionState.Disconnected
+            activeLink.value = null
             ignoreExceptionSuspend { active.link.close() }
             active.scope.cancel("link closed")
             Logger.i { "Closed the link for ${active.address.anonymize}" }

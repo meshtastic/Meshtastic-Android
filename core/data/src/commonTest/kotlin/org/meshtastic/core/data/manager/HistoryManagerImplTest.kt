@@ -21,19 +21,16 @@ import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.repository.LocalNodeUnavailableException
 import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.testing.FakeMeshPrefs
-import org.meshtastic.core.testing.FakeServiceRepository
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.StoreAndForward
-import org.meshtastic.sdk.ConnectionState
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 class HistoryManagerImplTest {
-    private val serviceRepository = FakeServiceRepository().apply { setConnectionState(ConnectionState.Connected) }
     private val config =
         ModuleConfig.StoreForwardConfig.Builder()
             .also { wb ->
@@ -65,8 +62,8 @@ class HistoryManagerImplTest {
         val meshPrefs = FakeMeshPrefs().apply { setDeviceAddress(ADDRESS) }
 
         assertFailsWith<LocalNodeUnavailableException> {
-            HistoryManagerImpl(meshPrefs, fixture.radio, serviceRepository)
-                .requestHistoryReplay("test", myNodeNum = null, config, "BLE", currentVersion())
+            HistoryManagerImpl(meshPrefs, fixture.radio)
+                .requestHistoryReplay("test", myNodeNum = null, config, "BLE", fixture.radio.activeSession.value!!)
         }
 
         assertTrue(fixture.storeForwardPackets().isEmpty())
@@ -78,8 +75,8 @@ class HistoryManagerImplTest {
         val fixture = sdkClientFixture(LOCAL_NODE)
 
         assertFailsWith<LocalNodeUnavailableException> {
-            HistoryManagerImpl(FakeMeshPrefs(), fixture.radio, serviceRepository)
-                .requestHistoryReplay("test", myNodeNum = LOCAL_NODE, config, "BLE", currentVersion())
+            HistoryManagerImpl(FakeMeshPrefs(), fixture.radio)
+                .requestHistoryReplay("test", myNodeNum = LOCAL_NODE, config, "BLE", fixture.radio.activeSession.value!!)
         }
 
         assertTrue(fixture.storeForwardPackets().isEmpty())
@@ -95,8 +92,8 @@ class HistoryManagerImplTest {
                 setStoreForwardLastRequest(ADDRESS, 1_700_000_000)
             }
 
-        HistoryManagerImpl(meshPrefs, fixture.radio, serviceRepository)
-            .requestHistoryReplay("test", myNodeNum = LOCAL_NODE, config, "BLE", currentVersion())
+        HistoryManagerImpl(meshPrefs, fixture.radio)
+            .requestHistoryReplay("test", myNodeNum = LOCAL_NODE, config, "BLE", fixture.radio.activeSession.value!!)
         runCurrent()
 
         val sent = fixture.storeForwardPackets().single()
@@ -111,23 +108,21 @@ class HistoryManagerImplTest {
     }
 
     @Test
-    fun `requestHistoryReplay from a replaced connection sends nothing`() = runTest {
+    fun `requestHistoryReplay from a closed session sends nothing`() = runTest {
         val fixture = sdkClientFixture(LOCAL_NODE)
         val meshPrefs = FakeMeshPrefs().apply { setDeviceAddress(ADDRESS) }
-        val captured = currentVersion()
-        serviceRepository.setConnectionState(ConnectionState.Disconnected)
-        serviceRepository.setConnectionState(ConnectionState.Connected)
+        val captured = fixture.radio.activeSession.value!!
+        fixture.radio.disconnect()
+        fixture.radio.connect()
 
         assertFailsWith<PacketQueueRejectedException> {
-            HistoryManagerImpl(meshPrefs, fixture.radio, serviceRepository)
+            HistoryManagerImpl(meshPrefs, fixture.radio)
                 .requestHistoryReplay("test", myNodeNum = LOCAL_NODE, config, "BLE", captured)
         }
 
         assertTrue(fixture.storeForwardPackets().isEmpty())
         fixture.client.disconnect()
     }
-
-    private fun currentVersion(): Long = serviceRepository.connectionLifecycle.value.version
 
     private fun SdkClientFixture.storeForwardPackets(): List<MeshPacket> =
         transport.outboundPackets().filter { it.decoded?.portnum == PortNum.STORE_FORWARD_APP }

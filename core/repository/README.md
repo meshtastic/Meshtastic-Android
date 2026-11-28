@@ -100,7 +100,6 @@ Decomposed into focused sub-interfaces via Interface Segregation Principle:
 
 ```kotlin
 interface ConnectionStateProvider {
-    val connectionLifecycle: StateFlow<ConnectionLifecycle>
     val connectionState: StateFlow<ConnectionState>
 }
 

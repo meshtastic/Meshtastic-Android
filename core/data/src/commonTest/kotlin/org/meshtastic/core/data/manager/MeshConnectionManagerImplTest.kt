@@ -40,7 +40,6 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.AppWidgetUpdater
-import org.meshtastic.core.repository.ConnectionStateHolder
 import org.meshtastic.core.repository.HistoryManager
 import org.meshtastic.core.repository.MeshLocationManager
 import org.meshtastic.core.repository.MeshNotificationManager
@@ -103,7 +102,8 @@ class MeshConnectionManagerImplTest {
 
     private val dataPacket = DataPacket(id = 456, time = 0L, to = "0", from = "0", bytes = null, dataType = 0)
 
-    private lateinit var connectionStateHolder: ConnectionStateHolder
+    private val connectionStateFlow = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
+    private val activeSessionFlow = MutableStateFlow<RadioSessionContext?>(RadioSessionContext(1, "tnode"))
     private val localConfigFlow = MutableStateFlow(LocalConfig.Builder().build())
     private val moduleConfigFlow = MutableStateFlow(LocalModuleConfig.Builder().build())
 
@@ -132,20 +132,24 @@ class MeshConnectionManagerImplTest {
         appWidgetUpdater = mock(MockMode.autofill)
 
         testDispatcher = UnconfinedTestDispatcher()
-        connectionStateHolder = ConnectionStateHolder()
+        connectionStateFlow.value = ConnectionState.Disconnected
+        activeSessionFlow.value = RadioSessionContext(1, "tnode")
         localConfigFlow.value = LocalConfig.Builder().build()
         moduleConfigFlow.value = LocalModuleConfig.Builder().build()
 
         every { radioConfigRepository.localConfigFlow } returns localConfigFlow
         every { radioConfigRepository.moduleConfigFlow } returns moduleConfigFlow
-        every { serviceRepository.connectionState } returns connectionStateHolder.connectionState
-        every { serviceRepository.connectionLifecycle } returns connectionStateHolder.connectionLifecycle
+        every { serviceRepository.connectionState } returns connectionStateFlow
         every { serviceRepository.setConnectionState(any()) } calls
             { call ->
                 applyConnectionState(call.arg<ConnectionState>(0))
             }
         every { serviceNotifications.updateServiceStateNotification(any(), any()) } returns Unit
-        every { radioInterfaceService.activeSession } returns MutableStateFlow(RadioSessionContext(1, "tnode"))
+        every { radioInterfaceService.activeSession } returns activeSessionFlow
+        every { radioInterfaceService.isSessionActive(any()) } calls
+            { call ->
+                activeSessionFlow.value == call.arg<RadioSessionContext>(0)
+            }
         every { radioInterfaceService.clientForSession(any()) } calls { sessionClient(++clientRequests) }
         every { locationManager.stop() } returns Unit
         every { mqttManager.stop() } returns Unit
@@ -173,7 +177,7 @@ class MeshConnectionManagerImplTest {
     )
 
     private fun applyConnectionState(state: ConnectionState) {
-        connectionStateHolder.setConnectionState(state)
+        connectionStateFlow.value = state
     }
 
     @AfterTest
@@ -274,7 +278,7 @@ class MeshConnectionManagerImplTest {
     }
 
     @Test
-    fun `onNodeDbReady skips history when its lifecycle departs while config loads`() = runTest(testDispatcher) {
+    fun `onNodeDbReady skips history when its session closes while config loads`() = runTest(testDispatcher) {
         val delayedModuleConfig = MutableSharedFlow<LocalModuleConfig>()
         every { radioConfigRepository.moduleConfigFlow } returns delayedModuleConfig
         every { nodeManager.myNodeNum } returns MutableStateFlow(123)
@@ -289,7 +293,7 @@ class MeshConnectionManagerImplTest {
             delayedModuleConfig.subscriptionCount.value >= 2,
             "MQTT and history collectors must be active; additional collectors are allowed",
         )
-        serviceRepository.setConnectionState(ConnectionState.Disconnected)
+        activeSessionFlow.value = null
         delayedModuleConfig.emit(
             LocalModuleConfig.Builder()
                 .also { wb ->
@@ -306,7 +310,7 @@ class MeshConnectionManagerImplTest {
     @Test
     fun `onNodeDbReady retains owned requests until queue admission opens`() = runTest(testDispatcher) {
         var historyAttempts = 0
-        val admissionVersions = mutableListOf<Long>()
+        val admittedSessions = mutableListOf<RadioSessionContext>()
         moduleConfigFlow.value =
             LocalModuleConfig.Builder()
                 .also { wb ->
@@ -319,7 +323,7 @@ class MeshConnectionManagerImplTest {
         sessionClient = { attempt -> if (attempt <= 2) null else sdk?.client }
         everySuspend { historyManager.requestHistoryReplay(any(), any(), any(), any(), any()) } calls
             { call ->
-                admissionVersions += call.arg<Long>(4)
+                admittedSessions += call.arg<RadioSessionContext>(4)
                 historyAttempts++
                 if (historyAttempts == 1) throw PacketQueueRejectedException("test history replay")
             }
@@ -343,7 +347,7 @@ class MeshConnectionManagerImplTest {
 
         assertEquals(2, historyAttempts)
         assertEquals(4, clientRequests)
-        assertEquals(setOf(connectionStateHolder.connectionLifecycle.value.version), admissionVersions.toSet())
+        assertEquals(setOf(RadioSessionContext(1, "tnode")), admittedSessions.toSet())
         checkNotNull(sdk).client.disconnect()
     }
 
@@ -407,7 +411,7 @@ class MeshConnectionManagerImplTest {
     }
 
     @Test
-    fun `post-handshake admission retries stop when the connected lifecycle changes`() = runTest(testDispatcher) {
+    fun `post-handshake admission retries stop when the session closes`() = runTest(testDispatcher) {
         // No session client: both telemetry requests are refused on every attempt.
         every { nodeManager.myNodeNum } returns MutableStateFlow(123)
         every { mqttManager.startProxy(any(), any()) } returns Unit
@@ -419,7 +423,7 @@ class MeshConnectionManagerImplTest {
         runCurrent()
         assertEquals(2, clientRequests)
 
-        serviceRepository.setConnectionState(ConnectionState.Disconnected)
+        activeSessionFlow.value = null
         advanceTimeBy(
             (1 until MeshConnectionManagerImpl.MAX_POST_HANDSHAKE_ADMISSION_ATTEMPTS).sumOf { rejectionCount ->
                 MeshConnectionManagerImpl.postHandshakeAdmissionRetryDelay(rejectionCount).inWholeMilliseconds
@@ -427,7 +431,7 @@ class MeshConnectionManagerImplTest {
         )
         runCurrent()
 
-        assertEquals(2, clientRequests, "a stale connection generation must not keep retrying admission")
+        assertEquals(2, clientRequests, "a closed session must not keep retrying admission")
     }
 
     @Test

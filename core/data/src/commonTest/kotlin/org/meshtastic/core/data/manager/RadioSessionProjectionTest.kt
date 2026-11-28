@@ -42,7 +42,6 @@ import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeNotificationPrefs
 import org.meshtastic.core.testing.FakeRadioConfigRepository
 import org.meshtastic.core.testing.FakeRadioInterfaceService
-import org.meshtastic.core.testing.FakeServiceRepository
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSettings
@@ -99,7 +98,6 @@ class RadioSessionProjectionTest {
                 nodeManager = nodeManager,
                 nodeRepository = nodeRepository,
                 radioConfigRepository = radioConfig,
-                serviceStateWriter = FakeServiceRepository(),
                 analytics = mock(MockMode.autofill),
                 notificationPrefs = FakeNotificationPrefs(),
                 radioInterfaceService = radio,

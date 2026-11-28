@@ -172,17 +172,22 @@ class SharedRadioInterfaceServiceTest {
 
     @Test
     fun `the client's states are published but Connected is left to the snapshot install`() = runTest(testDispatcher) {
-        val (_, link) = connectedService()
+        val (service, link) = connectedService()
+        val session = assertNotNull(service.activeSession.value)
+        val configuring = ConnectionState.Configuring(ConfigPhase.Stage2, 1f)
 
         link.connection.value = ConnectionState.Configuring(ConfigPhase.Stage2, 0.5f)
         assertEquals(ConnectionState.Configuring(ConfigPhase.Stage2, 0.5f), serviceRepository.connectionState.value)
 
         link.connection.value = ConnectionState.Connected
         assertEquals(
-            ConnectionState.Configuring(ConfigPhase.Stage2, 0.5f),
+            configuring,
             serviceRepository.connectionState.value,
             "the app is connected only once the session's snapshot is installed",
         )
+
+        link.host.onSnapshotInstalled(session)
+        assertEquals(ConnectionState.Connected, serviceRepository.connectionState.value)
 
         val drop = ConnectionState.Reconnecting(MeshtasticException.Transport("lost"), attempt = 1)
         link.connection.value = drop
@@ -196,14 +201,49 @@ class SharedRadioInterfaceServiceTest {
             val session = assertNotNull(service.activeSession.value)
             val drop = ConnectionState.Reconnecting(MeshtasticException.Transport("lost"), attempt = 1)
 
+            link.connection.value = ConnectionState.Connected
+            link.host.onSnapshotInstalled(session)
             link.connection.value = drop
-            // The install was still running in the session's scope when the link dropped.
-            serviceRepository.setConnectionState(ConnectionState.Connected)
+            assertEquals(drop, serviceRepository.connectionState.value)
+
             link.host.closeSession(session)
 
             assertEquals(drop, serviceRepository.connectionState.value)
             assertNull(service.activeSession.value)
         }
+
+    @Test
+    fun `an install that completes after the link dropped never shows Connected`() = runTest(testDispatcher) {
+        // Regression: a late install must not republish Connected over the drop that already ended the session.
+        val (service, link) = connectedService()
+        val session = assertNotNull(service.activeSession.value)
+        val drop = ConnectionState.Reconnecting(MeshtasticException.Transport("lost"), attempt = 1)
+
+        link.connection.value = ConnectionState.Connected
+        link.connection.value = drop
+        link.host.onSnapshotInstalled(session)
+
+        assertEquals(drop, serviceRepository.connectionState.value)
+    }
+
+    @Test
+    fun `Connected after a reconnect needs that session's own install`() = runTest(testDispatcher) {
+        // Regression: reusing the previous session's installed generation would show Connected before the reload.
+        val (service, link) = connectedService()
+        val first = assertNotNull(service.activeSession.value)
+        link.connection.value = ConnectionState.Connected
+        link.host.onSnapshotInstalled(first)
+        assertEquals(ConnectionState.Connected, serviceRepository.connectionState.value)
+
+        link.host.closeSession(first)
+        link.connection.value = ConnectionState.Reconnecting(MeshtasticException.Transport("lost"), attempt = 1)
+        link.connection.value = ConnectionState.Connected
+        val second = assertNotNull(link.host.openSession())
+
+        assertEquals(ConnectionState.Configuring(ConfigPhase.Stage2, 1f), serviceRepository.connectionState.value)
+        link.host.onSnapshotInstalled(second)
+        assertEquals(ConnectionState.Connected, serviceRepository.connectionState.value)
+    }
 
     @Test
     fun `disconnect drains the session then disconnects and releases the link`() = runTest(testDispatcher) {
