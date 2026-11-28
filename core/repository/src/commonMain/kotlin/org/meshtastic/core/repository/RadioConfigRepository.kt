@@ -82,17 +82,10 @@ interface RadioConfigRepository {
     val deviceProfileFlow: Flow<DeviceProfile>
 
     /**
-     * Flow of the device's UI configuration, populated from [DeviceUIConfig] during the config handshake
-     * (STATE_SEND_UIDATA — 2nd packet in every handshake). Null until the first handshake completes or after
-     * [clearDeviceUIConfig] is called.
+     * The connected device's UI configuration, from the active session's SDK config bundle. Null between sessions,
+     * including while reconnecting, before the handshake has delivered one, or when the firmware sends none.
      */
     val deviceUIConfigFlow: Flow<DeviceUIConfig?>
-
-    /** Stores the [DeviceUIConfig] received from the device. */
-    suspend fun setDeviceUIConfig(config: DeviceUIConfig)
-
-    /** Clears the stored [DeviceUIConfig]; called at the start of each new handshake. */
-    suspend fun clearDeviceUIConfig()
 
     /**
      * Flow of [FileInfo] packets accumulated during STATE_SEND_FILEMANIFEST.
@@ -108,16 +101,9 @@ interface RadioConfigRepository {
     suspend fun clearFileManifest()
 
     /**
-     * Flow of the firmware's region→modem-preset compatibility map ([LoRaRegionPresetMap]), populated from
-     * [org.meshtastic.proto.FromRadio.region_presets] during the config handshake (sent after metadata, before
-     * channels). Null when the connected firmware predates this message (< 2.8) or after [clearLoraRegionPresetMap].
+     * The firmware's region to modem-preset compatibility map, from the active session's SDK config bundle. Null
+     * between sessions, including while reconnecting, or when the connected firmware predates this message (< 2.8).
      * The local LoRa config UI uses it to constrain the preset picker to the presets legal in the selected region.
      */
     val loraRegionPresetMapFlow: Flow<LoRaRegionPresetMap?>
-
-    /** Stores the [LoRaRegionPresetMap] received from the device. */
-    suspend fun setLoraRegionPresetMap(map: LoRaRegionPresetMap)
-
-    /** Clears the stored region→preset map; called at the start of each new handshake. */
-    suspend fun clearLoraRegionPresetMap()
 }

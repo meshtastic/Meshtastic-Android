@@ -44,7 +44,6 @@ import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.FileInfo
 import org.meshtastic.proto.HardwareModel
-import org.meshtastic.proto.LoRaRegionPresetMap
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.NodeInfo
 import org.meshtastic.sdk.ConfigBundle
@@ -156,7 +155,6 @@ class MeshConfigFlowManagerImplTest {
         nodes: List<NodeInfo> = emptyList(),
         moduleConfigs: List<ModuleConfig> = emptyList(),
         files: List<FileInfo> = emptyList(),
-        regionPresets: LoRaRegionPresetMap? = null,
         myInfo: ProtoMyNodeInfo? = protoMyNodeInfo,
     ) = RadioSessionEvent.Ready(
         sessionId = 1L,
@@ -171,7 +169,6 @@ class MeshConfigFlowManagerImplTest {
         channels = emptyList(),
         nodes = nodes.associateBy { NodeId(it.num) },
         files = files,
-        regionPresets = regionPresets,
     )
 
     @Test
@@ -186,29 +183,20 @@ class MeshConfigFlowManagerImplTest {
     }
 
     @Test
-    fun `SDK snapshot installs manifest and regional presets after clearing old values`() = testScope.runTest {
+    fun `SDK snapshot installs the manifest after clearing the old one`() = testScope.runTest {
         val file = FileInfo.Builder().also { it.file_name = "firmware.bin" }.build()
-        val presets = LoRaRegionPresetMap.Builder().build()
         val calls = mutableListOf<String>()
         everySuspend { radioConfigRepository.clearFileManifest() } calls
             {
                 calls.add("clear files")
             }
-        everySuspend { radioConfigRepository.clearLoraRegionPresetMap() } calls
-            {
-                calls.add("clear presets")
-            }
         everySuspend { radioConfigRepository.addFileInfo(file) } calls
             {
                 calls.add("install file")
             }
-        everySuspend { radioConfigRepository.setLoraRegionPresetMap(presets) } calls
-            {
-                calls.add("install presets")
-            }
 
-        assertTrue(manager.installRadioSnapshot(activeSession, snapshot(files = listOf(file), regionPresets = presets)))
-        assertEquals(listOf("clear files", "clear presets", "install file", "install presets"), calls)
+        assertTrue(manager.installRadioSnapshot(activeSession, snapshot(files = listOf(file))))
+        assertEquals(listOf("clear files", "install file"), calls)
     }
 
     @Test

@@ -75,14 +75,8 @@ class FakeRadioConfigRepository :
     val currentModuleConfig: LocalModuleConfig
         get() = moduleConfigBacking.value
 
-    val currentDeviceUIConfig: DeviceUIConfig?
-        get() = deviceUIConfigBacking.value
-
     val currentFileManifest: List<FileInfo>
         get() = fileManifestBacking.value
-
-    val currentLoRaRegionPresetMap: LoRaRegionPresetMap?
-        get() = loraRegionPresetMapBacking.value
 
     /**
      * Last [Config] passed to [setLocalConfig] (null until called). Tests should use [setLocalConfigDirect] to drive
@@ -159,28 +153,12 @@ class FakeRadioConfigRepository :
         lastSetModuleConfig = config
     }
 
-    override suspend fun setDeviceUIConfig(config: DeviceUIConfig) {
-        deviceUIConfigBacking.value = config
-    }
-
-    override suspend fun clearDeviceUIConfig() {
-        deviceUIConfigBacking.value = null
-    }
-
     override suspend fun addFileInfo(info: FileInfo) {
         fileManifestBacking.value = fileManifestBacking.value + info
     }
 
     override suspend fun clearFileManifest() {
         fileManifestBacking.value = emptyList()
-    }
-
-    override suspend fun setLoraRegionPresetMap(map: LoRaRegionPresetMap) {
-        loraRegionPresetMapBacking.value = map
-    }
-
-    override suspend fun clearLoraRegionPresetMap() {
-        loraRegionPresetMapBacking.value = null
     }
 
     /** Directly sets the [LocalConfig] without merging (preferred for test setup). */
@@ -196,6 +174,16 @@ class FakeRadioConfigRepository :
     /** Directly sets the combined [DeviceProfile] emitted by [deviceProfileFlow]. */
     fun setDeviceProfile(profile: DeviceProfile) {
         deviceProfileBacking.value = profile
+    }
+
+    /** Directly sets the config emitted by [deviceUIConfigFlow]. */
+    fun setDeviceUIConfig(config: DeviceUIConfig?) {
+        deviceUIConfigBacking.value = config
+    }
+
+    /** Directly sets the map emitted by [loraRegionPresetMapFlow]. */
+    fun setLoraRegionPresetMap(map: LoRaRegionPresetMap?) {
+        loraRegionPresetMapBacking.value = map
     }
 
     /** Directly sets the [ChannelSet] (bypasses [updateChannelSettings]/[replaceAllSettings]). */

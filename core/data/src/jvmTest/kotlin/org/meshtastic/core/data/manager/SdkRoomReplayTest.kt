@@ -70,6 +70,7 @@ import org.meshtastic.core.testing.FakeNotificationPrefs
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Data
+import org.meshtastic.proto.DeviceUIConfig
 import org.meshtastic.proto.FileInfo
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.LoRaRegionPresetMap
@@ -486,6 +487,7 @@ class SdkRoomReplayTest {
                 }
                 .build()
         val regionPresets = LoRaRegionPresetMap.Builder().build()
+        val deviceUiConfig = DeviceUIConfig.Builder().also { it.screen_brightness = 128 }.build()
         val myInfo = MyNodeInfo.Builder().also { it.my_node_num = LOCAL_NODE }.build()
         val peer =
             User.Builder()
@@ -539,7 +541,8 @@ class SdkRoomReplayTest {
                 val duringHandshake = FromRadio.Builder().also { it.packet = packet }.build()
                 val manifest = FromRadio.Builder().also { it.fileInfo = file }.build()
                 val presets = FromRadio.Builder().also { it.region_presets = regionPresets }.build()
-                val configuration = listOf(config, manifest, presets, channel, duringHandshake)
+                val uiConfig = FromRadio.Builder().also { it.deviceuiConfig = deviceUiConfig }.build()
+                val configuration = listOf(config, manifest, presets, uiConfig, channel, duringHandshake)
                 writeInt(configuration.size)
                 configuration.forEach { envelope -> writeEnvelope(envelope) }
                 writeInt(nodes.size)
