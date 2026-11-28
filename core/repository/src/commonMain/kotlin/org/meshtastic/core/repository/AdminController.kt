@@ -54,6 +54,13 @@ interface AdminController {
      */
     suspend fun setLocalConfig(config: Config)
 
+    /**
+     * Writes [config] to the connected node of [session] and returns its answer, for a write whose input was read on
+     * that session. Nothing is sent once [session] no longer owns the radio; the answer is then
+     * [AdminResult.NodeUnreachable].
+     */
+    suspend fun setLocalConfigOn(session: RadioSessionContext, config: Config): AdminResult<Unit>
+
     /** Updates a local radio channel. Same fire-and-forget contract as [setLocalConfig]. */
     suspend fun setLocalChannel(channel: Channel)
 

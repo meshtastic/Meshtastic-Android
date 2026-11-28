@@ -25,11 +25,15 @@ import org.meshtastic.core.repository.HomoglyphPrefs
 import org.meshtastic.core.repository.MeshBeaconPrefs
 import org.meshtastic.core.repository.MeshBeaconRepository
 import org.meshtastic.core.repository.MessageQueue
+import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NodeRestartTracker
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
+import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioController
+import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.TransparentModeController
 import org.meshtastic.core.repository.usecase.SendMessageUseCase
 import org.meshtastic.core.repository.usecase.SendMessageUseCaseImpl
 
@@ -56,6 +60,7 @@ class CoreRepositoryModule {
         @Provided homoglyphEncodingPrefs: HomoglyphPrefs,
         @Provided messageQueue: MessageQueue,
         @Provided analytics: PlatformAnalytics,
+        transparentModeController: TransparentModeController,
     ): SendMessageUseCase = SendMessageUseCaseImpl(
         nodeRepository,
         packetRepository,
@@ -63,5 +68,21 @@ class CoreRepositoryModule {
         homoglyphEncodingPrefs,
         messageQueue,
         analytics,
+        transparentModeController,
+    )
+
+    @Single
+    fun provideTransparentModeController(
+        @Provided radioConfigRepository: RadioConfigRepository,
+        @Provided serviceRepository: ServiceRepository,
+        @Provided radioController: RadioController,
+        @Provided nodeManager: NodeManager,
+        @Provided applicationScope: ApplicationCoroutineScope,
+    ): TransparentModeController = TransparentModeController(
+        radioConfigRepository,
+        serviceRepository,
+        radioController,
+        nodeManager,
+        applicationScope,
     )
 }

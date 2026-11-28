@@ -18,6 +18,8 @@ package org.meshtastic.feature.connections
 
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.util.normalizeWebSocketUrl
+import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
+import org.meshtastic.proto.Config
 
 /**
  * Sentinel value for "no device selected" that mirrors the one-char prefix used by every real
@@ -87,4 +89,50 @@ fun blePairingPinFor(address: String?, pin: String?): String? = pin?.takeIf {
         it.length == BLE_PAIRING_PIN_LENGTH &&
         it.all { c -> c in '0'..'9' } &&
         it[0] != '0'
+}
+
+private const val FIXED_PIN_MIN = 100_000
+private const val FIXED_PIN_MAX = 999_999
+private const val HEX = 16
+private const val QUERY_SAFE = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:"
+
+/**
+ * The fixed pairing PIN [bluetooth] reports, in the form a connect link carries it, or `null` when the node pairs with
+ * a random PIN or none, or its fixed PIN is outside 100000 to 999999. Read only: nothing here sets or changes a PIN.
+ */
+fun fixedPairingPin(bluetooth: Config.BluetoothConfig?): String? = bluetooth
+    ?.takeIf { it.mode == Config.BluetoothConfig.PairingMode.FIXED_PIN }
+    ?.fixed_pin
+    ?.takeIf { it in FIXED_PIN_MIN..FIXED_PIN_MAX }
+    ?.toString()
+
+/**
+ * The meshtastic/design#177 connect link for [address], the form `connectLinkFrom` reads back, or `null` when the
+ * address is not one to hand to someone else: only a Bluetooth or TCP address is, never a serial port, which names
+ * something local to one machine, nor a demo transport. [pin] is added only where [blePairingPinFor] would accept it.
+ */
+fun connectLink(address: String, pin: String? = null): String? {
+    val rest = address.drop(1)
+    val shareable =
+        when (address.firstOrNull()?.let(InterfaceId::forIdChar)) {
+            InterfaceId.BLUETOOTH -> BLE_ADDRESS.matches(rest)
+            InterfaceId.TCP -> TCP_ADDRESS.matches(rest)
+            else -> false
+        }
+    return if (shareable) {
+        val pinPart = blePairingPinFor(address, pin)?.let { "&pin=$it" }.orEmpty()
+        "$DEEP_LINK_BASE_URI/connections?address=${address.queryEncoded()}$pinPart"
+    } else {
+        null
+    }
+}
+
+/** Percent-encodes what a query value cannot hold, leaving the colons of an address readable as labeltastic does. */
+private fun String.queryEncoded(): String = encodeToByteArray().joinToString("") { byte ->
+    val char = byte.toInt().toChar()
+    if (char in QUERY_SAFE) {
+        char.toString()
+    } else {
+        "%" + byte.toUByte().toString(HEX).uppercase().padStart(2, '0')
+    }
 }

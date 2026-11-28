@@ -151,6 +151,16 @@ class HeardOnCurrentLoraRefresherTest {
     }
 
     @Test
+    fun `an acked session-bound preset change refreshes the node info once`() = runTest {
+        backgroundScope.launch { controller().setLocalConfigOn(RadioSessionContext(1L, "tcp:radio"), turbo) }
+        runCurrent()
+        answer()
+        settle()
+
+        verify(exactly(1)) { meshConfigFlowManager.refreshNodeInfo() }
+    }
+
+    @Test
     fun `a LoRa save the radio never acks does not refresh`() = runTest {
         save(controller(), MY_NODE, turbo)
         advanceTimeBy(10 * 60_000L)

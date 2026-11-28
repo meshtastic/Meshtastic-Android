@@ -70,6 +70,7 @@ import org.meshtastic.core.repository.MapConsentPrefs
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NodeRestartTracker
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.SecurityKeyBackupStore
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.StoredSecurityKeys
@@ -78,12 +79,15 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.not_connected
 import org.meshtastic.core.resources.timeout
+import org.meshtastic.core.resources.transparent_mode_unsupported
 import org.meshtastic.core.testing.FakeLockdownCoordinator
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.ui.util.SnackbarManager
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.ModuleRoute
+import org.meshtastic.feature.settings.radio.component.LoraSaveTransparentMode
 import org.meshtastic.feature.settings.radio.component.loRaBandwidthSelection
+import org.meshtastic.feature.settings.radio.component.saveLora
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSet
@@ -489,6 +493,181 @@ class RadioConfigViewModelTest {
             analytics = mock(MockMode.autofill),
         )
             .also { createdViewModels += it }
+
+    @Test
+    fun `a follow-up to a local save runs only after the write has its answer`() = runTest {
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
+        val events = mutableListOf<String>()
+        everySuspend { adminController.setLocalConfigOn(any(), any()) } calls
+            {
+                events += "write answered"
+                AdminResult.Success(Unit)
+            }
+        viewModel = createViewModel()
+
+        viewModel.setLocalConfig(Config.Builder().build(), SAVE_SESSION) { events += "follow-up" }
+        runCurrent()
+
+        assertEquals(listOf("write answered", "follow-up"), events)
+        verifySuspend { adminController.setLocalConfigOn(SAVE_SESSION, any()) }
+    }
+
+    @Test
+    fun `a local save the session refuses runs no follow-up`() = runTest {
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
+        everySuspend { adminController.setLocalConfigOn(any(), any()) } returns AdminResult.NodeUnreachable
+        viewModel = createViewModel()
+        var followUps = 0
+
+        viewModel.setLocalConfig(Config.Builder().build(), SAVE_SESSION) { followUps++ }
+        runCurrent()
+
+        assertEquals(0, followUps)
+    }
+
+    private class CountingTransparentMode(private val events: MutableList<String>) : LoraSaveTransparentMode {
+        var session: RadioSessionContext? = SAVE_SESSION
+        val readBack = CompletableDeferred<Boolean?>()
+        val turnOffs = mutableListOf<RadioSessionContext>()
+        val confirms = mutableListOf<RadioSessionContext>()
+
+        override fun connectedSession(): RadioSessionContext? = session
+
+        override fun turnOff(savedOn: RadioSessionContext) {
+            turnOffs += savedOn
+            events += "turn off"
+        }
+
+        override suspend fun confirmTurnedOnByUser(savedOn: RadioSessionContext): Boolean? {
+            confirms += savedOn
+            events += "read back"
+            return readBack.await()
+        }
+    }
+
+    private fun transparentLora(on: Boolean, hopLimit: Int = 3) = Config.LoRaConfig.Builder()
+        .also { wb ->
+            wb.hop_limit = hopLimit
+            wb.transparent_mode = on
+        }
+        .build()
+
+    /** A LoRa save to the connected node, whose writes the node answers as soon as they are sent. */
+    private fun TestScope.saveLoraOnLocalNode(
+        events: MutableList<String>,
+        transparentMode: LoraSaveTransparentMode,
+        reported: Config.LoRaConfig,
+        saved: Config.LoRaConfig,
+    ) {
+        nodeRepository.setNodes(listOf(Node(num = 123, user = User.Builder().also { wb -> wb.id = "!123" }.build())))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
+        everySuspend { adminController.setConfig(any(), any()) } calls
+            {
+                events += "write sent"
+                AdminResult.Success(Unit)
+            }
+        everySuspend { adminController.setLocalConfigOn(any(), any()) } calls
+            {
+                events += "write sent on its session"
+                AdminResult.Success(Unit)
+            }
+        viewModel = createViewModel()
+
+        saveLora(viewModel, transparentMode, isLocal = true, reported = reported, saved = saved)
+        runCurrent()
+    }
+
+    @Test
+    fun `a reconnect while a local save is sent leaves its follow-up on the session the save started on`() =
+        runTest {
+            val events = mutableListOf<String>()
+            val transparentMode = CountingTransparentMode(events)
+            val writtenOn = mutableListOf<RadioSessionContext>()
+            nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
+            everySuspend { adminController.setLocalConfigOn(any(), any()) } calls
+                {
+                    writtenOn += it.args[0] as RadioSessionContext
+                    transparentMode.session = RadioSessionContext(SAVE_SESSION.generation + 1, SAVE_SESSION.address)
+                    AdminResult.Success(Unit)
+                }
+            viewModel = createViewModel()
+
+            saveLora(
+                viewModel,
+                transparentMode,
+                isLocal = true,
+                reported = transparentLora(true),
+                saved = transparentLora(false),
+            )
+            runCurrent()
+
+            assertEquals(listOf(SAVE_SESSION), writtenOn)
+            assertEquals(listOf(SAVE_SESSION), transparentMode.turnOffs)
+        }
+
+    @Test
+    fun `a LoRa save turning transparent mode off hands its result to the notice once the write is answered`() =
+        runTest {
+            val events = mutableListOf<String>()
+            val transparentMode = CountingTransparentMode(events)
+            saveLoraOnLocalNode(events, transparentMode, reported = transparentLora(true), saved = transparentLora(false))
+
+            assertEquals(listOf("write sent on its session", "turn off"), events)
+            assertEquals(listOf(SAVE_SESSION), transparentMode.turnOffs)
+            assertEquals(emptyList(), transparentMode.confirms)
+
+            advanceTimeBy(31_000)
+            runCurrent()
+
+            assertEquals(ResponseState.Empty, viewModel.radioConfigState.value.responseState)
+        }
+
+    @Test
+    fun `a LoRa save turning transparent mode on succeeds only once the node reads it back on`() = runTest {
+        val events = mutableListOf<String>()
+        val transparentMode = CountingTransparentMode(events)
+        saveLoraOnLocalNode(events, transparentMode, reported = transparentLora(false), saved = transparentLora(true))
+
+        assertEquals(listOf("write sent on its session", "read back"), events)
+        assertEquals(emptyList(), transparentMode.turnOffs)
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Loading)
+
+        transparentMode.readBack.complete(true)
+        runCurrent()
+
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Success)
+        assertEquals(listOf(SAVE_SESSION), transparentMode.confirms)
+    }
+
+    @Test
+    fun `a LoRa save turning transparent mode on that the firmware drops says it is not supported`() = runTest {
+        val events = mutableListOf<String>()
+        val transparentMode = CountingTransparentMode(events)
+        saveLoraOnLocalNode(events, transparentMode, reported = transparentLora(false), saved = transparentLora(true))
+
+        transparentMode.readBack.complete(false)
+        runCurrent()
+
+        assertEquals(
+            ResponseState.Error(UiText.Resource(Res.string.transparent_mode_unsupported)),
+            viewModel.radioConfigState.value.responseState,
+        )
+    }
+
+    @Test
+    fun `a LoRa save leaving transparent mode alone neither turns it off nor reads it back`() = runTest {
+        val events = mutableListOf<String>()
+        val transparentMode = CountingTransparentMode(events)
+        saveLoraOnLocalNode(
+            events,
+            transparentMode,
+            reported = transparentLora(true),
+            saved = transparentLora(true, hopLimit = 5),
+        )
+
+        assertEquals(listOf("write sent"), events)
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Success)
+    }
 
     @Test
     fun `setConfig sends the config to the destination`() = runTest {
@@ -2623,3 +2802,5 @@ class RadioConfigViewModelTest {
         assertFalse(nodeRestartTracker.restartExpected.value)
     }
 }
+
+private val SAVE_SESSION = RadioSessionContext(generation = 7L, address = "tcp:radio")

@@ -67,6 +67,9 @@ interface MeshNotificationManager {
 
     suspend fun showAlertNotification(contactKey: String, name: String, alert: String)
 
+    /** Tells the user a reply to [contactKey] was not sent because the connected node is in transparent mode. */
+    suspend fun showTransparentModeSendBlocked(contactKey: String) {}
+
     suspend fun showMeshBeaconNotification(offer: MeshBeaconOffer)
 
     /** [title] arrives resolved: the caller revalidates [node]'s identity right before posting, with no suspension. */

@@ -35,6 +35,7 @@ import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.REMOTE_READ_TIMEOUT
 import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.toFixedPositionProto
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Channel
@@ -156,6 +157,20 @@ internal class AdminControllerImpl(
         ) {
             setConfig(config)
         }
+    }
+
+    override suspend fun setLocalConfigOn(session: RadioSessionContext, config: Config): AdminResult<Unit> {
+        val movesSlot = heardOnCurrentLoraRefresher.movesSlot(config)
+        // Read after the last suspension: the SDK queues the write on this session's link or refuses it.
+        val admin = radio.adminForSession(session) ?: return AdminResult.NodeUnreachable
+        val result =
+            try {
+                admin.setConfig(config)
+            } catch (e: MeshtasticException) {
+                Logger.w(e) { "Local config write ended with the radio session" }
+                AdminResult.NodeUnreachable
+            }
+        return result.onSuccess { if (movesSlot) heardOnCurrentLoraRefresher.afterAcknowledgedWrite() }
     }
 
     override fun setDisplayMirror(enabled: Boolean) {

@@ -79,6 +79,7 @@ import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NodeRestartTracker
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.SecurityKeyBackupStore
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.resources.Res
@@ -625,6 +626,27 @@ open class RadioConfigViewModel(
 
     fun setConfig(config: Config) {
         val destNum = destNum ?: destNode.value?.num ?: return
+        launchConfigSave(config) {
+            launchWrite("setConfig") { adminController.setConfig(destNum, config) }
+        }
+    }
+
+    /**
+     * Saves [config] to the connected node on [session] only, as [setConfig] does. [onWritten] runs once the node has
+     * answered the write, before that answer settles the save, and not when [session] refused it: a follow-up there
+     * cannot overtake the write or reach another session, and it owns the save's result.
+     */
+    fun setLocalConfig(config: Config, session: RadioSessionContext, onWritten: suspend () -> Unit) {
+        launchConfigSave(config) {
+            launchWrite("setConfig") {
+                adminController.setLocalConfigOn(session, config).also { result ->
+                    if (result != AdminResult.NodeUnreachable) onWritten()
+                }
+            }
+        }
+    }
+
+    private fun launchConfigSave(config: Config, send: suspend () -> Unit) {
         safeLaunch(tag = "setConfig") {
             _radioConfigState.update { state ->
                 state.copy(
@@ -649,7 +671,7 @@ open class RadioConfigViewModel(
                 )
             }
             expectRestartIfLocal(config.saveRebootBehavior())
-            launchWrite("setConfig") { adminController.setConfig(destNum, config) }
+            send()
         }
     }
 
@@ -881,6 +903,27 @@ open class RadioConfigViewModel(
     fun clearPacketResponse() {
         clearRequestIds()
         _radioConfigState.update { it.copy(responseState = ResponseState.Empty) }
+    }
+
+    /**
+     * Makes [check] the result of the save in flight in place of the write's acknowledgement: loading until it returns,
+     * then success when it returns null, or the error it returns.
+     */
+    suspend fun settleSave(check: suspend () -> StringResource?) {
+        clearRequestIds()
+        _radioConfigState.update { it.copy(route = "", responseState = ResponseState.Loading()) }
+        val error = check()
+        if (error == null) {
+            setResponseStateSuccess()
+        } else {
+            _radioConfigState.update { state ->
+                if (state.responseState is ResponseState.Loading) {
+                    state.copy(responseState = ResponseState.Error(UiText.Resource(error)))
+                } else {
+                    state
+                }
+            }
+        }
     }
 
     /**

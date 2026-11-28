@@ -29,6 +29,7 @@ import org.meshtastic.core.repository.EditSettingsTransactionException
 import org.meshtastic.core.repository.NodeRequest
 import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.RadioController
+import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Config
@@ -312,6 +313,13 @@ class FakeRadioController :
         }
         configWrites.add(ConfigWrite(destination = null, config = config))
         settingsOperations.add(SettingsOperation.SetConfig(config))
+    }
+
+    /** Recorded like a [setLocalConfig] write; it does not check [session]. */
+    override suspend fun setLocalConfigOn(session: RadioSessionContext, config: Config): AdminResult<Unit> {
+        configWrites.add(ConfigWrite(destination = null, config = config))
+        settingsOperations.add(SettingsOperation.SetConfig(config))
+        return writeResult
     }
 
     override suspend fun setLocalChannel(channel: Channel) {
