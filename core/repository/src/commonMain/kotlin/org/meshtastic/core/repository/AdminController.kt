@@ -58,6 +58,15 @@ interface AdminController {
      */
     suspend fun sendLocalConfig(config: Config, expectedNodeNum: Int, expectedConnectionVersion: Long)
 
+    /**
+     * Sends [config] to the local node as request [packetId] with the optimistic cache write of [setConfig], for a
+     * settings save whose follow-up belongs to the connection it started on. It is sent only while [connection] is
+     * still the local node and connection; otherwise nothing is sent.
+     *
+     * @throws PacketQueueRejectedException when the local node or the connection is no longer [connection].
+     */
+    suspend fun setLocalConfigForConnection(config: Config, packetId: Int, connection: LocalNodeConnection)
+
     /** Updates a local radio channel. Same fire-and-forget contract as [setLocalConfig]. */
     suspend fun setLocalChannel(channel: Channel)
 
@@ -243,3 +252,11 @@ interface AdminEditScope {
     /** Sets a fixed position on the session's node. */
     suspend fun setFixedPosition(position: Position)
 }
+
+/**
+ * The local node and the connection lifecycle `version` a write was started on.
+ *
+ * @property nodeNum the node that was local when the write started.
+ * @property connectionVersion the `version` of [ConnectionStateProvider.connectionLifecycle] at that moment.
+ */
+data class LocalNodeConnection(val nodeNum: Int, val connectionVersion: Long)

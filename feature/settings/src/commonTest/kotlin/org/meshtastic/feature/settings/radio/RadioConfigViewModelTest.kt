@@ -56,6 +56,7 @@ import org.meshtastic.core.domain.usecase.settings.InstallProfileUseCase
 import org.meshtastic.core.domain.usecase.settings.ProcessRadioResponseUseCase
 import org.meshtastic.core.domain.usecase.settings.RadioConfigUseCase
 import org.meshtastic.core.domain.usecase.settings.RadioResponseResult
+import org.meshtastic.core.model.ConnectionLifecycle
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.MqttProbeStatus
@@ -66,6 +67,7 @@ import org.meshtastic.core.repository.AnalyticsPrefs
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.HomoglyphPrefs
+import org.meshtastic.core.repository.LocalNodeConnection
 import org.meshtastic.core.repository.LocationRepository
 import org.meshtastic.core.repository.LocationService
 import org.meshtastic.core.repository.MapConsentPrefs
@@ -418,6 +420,8 @@ class RadioConfigViewModelTest {
     private val securityKeyBackupStore: SecurityKeyBackupStore = mock(MockMode.autofill)
     private val snackbarManager: SnackbarManager = mock(MockMode.autofill)
     private val connectionManager: MeshConnectionManager = mock(MockMode.autofill)
+    private val connectionLifecycle =
+        MutableStateFlow(ConnectionLifecycle(version = SAVE_CONNECTION_VERSION, state = ConnectionState.Connected))
     private val trackerScope = CoroutineScope(SupervisorJob())
     private val nodeRestartTracker = NodeRestartTracker(trackerScope)
 
@@ -448,6 +452,7 @@ class RadioConfigViewModelTest {
         every { serviceRepository.meshPacketFlow } returns MutableSharedFlow()
         every { serviceRepository.connectionState } returns
             MutableStateFlow(org.meshtastic.core.model.ConnectionState.Connected)
+        every { serviceRepository.connectionLifecycle } returns connectionLifecycle
 
         every { mqttManager.mqttConnectionState } returns
             MutableStateFlow(org.meshtastic.core.model.MqttConnectionState.Inactive)
@@ -508,36 +513,60 @@ class RadioConfigViewModelTest {
     fun `a follow-up to a save runs only after the write was handed to the radio`() = runTest {
         nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
         val events = mutableListOf<String>()
-        everySuspend { radioConfigUseCase.setConfig(any(), any(), any()) } calls
+        everySuspend { radioConfigUseCase.setLocalConfigForConnection(any(), any(), any()) } calls
             {
                 events += "write sent"
                 77
             }
-        viewModel = createViewModel(destNum = 123)
+        viewModel = createViewModel()
 
-        viewModel.setConfig(Config.Builder().build(), onSent = { events += "follow-up" })
+        viewModel.setLocalConfig(Config.Builder().build()) { events += "follow-up" }
 
         runCurrent()
 
         assertEquals(listOf("write sent", "follow-up"), events)
     }
 
+    @Test
+    fun `a reconnect while a local save is sent leaves its follow-up on the connection the save started on`() =
+        runTest {
+            nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
+            val sentOn = mutableListOf<LocalNodeConnection>()
+            val followUpOn = mutableListOf<LocalNodeConnection>()
+            everySuspend { radioConfigUseCase.setLocalConfigForConnection(any(), any(), any()) } calls
+                {
+                    sentOn += it.args[0] as LocalNodeConnection
+                    connectionLifecycle.value =
+                        ConnectionLifecycle(version = SAVE_CONNECTION_VERSION + 1, state = ConnectionState.Connected)
+                    77
+                }
+            viewModel = createViewModel()
+
+            viewModel.setLocalConfig(Config.Builder().build()) { followUpOn += it }
+            runCurrent()
+
+            assertEquals(listOf(localSaveConnection), sentOn)
+            assertEquals(listOf(localSaveConnection), followUpOn)
+        }
+
     private class CountingTransparentMode(private val events: MutableList<String>) : LoraSaveTransparentMode {
         val readBack = CompletableDeferred<Boolean?>()
-        var turnOffs = 0
-        var confirms = 0
+        val turnOffs = mutableListOf<LocalNodeConnection>()
+        val confirms = mutableListOf<LocalNodeConnection>()
 
-        override fun turnOff() {
-            turnOffs++
+        override fun turnOff(savedOn: LocalNodeConnection) {
+            turnOffs += savedOn
             events += "turn off"
         }
 
-        override suspend fun confirmTurnedOnByUser(): Boolean? {
-            confirms++
+        override suspend fun confirmTurnedOnByUser(savedOn: LocalNodeConnection): Boolean? {
+            confirms += savedOn
             events += "read back"
             return readBack.await()
         }
     }
+
+    private val localSaveConnection = LocalNodeConnection(nodeNum = 123, connectionVersion = SAVE_CONNECTION_VERSION)
 
     private fun transparentLora(on: Boolean, hopLimit: Int = 3) = Config.LoRaConfig.Builder()
         .also { wb ->
@@ -563,6 +592,12 @@ class RadioConfigViewModelTest {
                 it.args.onRequestIdArg()(77)
                 77
             }
+        everySuspend { radioConfigUseCase.setLocalConfigForConnection(any(), any(), any()) } calls
+            {
+                events += "write sent on its connection"
+                it.args.onRequestIdArg()(77)
+                77
+            }
         viewModel = createViewModel(processRadioResponseUseCase = ProcessRadioResponseUseCase())
 
         saveLora(viewModel, transparentMode, isLocal = true, reported = reported, saved = saved)
@@ -585,9 +620,9 @@ class RadioConfigViewModelTest {
                 saved = transparentLora(false),
             )
 
-        assertEquals(listOf("write sent", "turn off"), events)
-        assertEquals(1, transparentMode.turnOffs)
-        assertEquals(0, transparentMode.confirms)
+        assertEquals(listOf("write sent on its connection", "turn off"), events)
+        assertEquals(listOf(localSaveConnection), transparentMode.turnOffs)
+        assertEquals(emptyList(), transparentMode.confirms)
 
         ack()
         advanceTimeBy(31_000)
@@ -608,8 +643,8 @@ class RadioConfigViewModelTest {
                 saved = transparentLora(true),
             )
 
-        assertEquals(listOf("write sent", "read back"), events)
-        assertEquals(0, transparentMode.turnOffs)
+        assertEquals(listOf("write sent on its connection", "read back"), events)
+        assertEquals(emptyList(), transparentMode.turnOffs)
 
         ack()
 
@@ -619,7 +654,7 @@ class RadioConfigViewModelTest {
         runCurrent()
 
         assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Success)
-        assertEquals(1, transparentMode.confirms)
+        assertEquals(listOf(localSaveConnection), transparentMode.confirms)
     }
 
     @Test
@@ -3332,6 +3367,8 @@ class RadioConfigViewModelTest {
         assertFalse(nodeRestartTracker.restartExpected.value)
     }
 }
+
+private const val SAVE_CONNECTION_VERSION = 7L
 
 /** Extracts the trailing `onRequestId` callback from a mocked request method's args. */
 @Suppress("UNCHECKED_CAST")

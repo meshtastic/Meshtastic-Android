@@ -34,6 +34,7 @@ import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.ConnectionIdentity
+import org.meshtastic.core.repository.LocalNodeConnection
 import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.PacketQueueRejectedException
@@ -140,44 +141,43 @@ class SendLocalConfigTest {
         assertTrue(commandSender.adminRequests.isEmpty())
     }
 
+    /** Admits a write only on the lifecycle version it is bound to, as PacketHandlerImpl does. */
+    private val admittingSender =
+        object : CommandSender by commandSender {
+            override suspend fun sendAdminForConnection(
+                destNum: Int,
+                expectedConnectionVersion: Long,
+                requestId: Int,
+                wantResponse: Boolean,
+                initFn: () -> AdminMessage,
+            ) {
+                val lifecycle = serviceRepository.connectionLifecycle.value
+                if (lifecycle.state != ConnectionState.Connected || lifecycle.version != expectedConnectionVersion) {
+                    throw PacketQueueRejectedException("Admin command")
+                }
+                commandSender.sendAdminForConnection(
+                    destNum,
+                    expectedConnectionVersion,
+                    requestId,
+                    wantResponse,
+                    initFn,
+                )
+            }
+        }
+
+    /** A reconnect that lands while a write awaits the cached LoRa config, after its up-front check passed. */
+    private val reconnectingConfig =
+        object : RadioConfigRepository by radioConfigRepository {
+            override val localConfigFlow: Flow<LocalConfig> = flow {
+                serviceRepository.setConnectionState(ConnectionState.Disconnected)
+                serviceRepository.setConnectionState(ConnectionState.Connected)
+                emitAll(radioConfigRepository.localConfigFlow)
+            }
+        }
+
     @Test
     fun `a reconnect after the session check but before queue admission admits nothing to the new connection`() =
         runTest {
-            // Admits a write only on the lifecycle version it is bound to, as PacketHandlerImpl does.
-            val admittingSender =
-                object : CommandSender by commandSender {
-                    override suspend fun sendAdminForConnection(
-                        destNum: Int,
-                        expectedConnectionVersion: Long,
-                        requestId: Int,
-                        wantResponse: Boolean,
-                        initFn: () -> AdminMessage,
-                    ) {
-                        val lifecycle = serviceRepository.connectionLifecycle.value
-                        if (
-                            lifecycle.state != ConnectionState.Connected ||
-                            lifecycle.version != expectedConnectionVersion
-                        ) {
-                            throw PacketQueueRejectedException("Admin command")
-                        }
-                        commandSender.sendAdminForConnection(
-                            destNum,
-                            expectedConnectionVersion,
-                            requestId,
-                            wantResponse,
-                            initFn,
-                        )
-                    }
-                }
-            // The reconnect lands while the write awaits the cached LoRa config, after its up-front check passed.
-            val reconnectingConfig =
-                object : RadioConfigRepository by radioConfigRepository {
-                    override val localConfigFlow: Flow<LocalConfig> = flow {
-                        serviceRepository.setConnectionState(ConnectionState.Disconnected)
-                        serviceRepository.setConnectionState(ConnectionState.Connected)
-                        emitAll(radioConfigRepository.localConfigFlow)
-                    }
-                }
             val controller = adminController(sender = admittingSender, refresherConfig = reconnectingConfig)
             val readOn = version()
 
@@ -187,6 +187,34 @@ class SendLocalConfigTest {
             assertTrue(readOn != version())
             assertTrue(setConfigWrites().isEmpty())
         }
+
+    @Test
+    fun `a settings save is sent on its connection as its own request and cached optimistically`() = runTest {
+        val sent = config(transparentLora)
+
+        adminController().setLocalConfigForConnection(sent, SAVE_REQUEST_ID, LocalNodeConnection(NODE_NUM, version()))
+        runCurrent()
+
+        val request = setConfigWrites().single()
+        assertEquals(SAVE_REQUEST_ID, request.requestId)
+        assertEquals(version(), request.expectedConnectionVersion)
+        assertEquals(sent, radioConfigRepository.lastSetLocalConfig)
+    }
+
+    @Test
+    fun `a settings save whose connection is replaced while it awaits the cached config admits nothing`() = runTest {
+        val controller = adminController(sender = admittingSender, refresherConfig = reconnectingConfig)
+        val savedOn = LocalNodeConnection(NODE_NUM, version())
+
+        assertFailsWith<PacketQueueRejectedException> {
+            controller.setLocalConfigForConnection(config(transparentLora), SAVE_REQUEST_ID, savedOn)
+        }
+        runCurrent()
+
+        assertTrue(savedOn.connectionVersion != version())
+        assertTrue(setConfigWrites().isEmpty())
+        assertNull(radioConfigRepository.lastSetLocalConfig)
+    }
 
     @Test
     fun `a radio switch after the turn-off read but before the session check sends nothing`() = runTest {
@@ -252,6 +280,7 @@ class SendLocalConfigTest {
         const val NODE_NUM = 0x1234
         const val OTHER_NODE_NUM = 0x5678
         const val FIRST_REQUEST_ID = 42
+        const val SAVE_REQUEST_ID = 77
         const val ADDRESS = "x12:34"
     }
 }

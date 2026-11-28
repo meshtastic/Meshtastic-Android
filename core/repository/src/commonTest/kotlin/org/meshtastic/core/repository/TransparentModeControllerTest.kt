@@ -152,6 +152,9 @@ class TransparentModeControllerTest {
         runCurrent()
     }
 
+    /** The local node and connection a settings save started on right now. */
+    private fun currentConnection() = LocalNodeConnection(NODE_NUM, serviceRepository.connectionLifecycle.value.version)
+
     @Test
     fun `the notice shows once the connected node reports transparent mode`() = runTest {
         val controller = newController()
@@ -449,7 +452,7 @@ class TransparentModeControllerTest {
         val controller = newController()
         connect(normalLora)
 
-        val confirmed = async { controller.confirmTurnedOnByUser() }
+        val confirmed = async { controller.confirmTurnedOnByUser(currentConnection()) }
         runCurrent()
         // The save's optimistic cache write lands while the read-back is out.
         cache(transparentLora)
@@ -471,7 +474,7 @@ class TransparentModeControllerTest {
         val controller = newController()
         connect(normalLora)
 
-        val confirmed = async { controller.confirmTurnedOnByUser() }
+        val confirmed = async { controller.confirmTurnedOnByUser(currentConnection()) }
         runCurrent()
         cache(transparentLora)
         advanceUntilIdle()
@@ -485,7 +488,7 @@ class TransparentModeControllerTest {
         val controller = newController()
         connect(normalLora)
 
-        val confirmed = async { controller.confirmTurnedOnByUser() }
+        val confirmed = async { controller.confirmTurnedOnByUser(currentConnection()) }
         runCurrent()
         // Firmware without field 108 accepts the write and drops the flag.
         nodeAnswers(normalLora)
@@ -495,6 +498,38 @@ class TransparentModeControllerTest {
         // Turned on later in this connection, by another client say, the notice still asks.
         cache(transparentLora)
 
+        assertEquals(TransparentModeState(active = true, noticeVisible = true), controller.state.first())
+    }
+
+    @Test
+    fun `a turn-off handed over by a save starts only on the connection the save was sent on`() = runTest {
+        val controller = newController()
+        connect(transparentLora)
+        val savedOn = currentConnection()
+        reconnect(transparentLora)
+
+        controller.turnOff(savedOn)
+        runCurrent()
+
+        assertEquals(0, reads())
+        assertEquals(TransparentModeState(active = true, noticeVisible = true), controller.state.first())
+
+        controller.turnOff(currentConnection())
+        runCurrent()
+
+        assertEquals(1, reads())
+        assertEquals(TransparentModeTurnOff.IN_PROGRESS, controller.state.first().turnOff)
+    }
+
+    @Test
+    fun `a read-back for a save whose connection has moved on reads nothing and confirms nothing`() = runTest {
+        val controller = newController()
+        connect(normalLora)
+        val savedOn = currentConnection()
+        reconnect(transparentLora)
+
+        assertEquals(null, controller.confirmTurnedOnByUser(savedOn))
+        assertEquals(0, reads())
         assertEquals(TransparentModeState(active = true, noticeVisible = true), controller.state.first())
     }
 

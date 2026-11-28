@@ -26,6 +26,7 @@ import org.meshtastic.core.model.Position
 import org.meshtastic.core.repository.AdminEditScope
 import org.meshtastic.core.repository.ConnectionStateHolder
 import org.meshtastic.core.repository.EditSettingsTransactionException
+import org.meshtastic.core.repository.LocalNodeConnection
 import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.proto.Channel
@@ -347,6 +348,10 @@ class FakeRadioController :
         recordAdminRequest("setConfig", destNum, config, packetId)
         recordConfigWrite(destNum, config, invokeStandaloneHook = true)
     }
+
+    /** Recorded like a [setConfig] write to the local node; it does not check the connection. */
+    override suspend fun setLocalConfigForConnection(config: Config, packetId: Int, connection: LocalNodeConnection) =
+        setConfig(connection.nodeNum, config, packetId)
 
     override suspend fun setModuleConfig(destNum: Int, config: ModuleConfig, packetId: Int) {
         recordAdminRequest("setModuleConfig", destNum, config, packetId)

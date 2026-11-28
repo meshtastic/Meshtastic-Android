@@ -152,6 +152,11 @@ class TransparentModeController(
     private fun currentSession(): TransparentModeSession? =
         transparentModeSessionFor(serviceRepository.connectionLifecycle.value, connectionIdentity.value)
 
+    private fun currentSessionOn(connection: LocalNodeConnection?): TransparentModeSession? = currentSession()?.takeIf {
+        connection == null ||
+            (it.nodeNum == connection.nodeNum && it.connectionVersion == connection.connectionVersion)
+    }
+
     val state: Flow<TransparentModeState> =
         combine(
             session,
@@ -179,13 +184,13 @@ class TransparentModeController(
     }
 
     /**
-     * Reads `transparent_mode` back after the user saved it on from settings, and returns what the node reports, or
-     * null when it did not answer on this connection. The notice stays back while the read is out, and afterwards
-     * unless the node reports the mode off: firmware that does not know the field accepts the write and drops it, so
-     * that is not the user's choice taking effect.
+     * Reads `transparent_mode` back after the user saved it on from settings over [savedOn], and returns what the node
+     * reports, or null when it did not answer on that connection or the connection has changed since. The notice stays
+     * back while the read is out, and afterwards unless the node reports the mode off: firmware that does not know the
+     * field accepts the write and drops it, so that is not the user's choice taking effect.
      */
-    suspend fun confirmTurnedOnByUser(): Boolean? {
-        val started = currentSession() ?: return null
+    suspend fun confirmTurnedOnByUser(savedOn: LocalNodeConnection): Boolean? {
+        val started = currentSessionOn(savedOn) ?: return null
         turnOnReadBack.value = started
         return try {
             val reported = safeCatching { readLoraConfig(started.nodeNum) }.getOrNull()?.transparent_mode
@@ -200,10 +205,11 @@ class TransparentModeController(
     /**
      * Reads the node's LoRa config, sends it back with only `transparent_mode` cleared, and reads it again. The outcome
      * is [TransparentModeTurnOff.TURNED_OFF] only when that second read says so. The attempt runs in the controller's
-     * own scope and ends without an outcome when its connection does.
+     * own scope and ends without an outcome when its connection does. With [savedOn] it starts only while that is still
+     * the connection, so a settings save cannot hand its turn-off to another one.
      */
-    fun turnOff() {
-        val started = currentSession() ?: return
+    fun turnOff(savedOn: LocalNodeConnection? = null) {
+        val started = currentSessionOn(savedOn) ?: return
         val inProgress = TransparentModeAttempt(started, TransparentModeTurnOff.IN_PROGRESS)
         if (attempt.value == inProgress) return
         attempt.value = inProgress

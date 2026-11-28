@@ -72,6 +72,7 @@ import org.meshtastic.core.repository.AnalyticsPrefs
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.HomoglyphPrefs
+import org.meshtastic.core.repository.LocalNodeConnection
 import org.meshtastic.core.repository.LocationRepository
 import org.meshtastic.core.repository.LocationService
 import org.meshtastic.core.repository.LockdownCoordinator
@@ -620,9 +621,27 @@ open class RadioConfigViewModel(
         }
     }
 
-    /** [onSent] runs once the write has been handed to the radio, for a follow-up that must not overtake it. */
-    fun setConfig(config: Config, onSent: suspend () -> Unit = {}) {
+    fun setConfig(config: Config) {
         val destNum = destNum ?: destNode.value?.num ?: return
+        launchConfigSave(config) {
+            radioConfigUseCase.setConfig(destNum, config, onRequestId = ::registerWriteRequestId)
+        }
+    }
+
+    /**
+     * Saves [config] to the local node over the connection current at this call; if that connection has moved on by the
+     * time the write is queued, nothing is sent. [onSent] runs with that connection once the write has been handed to
+     * the radio, for a follow-up that must not overtake it or reach another connection.
+     */
+    fun setLocalConfig(config: Config, onSent: suspend (LocalNodeConnection) -> Unit) {
+        val connection = LocalNodeConnection(myNodeNum ?: return, serviceRepository.connectionLifecycle.value.version)
+        launchConfigSave(config) {
+            radioConfigUseCase.setLocalConfigForConnection(connection, config, onRequestId = ::registerWriteRequestId)
+            onSent(connection)
+        }
+    }
+
+    private fun launchConfigSave(config: Config, send: suspend () -> Unit) {
         safeLaunch(tag = "setConfig") {
             _radioConfigState.update { state ->
                 state.copy(
@@ -647,8 +666,7 @@ open class RadioConfigViewModel(
                 )
             }
             expectRestartIfLocal(config.saveRebootBehavior())
-            radioConfigUseCase.setConfig(destNum, config, onRequestId = ::registerWriteRequestId)
-            onSent()
+            send()
         }
     }
 
