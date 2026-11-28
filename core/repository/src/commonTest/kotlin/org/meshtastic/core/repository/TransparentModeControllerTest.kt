@@ -75,9 +75,9 @@ class TransparentModeControllerTest {
     private val transparentLora = normalLora.newBuilder().also { wb -> wb.transparent_mode = true }.build()
 
     /**
-     * The connected node behind [AdminController]: a LoRa read waits until the test answers it, a session-bound write is
-     * recorded. An acknowledged write reaches the cache, as the SDK mirrors an acknowledged local write onto the session's
-     * config (`AdminApiImpl.submitLocalWrite`) and the app caches that; a read answer reaches no cache.
+     * The connected node behind [AdminController]: a LoRa read waits until the test answers it, a session-bound write
+     * is recorded. An acknowledged write reaches the cache, as the SDK mirrors an acknowledged local write onto the
+     * session's config (`AdminApiImpl.submitLocalWrite`) and the app caches that; a read answer reaches no cache.
      */
     private inner class NodeRadio : AdminController by FakeRadioController() {
         val reads = mutableListOf<Pair<Int, Int>>()
