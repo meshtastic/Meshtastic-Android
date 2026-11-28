@@ -69,7 +69,6 @@ import org.meshtastic.core.repository.AnalyticsPrefs
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.HomoglyphPrefs
-import org.meshtastic.core.repository.LocalNodeConnection
 import org.meshtastic.core.repository.LocationRepository
 import org.meshtastic.core.repository.LocationService
 import org.meshtastic.core.repository.LockdownCoordinator
@@ -80,6 +79,7 @@ import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NodeRestartTracker
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.SecurityKeyBackupStore
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.resources.Res
@@ -632,15 +632,17 @@ open class RadioConfigViewModel(
     }
 
     /**
-     * Saves [config] to the local node over the connection current at this call; if that connection has moved on by the
-     * time the write is queued, nothing is sent. [onSent] runs with that connection once the write has been handed to
-     * the radio, for a follow-up that must not overtake it or reach another connection.
+     * Saves [config] to the connected node on [session] only, as [setConfig] does. [onWritten] runs once the node has
+     * answered the write, before that answer settles the save, and not when [session] refused it: a follow-up there
+     * cannot overtake the write or reach another session, and it owns the save's result.
      */
-    fun setLocalConfig(config: Config, onSent: suspend (LocalNodeConnection) -> Unit) {
-        val connection = LocalNodeConnection(myNodeNum ?: return, serviceRepository.connectionLifecycle.value.version)
+    fun setLocalConfig(config: Config, session: RadioSessionContext, onWritten: suspend () -> Unit) {
         launchConfigSave(config) {
-            radioConfigUseCase.setLocalConfigForConnection(connection, config, onRequestId = ::registerWriteRequestId)
-            onSent(connection)
+            launchWrite("setConfig") {
+                adminController.setLocalConfigOn(session, config).also { result ->
+                    if (result != AdminResult.NodeUnreachable) onWritten()
+                }
+            }
         }
     }
 

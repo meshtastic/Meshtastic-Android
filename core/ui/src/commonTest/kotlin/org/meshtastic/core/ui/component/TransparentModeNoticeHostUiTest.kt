@@ -32,7 +32,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.repository.ConnectionIdentity
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.TransparentModeController
@@ -43,6 +42,7 @@ import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.viewmodel.TransparentModeViewModel
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalConfig
+import org.meshtastic.sdk.ConnectionState
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test

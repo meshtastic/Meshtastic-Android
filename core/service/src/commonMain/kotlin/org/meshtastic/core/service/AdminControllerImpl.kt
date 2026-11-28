@@ -30,12 +30,12 @@ import org.meshtastic.core.model.Position
 import org.meshtastic.core.repository.AdminController
 import org.meshtastic.core.repository.AdminEditScope
 import org.meshtastic.core.repository.EditSettingsTransactionException
-import org.meshtastic.core.repository.LocalNodeConnection
 import org.meshtastic.core.repository.LocalNodeUnavailableException
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.REMOTE_READ_TIMEOUT
 import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.toFixedPositionProto
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Channel
@@ -159,30 +159,18 @@ internal class AdminControllerImpl(
         }
     }
 
-    override suspend fun sendLocalConfig(config: Config, expectedNodeNum: Int, expectedConnectionVersion: Long) {
-        sendLocalConfigOn(
-            config,
-            commandSender.generatePacketId(),
-            LocalNodeConnection(expectedNodeNum, expectedConnectionVersion),
-        )
-    }
-
-    override suspend fun setLocalConfigForConnection(config: Config, packetId: Int, connection: LocalNodeConnection) {
-        sendLocalConfigOn(config, packetId, connection)
-        scope.handledLaunch { radioConfigRepository.setLocalConfig(config) }
-    }
-
-    private suspend fun sendLocalConfigOn(config: Config, packetId: Int, connection: LocalNodeConnection) {
-        if (
-            nodeManager.myNodeNum.value != connection.nodeNum ||
-            connectionStateProvider.connectionLifecycle.value.version != connection.connectionVersion
-        ) {
-            throw PacketQueueRejectedException("Local config for another connection")
-        }
-        heardOnCurrentLoraRefresher.beforeLocalWrite(config, packetId)
-        commandSender.sendAdminForConnection(connection.nodeNum, connection.connectionVersion, packetId) {
-            AdminMessage.Builder().also { wb -> wb.set_config = config }.build()
-        }
+    override suspend fun setLocalConfigOn(session: RadioSessionContext, config: Config): AdminResult<Unit> {
+        val movesSlot = heardOnCurrentLoraRefresher.movesSlot(config)
+        // Read after the last suspension: the SDK queues the write on this session's link or refuses it.
+        val admin = radio.adminForSession(session) ?: return AdminResult.NodeUnreachable
+        val result =
+            try {
+                admin.setConfig(config)
+            } catch (e: MeshtasticException) {
+                Logger.w(e) { "Local config write ended with the radio session" }
+                AdminResult.NodeUnreachable
+            }
+        return result.onSuccess { if (movesSlot) heardOnCurrentLoraRefresher.afterAcknowledgedWrite() }
     }
 
     override fun setDisplayMirror(enabled: Boolean) {

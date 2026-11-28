@@ -17,10 +17,7 @@
 package org.meshtastic.core.repository
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,16 +26,13 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.meshtastic.core.common.util.safeCatching
-import org.meshtastic.core.model.ConnectionLifecycle
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Config
-import org.meshtastic.proto.MeshPacket
-import org.meshtastic.proto.PortNum
+import org.meshtastic.sdk.AdminResult
+import org.meshtastic.sdk.ConnectionState
 import kotlin.time.Duration.Companion.seconds
 
 /** Where the user's request to turn transparent mode off stands. */
@@ -70,32 +64,17 @@ data class TransparentModeState(
 )
 
 /**
- * One completed handshake with one node. A choice or a turn-off belongs to the connection it was made on:
- * [completedHandshakes] moves on a reconnect inside one transport instance, which keeps [sessionGeneration].
- * [connectionVersion] is the lifecycle `version` a write on this connection must still find at queue admission.
+ * One completed handshake with one node: the app opens a radio session for each SDK session, and the SDK starts one on
+ * every handshake, a reconnect or a renumber included. A choice or a turn-off belongs to the session it was made on.
  */
-internal data class TransparentModeSession(
-    val sessionGeneration: Long,
-    val nodeNum: Int,
-    val completedHandshakes: Long,
-    val connectionVersion: Long,
-)
+internal data class TransparentModeSession(val radioSession: RadioSessionContext, val nodeNum: Int)
 
 internal data class TransparentModeAttempt(val session: TransparentModeSession, val progress: TransparentModeTurnOff)
 
-internal fun transparentModeSessionFor(
-    lifecycle: ConnectionLifecycle,
-    identity: ConnectionIdentity?,
-): TransparentModeSession? = identity
-    ?.takeIf { lifecycle.state == ConnectionState.Connected }
-    ?.let {
-        TransparentModeSession(
-            it.sessionGeneration,
-            it.nodeNum,
-            lifecycle.epochs.completedHandshakes,
-            lifecycle.version,
-        )
-    }
+internal fun transparentModeSessionFor(state: ConnectionState, identity: ConnectionIdentity?): TransparentModeSession? =
+    identity
+        ?.takeIf { state == ConnectionState.Connected }
+        ?.let { TransparentModeSession(RadioSessionContext(it.sessionGeneration, it.address), it.nodeNum) }
 
 internal fun transparentModeStateFor(
     session: TransparentModeSession?,
@@ -118,25 +97,18 @@ internal fun transparentModeStateFor(
 internal fun Config.LoRaConfig.withTransparentModeOff(): Config =
     Config.Builder().also { wb -> wb.lora = newBuilder().also { lb -> lb.transparent_mode = false }.build() }.build()
 
-/** The LoRa config in the node's answer to admin request [requestId], or null for any other packet. */
-internal fun MeshPacket.loraConfigResponseTo(requestId: Int, nodeNum: Int): Config.LoRaConfig? {
-    val data = decoded?.takeIf { from == nodeNum && it.portnum == PortNum.ADMIN_APP && it.request_id == requestId }
-    return data?.let { safeCatching { AdminMessage.ADAPTER.decode(it.payload) }.getOrNull() }?.get_config_response?.lora
-}
-
 /**
  * Tracks whether the connected node is in transparent mode (a raw LoRa modem for a host such as meshtasticd), what the
  * user chose to do about it for this connection, and turns it off on request.
  *
- * It never writes the local config cache. The cache follows the node's own answers, which the admin handler stores
- * bound to the session they arrived on, so a turn-off that outlives its connection cannot put one node's config in
- * another's cache.
+ * It writes no cache: the local config cache follows the SDK session's config, which takes the handshake and the
+ * writes acknowledged on that session's link.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class TransparentModeController(
     radioConfigRepository: RadioConfigRepository,
     private val serviceRepository: ServiceRepository,
-    private val radioController: RadioController,
+    private val adminController: AdminController,
     nodeManager: NodeManager,
     private val scope: CoroutineScope,
 ) {
@@ -146,16 +118,14 @@ class TransparentModeController(
     private val turnOnReadBack = MutableStateFlow<TransparentModeSession?>(null)
 
     private val session: Flow<TransparentModeSession?> =
-        combine(serviceRepository.connectionLifecycle, connectionIdentity, ::transparentModeSessionFor)
+        combine(serviceRepository.connectionState, connectionIdentity, ::transparentModeSessionFor)
             .distinctUntilChanged()
 
     private fun currentSession(): TransparentModeSession? =
-        transparentModeSessionFor(serviceRepository.connectionLifecycle.value, connectionIdentity.value)
+        transparentModeSessionFor(serviceRepository.connectionState.value, connectionIdentity.value)
 
-    private fun currentSessionOn(connection: LocalNodeConnection?): TransparentModeSession? = currentSession()?.takeIf {
-        connection == null ||
-            (it.nodeNum == connection.nodeNum && it.connectionVersion == connection.connectionVersion)
-    }
+    private fun currentSessionOn(savedOn: RadioSessionContext?): TransparentModeSession? =
+        currentSession()?.takeIf { savedOn == null || it.radioSession == savedOn }
 
     val state: Flow<TransparentModeState> =
         combine(
@@ -171,6 +141,9 @@ class TransparentModeController(
     /** Whether the connected node would drop a packet sent through it right now. */
     val active: Flow<Boolean> = state.map { it.active }.distinctUntilChanged()
 
+    /** The radio session a save to the connected node belongs to, or null while no node is connected. */
+    fun connectedSession(): RadioSessionContext? = currentSession()?.radioSession
+
     /** Closes the notice for this connection, leaving the node as it is. */
     fun closeNotice() {
         val current = currentSession() ?: return
@@ -185,11 +158,11 @@ class TransparentModeController(
 
     /**
      * Reads `transparent_mode` back after the user saved it on from settings over [savedOn], and returns what the node
-     * reports, or null when it did not answer on that connection or the connection has changed since. The notice stays
-     * back while the read is out, and afterwards unless the node reports the mode off: firmware that does not know the
-     * field accepts the write and drops it, so that is not the user's choice taking effect.
+     * reports, or null when it did not answer on that session or the session has changed since. The notice stays back
+     * while the read is out, and afterwards unless the node reports the mode off: firmware that does not know the field
+     * accepts the write and drops it, so that is not the user's choice taking effect.
      */
-    suspend fun confirmTurnedOnByUser(savedOn: LocalNodeConnection): Boolean? {
+    suspend fun confirmTurnedOnByUser(savedOn: RadioSessionContext): Boolean? {
         val started = currentSessionOn(savedOn) ?: return null
         turnOnReadBack.value = started
         return try {
@@ -205,10 +178,10 @@ class TransparentModeController(
     /**
      * Reads the node's LoRa config, sends it back with only `transparent_mode` cleared, and reads it again. The outcome
      * is [TransparentModeTurnOff.TURNED_OFF] only when that second read says so. The attempt runs in the controller's
-     * own scope and ends without an outcome when its connection does. With [savedOn] it starts only while that is still
-     * the connection, so a settings save cannot hand its turn-off to another one.
+     * own scope and ends without an outcome when its session does. With [savedOn] it starts only while that is still
+     * the session, so a settings save cannot hand its turn-off to another one.
      */
-    fun turnOff(savedOn: LocalNodeConnection? = null) {
+    fun turnOff(savedOn: RadioSessionContext? = null) {
         val started = currentSessionOn(savedOn) ?: return
         val inProgress = TransparentModeAttempt(started, TransparentModeTurnOff.IN_PROGRESS)
         if (attempt.value == inProgress) return
@@ -233,16 +206,13 @@ class TransparentModeController(
         val nodeNum = started.nodeNum
         val readBack = safeCatching {
             // What the node says now, not the cache: an earlier save the node dropped or adjusted is still cached.
-            // The write is admitted only on the connection that was read, checked where it is queued.
             readLoraConfig(nodeNum)
                 ?.takeIf { currentSession() == started }
                 ?.let { reported ->
-                    radioController.sendLocalConfig(
-                        reported.withTransparentModeOff(),
-                        expectedNodeNum = nodeNum,
-                        expectedConnectionVersion = started.connectionVersion,
-                    )
-                    readLoraConfig(nodeNum)
+                    // Sent only on the session that was read; one that has ended answers NodeUnreachable unsent.
+                    val written =
+                        adminController.setLocalConfigOn(started.radioSession, reported.withTransparentModeOff())
+                    if (written == AdminResult.NodeUnreachable) null else readLoraConfig(nodeNum)
                 }
         }
             .getOrNull()
@@ -254,17 +224,9 @@ class TransparentModeController(
     }
 
     private suspend fun readLoraConfig(nodeNum: Int): Config.LoRaConfig? = withTimeoutOrNull(RESPONSE_TIMEOUT) {
-        coroutineScope {
-            val requestId = radioController.generatePacketId()
-            // Subscribed before the request goes out: the local node answers through a synchronous loopback.
-            val response =
-                async(start = CoroutineStart.UNDISPATCHED) {
-                    serviceRepository.meshPacketFlow
-                        .mapNotNull { it.loraConfigResponseTo(requestId, nodeNum) }
-                        .first()
-                }
-            radioController.getConfig(nodeNum, AdminMessage.ConfigType.LORA_CONFIG.value, requestId)
-            response.await()
+        when (val result = adminController.getConfig(nodeNum, AdminMessage.ConfigType.LORA_CONFIG.value)) {
+            is AdminResult.Success -> result.value.lora
+            else -> null
         }
     }
 

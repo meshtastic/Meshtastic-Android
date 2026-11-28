@@ -19,7 +19,7 @@ package org.meshtastic.feature.settings.radio.component
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import org.meshtastic.core.model.util.keepingTransparentModeOf
-import org.meshtastic.core.repository.LocalNodeConnection
+import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.transparent_mode_turn_on_unconfirmed
 import org.meshtastic.core.resources.transparent_mode_unsupported
@@ -50,22 +50,27 @@ internal fun loraSaveFor(isLocal: Boolean, reported: Config.LoRaConfig, saved: C
 
 /** The transparent mode controller as a LoRa save reaches it. */
 internal interface LoraSaveTransparentMode {
-    fun turnOff(savedOn: LocalNodeConnection)
+    /** The radio session of the connected node, or null while none is connected. */
+    fun connectedSession(): RadioSessionContext?
 
-    suspend fun confirmTurnedOnByUser(savedOn: LocalNodeConnection): Boolean?
+    fun turnOff(savedOn: RadioSessionContext)
+
+    suspend fun confirmTurnedOnByUser(savedOn: RadioSessionContext): Boolean?
 }
 
 internal fun TransparentModeViewModel.asLoraSaveTransparentMode() = object : LoraSaveTransparentMode {
-    override fun turnOff(savedOn: LocalNodeConnection) = this@asLoraSaveTransparentMode.turnOff(savedOn)
+    override fun connectedSession() = this@asLoraSaveTransparentMode.connectedSession()
 
-    override suspend fun confirmTurnedOnByUser(savedOn: LocalNodeConnection) =
+    override fun turnOff(savedOn: RadioSessionContext) = this@asLoraSaveTransparentMode.turnOff(savedOn)
+
+    override suspend fun confirmTurnedOnByUser(savedOn: RadioSessionContext) =
         this@asLoraSaveTransparentMode.confirmTurnedOnByUser(savedOn)
 }
 
 /**
  * Sends a LoRa save. A turn-off is reported by the transparent mode notice alone, so the save hands its result over and
- * shows no dialog of its own. A turn-on is reported by the save dialog once the node reads the flag back. Either
- * follow-up belongs to the connection the save was sent on.
+ * shows no dialog of its own. A turn-on is reported by the save dialog once the node reads the flag back. The save and
+ * either follow-up belong to the radio session current when the user saved.
  */
 internal fun saveLora(
     viewModel: RadioConfigViewModel,
@@ -75,17 +80,18 @@ internal fun saveLora(
     saved: Config.LoRaConfig,
 ) {
     val save = loraSaveFor(isLocal, reported, saved)
+    val session = transparentMode.connectedSession()
     when {
-        save.turnOffAfter ->
-            viewModel.setLocalConfig(save.config) { connection ->
+        save.turnOffAfter && session != null ->
+            viewModel.setLocalConfig(save.config, session) {
                 viewModel.clearPacketResponse()
-                transparentMode.turnOff(connection)
+                transparentMode.turnOff(session)
             }
 
-        save.turnsOn ->
-            viewModel.setLocalConfig(save.config) { connection ->
+        save.turnsOn && session != null ->
+            viewModel.setLocalConfig(save.config, session) {
                 viewModel.settleSave {
-                    when (transparentMode.confirmTurnedOnByUser(connection)) {
+                    when (transparentMode.confirmTurnedOnByUser(session)) {
                         true -> null
                         false -> Res.string.transparent_mode_unsupported
                         null -> Res.string.transparent_mode_turn_on_unconfirmed
