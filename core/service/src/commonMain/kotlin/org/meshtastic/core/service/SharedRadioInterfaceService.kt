@@ -296,7 +296,11 @@ class SharedRadioInterfaceService(
             _activeSession,
         ) { sdk, installed, session ->
             // The SDK's Connected is the app's only once the app holds this session's snapshot.
-            if (sdk is ConnectionState.Connected && installed != session?.generation) APP_CONFIGURING else sdk
+            if (sdk is ConnectionState.Connected && (session == null || installed != session.generation)) {
+                APP_CONFIGURING
+            } else {
+                sdk
+            }
         }
             .distinctUntilChanged()
             .onEach { serviceStateWriter.setConnectionState(it) }

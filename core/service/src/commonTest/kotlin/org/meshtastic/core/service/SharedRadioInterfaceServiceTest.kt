@@ -227,6 +227,18 @@ class SharedRadioInterfaceServiceTest {
     }
 
     @Test
+    fun `a session closed before its first install never shows Connected`() = runTest(testDispatcher) {
+        // Regression: with no session and no installed generation, null == null published Connected with no snapshot.
+        val (service, link) = connectedService()
+        val session = assertNotNull(service.activeSession.value)
+
+        link.connection.value = ConnectionState.Connected
+        link.host.closeSession(session)
+
+        assertEquals(ConnectionState.Configuring(ConfigPhase.Stage2, 1f), serviceRepository.connectionState.value)
+    }
+
+    @Test
     fun `Connected after a reconnect needs that session's own install`() = runTest(testDispatcher) {
         // Regression: reusing the previous session's installed generation would show Connected before the reload.
         val (service, link) = connectedService()

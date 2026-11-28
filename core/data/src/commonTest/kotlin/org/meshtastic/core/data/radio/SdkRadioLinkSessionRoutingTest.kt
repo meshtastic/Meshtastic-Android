@@ -377,7 +377,7 @@ class SdkRadioLinkSessionRoutingTest {
 
     // Regression: a dropped or late onSnapshotInstalled would run post-handshake requests before Connected shows.
     @Test
-    fun `a handshake snapshot that installs is reported to the host before readiness callbacks`() = runTest {
+    fun `a handshake snapshot that installs is reported to the host before onNodeDbReady`() = runTest {
         val rig = Rig(this)
         val events = MutableSharedFlow<RadioSessionEvent>()
         pump(rig, rig.link(), events)
