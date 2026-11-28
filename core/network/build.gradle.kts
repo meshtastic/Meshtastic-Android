@@ -65,7 +65,7 @@ kotlin {
         getByName("jvmMain") {
             dependencies {
                 implementation(libs.ktor.client.java)
-                implementation(libs.jserialcomm)
+                implementation(libs.meshtastic.sdk.transport.serial)
                 implementation(libs.jmdns)
             }
         }
