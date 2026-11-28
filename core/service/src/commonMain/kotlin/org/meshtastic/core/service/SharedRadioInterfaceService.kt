@@ -22,16 +22,20 @@ import co.touchlab.kermit.Logger
 import kotlinx.atomicfu.atomic
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
-import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -48,6 +52,8 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -118,7 +124,8 @@ data class ActiveRadioSession(val generation: Long, val address: String) {
     override fun toString(): String = "ActiveRadioSession(generation=$generation, address=...)"
 }
 
-private class SessionOperationState(var admittedOperations: Int = 0, var drainWaiter: CompletableDeferred<Unit>? = null)
+/** The admitted app session and the scope its work runs in. Cancelling the scope closes admission; joining it drains. */
+private class OpenSession(val active: ActiveRadioSession, val scope: CoroutineScope)
 
 /** The selected radio's open link. Each one gets its own scope, cancelled when the link closes. */
 private class ActiveLink(val address: String, val link: RadioLink, val scope: CoroutineScope) {
@@ -221,19 +228,10 @@ class SharedRadioInterfaceService(
     override val activeSession: StateFlow<RadioSessionContext?> = _activeSession.asStateFlow()
 
     /**
-     * The session that owns lifecycle completion. [revokeSession] closes its admission first, waits for every
-     * already-admitted operation, then clears this token. Callbacks are rejected as soon as admission closes.
+     * The session that owns lifecycle completion. [revokeSession] cancels its scope first (admission closes), joins
+     * the work already admitted, then clears this token.
      */
-    @Volatile private var activeRadioSession: ActiveRadioSession? = null
-
-    /** Serializes session publication/revocation with callback and suspend-operation admission. */
-    private val sessionCallbackLock = SynchronizedObject()
-
-    /** Guarded by [sessionCallbackLock]. New work is rejected immediately when teardown closes this gate. */
-    private var sessionAdmissionOpen = false
-
-    /** Per-generation operation ownership, guarded by [sessionCallbackLock]. */
-    private val sessionOperationStates = mutableMapOf<Long, SessionOperationState>()
+    @Volatile private var activeRadioSession: OpenSession? = null
 
     private val activeLink = MutableStateFlow<ActiveLink?>(null)
 
@@ -264,7 +262,7 @@ class SharedRadioInterfaceService(
     private val connectionErrorReasons = Channel<TransportDisconnectReason>(Channel.UNLIMITED)
 
     companion object {
-        /** How often [revokeSession] reports a lease drain that has not completed. */
+        /** How often [revokeSession] reports a session drain that has not completed. */
         private const val DRAIN_WAIT_LOG_INTERVAL_MILLIS = 15 * 1000L
 
         /** The handshake stage a link failed at when the app could not install its snapshot. */
@@ -288,161 +286,91 @@ class SharedRadioInterfaceService(
 
     // ── Session admission ───────────────────────────────────────────────────
 
-    override fun isSessionActive(session: RadioSessionContext): Boolean =
-        synchronized(sessionCallbackLock) { sessionAdmissionOpen && activeRadioSession?.context == session }
+    private fun openFor(session: RadioSessionContext): OpenSession? =
+        activeRadioSession?.takeIf { it.active.context == session && it.scope.isActive }
 
-    override fun runIfSessionActive(session: RadioSessionContext, block: () -> Unit): Boolean =
-        synchronized(sessionCallbackLock) {
-            if (!sessionAdmissionOpen || activeRadioSession?.context != session) return@synchronized false
-            block()
-            true
-        }
+    override fun isSessionActive(session: RadioSessionContext): Boolean = openFor(session) != null
+
+    override fun runIfSessionActive(session: RadioSessionContext, block: () -> Unit): Boolean {
+        if (openFor(session) == null) return false
+        block()
+        return true
+    }
 
     override suspend fun runWithSessionLease(
         session: RadioSessionContext,
         block: suspend (RadioSessionLease) -> Unit,
     ): Boolean {
-        val admittedSession =
-            synchronized(sessionCallbackLock) {
-                val active = activeRadioSession
-                if (!sessionAdmissionOpen || active?.context != session) {
-                    null
-                } else {
-                    checkNotNull(sessionOperationStates[active.generation]).admittedOperations++
-                    active
-                }
-            } ?: return false
-
+        val open = openFor(session) ?: return false
         val lease =
             object : RadioSessionLease {
                 override val session: RadioSessionContext = session
 
-                override fun isCurrent(): Boolean =
-                    synchronized(sessionCallbackLock) { activeRadioSession === admittedSession }
+                override fun isCurrent(): Boolean = activeRadioSession === open
             }
-
+        // A child of the session scope, so revokeSession joins it; NonCancellable so teardown waits for the block.
+        var ran = false
+        val work =
+            open.scope.async(start = CoroutineStart.UNDISPATCHED) {
+                if (isActive) {
+                    withContext(NonCancellable) {
+                        block(lease)
+                        ran = true
+                    }
+                }
+            }
         try {
-            block(lease)
-            return true
-        } finally {
-            releaseSessionOperation(admittedSession)
+            work.await()
+        } catch (cancelled: CancellationException) {
+            // Teardown cancels the child, which hides its outcome; a cancelled caller still unwinds.
+            currentCoroutineContext().ensureActive()
+            if (!work.isCancelled) throw cancelled
         }
-    }
-
-    private fun releaseSessionOperation(admittedSession: ActiveRadioSession) {
-        val drainWaiter =
-            synchronized(sessionCallbackLock) {
-                val state = sessionOperationStates[admittedSession.generation]
-                if (state == null) {
-                    Logger.e { "Session operation released after generation ${admittedSession.generation} was revoked" }
-                    return@synchronized null
-                }
-                if (state.admittedOperations <= 0) {
-                    Logger.e { "Session operation count underflow for generation ${admittedSession.generation}" }
-                    return@synchronized state.drainWaiter.also { state.drainWaiter = null }
-                }
-                state.admittedOperations--
-                if (state.admittedOperations == 0) {
-                    state.drainWaiter.also { state.drainWaiter = null }
-                } else {
-                    null
-                }
-            }
-        drainWaiter?.complete(Unit)
-    }
-
-    /** Removes a drained session's operation state without letting a diagnostic invariant failure block teardown. */
-    private fun removeDrainedSessionStateLocked(session: ActiveRadioSession): CompletableDeferred<Unit>? {
-        val state = sessionOperationStates.remove(session.generation)
-        if (state == null) {
-            Logger.e { "Session generation ${session.generation} lost its operation state during drain" }
-            return null
-        }
-        if (state.admittedOperations != 0) {
-            Logger.e {
-                "Session generation ${session.generation} revoked with " +
-                    "${state.admittedOperations} admitted operation(s) still outstanding"
-            }
-        }
-        return state.drainWaiter?.also {
-            Logger.e { "Session generation ${session.generation} retained a drain waiter" }
-            state.drainWaiter = null
-        }
+        return ran
     }
 
     /** Admits a new session for [active], or null once [active] is no longer the selected radio's open link. */
-    private fun admitSession(active: ActiveLink): RadioSessionContext? = synchronized(sessionCallbackLock) {
-        if (activeLink.value !== active || active.closing) return@synchronized null
-        check(activeRadioSession == null && sessionOperationStates.isEmpty()) {
-            "Cannot admit a session while the previous one is still draining"
-        }
+    private fun admitSession(active: ActiveLink): RadioSessionContext? {
+        if (activeLink.value !== active || active.closing) return null
+        check(activeRadioSession == null) { "Cannot admit a session while the previous one is still draining" }
         val session = ActiveRadioSession(sessionGenerationCounter.incrementAndGet(), active.address)
-        sessionOperationStates[session.generation] = SessionOperationState()
-        activeRadioSession = session
-        sessionAdmissionOpen = true
+        val scope = CoroutineScope(dispatchers.default + SupervisorJob(active.scope.coroutineContext.job))
+        activeRadioSession = OpenSession(session, scope)
         _activeSession.value = session.context
         _sessionGeneration.value = session.generation
         Logger.i { "Admitted session ${session.generation} for ${active.address.anonymize}" }
-        session.context
+        return session.context
     }
 
     /**
-     * Closes admission for [session], waits for its existing suspend operations, then publishes lifecycle completion.
-     * The closed gate rejects queued callbacks and new operations immediately; the retained session token prevents a
-     * replacement session from overlapping an admitted database commit.
+     * Closes admission for [open] by cancelling its scope, joins the operations already admitted, then publishes
+     * lifecycle completion. The retained session token prevents a replacement session from overlapping an admitted
+     * database commit.
      */
-    private suspend fun revokeSession(session: ActiveRadioSession?) {
-        if (session == null) return
+    private suspend fun revokeSession(open: OpenSession?) {
+        if (open == null) return
         withContext(NonCancellable) {
-            val drainWaiter =
-                synchronized(sessionCallbackLock) {
-                    if (activeRadioSession !== session) return@synchronized null
-                    sessionAdmissionOpen = false
-                    val state = sessionOperationStates[session.generation]
-                    if (state == null) {
-                        Logger.e { "Session generation ${session.generation} has no operation state at revocation" }
-                        null
-                    } else if (state.admittedOperations == 0) {
-                        null
-                    } else {
-                        state.drainWaiter ?: CompletableDeferred<Unit>().also { state.drainWaiter = it }
-                    }
-                }
-            if (drainWaiter != null) {
-                // The drain must complete before a replacement session is admitted (DB-atomicity contract), so keep
-                // waiting, but never silently: a lease stuck past the handler timeout means a handler ignored
-                // cancellation, and these reports are the observability surface for that wedge.
-                var waitedMillis = 0L
-                while (withTimeoutOrNull(DRAIN_WAIT_LOG_INTERVAL_MILLIS) { drainWaiter.await() } == null) {
-                    waitedMillis += DRAIN_WAIT_LOG_INTERVAL_MILLIS
-                    val outstanding =
-                        synchronized(sessionCallbackLock) {
-                            sessionOperationStates[session.generation]?.admittedOperations ?: 0
-                        }
-                    Logger.e {
-                        "Session teardown blocked ${waitedMillis}ms waiting for $outstanding admitted session " +
-                            "operation(s) to release (generation=${session.generation})"
-                    }
+            val job = open.scope.coroutineContext.job
+            job.cancel()
+            // The drain must finish before a replacement session is admitted, so keep waiting, but never silently: a
+            // block stuck past the handler timeout means a handler ignored cancellation.
+            var waitedMillis = 0L
+            while (withTimeoutOrNull(DRAIN_WAIT_LOG_INTERVAL_MILLIS) { job.join() } == null) {
+                waitedMillis += DRAIN_WAIT_LOG_INTERVAL_MILLIS
+                Logger.e {
+                    "Session teardown blocked ${waitedMillis}ms waiting for ${job.children.count()} admitted session " +
+                        "operation(s) to release (generation=${open.active.generation})"
                 }
             }
-            val retainedDrainWaiter =
-                synchronized(sessionCallbackLock) {
-                    if (activeRadioSession === session) {
-                        val waiter = removeDrainedSessionStateLocked(session)
-                        activeRadioSession = null
-                        _activeSession.value = null
-                        waiter
-                    } else {
-                        null
-                    }
-                }
-            retainedDrainWaiter?.complete(Unit)
+            if (activeRadioSession === open) {
+                activeRadioSession = null
+                _activeSession.value = null
+            }
         }
     }
 
-    private fun sessionFor(context: RadioSessionContext): ActiveRadioSession? = activeRadioSession?.takeIf {
-        it.context == context
-    }
+    private fun sessionFor(context: RadioSessionContext): OpenSession? =
+        activeRadioSession?.takeIf { it.active.context == context }
 
     /** The host one link's pipeline admits its sessions through; it stops admitting once that link closes. */
     private inner class LinkHost(private val active: ActiveLink) :
@@ -451,7 +379,7 @@ class SharedRadioInterfaceService(
         override fun openSession(): RadioSessionContext? = admitSession(active)
 
         override suspend fun closeSession(session: RadioSessionContext) {
-            revokeSession(synchronized(sessionCallbackLock) { sessionFor(session) })
+            revokeSession(sessionFor(session))
             // A snapshot install can publish Connected after the link dropped; the drop's state wins once it closes.
             publishState(active)
         }
@@ -543,7 +471,7 @@ class SharedRadioInterfaceService(
             return@withContext
         }
         active.closing = true
-        revokeSession(synchronized(sessionCallbackLock) { activeRadioSession })
+        revokeSession(activeRadioSession)
         try {
             active.link.disconnect()
             active.pipeline?.cancelAndJoin()
@@ -707,11 +635,8 @@ class SharedRadioInterfaceService(
 
     // ── Session-bound client access ─────────────────────────────────────────
 
-    override fun clientForSession(session: RadioSessionContext): RadioClient? {
-        var client: RadioClient? = null
-        runIfSessionActive(session) { client = activeLink.value?.link?.client }
-        return client
-    }
+    override fun clientForSession(session: RadioSessionContext): RadioClient? =
+        if (isSessionActive(session)) activeLink.value?.link?.client else null
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun adminSessionStatus(node: NodeId): Flow<AdminSessionStatus> = activeLink.flatMapLatest {
@@ -721,31 +646,19 @@ class SharedRadioInterfaceService(
     override fun requestNodeDbRefresh(session: RadioSessionContext): Boolean =
         clientForSession(session)?.requestNodeDbRefresh() == true
 
-    /** Runs [send] on [session]'s client under a lease, so teardown drains the handoff before revoking the session. */
+    /** Runs [send] on [session]'s client while that session owns admission; teardown does not wait for the handoff. */
     private inline fun <T> withAdmittedClient(session: RadioSessionContext?, send: (ActiveLink) -> T?): T? {
-        val admitted =
-            synchronized(sessionCallbackLock) {
-                val current = activeRadioSession
-                val link = activeLink.value
-                if (!sessionAdmissionOpen || current == null || link == null) return@synchronized null
-                if (session != null && current.context != session) return@synchronized null
-                checkNotNull(sessionOperationStates[current.generation]).admittedOperations++
-                current to link
-            } ?: return null
-        return try {
-            safeCatching { send(admitted.second) }
-                .onFailure { Logger.w(it) { "Active session handoff failed" } }
-                .getOrNull()
-        } finally {
-            releaseSessionOperation(admitted.first)
-        }
+        val open = activeRadioSession ?: return null
+        val link = activeLink.value ?: return null
+        if (!open.scope.isActive || (session != null && open.active.context != session)) return null
+        return safeCatching { send(link) }.onFailure { Logger.w(it) { "Active session handoff failed" } }.getOrNull()
     }
 
     override fun sendPaced(session: RadioSessionContext, packet: MeshPacket): PacedMessageHandle? {
         val (handle, linkScope) =
             withAdmittedClient(session) { it.link.client.sendPaced(packet) to it.scope } ?: return null
         linkScope.launch {
-            if (handle.awaitDispatch()) runIfSessionActive(session) { _meshActivity.tryEmit(MeshActivity.Send) }
+            if (handle.awaitDispatch() && isSessionActive(session)) _meshActivity.tryEmit(MeshActivity.Send)
         }
         return handle
     }

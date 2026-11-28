@@ -53,6 +53,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
@@ -203,7 +204,15 @@ class SharedRadioInterfaceServiceTest {
         val (service, link) = connectedService()
         val session = assertNotNull(service.activeSession.value)
         val release = CompletableDeferred<Unit>()
-        val work = launch { service.runWithSessionLease(session) { release.await() } }
+        var workFinished = false
+        var leaseWasCurrent = false
+        val work = launch {
+            service.runWithSessionLease(session) { lease ->
+                release.await()
+                workFinished = true
+                leaseWasCurrent = lease.isCurrent()
+            }
+        }
 
         val disconnect = launch { service.disconnect() }
         assertFalse(disconnect.isCompleted, "disconnect waits for the admitted lease")
@@ -214,10 +223,66 @@ class SharedRadioInterfaceServiceTest {
         work.join()
         disconnect.join()
 
+        assertTrue(workFinished, "the drain waits for the admitted block to run to its end, not cancel it")
+        assertTrue(leaseWasCurrent, "the lease stays current until the block returns")
         assertEquals(1, link.disconnects)
         assertTrue(link.closed)
         assertNull(service.activeSession.value)
         assertEquals(ConnectionState.Disconnected, serviceRepository.connectionState.value)
+    }
+
+    @Test
+    fun `a lease requested while teardown drains is rejected and never runs`() = runTest(testDispatcher) {
+        // Regression: admission still open during the drain would let new work start under a closing session.
+        val (service, _) = connectedService()
+        val session = assertNotNull(service.activeSession.value)
+        val release = CompletableDeferred<Unit>()
+        val work = launch { service.runWithSessionLease(session) { release.await() } }
+        val disconnect = launch { service.disconnect() }
+        var ran = false
+
+        assertFalse(service.runWithSessionLease(session) { ran = true })
+        assertFalse(ran)
+
+        release.complete(Unit)
+        work.join()
+        disconnect.join()
+    }
+
+    @Test
+    fun `the next session cannot be admitted while the previous session's work is still running`() =
+        runTest(testDispatcher) {
+            // Regression: opening session N+1 mid-write for session N breaks the database-atomicity contract.
+            val (service, link) = connectedService()
+            val session = assertNotNull(service.activeSession.value)
+            val release = CompletableDeferred<Unit>()
+            val work = launch { service.runWithSessionLease(session) { release.await() } }
+            val close = launch { link.host.closeSession(session) }
+
+            assertFailsWith<IllegalStateException> { link.host.openSession() }
+
+            release.complete(Unit)
+            close.join()
+            work.join()
+
+            assertEquals(session.generation + 1, link.host.openSession()?.generation)
+        }
+
+    @Test
+    fun `a lease that teardown overlaps still reports that it ran`() = runTest(testDispatcher) {
+        // Regression: returning the child's await() throws once teardown cancels it, so the caller never saw true.
+        val (service, _) = connectedService()
+        val session = assertNotNull(service.activeSession.value)
+        val release = CompletableDeferred<Unit>()
+        var returned: Boolean? = null
+        val work = launch { returned = service.runWithSessionLease(session) { release.await() } }
+        val disconnect = launch { service.disconnect() }
+
+        release.complete(Unit)
+        disconnect.join()
+        work.join()
+
+        assertEquals(true, returned, "a lease whose block ran returns true even when teardown overlapped it")
     }
 
     @Test

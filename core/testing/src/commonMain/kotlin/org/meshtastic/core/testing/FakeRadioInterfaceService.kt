@@ -16,19 +16,24 @@
  */
 package org.meshtastic.core.testing
 
-import co.touchlab.kermit.Logger
 import kotlinx.atomicfu.atomic
-import kotlinx.atomicfu.locks.SynchronizedObject
-import kotlinx.atomicfu.locks.synchronized
-import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.job
 import kotlinx.coroutines.withContext
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
@@ -41,6 +46,7 @@ import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.MqttClientProxyMessage
 import org.meshtastic.sdk.PacedMessageHandle
 import org.meshtastic.sdk.RadioClient
+import kotlin.concurrent.Volatile
 
 /**
  * A test double for [RadioInterfaceService] that provides an in-memory implementation. Address selection remains
@@ -61,46 +67,49 @@ class FakeRadioInterfaceService(val serviceScope: CoroutineScope = MainScope()) 
     private val _activeSession = MutableStateFlow<RadioSessionContext?>(null)
     override val activeSession: StateFlow<RadioSessionContext?> = _activeSession
 
-    private val sessionAdmissionLock = SynchronizedObject()
-    private var sessionAdmissionOpen = false
-    private var admittedSessionOperations = 0
-    private var sessionDrainWaiter: CompletableDeferred<Unit>? = null
+    private class OpenFakeSession(val context: RadioSessionContext, val scope: CoroutineScope)
 
-    /** Number of lease-release invariant violations observed by this fake. Finally paths record rather than throw. */
-    private var sessionLeaseInvariantViolationsState: Int = 0
-    val sessionLeaseInvariantViolations: Int
-        get() = synchronized(sessionAdmissionLock) { sessionLeaseInvariantViolationsState }
+    @Volatile private var open: OpenFakeSession? = null
 
-    override fun isSessionActive(session: RadioSessionContext): Boolean =
-        synchronized(sessionAdmissionLock) { sessionAdmissionOpen && _activeSession.value == session }
+    private fun openFor(session: RadioSessionContext): OpenFakeSession? =
+        open?.takeIf { it.context == session && it.scope.isActive }
 
-    override fun runIfSessionActive(session: RadioSessionContext, block: () -> Unit): Boolean =
-        synchronized(sessionAdmissionLock) {
-            if (!sessionAdmissionOpen || _activeSession.value != session) return@synchronized false
-            block()
-            true
-        }
+    override fun isSessionActive(session: RadioSessionContext): Boolean = openFor(session) != null
+
+    override fun runIfSessionActive(session: RadioSessionContext, block: () -> Unit): Boolean {
+        if (openFor(session) == null) return false
+        block()
+        return true
+    }
 
     override suspend fun runWithSessionLease(
         session: RadioSessionContext,
         block: suspend (RadioSessionLease) -> Unit,
     ): Boolean {
-        val admittedSession = admitSessionOperation(session) ?: return false
-
+        val admitted = openFor(session) ?: return false
         val lease =
             object : RadioSessionLease {
                 override val session: RadioSessionContext = session
 
-                override fun isCurrent(): Boolean =
-                    synchronized(sessionAdmissionLock) { _activeSession.value == admittedSession }
+                override fun isCurrent(): Boolean = open === admitted
             }
-
+        var ran = false
+        val work =
+            admitted.scope.async(start = CoroutineStart.UNDISPATCHED) {
+                if (isActive) {
+                    withContext(NonCancellable) {
+                        block(lease)
+                        ran = true
+                    }
+                }
+            }
         try {
-            block(lease)
-            return true
-        } finally {
-            releaseSessionOperation(admittedSession)
+            work.await()
+        } catch (cancelled: CancellationException) {
+            currentCoroutineContext().ensureActive()
+            if (!work.isCancelled) throw cancelled
         }
+        return ran
     }
 
     private val _meshActivity = MutableSharedFlow<MeshActivity>()
@@ -133,79 +142,27 @@ class FakeRadioInterfaceService(val serviceScope: CoroutineScope = MainScope()) 
         return true
     }
 
-    private fun admitSessionOperation(expectedSession: RadioSessionContext? = null): RadioSessionContext? =
-        synchronized(sessionAdmissionLock) {
-            val active = _activeSession.value
-            val matchesExpectedSession = expectedSession == null || active == expectedSession
-            if (!sessionAdmissionOpen || active == null || !matchesExpectedSession) {
-                null
-            } else {
-                admittedSessionOperations++
-                active
-            }
-        }
-
-    private fun releaseSessionOperation(admittedSession: RadioSessionContext) {
-        val waiter =
-            synchronized(sessionAdmissionLock) {
-                if (_activeSession.value != admittedSession) {
-                    sessionLeaseInvariantViolationsState++
-                    Logger.e { "Fake session changed before an admitted operation released its lease" }
-                    return@synchronized null
-                }
-                if (admittedSessionOperations <= 0) {
-                    sessionLeaseInvariantViolationsState++
-                    Logger.e { "Fake session operation count underflow" }
-                    sessionDrainWaiter.also { sessionDrainWaiter = null }
-                } else {
-                    admittedSessionOperations--
-                    if (admittedSessionOperations == 0) {
-                        sessionDrainWaiter.also { sessionDrainWaiter = null }
-                    } else {
-                        null
-                    }
-                }
-            }
-        waiter?.complete(Unit)
-    }
-
     private fun admitSelectedSession() {
-        val address = _currentDeviceAddressFlow.value
-        synchronized(sessionAdmissionLock) {
-            check(_activeSession.value == null && admittedSessionOperations == 0) {
-                "Cannot admit a fake transport while the previous session is still draining"
-            }
-            if (address == null) {
-                sessionAdmissionOpen = false
-                return
-            }
-            val generation = _sessionGeneration.value + 1
-            _sessionGeneration.value = generation
-            _activeSession.value = RadioSessionContext(generation, address)
-            sessionAdmissionOpen = true
-        }
+        val address = _currentDeviceAddressFlow.value ?: return
+        check(open == null) { "Cannot admit a fake transport while the previous session is still draining" }
+        val generation = _sessionGeneration.value + 1
+        _sessionGeneration.value = generation
+        val context = RadioSessionContext(generation, address)
+        open =
+            OpenFakeSession(
+                context,
+                CoroutineScope(serviceScope.coroutineContext + SupervisorJob(serviceScope.coroutineContext.job)),
+            )
+        _activeSession.value = context
     }
 
     private suspend fun revokeActiveSession() {
-        val session = synchronized(sessionAdmissionLock) { _activeSession.value } ?: return
+        val current = open ?: return
         withContext(NonCancellable) {
-            val waiter =
-                synchronized(sessionAdmissionLock) {
-                    if (_activeSession.value != session) return@synchronized null
-                    sessionAdmissionOpen = false
-                    if (admittedSessionOperations == 0) {
-                        null
-                    } else {
-                        sessionDrainWaiter ?: CompletableDeferred<Unit>().also { sessionDrainWaiter = it }
-                    }
-                }
-            waiter?.await()
-            synchronized(sessionAdmissionLock) {
-                if (_activeSession.value == session) {
-                    check(admittedSessionOperations == 0) { "Fake session revoked before admitted operations drained" }
-                    _activeSession.value = null
-                    sessionDrainWaiter = null
-                }
+            current.scope.coroutineContext.job.cancelAndJoin()
+            if (open === current) {
+                open = null
+                _activeSession.value = null
             }
         }
     }

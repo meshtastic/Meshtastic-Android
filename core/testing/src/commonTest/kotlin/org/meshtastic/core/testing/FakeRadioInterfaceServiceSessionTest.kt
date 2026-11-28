@@ -63,14 +63,14 @@ class FakeRadioInterfaceServiceSessionTest {
         val releaseWork = CompletableDeferred<Unit>()
         val leaseStillCurrent = CompletableDeferred<Boolean>()
 
+        var returned: Boolean? = null
         val work = launch {
-            assertTrue(
+            returned =
                 service.runWithSessionLease(session) { lease ->
                     workStarted.complete(Unit)
                     releaseWork.await()
                     leaseStillCurrent.complete(lease.isCurrent())
-                },
-            )
+                }
         }
         workStarted.await()
 
@@ -83,6 +83,7 @@ class FakeRadioInterfaceServiceSessionTest {
 
         releaseWork.complete(Unit)
         work.join()
+        assertEquals(true, returned, "a fake lease whose block ran reports that it ran, like the real service")
         assertTrue(leaseStillCurrent.await(), "admitted fake work retains its lifecycle lease until return")
         disconnect.join()
         assertNull(service.activeSession.value)
