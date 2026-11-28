@@ -40,7 +40,6 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonObject
 import org.koin.compose.koinInject
-import org.meshtastic.core.domain.usecase.settings.RadioConfigUseCase
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.NodeAddress
@@ -71,7 +70,6 @@ fun DesktopMcpLifecycle() {
     val sendMessageUseCase = koinInject<SendMessageUseCase>()
     val meshLogRepository = koinInject<MeshLogRepository>()
     val radioConfigRepository = koinInject<RadioConfigRepository>()
-    val radioConfigUseCase = koinInject<RadioConfigUseCase>()
     val server = remember {
         DesktopMcpServer(
             serviceRepository,
@@ -83,7 +81,7 @@ fun DesktopMcpLifecycle() {
             extraTools =
             listOf(
                 McpRequestTool(radioController, serviceRepository, nodeRepository, meshLogRepository),
-                McpConfigTool(radioConfigUseCase, radioConfigRepository, nodeRepository, serviceRepository),
+                McpConfigTool(radioController, radioConfigRepository, nodeRepository, serviceRepository),
                 McpMessagesTool(packetRepository, nodeRepository),
             ),
         )

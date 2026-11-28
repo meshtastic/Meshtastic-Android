@@ -40016,7 +40016,6 @@ Lorg/meshtastic/core/domain/usecase/settings/InstallProfileUseCase;
 Lorg/meshtastic/core/domain/usecase/settings/IsOtaCapableUseCase;
 Lorg/meshtastic/core/domain/usecase/settings/IsOtaCapableUseCaseImpl;
 Lorg/meshtastic/core/domain/usecase/settings/ProcessRadioResponseUseCase;
-Lorg/meshtastic/core/domain/usecase/settings/RadioConfigUseCase;
 Lorg/meshtastic/core/domain/usecase/settings/SetMeshLogSettingsUseCase;
 Lorg/meshtastic/core/model/Channel;
 HSPLorg/meshtastic/core/model/Channel;-><clinit>()V

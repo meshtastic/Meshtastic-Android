@@ -34,7 +34,7 @@ import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonObject
-import org.meshtastic.core.domain.usecase.settings.RadioConfigUseCase
+import org.meshtastic.core.repository.AdminController
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.RadioConfigRepository
@@ -53,11 +53,11 @@ import kotlin.time.Duration.Companion.seconds
 import kotlin.time.TimeSource
 
 /**
- * `set_config`: writes `section.field` values one section at a time through [RadioConfigUseCase], the call the settings
+ * `set_config`: writes `section.field` values one section at a time through [AdminController], the call the settings
  * screens make. A local write waits for the app's config flows to hold the values; a remote write reads them back.
  */
 internal class McpConfigTool(
-    private val radioConfigUseCase: RadioConfigUseCase,
+    private val adminController: AdminController,
     private val radioConfigRepository: RadioConfigRepository,
     private val nodeRepository: NodeRepository,
     private val serviceRepository: ServiceRepository,
@@ -230,9 +230,9 @@ internal class McpConfigTool(
         for ((section, kind) in kinds) {
             val read: AdminResult<Message<*, *>> =
                 when (kind) {
-                    McpSectionKind.OWNER -> radioConfigUseCase.getOwner(dest)
-                    McpSectionKind.CONFIG -> radioConfigUseCase.getConfig(dest, mcpSectionType(kind, section))
-                    McpSectionKind.MODULE -> radioConfigUseCase.getModuleConfig(dest, mcpSectionType(kind, section))
+                    McpSectionKind.OWNER -> adminController.getOwner(dest)
+                    McpSectionKind.CONFIG -> adminController.getConfig(dest, mcpSectionType(kind, section))
+                    McpSectionKind.MODULE -> adminController.getModuleConfig(dest, mcpSectionType(kind, section))
                 }
             val value =
                 when (read) {
@@ -249,9 +249,9 @@ internal class McpConfigTool(
     }
 
     private suspend fun send(write: McpConfigWrite, dest: Int): AdminResult<Unit> = when (write.kind) {
-        McpSectionKind.OWNER -> radioConfigUseCase.setOwner(dest, write.updated as User)
-        McpSectionKind.CONFIG -> radioConfigUseCase.setConfig(dest, write.toConfig())
-        McpSectionKind.MODULE -> radioConfigUseCase.setModuleConfig(dest, write.toModuleConfig())
+        McpSectionKind.OWNER -> adminController.setOwner(dest, write.updated as User)
+        McpSectionKind.CONFIG -> adminController.setConfig(dest, write.toConfig())
+        McpSectionKind.MODULE -> adminController.setModuleConfig(dest, write.toModuleConfig())
     }
 
     private fun heldConfig(): Flow<McpHeldConfig> = combine(

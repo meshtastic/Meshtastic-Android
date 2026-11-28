@@ -53,7 +53,6 @@ import org.meshtastic.core.domain.usecase.settings.ExportProfileUseCase
 import org.meshtastic.core.domain.usecase.settings.ImportProfileUseCase
 import org.meshtastic.core.domain.usecase.settings.ImportSecurityConfigUseCase
 import org.meshtastic.core.domain.usecase.settings.InstallProfileUseCase
-import org.meshtastic.core.domain.usecase.settings.RadioConfigUseCase
 import org.meshtastic.core.domain.usecase.settings.RadioResponseResult
 import org.meshtastic.core.domain.usecase.settings.toRadioResponseResult
 import org.meshtastic.core.model.Capabilities
@@ -65,6 +64,7 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.excludes
 import org.meshtastic.core.model.util.MalformedMeshtasticUrlException
+import org.meshtastic.core.repository.AdminController
 import org.meshtastic.core.repository.AnalyticsPrefs
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FileService
@@ -179,7 +179,7 @@ open class RadioConfigViewModel(
     protected val exportProfileUseCase: ExportProfileUseCase,
     protected val importSecurityConfigUseCase: ImportSecurityConfigUseCase,
     private val installProfileUseCase: InstallProfileUseCase,
-    private val radioConfigUseCase: RadioConfigUseCase,
+    private val adminController: AdminController,
     private val adminActionsUseCase: AdminActionsUseCase,
     private val locationService: LocationService,
     private val fileService: FileService,
@@ -516,7 +516,7 @@ open class RadioConfigViewModel(
                         wb.long_name = longName
                     }
                     .build()
-            launchWrite("setHamMode") { radioConfigUseCase.setHamMode(destNum, hamParameters) }
+            launchWrite("setHamMode") { adminController.setHamMode(destNum, hamParameters) }
         }
     }
 
@@ -528,7 +528,7 @@ open class RadioConfigViewModel(
         val destNum = destNum ?: destNode.value?.num ?: return
         safeLaunch(tag = "setOwner") {
             _radioConfigState.update { it.copy(userConfig = user) }
-            launchWrite("setOwner") { radioConfigUseCase.setOwner(destNum, user) }
+            launchWrite("setOwner") { adminController.setOwner(destNum, user) }
         }
     }
 
@@ -561,7 +561,7 @@ open class RadioConfigViewModel(
                                     "setRemoteChannel",
                                     onRequestId,
                                     {
-                                        radioConfigUseCase.setRemoteChannel(destNum, channel)
+                                        adminController.setRemoteChannel(destNum, channel)
                                     },
                                 ) {
                                     RadioResponseResult.Success
@@ -649,7 +649,7 @@ open class RadioConfigViewModel(
                 )
             }
             expectRestartIfLocal(config.saveRebootBehavior())
-            launchWrite("setConfig") { radioConfigUseCase.setConfig(destNum, config) }
+            launchWrite("setConfig") { adminController.setConfig(destNum, config) }
         }
     }
 
@@ -658,7 +658,7 @@ open class RadioConfigViewModel(
         safeLaunch(tag = "setModuleConfig") {
             _radioConfigState.update { state -> state.copy(moduleConfig = state.moduleConfig.mergedWith(config)) }
             expectRestartIfLocal(config.saveRebootBehavior())
-            launchWrite("setModuleConfig") { radioConfigUseCase.setModuleConfig(destNum, config) }
+            launchWrite("setModuleConfig") { adminController.setModuleConfig(destNum, config) }
         }
     }
 
@@ -666,19 +666,19 @@ open class RadioConfigViewModel(
         val destNum = destNum ?: destNode.value?.num ?: return
         retireReadRequestsForRoute(radioConfigState.value.route)
         _radioConfigState.update { it.copy(ringtone = ringtone) }
-        safeLaunch(tag = "setRingtone") { radioConfigUseCase.setRingtone(destNum, ringtone) }
+        safeLaunch(tag = "setRingtone") { adminController.setRingtone(destNum, ringtone) }
     }
 
     fun playRingtone() {
         val destNum = destNum ?: destNode.value?.num ?: return
-        safeLaunch(tag = "playRingtone") { radioConfigUseCase.playRingtone(destNum) }
+        safeLaunch(tag = "playRingtone") { adminController.playRingtone(destNum) }
     }
 
     fun setCannedMessages(messages: String) {
         val destNum = destNum ?: destNode.value?.num ?: return
         retireReadRequestsForRoute(radioConfigState.value.route)
         _radioConfigState.update { it.copy(cannedMessageMessages = messages) }
-        safeLaunch(tag = "setCannedMessages") { radioConfigUseCase.setCannedMessages(destNum, messages) }
+        safeLaunch(tag = "setCannedMessages") { adminController.setCannedMessages(destNum, messages) }
     }
 
     private fun sendAdminRequest(destNum: Int) {
@@ -756,12 +756,12 @@ open class RadioConfigViewModel(
 
     fun setFixedPosition(position: Position) {
         val destNum = destNum ?: destNode.value?.num ?: return
-        safeLaunch(tag = "setFixedPosition") { radioConfigUseCase.setFixedPosition(destNum, position) }
+        safeLaunch(tag = "setFixedPosition") { adminController.setFixedPosition(destNum, position) }
     }
 
     fun removeFixedPosition() {
         val destNum = destNum ?: destNode.value?.num ?: return
-        safeLaunch(tag = "removeFixedPosition") { radioConfigUseCase.removeFixedPosition(destNum) }
+        safeLaunch(tag = "removeFixedPosition") { adminController.setFixedPosition(destNum, Position(0.0, 0.0, 0)) }
     }
 
     fun importProfile(uri: CommonUri, onResult: (DeviceProfile) -> Unit) {
@@ -914,7 +914,7 @@ open class RadioConfigViewModel(
 
         when (route) {
             ConfigRoute.USER -> {
-                launchRead("getOwner", { radioConfigUseCase.getOwner(destNum) }, RadioResponseResult::Owner)
+                launchRead("getOwner", { adminController.getOwner(destNum) }, RadioResponseResult::Owner)
                 // The status message is edited on the user screen, so it is read with the owner. Gated like the
                 // editor: firmware without the module never answers the get, leaving the overlay waiting.
                 val metadata = radioConfigState.value.metadata
@@ -926,7 +926,7 @@ open class RadioConfigViewModel(
                     launchRead(
                         "getStatusMessageConfig",
                         {
-                            radioConfigUseCase.getModuleConfig(
+                            adminController.getModuleConfig(
                                 destNum,
                                 AdminMessage.ModuleConfigType.STATUSMESSAGE_CONFIG.value,
                             )
@@ -939,12 +939,12 @@ open class RadioConfigViewModel(
             ConfigRoute.CHANNELS -> {
                 launchRead(
                     "getChannel0",
-                    { radioConfigUseCase.getChannel(destNum, 0) },
+                    { adminController.getChannel(destNum, 0) },
                     RadioResponseResult::ChannelResponse,
                 )
                 launchRead(
                     "getLoraConfig",
-                    { radioConfigUseCase.getConfig(destNum, AdminMessage.ConfigType.LORA_CONFIG.value) },
+                    { adminController.getConfig(destNum, AdminMessage.ConfigType.LORA_CONFIG.value) },
                     RadioResponseResult::ConfigResponse,
                 )
                 // channel editor is synchronous, so we don't use requestIds as total
@@ -954,7 +954,7 @@ open class RadioConfigViewModel(
             is AdminRoute -> {
                 launchRead(
                     "getDeviceMetadata",
-                    { radioConfigUseCase.getDeviceMetadata(destNum) },
+                    { adminController.getDeviceMetadata(destNum) },
                     RadioResponseResult::Metadata,
                 )
                 setResponseStateTotal(2)
@@ -970,20 +970,20 @@ open class RadioConfigViewModel(
         if (route == ConfigRoute.LORA) {
             launchRead(
                 "getChannel0ForLora",
-                { radioConfigUseCase.getChannel(destNum, 0) },
+                { adminController.getChannel(destNum, 0) },
                 RadioResponseResult::ChannelResponse,
             )
         }
         if (route == ConfigRoute.NETWORK) {
             launchRead(
                 "getConnectionStatus",
-                { radioConfigUseCase.getDeviceConnectionStatus(destNum) },
+                { adminController.getDeviceConnectionStatus(destNum) },
                 RadioResponseResult::ConnectionStatus,
             )
         }
         launchRead(
             "getConfig",
-            { radioConfigUseCase.getConfig(destNum, route.type) },
+            { adminController.getConfig(destNum, route.type) },
             RadioResponseResult::ConfigResponse,
         )
     }
@@ -992,31 +992,31 @@ open class RadioConfigViewModel(
         if (route == ModuleRoute.CANNED_MESSAGE) {
             launchRead(
                 "getCannedMessages",
-                { radioConfigUseCase.getCannedMessages(destNum) },
+                { adminController.getCannedMessages(destNum) },
                 RadioResponseResult::CannedMessages,
             )
         }
         if (route == ModuleRoute.EXT_NOTIFICATION) {
-            launchRead("getRingtone", { radioConfigUseCase.getRingtone(destNum) }, RadioResponseResult::Ringtone)
+            launchRead("getRingtone", { adminController.getRingtone(destNum) }, RadioResponseResult::Ringtone)
         }
         if (route == ModuleRoute.MESH_BEACON) {
             // The beacon editor gates on the radio's LoRa region and offers its channels, neither of which a remote
             // session has until read. Firmware without the module never answers the module get, so skip it there.
             launchRead(
                 "getChannel0ForMeshBeacon",
-                { radioConfigUseCase.getChannel(destNum, 0) },
+                { adminController.getChannel(destNum, 0) },
                 RadioResponseResult::ChannelResponse,
             )
             launchRead(
                 "getLoraConfigForMeshBeacon",
-                { radioConfigUseCase.getConfig(destNum, AdminMessage.ConfigType.LORA_CONFIG.value) },
+                { adminController.getConfig(destNum, AdminMessage.ConfigType.LORA_CONFIG.value) },
                 RadioResponseResult::ConfigResponse,
             )
             if (!Capabilities(radioConfigState.value.metadata?.firmware_version).supportsMeshBeacon) return
         }
         launchRead(
             "getModuleConfig",
-            { radioConfigUseCase.getModuleConfig(destNum, route.type) },
+            { adminController.getModuleConfig(destNum, route.type) },
             RadioResponseResult::ModuleConfigResponse,
         )
     }
@@ -1391,7 +1391,7 @@ open class RadioConfigViewModel(
                         // Not done yet, request next channel
                         launchRead(
                             "getNextChannel",
-                            { radioConfigUseCase.getChannel(destNum, index + 1) },
+                            { adminController.getChannel(destNum, index + 1) },
                             RadioResponseResult::ChannelResponse,
                         )
                     }
