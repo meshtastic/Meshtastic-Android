@@ -126,6 +126,7 @@ import org.meshtastic.core.ui.component.MeshtasticImportFAB
 import org.meshtastic.core.ui.component.PermissionRationaleDialog
 import org.meshtastic.core.ui.component.PermissionRecoveryCard
 import org.meshtastic.core.ui.component.RecoveryCard
+import org.meshtastic.core.ui.component.TransparentModeBanner
 import org.meshtastic.core.ui.component.isAdaptiveTwoPaneSplit
 import org.meshtastic.core.ui.icon.AppSettingsAlt
 import org.meshtastic.core.ui.icon.Bluetooth
@@ -134,6 +135,8 @@ import org.meshtastic.core.ui.icon.Language
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.NoDevice
 import org.meshtastic.core.ui.icon.SystemUpdate
+import org.meshtastic.core.ui.label.LabelPrintSheet
+import org.meshtastic.core.ui.label.LabelSpec
 import org.meshtastic.core.ui.util.LocalEventBranding
 import org.meshtastic.core.ui.util.PermissionGateAction
 import org.meshtastic.core.ui.util.PermissionStatus
@@ -150,6 +153,7 @@ import org.meshtastic.core.ui.util.rememberOpenLocationSettings
 import org.meshtastic.core.ui.util.rememberOpenWifiSettings
 import org.meshtastic.core.ui.util.shouldShowWifiUnavailableBanner
 import org.meshtastic.core.ui.viewmodel.ConnectionsViewModel
+import org.meshtastic.core.ui.viewmodel.TransparentModeViewModel
 import org.meshtastic.feature.connections.NO_DEVICE_SELECTED
 import org.meshtastic.feature.connections.ScannerViewModel
 import org.meshtastic.feature.connections.model.DeviceListEntry
@@ -162,6 +166,7 @@ import org.meshtastic.feature.connections.ui.components.LiveUpdateSection
 import org.meshtastic.feature.connections.ui.components.TransportSelector
 import org.meshtastic.feature.connections.ui.components.TransportUnsupportedCard
 import org.meshtastic.feature.connections.ui.components.loraSummary
+import org.meshtastic.feature.connections.ui.components.rememberConnectLabel
 import org.meshtastic.proto.Config
 import org.meshtastic.sdk.ConnectionState
 import org.meshtastic.sdk.isInProgress
@@ -261,6 +266,7 @@ internal fun ConfigurationWarningCards(
 fun ConnectionsScreen(
     connectionsViewModel: ConnectionsViewModel = koinViewModel(),
     scanModel: ScannerViewModel = koinViewModel(),
+    transparentModeViewModel: TransparentModeViewModel = koinViewModel(),
     onClickNodeChip: (Int) -> Unit,
     onNavigateToNodeDetails: (Int) -> Unit,
     onConfigNavigate: (Route) -> Unit,
@@ -277,6 +283,7 @@ fun ConnectionsScreen(
     val activeNodeInfoReady by connectionsViewModel.activeNodeInfoReady.collectAsStateWithLifecycle()
     val lockdownState by connectionsViewModel.lockdownState.collectAsStateWithLifecycle()
     val localConfig by connectionsViewModel.localConfig.collectAsStateWithLifecycle()
+    val transparentMode by transparentModeViewModel.state.collectAsStateWithLifecycle()
 
     val selectedDevice by scanModel.selectedNotNullFlow.collectAsStateWithLifecycle()
     val persistedDeviceName by scanModel.persistedDeviceName.collectAsStateWithLifecycle()
@@ -473,6 +480,22 @@ fun ConnectionsScreen(
             loraSummary = loraSummaryText,
         )
 
+    // The label is offered only for the radio this session's handshake came from, once the selection matches it. Once
+    // its sheet is open it keeps the label it was opened with and stays up whatever the radio's connection does: a
+    // radio that drops must not cut a print short.
+    val connectLabel = ourNode?.let {
+        rememberConnectLabel(
+            node = it,
+            address = selectedDevice,
+            connectedAddress = connectionAddress,
+            bluetooth = localConfig.bluetooth,
+            nodeIsThisSession = activeNodeInfoReady,
+            configIsThisSession = connectionState is ConnectionState.Connected,
+        )
+    }
+    var printingLabel by remember { mutableStateOf<LabelSpec.Connect?>(null) }
+    printingLabel?.let { LabelPrintSheet(spec = it, onDismiss = { printingLabel = null }) }
+
     Scaffold(
         topBar = {
             MainAppBar(
@@ -558,6 +581,7 @@ fun ConnectionsScreen(
                                     onNavigateToNodeDetails = onNavigateToNodeDetails,
                                     onClickDisconnect = { scanModel.disconnect() },
                                     onClickLora = { onConfigNavigate(SettingsRoute.LoRa) },
+                                    onPrintLabel = connectLabel?.let { label -> { printingLabel = label } },
                                 )
 
                             ConnectionUiState.CONNECTING ->
@@ -652,6 +676,10 @@ fun ConnectionsScreen(
                 onConfigNavigate = onConfigNavigate,
                 radioSetupAddress = connectionAddress,
             )
+
+            if (transparentMode.active) {
+                TransparentModeBanner(onClick = transparentModeViewModel::reopenNotice)
+            }
 
             LiveUpdateSection(connected = uiState == ConnectionUiState.CONNECTED_WITH_NODE)
 
@@ -990,9 +1018,11 @@ private fun ConnectedDeviceContent(
     onNavigateToNodeDetails: (Int) -> Unit,
     onClickDisconnect: () -> Unit,
     onClickLora: () -> Unit,
+    onPrintLabel: (() -> Unit)?,
 ) {
     ourNode?.let { node ->
         CurrentlyConnectedInfo(
+            onPrintLabel = onPrintLabel,
             node = node,
             text = text,
             onClickLora = onClickLora,

@@ -54,6 +54,24 @@ interface AdminController {
      */
     suspend fun setLocalConfig(config: Config)
 
+    /**
+     * Sends [config] to the local node like [setLocalConfig], without the optimistic cache write, for a caller that
+     * read the config on one connection and reads it back. It is sent only while [expectedNodeNum] is still the local
+     * node on connection lifecycle `version` [expectedConnectionVersion]; otherwise nothing is sent.
+     *
+     * @throws PacketQueueRejectedException when the local node or the connection is no longer the expected one.
+     */
+    suspend fun sendLocalConfig(config: Config, expectedNodeNum: Int, expectedConnectionVersion: Long)
+
+    /**
+     * Sends [config] to the local node as request [packetId] with the optimistic cache write of [setConfig], for a
+     * settings save whose follow-up belongs to the connection it started on. It is sent only while [connection] is
+     * still the local node and connection; otherwise nothing is sent.
+     *
+     * @throws PacketQueueRejectedException when the local node or the connection is no longer [connection].
+     */
+    suspend fun setLocalConfigForConnection(config: Config, packetId: Int, connection: LocalNodeConnection)
+
     /** Updates a local radio channel. Same fire-and-forget contract as [setLocalConfig]. */
     suspend fun setLocalChannel(channel: Channel)
 
@@ -250,3 +268,11 @@ interface AdminEditScope {
 
 /** How long a read addressed to another node waits: the 30 s UX deadline plus the two-minute late-reply grace. */
 val REMOTE_READ_TIMEOUT: Duration = 150.seconds
+
+/**
+ * The local node and the connection lifecycle `version` a write was started on.
+ *
+ * @property nodeNum the node that was local when the write started.
+ * @property connectionVersion the `version` of [ConnectionStateProvider.connectionLifecycle] at that moment.
+ */
+data class LocalNodeConnection(val nodeNum: Int, val connectionVersion: Long)

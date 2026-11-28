@@ -28,4 +28,7 @@ class KableBleConnectionFactory(private val loggingConfig: BleLoggingConfig) : B
      * using the device address, which provides more precise context than a factory-time tag.
      */
     override fun create(scope: CoroutineScope, tag: String): BleConnection = KableBleConnection(scope, loggingConfig)
+
+    override fun createAuxiliary(scope: CoroutineScope, tag: String): BleConnection =
+        KableBleConnection(scope, loggingConfig, tracksActiveConnection = false)
 }

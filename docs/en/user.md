@@ -17,6 +17,8 @@ Documentation for using the Meshtastic Android, Desktop and web app.
 Keep the last 5–8 entries and archive older ones by removing them.
 -->
 
+**November 2026** — [Nodes](user/nodes) — **Share Contact** and **Share Channels** can print a name tag or a channel label on a Niimbot D110 label printer.
+
 **November 2026** — [Home Screen Widget](user/widget) — A Telemetry widget shows one node's environment, air quality and power readings as tiles.
 
 **November 2026** — [MQTT](user/mqtt) — A root topic can use letters in any script, and the field names the rules that would make the node reject one.

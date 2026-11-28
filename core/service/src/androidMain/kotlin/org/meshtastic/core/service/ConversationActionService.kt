@@ -114,26 +114,39 @@ class ConversationActionService :
         }
         try {
             // Send first so the reply is never lost to a notification failure.
-            if (sendMessageUseCase(message, contactKey) == SendMessageOutcome.Refused) {
-                Logger.w(tag = TAG) { "Reply refused: the conversation is retired" }
-                safeCatching { serviceNotifications.cancelMessageNotification(contactKey) }
-                return
-            }
-            // Replying reads the conversation; Android Auto keys dismissal off read state, not just cancel().
-            packetRepository.clearUnreadCount(contactKey, nowMillis)
-            // Re-post with the reply appended so the RemoteInput spinner resolves with visible feedback; fall back
-            // to dismissal so it never hangs.
-            safeCatching { serviceNotifications.refreshConversationAfterReply(contactKey) }
-                .onFailure {
-                    Logger.e(tag = TAG, throwable = it) { "Refresh after reply failed" }
+            when (sendMessageUseCase(message, contactKey)) {
+                SendMessageOutcome.Refused -> {
+                    Logger.w(tag = TAG) { "Reply refused: the conversation is retired" }
                     safeCatching { serviceNotifications.cancelMessageNotification(contactKey) }
                 }
+
+                SendMessageOutcome.TransparentMode -> {
+                    Logger.w(tag = TAG) { "Reply refused: the connected node is in transparent mode" }
+                    safeCatching { serviceNotifications.cancelMessageNotification(contactKey) }
+                    // The reply box is gone by now, so the reason needs a notification of its own.
+                    safeCatching { serviceNotifications.showTransparentModeSendBlocked(contactKey) }
+                }
+
+                is SendMessageOutcome.Queued -> showReplySent(contactKey)
+            }
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
             Logger.e(tag = TAG, throwable = e) { "Reply send failed" }
             safeCatching { serviceNotifications.cancelMessageNotification(contactKey) }
         }
+    }
+
+    private suspend fun showReplySent(contactKey: String) {
+        // Replying reads the conversation; Android Auto keys dismissal off read state, not just cancel().
+        packetRepository.clearUnreadCount(contactKey, nowMillis)
+        // Re-post with the reply appended so the RemoteInput spinner resolves with visible feedback; fall back
+        // to dismissal so it never hangs.
+        safeCatching { serviceNotifications.refreshConversationAfterReply(contactKey) }
+            .onFailure {
+                Logger.e(tag = TAG, throwable = it) { "Refresh after reply failed" }
+                safeCatching { serviceNotifications.cancelMessageNotification(contactKey) }
+            }
     }
 
     @Suppress("TooGenericExceptionCaught")

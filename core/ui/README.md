@@ -60,6 +60,7 @@ MeshtasticResourceDialog(
 ```mermaid
 graph TB
   :core:ui[ui]:::kmp-library-compose
+  :core:ui -.-> :core:ble
   :core:ui -.-> :core:common
   :core:ui -.-> :core:model
   :core:ui -.-> :core:navigation

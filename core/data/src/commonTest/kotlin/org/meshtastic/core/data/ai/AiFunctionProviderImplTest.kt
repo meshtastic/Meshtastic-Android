@@ -317,6 +317,17 @@ class AiFunctionProviderImplTest {
     }
 
     @Test
+    fun sendMessage_reports_a_transparent_mode_refusal_by_name_not_success() = runTest {
+        every { radioConfigRepository.channelSetFlow } returns flowOf(ChannelSet.Builder().build())
+        everySuspend { sendMessageUseCase.invoke(any(), any(), any()) } returns SendMessageOutcome.TransparentMode
+
+        val result = createProvider().sendMessage("hello", null, null)
+
+        val refused = assertIs<SendMessageResult.NotConnected>(result)
+        assertTrue(refused.message.contains("transparent mode"), "the reason should be named: ${refused.message}")
+    }
+
+    @Test
     fun sendMessage_reports_a_refused_send_as_invalid_not_success() = runTest {
         every { radioConfigRepository.channelSetFlow } returns flowOf(ChannelSet.Builder().build())
         everySuspend { sendMessageUseCase.invoke(any(), any(), any()) } returns SendMessageOutcome.Refused

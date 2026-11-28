@@ -120,6 +120,18 @@ class MeshBeaconOfferTest {
     }
 
     @Test
+    fun `switching to a beaconed mesh keeps the transparent mode the radio has`() {
+        val beacon = offerOn("PartyNet")
+        val transparentRadio = radioLora.newBuilder().also { wb -> wb.transparent_mode = true }.build()
+
+        val kept = beacon.toJoinChannelSet(BeaconJoinOption.SWITCH, transparentRadio)?.lora_config
+        val stillOff = beacon.toJoinChannelSet(BeaconJoinOption.SWITCH, radioLora)?.lora_config
+
+        assertEquals(true, kept?.transparent_mode)
+        assertEquals(false, stillOff?.transparent_mode)
+    }
+
+    @Test
     fun `toJoinChannelSet omits lora for ADD and includes it for SWITCH`() {
         val beacon =
             MeshBeacon.Builder()

@@ -64,6 +64,7 @@ import org.meshtastic.core.repository.AnalyticsPrefs
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.HomoglyphPrefs
+import org.meshtastic.core.repository.LocalNodeConnection
 import org.meshtastic.core.repository.LocationRepository
 import org.meshtastic.core.repository.LocationService
 import org.meshtastic.core.repository.MapConsentPrefs
@@ -83,7 +84,9 @@ import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.ui.util.SnackbarManager
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.ModuleRoute
+import org.meshtastic.feature.settings.radio.component.LoraSaveTransparentMode
 import org.meshtastic.feature.settings.radio.component.loRaBandwidthSelection
+import org.meshtastic.feature.settings.radio.component.saveLora
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSet

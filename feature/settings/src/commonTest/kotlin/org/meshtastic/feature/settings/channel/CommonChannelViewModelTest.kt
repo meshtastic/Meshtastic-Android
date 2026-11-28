@@ -42,6 +42,10 @@ import org.meshtastic.core.ui.util.SnackbarManager
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config
+import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
+import org.meshtastic.proto.LoRaPresetGroup
+import org.meshtastic.proto.LoRaRegionPresetMap
+import org.meshtastic.proto.LoRaRegionPresets
 import org.meshtastic.proto.LocalConfig
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -90,6 +94,77 @@ abstract class CommonChannelViewModelTest {
             cancelAndIgnoreRemainingEvents()
         }
     }
+
+    @Test
+    fun `reset to defaults keeps the transparent mode region and transmit setting of the device`() = runTest {
+        val device =
+            Config.LoRaConfig.Builder()
+                .also { wb ->
+                    wb.region = Config.LoRaConfig.RegionCode.EU_868
+                    wb.tx_enabled = true
+                    wb.hop_limit = 6
+                    wb.transparent_mode = true
+                }
+                .build()
+        every { radioConfigRepository.localConfigFlow } returns
+            MutableStateFlow(LocalConfig.Builder().also { wb -> wb.lora = device }.build())
+        viewModel = ChannelViewModel(radioController, radioConfigRepository, analytics, snackbarManager)
+
+        // Nothing collects viewModel.localConfig here, as nothing does on the channel screen.
+        viewModel.resetToDefaults(regionPresetMap = null)
+
+        val written = radioController.configWrites.single().config.lora
+        assertEquals(true, written?.transparent_mode)
+        assertEquals(Config.LoRaConfig.RegionCode.EU_868, written?.region)
+        assertEquals(true, written?.tx_enabled)
+    }
+
+    @Test
+    fun `reset to defaults takes the first-setup preset of the region the device reports`() = runTest {
+        val usGroup =
+            LoRaPresetGroup.Builder()
+                .also { wb ->
+                    wb.presets = listOf(ModemPreset.LONG_FAST, ModemPreset.LONG_TURBO)
+                    wb.default_preset = ModemPreset.LONG_FAST
+                }
+                .build()
+        val map =
+            LoRaRegionPresetMap.Builder()
+                .also { wb ->
+                    wb.groups = listOf(usGroup)
+                    wb.region_groups =
+                        listOf(
+                            LoRaRegionPresets.Builder()
+                                .also { rb ->
+                                    rb.region = Config.LoRaConfig.RegionCode.US
+                                    rb.group_index = 0
+                                }
+                                .build(),
+                        )
+                }
+                .build()
+        val device = Config.LoRaConfig.Builder().also { wb -> wb.region = Config.LoRaConfig.RegionCode.US }.build()
+        every { radioConfigRepository.localConfigFlow } returns
+            MutableStateFlow(LocalConfig.Builder().also { wb -> wb.lora = device }.build())
+        viewModel = ChannelViewModel(radioController, radioConfigRepository, analytics, snackbarManager)
+
+        viewModel.resetToDefaults(regionPresetMap = map)
+
+        val written = radioController.configWrites.single().config.lora
+        assertEquals(ModemPreset.LONG_TURBO, written?.modem_preset)
+        assertEquals(Config.LoRaConfig.RegionCode.US, written?.region)
+    }
+
+    @Test
+    fun `reset to defaults with no LoRa config cached sends the default channel and preset unset to a region`() =
+        runTest {
+            viewModel.resetToDefaults(regionPresetMap = null)
+
+            val written = radioController.configWrites.single().config.lora
+            assertEquals(ModemPreset.LONG_FAST, written?.modem_preset)
+            assertEquals(Config.LoRaConfig.RegionCode.UNSET, written?.region)
+            assertEquals(false, written?.transparent_mode)
+        }
 
     @Test
     fun `txEnabled updates config via radioController`() = runTest {
