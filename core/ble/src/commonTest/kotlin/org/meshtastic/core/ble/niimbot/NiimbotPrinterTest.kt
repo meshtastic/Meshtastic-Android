@@ -58,13 +58,10 @@ class NiimbotPrinterTest {
         assertEquals(null, niimbotChannel(services.take(1)))
     }
 
-    @Test
-    fun `printing runs on an auxiliary connection in writes the link can carry`() = runTest {
+    /** Answers each whole packet the app writes the way [scripted] does, as notifications. */
+    private fun scriptedConnection(scripted: ScriptedPrinter): FakeBleConnection {
         val connection = FakeBleConnection().apply { discoveredServices = services }
-        val factory = FakeBleConnectionFactory(connection)
         val parser = NiimbotPacketParser()
-        val scripted = ScriptedPrinter(ScriptedPrinter.statusData(3, 0))
-        // Answers each whole packet the app writes the way ScriptedPrinter does, as notifications.
         connection.service.beforeWrite = { _, bytes ->
             parser.append(bytes).forEach { scripted.send(it) }
             var reply = scripted.received.tryReceive().getOrNull()
@@ -73,6 +70,14 @@ class NiimbotPrinterTest {
                 reply = scripted.received.tryReceive().getOrNull()
             }
         }
+        return connection
+    }
+
+    @Test
+    fun `printing runs on an auxiliary connection in writes the link can carry`() = runTest {
+        val scripted = ScriptedPrinter(ScriptedPrinter.statusData(3, 0))
+        val connection = scriptedConnection(scripted)
+        val factory = FakeBleConnectionFactory(connection)
         val printer = NiimbotPrinter(FakeBleScanner(), factory, backgroundScope)
 
         printer.connect(FakeBleDevice("AA:BB:CC:DD:EE:FF", name = "D110_M-H123"))
@@ -86,6 +91,23 @@ class NiimbotPrinterTest {
         assertTrue("5555851200010100000180000000000000000000000016aaaa" in scripted.sent)
         assertEquals("5555c10101c1aaaa", scripted.sent[2])
         assertEquals("5555dc0101dcaaaa", scripted.sent.last())
+    }
+
+    @Test
+    fun `a negotiated link longer than 20 bytes carries each packet in writes up to that length`() = runTest {
+        val scripted = ScriptedPrinter(ScriptedPrinter.statusData(3, 0))
+        val connection = scriptedConnection(scripted).apply { maxWriteValueLength = 22 }
+        val printer = NiimbotPrinter(FakeBleScanner(), FakeBleConnectionFactory(connection), backgroundScope)
+
+        printer.connect(FakeBleDevice("AA:BB:CC:DD:EE:FF", name = "D110_M-H123"))
+        printer.print(LabelBitmap(width = 96, height = 3).also { it.setInk(0, 1) })
+
+        val sizes = connection.service.writes.map { it.data.size }
+        val packetSizes = scripted.sent.map { it.length / 2 }
+        // The inked row's 25-byte packet takes a full 22-byte write and the 3 left over.
+        assertTrue(25 in packetSizes)
+        assertEquals(22, sizes.max())
+        assertEquals(packetSizes.sumOf { (it + 21) / 22 }, sizes.size)
     }
 
     @Test

@@ -23,7 +23,6 @@ import com.juul.kable.PeripheralBuilder
 import com.juul.kable.State
 import com.juul.kable.WriteType
 import com.juul.kable.characteristicOf
-import com.juul.kable.notify
 import com.juul.kable.writeWithoutResponse
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -372,11 +371,7 @@ internal constructor(
                     uuid = service.serviceUuid,
                     characteristics =
                     service.characteristics.map {
-                        BleCharacteristicInfo(
-                            uuid = it.characteristicUuid,
-                            notifies = it.properties.notify,
-                            writesWithoutResponse = it.properties.writeWithoutResponse,
-                        )
+                        bleCharacteristicInfo(it.characteristicUuid, it.properties.value)
                     },
                 )
             }
@@ -420,3 +415,16 @@ internal constructor(
         }
     }
 }
+
+/**
+ * What a characteristic can do, from its GATT Characteristic Properties bits (Bluetooth Core Vol 3 Part G 3.3.1.1),
+ * which Kable's `Characteristic.Properties.value` carries on every platform.
+ */
+internal fun bleCharacteristicInfo(uuid: Uuid, gattProperties: Int) = BleCharacteristicInfo(
+    uuid = uuid,
+    notifies = (gattProperties and GATT_PROPERTY_NOTIFY) != 0,
+    writesWithoutResponse = (gattProperties and GATT_PROPERTY_WRITE_WITHOUT_RESPONSE) != 0,
+)
+
+private const val GATT_PROPERTY_WRITE_WITHOUT_RESPONSE = 0x04
+private const val GATT_PROPERTY_NOTIFY = 0x10
