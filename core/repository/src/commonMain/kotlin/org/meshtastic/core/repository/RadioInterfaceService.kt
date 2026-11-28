@@ -54,9 +54,7 @@ interface RadioSessionAuthority {
      */
     fun isSessionActive(session: RadioSessionContext): Boolean
 
-    /**
-     * Runs [block] only while [session] owns admission. The check and the block are not atomic with teardown.
-     */
+    /** Runs [block] only while [session] owns admission. The check and the block are not atomic with teardown. */
     fun runIfSessionActive(session: RadioSessionContext, block: () -> Unit): Boolean
 
     /**

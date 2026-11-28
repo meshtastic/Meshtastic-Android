@@ -71,8 +71,9 @@ class FakeRadioInterfaceService(val serviceScope: CoroutineScope = MainScope()) 
 
     @Volatile private var open: OpenFakeSession? = null
 
-    private fun openFor(session: RadioSessionContext): OpenFakeSession? =
-        open?.takeIf { it.context == session && it.scope.isActive }
+    private fun openFor(session: RadioSessionContext): OpenFakeSession? = open?.takeIf {
+        it.context == session && it.scope.isActive
+    }
 
     override fun isSessionActive(session: RadioSessionContext): Boolean = openFor(session) != null
 

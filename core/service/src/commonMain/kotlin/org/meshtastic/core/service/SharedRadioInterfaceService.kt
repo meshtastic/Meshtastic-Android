@@ -124,7 +124,9 @@ data class ActiveRadioSession(val generation: Long, val address: String) {
     override fun toString(): String = "ActiveRadioSession(generation=$generation, address=...)"
 }
 
-/** The admitted app session and the scope its work runs in. Cancelling the scope closes admission; joining it drains. */
+/**
+ * The admitted app session and the scope its work runs in. Cancelling the scope closes admission; joining it drains.
+ */
 private class OpenSession(val active: ActiveRadioSession, val scope: CoroutineScope)
 
 /** The selected radio's open link. Each one gets its own scope, cancelled when the link closes. */
@@ -228,8 +230,8 @@ class SharedRadioInterfaceService(
     override val activeSession: StateFlow<RadioSessionContext?> = _activeSession.asStateFlow()
 
     /**
-     * The session that owns lifecycle completion. [revokeSession] cancels its scope first (admission closes), joins
-     * the work already admitted, then clears this token.
+     * The session that owns lifecycle completion. [revokeSession] cancels its scope first (admission closes), joins the
+     * work already admitted, then clears this token.
      */
     @Volatile private var activeRadioSession: OpenSession? = null
 
@@ -286,8 +288,9 @@ class SharedRadioInterfaceService(
 
     // ── Session admission ───────────────────────────────────────────────────
 
-    private fun openFor(session: RadioSessionContext): OpenSession? =
-        activeRadioSession?.takeIf { it.active.context == session && it.scope.isActive }
+    private fun openFor(session: RadioSessionContext): OpenSession? = activeRadioSession?.takeIf {
+        it.active.context == session && it.scope.isActive
+    }
 
     override fun isSessionActive(session: RadioSessionContext): Boolean = openFor(session) != null
 
@@ -369,8 +372,9 @@ class SharedRadioInterfaceService(
         }
     }
 
-    private fun sessionFor(context: RadioSessionContext): OpenSession? =
-        activeRadioSession?.takeIf { it.active.context == context }
+    private fun sessionFor(context: RadioSessionContext): OpenSession? = activeRadioSession?.takeIf {
+        it.active.context == context
+    }
 
     /** The host one link's pipeline admits its sessions through; it stops admitting once that link closes. */
     private inner class LinkHost(private val active: ActiveLink) :
@@ -648,8 +652,7 @@ class SharedRadioInterfaceService(
 
     /** Runs [send] on [session]'s client while that session owns admission; teardown does not wait for the handoff. */
     private inline fun <T> withAdmittedClient(session: RadioSessionContext?, send: (ActiveLink) -> T?): T? {
-        val open =
-            activeRadioSession?.takeIf { it.scope.isActive && (session == null || it.active.context == session) }
+        val open = activeRadioSession?.takeIf { it.scope.isActive && (session == null || it.active.context == session) }
         val link = activeLink.value
         if (open == null || link == null) return null
         return safeCatching { send(link) }.onFailure { Logger.w(it) { "Active session handoff failed" } }.getOrNull()
