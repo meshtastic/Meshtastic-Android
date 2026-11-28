@@ -298,7 +298,13 @@ open class RadioConfigViewModel(
     val destNode: StateFlow<Node?>
         get() = _destNode
 
-    private enum class RequestKind { READ, WRITE, ACTION, BATCH_WRITE, DFU }
+    private enum class RequestKind {
+        READ,
+        WRITE,
+        ACTION,
+        BATCH_WRITE,
+        DFU,
+    }
 
     /** One radio request the visible flow waits on. [route] is the route a read was issued for; writes carry none. */
     private class PendingRequest(val tag: String, val kind: RequestKind, val route: String) {
@@ -1185,7 +1191,9 @@ open class RadioConfigViewModel(
         return request
     }
 
-    /** Stops tracking [request]; a read's call is cancelled too, a write runs to its end so its local projection lands. */
+    /**
+     * Stops tracking [request]; a read's call is cancelled too, a write runs to its end so its local projection lands.
+     */
     private fun retire(request: PendingRequest) {
         pending.remove(request)
         if (request.kind == RequestKind.READ) request.job?.cancel()
@@ -1316,9 +1324,12 @@ open class RadioConfigViewModel(
                     val message = failure.message?.let(UiText::DynamicString)
                     refuse(request, message ?: UiText.Resource(Res.string.unknown_error), late)
                 }
+
                 reply is AdminResult.Success -> accept(request, reply.value, apply, late, destNum)
+
                 reply == AdminResult.NodeUnreachable && !nodeRestartTracker.restartExpected.value ->
                     refuse(request, UiText.Resource(Res.string.not_connected), late)
+
                 else -> reply?.refusalText()?.let { refuse(request, it, late) }
             }
         }
