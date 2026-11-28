@@ -24,6 +24,7 @@ org.meshtastic.appshell
 module:core-ble
 org.meshtastic.core.ble
 org.meshtastic.core.ble.di
+org.meshtastic.core.ble.niimbot
 module:core-common
 org.meshtastic.core.common
 org.meshtastic.core.common.database
@@ -81,6 +82,7 @@ org.meshtastic.core.prefs.discovery
 org.meshtastic.core.prefs.emoji
 org.meshtastic.core.prefs.filter
 org.meshtastic.core.prefs.homoglyph
+org.meshtastic.core.prefs.label
 org.meshtastic.core.prefs.map
 org.meshtastic.core.prefs.mesh
 org.meshtastic.core.prefs.meshlog
@@ -109,6 +111,7 @@ org.meshtastic.core.ui.di
 org.meshtastic.core.ui.emoji
 org.meshtastic.core.ui.icon
 org.meshtastic.core.ui.input
+org.meshtastic.core.ui.label
 org.meshtastic.core.ui.navigation
 org.meshtastic.core.ui.qr
 org.meshtastic.core.ui.share
