@@ -47,7 +47,7 @@ class DisplayMirrorManagerImpl : DisplayMirrorManager {
                 paletteSignature = image.paletteSignature,
                 pixels = image.pixels.toByteArray(),
                 format =
-                    if (image.format == DisplayFrame.Format.RGB565) MirrorFormat.RGB565 else MirrorFormat.MONO_VLSB,
+                if (image.format == DisplayFrame.Format.RGB565) MirrorFormat.RGB565 else MirrorFormat.MONO_VLSB,
             )
     }
 

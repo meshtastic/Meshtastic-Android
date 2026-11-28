@@ -142,7 +142,6 @@ open class RadioConfigRepositoryImpl(
             session?.let(radioInterfaceService::clientForSession)?.fileManifest ?: flowOf(emptyList())
         }
 
-
     /** Flow representing the combined [DeviceProfile] protobuf. */
     override val deviceProfileFlow: Flow<DeviceProfile> =
         combine(nodeDB.ourNodeInfo, channelSetFlow, localConfigFlow, moduleConfigFlow) {

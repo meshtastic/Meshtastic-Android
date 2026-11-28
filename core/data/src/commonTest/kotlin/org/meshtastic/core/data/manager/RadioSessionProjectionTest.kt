@@ -49,13 +49,13 @@ import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.Data
-import org.meshtastic.proto.DeviceUIConfig
-import org.meshtastic.proto.KeyVerificationFinal
-import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.DeviceMetadata
+import org.meshtastic.proto.DeviceUIConfig
 import org.meshtastic.proto.FirmwareEdition
 import org.meshtastic.proto.FromRadio
+import org.meshtastic.proto.KeyVerificationFinal
 import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.MyNodeInfo
 import org.meshtastic.proto.NodeInfo
 import org.meshtastic.proto.PortNum

@@ -76,9 +76,9 @@ class TransparentModeControllerTest {
 
     /**
      * The connected node behind [AdminController]: a LoRa read waits until the test answers it, a session-bound write
-     * is recorded. An acknowledged write and a read answer both reach the cache before the call returns, as the SDK folds
-     * them into the session's config (`AdminApiImpl.submitLocalWrite`, `MeshEngine.mergeLocalReadAnswer`) and the app
-     * caches that.
+     * is recorded. An acknowledged write and a read answer both reach the cache before the call returns, as the SDK
+     * folds them into the session's config (`AdminApiImpl.submitLocalWrite`, `MeshEngine.mergeLocalReadAnswer`) and the
+     * app caches that.
      */
     private inner class NodeRadio : AdminController by FakeRadioController() {
         val reads = mutableListOf<Pair<Int, Int>>()
