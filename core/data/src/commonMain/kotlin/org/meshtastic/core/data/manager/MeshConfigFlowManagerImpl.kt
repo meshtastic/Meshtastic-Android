@@ -240,16 +240,8 @@ class MeshConfigFlowManagerImpl(
                     else -> hwModel.name.replace('_', '-').replace('p', '.').lowercase()
                 },
                 firmwareVersion = metadata?.firmware_version?.takeIf { it.isNotBlank() },
-                couldUpdate = false,
-                shouldUpdate = false,
-                // Nothing reads this column; the SDK client numbers packets.
-                currentPacketId = 0L,
-                messageTimeoutMsec = 300000,
                 minAppVersion = min_app_version,
-                maxChannels = 8,
                 hasWifi = metadata?.hasWifi == true,
-                channelUtilization = 0f,
-                airUtilTx = 0f,
                 // Hex, not utf8: device_id is raw hardware bytes (see setMyDeviceId above).
                 deviceId = device_id.hex().ifEmpty { null },
                 pioEnv = pio_env.ifEmpty { null },

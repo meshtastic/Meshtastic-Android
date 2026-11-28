@@ -71,12 +71,7 @@ class DatabaseMergerTest {
         myNodeNum = nodeNum,
         model = "TBEAM",
         firmwareVersion = "2.5.0",
-        couldUpdate = false,
-        shouldUpdate = false,
-        currentPacketId = 1L,
-        messageTimeoutMsec = 300_000,
         minAppVersion = 1,
-        maxChannels = 8,
         hasWifi = false,
     )
 

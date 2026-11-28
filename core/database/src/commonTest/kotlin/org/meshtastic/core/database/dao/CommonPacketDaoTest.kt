@@ -50,12 +50,7 @@ abstract class CommonPacketDaoTest {
             myNodeNum = 42424242,
             model = null,
             firmwareVersion = null,
-            couldUpdate = false,
-            shouldUpdate = false,
-            currentPacketId = 1L,
-            messageTimeoutMsec = 5 * 60 * 1000,
             minAppVersion = 1,
-            maxChannels = 8,
             hasWifi = false,
         )
 

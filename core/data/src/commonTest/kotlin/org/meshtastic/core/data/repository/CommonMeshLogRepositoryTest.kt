@@ -150,12 +150,7 @@ abstract class CommonMeshLogRepositoryTest {
                 myNodeNum = localNodeNum,
                 model = "model",
                 firmwareVersion = "1.0",
-                couldUpdate = false,
-                shouldUpdate = false,
-                currentPacketId = 0L,
-                messageTimeoutMsec = 0,
                 minAppVersion = 0,
-                maxChannels = 0,
                 hasWifi = false,
             )
         every { nodeInfoReadDataSource.myNodeInfoFlow() } returns MutableStateFlow(myNodeEntity)

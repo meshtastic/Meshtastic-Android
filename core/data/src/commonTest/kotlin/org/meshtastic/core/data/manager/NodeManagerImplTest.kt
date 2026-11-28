@@ -1150,15 +1150,8 @@ class NodeManagerImplTest {
                 hasGPS = false,
                 model = "tbeam",
                 firmwareVersion = "2.5.0",
-                couldUpdate = false,
-                shouldUpdate = false,
-                currentPacketId = 100L,
-                messageTimeoutMsec = 5000,
                 minAppVersion = 30000,
-                maxChannels = 8,
                 hasWifi = false,
-                channelUtilization = 0f,
-                airUtilTx = 0f,
                 deviceId = null,
             )
         every { nodeRepository.myNodeInfo } returns MutableStateFlow(repoInfo)
@@ -1201,15 +1194,8 @@ class NodeManagerImplTest {
                 hasGPS = false,
                 model = null,
                 firmwareVersion = "2.5.0",
-                couldUpdate = false,
-                shouldUpdate = false,
-                currentPacketId = 100L,
-                messageTimeoutMsec = 5000,
                 minAppVersion = 30000,
-                maxChannels = 8,
                 hasWifi = false,
-                channelUtilization = 0f,
-                airUtilTx = 0f,
                 deviceId = null,
             )
         every { nodeRepository.myNodeInfo } returns MutableStateFlow(repoInfo)
@@ -3338,15 +3324,8 @@ class NodeManagerImplTest {
                 hasGPS = false,
                 model = null,
                 firmwareVersion = "2.5.0",
-                couldUpdate = false,
-                shouldUpdate = false,
-                currentPacketId = 0L,
-                messageTimeoutMsec = 0,
                 minAppVersion = 0,
-                maxChannels = 0,
                 hasWifi = false,
-                channelUtilization = 0f,
-                airUtilTx = 0f,
                 deviceId = null,
             )
         val snapshotRead = CompletableDeferred<Unit>()
@@ -3382,15 +3361,8 @@ class NodeManagerImplTest {
                 hasGPS = false,
                 model = null,
                 firmwareVersion = "2.5.0",
-                couldUpdate = false,
-                shouldUpdate = false,
-                currentPacketId = 0L,
-                messageTimeoutMsec = 0,
                 minAppVersion = 0,
-                maxChannels = 0,
                 hasWifi = false,
-                channelUtilization = 0f,
-                airUtilTx = 0f,
                 deviceId = null,
             )
         val liveLearnedNum = 8008

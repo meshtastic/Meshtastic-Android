@@ -28,6 +28,7 @@ import com.google.firebase.ai.ai
 import com.google.firebase.ai.type.GenerativeBackend
 import com.google.firebase.ai.type.PublicPreviewAPI
 import com.google.firebase.ai.type.content
+import kotlin.math.roundToInt
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -472,6 +473,9 @@ class GeminiNanoDocAssistant(
         val ourNode = nodeRepository.ourNodeInfo.value
         val nodeDb = nodeRepository.nodeDBbyNum.value
 
+        val channelUtilStr = ourNode?.deviceMetrics?.channel_utilization?.let { "${it.roundToInt()}%" } ?: "Unknown"
+        val airUtilStr = ourNode?.deviceMetrics?.air_util_tx?.let { "${it.roundToInt()}%" } ?: "Unknown"
+
         val hardwareInfo =
             if (myNode != null) {
                 """
@@ -479,8 +483,8 @@ class GeminiNanoDocAssistant(
             |- Local Node Number: ${myNode.myNodeNum}
             |- GPS Capabilities: ${if (myNode.hasGPS) "Equipped/Active" else "No GPS"}
             |- WiFi Enabled: ${if (myNode.hasWifi) "Yes" else "No"}
-            |- Channel Utilization: ${myNode.channelUtilization}%
-            |- Airtime Tx: ${myNode.airUtilTx}%
+            |- Channel Utilization: $channelUtilStr
+            |- Airtime Tx: $airUtilStr
             """
                     .trimIndent()
             } else {

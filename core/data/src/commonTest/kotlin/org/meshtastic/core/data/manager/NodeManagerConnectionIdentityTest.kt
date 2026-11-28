@@ -248,15 +248,8 @@ class NodeManagerConnectionIdentityTest {
         hasGPS = false,
         model = null,
         firmwareVersion = null,
-        couldUpdate = false,
-        shouldUpdate = false,
-        currentPacketId = 0L,
-        messageTimeoutMsec = 0,
         minAppVersion = 0,
-        maxChannels = 0,
         hasWifi = false,
-        channelUtilization = 0f,
-        airUtilTx = 0f,
         deviceId = null,
     )
 }

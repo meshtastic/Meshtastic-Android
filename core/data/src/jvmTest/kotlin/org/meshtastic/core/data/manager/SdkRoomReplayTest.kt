@@ -346,7 +346,7 @@ class SdkRoomReplayTest {
                 database
                     .nodeInfoDao()
                     .installConfig(
-                        MyNodeEntity(info.my_node_num, null, null, false, false, 0, 0, 0, 8, false),
+                        MyNodeEntity(info.my_node_num, null, null, 0, false),
                         nodes.map { NodeEntity(num = it.num, user = assertNotNull(it.user)) },
                     )
             }
