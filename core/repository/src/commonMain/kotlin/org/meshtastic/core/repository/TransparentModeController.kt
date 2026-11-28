@@ -72,8 +72,14 @@ data class TransparentModeState(
 /**
  * One completed handshake with one node. A choice or a turn-off belongs to the connection it was made on:
  * [completedHandshakes] moves on a reconnect inside one transport instance, which keeps [sessionGeneration].
+ * [connectionVersion] is the lifecycle `version` a write on this connection must still find at queue admission.
  */
-internal data class TransparentModeSession(val sessionGeneration: Long, val nodeNum: Int, val completedHandshakes: Long)
+internal data class TransparentModeSession(
+    val sessionGeneration: Long,
+    val nodeNum: Int,
+    val completedHandshakes: Long,
+    val connectionVersion: Long,
+)
 
 internal data class TransparentModeAttempt(val session: TransparentModeSession, val progress: TransparentModeTurnOff)
 
@@ -82,7 +88,14 @@ internal fun transparentModeSessionFor(
     identity: ConnectionIdentity?,
 ): TransparentModeSession? = identity
     ?.takeIf { lifecycle.state == ConnectionState.Connected }
-    ?.let { TransparentModeSession(it.sessionGeneration, it.nodeNum, lifecycle.epochs.completedHandshakes) }
+    ?.let {
+        TransparentModeSession(
+            it.sessionGeneration,
+            it.nodeNum,
+            lifecycle.epochs.completedHandshakes,
+            lifecycle.version,
+        )
+    }
 
 internal fun transparentModeStateFor(
     session: TransparentModeSession?,
@@ -196,11 +209,15 @@ class TransparentModeController(
         val nodeNum = started.nodeNum
         val readBack = safeCatching {
             // What the node says now, not the cache: an earlier save the node dropped or adjusted is still cached.
-            // The write goes to whichever node is local now, so it is sent only on the connection that was read.
+            // The write is admitted only on the connection that was read, checked where it is queued.
             readLoraConfig(nodeNum)
                 ?.takeIf { currentSession() == started }
                 ?.let { reported ->
-                    radioController.sendLocalConfig(reported.withTransparentModeOff())
+                    radioController.sendLocalConfig(
+                        reported.withTransparentModeOff(),
+                        expectedNodeNum = nodeNum,
+                        expectedConnectionVersion = started.connectionVersion,
+                    )
                     readLoraConfig(nodeNum)
                 }
         }

@@ -73,10 +73,10 @@ class TransparentModeControllerTest {
             .build()
     private val transparentLora = normalLora.newBuilder().also { wb -> wb.transparent_mode = true }.build()
 
-    private fun TestScope.newController() = TransparentModeController(
+    private fun TestScope.newController(radio: RadioController = radioController) = TransparentModeController(
         radioConfigRepository,
         serviceRepository,
-        radioController,
+        radio,
         mock<NodeManager>(MockMode.autofill) {
             every { connectionIdentity } returns this@TransparentModeControllerTest.connectionIdentity
         },
@@ -134,6 +134,14 @@ class TransparentModeControllerTest {
         val requestId = checkNotNull(pendingRead().packetId)
         radioController.nextPacketId++
         cache(lora)
+        serviceRepository.emitMeshPacket(loraResponse(lora, requestId))
+        runCurrent()
+    }
+
+    /** The node answers the outstanding LoRa read and the cache keeps what it held. */
+    private suspend fun TestScope.nodeAnswersUncached(lora: Config.LoRaConfig) {
+        val requestId = checkNotNull(pendingRead().packetId)
+        radioController.nextPacketId++
         serviceRepository.emitMeshPacket(loraResponse(lora, requestId))
         runCurrent()
     }
@@ -396,6 +404,43 @@ class TransparentModeControllerTest {
         cache(normalLora)
 
         assertTrue(controller.active.first())
+    }
+
+    @Test
+    fun `the write and the outcome follow the answers of the node where the cache holds something else`() = runTest {
+        val controller = newController()
+        connect(transparentLora.newBuilder().also { wb -> wb.hop_limit = 7 }.build())
+
+        startTurnOff(controller)
+        nodeAnswersUncached(transparentLora)
+
+        assertEquals(listOf(Config.Builder().also { wb -> wb.lora = normalLora }.build()), radioController.localConfigs)
+
+        nodeAnswersUncached(normalLora)
+
+        assertEquals(TransparentModeTurnOff.TURNED_OFF, controller.state.first().turnOff)
+    }
+
+    @Test
+    fun `a successful turn-off leaves the cached LoRa config to the answers of the node`() = runTest {
+        // Models the production contract: setLocalConfig writes the cache optimistically, sendLocalConfig does not.
+        val cacheWritingRadio =
+            object : RadioController by radioController {
+                override suspend fun setLocalConfig(config: Config) {
+                    config.lora?.let(::cache)
+                    radioController.setLocalConfig(config)
+                }
+            }
+        val controller = newController(cacheWritingRadio)
+        connect(transparentLora)
+
+        startTurnOff(controller)
+        nodeAnswersUncached(transparentLora)
+        nodeAnswersUncached(normalLora)
+
+        assertEquals(TransparentModeTurnOff.TURNED_OFF, controller.state.first().turnOff)
+        assertEquals(transparentLora, radioConfigRepository.localConfigFlow.first().lora)
+        assertEquals(null, radioConfigRepository.lastSetLocalConfig)
     }
 
     @Test

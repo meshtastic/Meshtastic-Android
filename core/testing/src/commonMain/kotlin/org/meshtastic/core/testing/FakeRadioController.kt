@@ -306,8 +306,9 @@ class FakeRadioController :
         settingsOperations.add(SettingsOperation.SetConfig(config))
     }
 
-    /** Recorded like a [setLocalConfig] write and subject to the same rejection hooks. */
-    override suspend fun sendLocalConfig(config: Config) = setLocalConfig(config)
+    /** Recorded like a [setLocalConfig] write, with the same rejection hooks; it does not check the connection. */
+    override suspend fun sendLocalConfig(config: Config, expectedNodeNum: Int, expectedConnectionVersion: Long) =
+        setLocalConfig(config)
 
     override suspend fun setLocalChannel(channel: Channel) {
         if (rejectLocalChannelWritesRemaining > 0) {

@@ -42,6 +42,7 @@ import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.EditSettingsTransactionException
 import org.meshtastic.core.repository.LocalNodeUnavailableException
 import org.meshtastic.core.repository.NodeManager
+import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.toFixedPositionAdminMessage
 import org.meshtastic.core.repository.toFixedPositionProto
@@ -147,10 +148,16 @@ internal class AdminControllerImpl(
         scope.handledLaunch { radioConfigRepository.setLocalConfig(config) }
     }
 
-    override suspend fun sendLocalConfig(config: Config) {
+    override suspend fun sendLocalConfig(config: Config, expectedNodeNum: Int, expectedConnectionVersion: Long) {
+        if (
+            nodeManager.myNodeNum.value != expectedNodeNum ||
+            connectionStateProvider.connectionLifecycle.value.version != expectedConnectionVersion
+        ) {
+            throw PacketQueueRejectedException("Local config for another connection")
+        }
         val packetId = commandSender.generatePacketId()
         heardOnCurrentLoraRefresher.beforeLocalWrite(config, packetId)
-        commandSender.sendAdmin(myNodeNum, packetId) {
+        commandSender.sendAdminForConnection(expectedNodeNum, expectedConnectionVersion, packetId) {
             AdminMessage.Builder().also { wb -> wb.set_config = config }.build()
         }
     }

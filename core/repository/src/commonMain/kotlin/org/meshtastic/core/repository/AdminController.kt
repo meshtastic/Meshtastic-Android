@@ -50,10 +50,13 @@ interface AdminController {
     suspend fun setLocalConfig(config: Config)
 
     /**
-     * Sends [config] to the local node like [setLocalConfig], without the optimistic cache write. For a caller that
-     * reads the config back and must not have the cache say what the node has not confirmed.
+     * Sends [config] to the local node like [setLocalConfig], without the optimistic cache write, for a caller that
+     * read the config on one connection and reads it back. It is sent only while [expectedNodeNum] is still the local
+     * node on connection lifecycle `version` [expectedConnectionVersion]; otherwise nothing is sent.
+     *
+     * @throws PacketQueueRejectedException when the local node or the connection is no longer the expected one.
      */
-    suspend fun sendLocalConfig(config: Config)
+    suspend fun sendLocalConfig(config: Config, expectedNodeNum: Int, expectedConnectionVersion: Long)
 
     /** Updates a local radio channel. Same fire-and-forget contract as [setLocalConfig]. */
     suspend fun setLocalChannel(channel: Channel)
