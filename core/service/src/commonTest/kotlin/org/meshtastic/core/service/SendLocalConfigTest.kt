@@ -41,6 +41,7 @@ import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
+import org.meshtastic.proto.Routing
 import org.meshtastic.sdk.AdminResult
 import org.meshtastic.sdk.ConnectionState
 import org.meshtastic.sdk.InMemoryStorageProvider
@@ -134,6 +135,20 @@ class SendLocalConfigTest {
         assertEquals(NODE_NUM, packet.to)
         assertEquals(sent, setConfigOf(packet))
         assertEquals(AdminResult.Success(Unit), result.await())
+    }
+
+    @Test
+    fun `a local config write the node refuses returns the refusal`() = runTest {
+        // Regression: a write reported success once sent, whatever the node answered.
+        val admin = adminController()
+
+        val result = async { admin.setLocalConfigOn(session(), config(transparentLora)) }
+        runCurrent()
+        val packet = transport.outboundPackets().single { setConfigOf(it) != null }
+        transport.injectRoutingError(packet.id, Routing.Error.BAD_REQUEST)
+        runCurrent()
+
+        assertEquals(AdminResult.Failed(Routing.Error.BAD_REQUEST), result.await())
     }
 
     @Test
