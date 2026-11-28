@@ -42,7 +42,7 @@ import org.meshtastic.core.domain.usecase.settings.ExportProfileUseCase
 import org.meshtastic.core.domain.usecase.settings.ImportProfileUseCase
 import org.meshtastic.core.domain.usecase.settings.ImportSecurityConfigUseCase
 import org.meshtastic.core.domain.usecase.settings.InstallProfileUseCase
-import org.meshtastic.core.domain.usecase.settings.RadioConfigUseCase
+import org.meshtastic.core.repository.AdminController
 import org.meshtastic.core.repository.AnalyticsPrefs
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FileService
@@ -90,7 +90,7 @@ class ProfileRoundTripTest {
     private val deviceHardwareRepository: DeviceHardwareRepository = mock(MockMode.autofill)
     private val nodeRestartTracker = NodeRestartTracker(CoroutineScope(SupervisorJob()))
     private val installProfileUseCase: InstallProfileUseCase = mock(MockMode.autofill)
-    private val radioConfigUseCase: RadioConfigUseCase = mock(MockMode.autofill)
+    private val adminController: AdminController = mock(MockMode.autofill)
     private val adminActionsUseCase: AdminActionsUseCase = mock(MockMode.autofill)
     private val locationService: LocationService = mock(MockMode.autofill)
     private val mqttManager: MqttManager = mock(MockMode.autofill)
@@ -133,7 +133,7 @@ class ProfileRoundTripTest {
                 exportProfileUseCase = ExportProfileUseCase(),
                 importSecurityConfigUseCase = importSecurityConfigUseCase,
                 installProfileUseCase = installProfileUseCase,
-                radioConfigUseCase = radioConfigUseCase,
+                adminController = adminController,
                 adminActionsUseCase = adminActionsUseCase,
                 locationService = locationService,
                 fileService = fileService,

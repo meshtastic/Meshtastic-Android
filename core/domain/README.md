@@ -37,7 +37,6 @@ src/commonMain/kotlin/org/meshtastic/core/domain/
         ├── InstallProfileUseCase.kt
         ├── IsOtaCapableUseCase.kt
         ├── RadioResponseResult.kt  ← the answer type the settings screens consume, mapped from AdminResult
-        ├── RadioConfigUseCase.kt
         └── SetMeshLogSettingsUseCase.kt
 ```
 
@@ -56,23 +55,6 @@ sealed interface EnsureSessionResult {
     data object Disconnected    : EnsureSessionResult  // radio not connected
 }
 ```
-
-### `RadioConfigUseCase`
-
-Node configuration read/write operations. Each admin request suspends until the device answers and returns the SDK's `AdminResult`, except `setFixedPosition`, `removeFixedPosition`, `setRingtone` and `setCannedMessages`, which return nothing:
-
-| Method | Description |
-|---|---|
-| `setOwner` / `getOwner` | Node owner info |
-| `setHamMode` | Licensed (ham) mode parameters |
-| `setConfig` / `getConfig` | `Config` proto (device, position, power, …) |
-| `setModuleConfig` / `getModuleConfig` | `ModuleConfig` proto |
-| `getChannel` / `setRemoteChannel` | Channel configuration |
-| `setFixedPosition` / `removeFixedPosition` | Fixed GPS position |
-| `setRingtone` / `getRingtone` | External notification ringtone |
-| `setCannedMessages` / `getCannedMessages` | Canned message slots |
-| `getDeviceConnectionStatus` | The node's `DeviceConnectionStatus` |
-| `getDeviceMetadata` | Device metadata, the remote-admin preflight |
 
 ### `AdminActionsUseCase`
 
