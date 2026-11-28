@@ -35,5 +35,5 @@ class TransparentModeViewModel(private val controller: TransparentModeController
 
     fun reopenNotice() = controller.reopenNotice()
 
-    fun turnedOnByUser() = controller.turnedOnByUser()
+    suspend fun confirmTurnedOnByUser(): Boolean? = controller.confirmTurnedOnByUser()
 }

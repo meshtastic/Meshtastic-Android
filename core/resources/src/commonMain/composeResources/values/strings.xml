@@ -2390,9 +2390,11 @@
     <string name="transparent_mode_still_on">The node still reports transparent mode on.</string>
     <string name="transparent_mode_summary">Act as a raw LoRa modem for another program such as meshtasticd.</string>
     <string name="transparent_mode_turn_off">Turn off</string>
+    <string name="transparent_mode_turn_on_unconfirmed">The node did not confirm that transparent mode is on.</string>
     <string name="transparent_mode_turned_off">Transparent mode is off. This node works normally again.</string>
     <string name="transparent_mode_turning_off">Turning off transparent mode…</string>
     <string name="transparent_mode_unconfirmed">The node did not confirm the change. Transparent mode may still be on.</string>
+    <string name="transparent_mode_unsupported">This node's firmware does not support transparent mode. The setting was not applied.</string>
     <!-- TRANSPORT -->
     <string name="transport">Transport</string>
     <string name="transport_api">API</string>

@@ -226,7 +226,7 @@ fun LoRaConfigScreen(
         onSave = {
             saveLora(
                 viewModel = viewModel,
-                transparentMode = transparentModeViewModel,
+                transparentMode = transparentModeViewModel.asLoraSaveTransparentMode(),
                 isLocal = state.isLocal,
                 reported = loraConfig,
                 saved = it.withCodingRateOverrideFor(capabilities),

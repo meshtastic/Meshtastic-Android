@@ -102,7 +102,7 @@ On **Settings → LoRa**. These settings decide where and how the node transmits
 | Spread Factor | Manual mode only: 5 to 12. Higher spreads further but slower. On SX127x (RF95) radios the firmware doesn't accept 5 or 6 and uses 11 instead | From preset |
 | Transmit Enabled | Turning this off makes the node receive-only | On |
 | Transmit Power | In dBm. 0 uses the highest power legal for the region, which suits most nodes | 0 (region max) |
-| Transparent Mode | Makes the node a raw LoRa modem for another program such as meshtasticd. The app asks you to confirm before turning it on, because messaging, positions, node updates and remote admin stop working from the app while it is on. You can change it only on the node you are connected to; a remote node that has it on shows it read-only, because remote admin does not reach a node in transparent mode. See [Transparent mode](connections#transparent-mode) | Off |
+| Transparent Mode | Makes the node a raw LoRa modem for another program such as meshtasticd. The app asks you to confirm before turning it on, because messaging, positions, node updates and remote admin stop working from the app while it is on. You can change it only on the node you are connected to; a remote node that has it on shows it read-only, because remote admin does not reach a node in transparent mode. Firmware that does not support it ignores the setting, and the save says so. See [Transparent mode](connections#transparent-mode) | Off |
 | Use Preset | Turn it off to set **Spread Factor**, **Coding Rate** and **Bandwidth** by hand instead of taking them from the modem preset | On |
 
 The preset list is also filtered to what your region legally permits, so a preset allowed in one

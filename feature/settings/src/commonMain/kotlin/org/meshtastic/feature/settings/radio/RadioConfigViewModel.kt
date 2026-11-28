@@ -621,7 +621,7 @@ open class RadioConfigViewModel(
     }
 
     /** [onSent] runs once the write has been handed to the radio, for a follow-up that must not overtake it. */
-    fun setConfig(config: Config, onSent: () -> Unit = {}) {
+    fun setConfig(config: Config, onSent: suspend () -> Unit = {}) {
         val destNum = destNum ?: destNode.value?.num ?: return
         safeLaunch(tag = "setConfig") {
             _radioConfigState.update { state ->
@@ -874,6 +874,27 @@ open class RadioConfigViewModel(
     fun clearPacketResponse() {
         clearRequestIds()
         _radioConfigState.update { it.copy(responseState = ResponseState.Empty) }
+    }
+
+    /**
+     * Makes [check] the result of the save in flight in place of the write's acknowledgement: loading until it returns,
+     * then success when it returns null, or the error it returns.
+     */
+    suspend fun settleSave(check: suspend () -> StringResource?) {
+        clearRequestIds()
+        _radioConfigState.update { it.copy(route = "", responseState = ResponseState.Loading()) }
+        val error = check()
+        if (error == null) {
+            setResponseStateSuccess()
+        } else {
+            _radioConfigState.update { state ->
+                if (state.responseState is ResponseState.Loading) {
+                    state.copy(responseState = ResponseState.Error(UiText.Resource(error)))
+                } else {
+                    state
+                }
+            }
+        }
     }
 
     /**

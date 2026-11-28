@@ -77,12 +77,17 @@ import org.meshtastic.core.repository.SecurityKeyBackupStore
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.StoredSecurityKeys
 import org.meshtastic.core.repository.UiPrefs
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.UiText
+import org.meshtastic.core.resources.transparent_mode_unsupported
 import org.meshtastic.core.testing.FakeLockdownCoordinator
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.ui.util.SnackbarManager
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.ModuleRoute
+import org.meshtastic.feature.settings.radio.component.LoraSaveTransparentMode
 import org.meshtastic.feature.settings.radio.component.loRaBandwidthSelection
+import org.meshtastic.feature.settings.radio.component.saveLora
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSet
@@ -515,6 +520,146 @@ class RadioConfigViewModelTest {
         runCurrent()
 
         assertEquals(listOf("write sent", "follow-up"), events)
+    }
+
+    private class CountingTransparentMode(private val events: MutableList<String>) : LoraSaveTransparentMode {
+        val readBack = CompletableDeferred<Boolean?>()
+        var turnOffs = 0
+        var confirms = 0
+
+        override fun turnOff() {
+            turnOffs++
+            events += "turn off"
+        }
+
+        override suspend fun confirmTurnedOnByUser(): Boolean? {
+            confirms++
+            events += "read back"
+            return readBack.await()
+        }
+    }
+
+    private fun transparentLora(on: Boolean, hopLimit: Int = 3) = Config.LoRaConfig.Builder()
+        .also { wb ->
+            wb.hop_limit = hopLimit
+            wb.transparent_mode = on
+        }
+        .build()
+
+    /** A local LoRa save whose write is acked as request 77 once [ack] is emitted. */
+    private fun TestScope.saveLoraOnLocalNode(
+        events: MutableList<String>,
+        transparentMode: LoraSaveTransparentMode,
+        reported: Config.LoRaConfig,
+        saved: Config.LoRaConfig,
+    ): suspend () -> Unit {
+        nodeRepository.setNodes(listOf(Node(num = 123, user = User.Builder().also { wb -> wb.id = "!123" }.build())))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
+        val packetFlow = MutableSharedFlow<MeshPacket>()
+        every { serviceRepository.meshPacketFlow } returns packetFlow
+        everySuspend { radioConfigUseCase.setConfig(any(), any(), any()) } calls
+            {
+                events += "write sent"
+                it.args.onRequestIdArg()(77)
+                77
+            }
+        viewModel = createViewModel(processRadioResponseUseCase = ProcessRadioResponseUseCase())
+
+        saveLora(viewModel, transparentMode, isLocal = true, reported = reported, saved = saved)
+        runCurrent()
+        return {
+            packetFlow.emit(routingAck(requestId = 77, from = 123))
+            runCurrent()
+        }
+    }
+
+    @Test
+    fun `a LoRa save turning transparent mode off hands its result to the notice once the write is sent`() = runTest {
+        val events = mutableListOf<String>()
+        val transparentMode = CountingTransparentMode(events)
+        val ack =
+            saveLoraOnLocalNode(
+                events,
+                transparentMode,
+                reported = transparentLora(true),
+                saved = transparentLora(false),
+            )
+
+        assertEquals(listOf("write sent", "turn off"), events)
+        assertEquals(1, transparentMode.turnOffs)
+        assertEquals(0, transparentMode.confirms)
+
+        ack()
+        advanceTimeBy(31_000)
+        runCurrent()
+
+        assertEquals(ResponseState.Empty, viewModel.radioConfigState.value.responseState)
+    }
+
+    @Test
+    fun `a LoRa save turning transparent mode on succeeds only once the node reads it back on`() = runTest {
+        val events = mutableListOf<String>()
+        val transparentMode = CountingTransparentMode(events)
+        val ack =
+            saveLoraOnLocalNode(
+                events,
+                transparentMode,
+                reported = transparentLora(false),
+                saved = transparentLora(true),
+            )
+
+        assertEquals(listOf("write sent", "read back"), events)
+        assertEquals(0, transparentMode.turnOffs)
+
+        ack()
+
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Loading)
+
+        transparentMode.readBack.complete(true)
+        runCurrent()
+
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Success)
+        assertEquals(1, transparentMode.confirms)
+    }
+
+    @Test
+    fun `a LoRa save turning transparent mode on that the firmware drops says it is not supported`() = runTest {
+        val events = mutableListOf<String>()
+        val transparentMode = CountingTransparentMode(events)
+        val ack =
+            saveLoraOnLocalNode(
+                events,
+                transparentMode,
+                reported = transparentLora(false),
+                saved = transparentLora(true),
+            )
+
+        ack()
+        transparentMode.readBack.complete(false)
+        runCurrent()
+
+        assertEquals(
+            ResponseState.Error(UiText.Resource(Res.string.transparent_mode_unsupported)),
+            viewModel.radioConfigState.value.responseState,
+        )
+    }
+
+    @Test
+    fun `a LoRa save leaving transparent mode alone neither turns it off nor reads it back`() = runTest {
+        val events = mutableListOf<String>()
+        val transparentMode = CountingTransparentMode(events)
+        val ack =
+            saveLoraOnLocalNode(
+                events,
+                transparentMode,
+                reported = transparentLora(true),
+                saved = transparentLora(true, hopLimit = 5),
+            )
+
+        ack()
+
+        assertEquals(listOf("write sent"), events)
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Success)
     }
 
     @Test

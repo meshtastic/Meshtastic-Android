@@ -19,6 +19,9 @@ package org.meshtastic.feature.settings.radio.component
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import org.meshtastic.core.model.util.keepingTransparentModeOf
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.transparent_mode_turn_on_unconfirmed
+import org.meshtastic.core.resources.transparent_mode_unsupported
 import org.meshtastic.core.ui.component.TransparentModeSetting
 import org.meshtastic.core.ui.viewmodel.TransparentModeViewModel
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
@@ -44,17 +47,51 @@ internal fun loraSaveFor(isLocal: Boolean, reported: Config.LoRaConfig, saved: C
     )
 }
 
+/** The transparent mode controller as a LoRa save reaches it. */
+internal interface LoraSaveTransparentMode {
+    fun turnOff()
+
+    suspend fun confirmTurnedOnByUser(): Boolean?
+}
+
+internal fun TransparentModeViewModel.asLoraSaveTransparentMode() = object : LoraSaveTransparentMode {
+    override fun turnOff() = this@asLoraSaveTransparentMode.turnOff()
+
+    override suspend fun confirmTurnedOnByUser() = this@asLoraSaveTransparentMode.confirmTurnedOnByUser()
+}
+
+/**
+ * Sends a LoRa save. A turn-off is reported by the transparent mode notice alone, so the save hands its result over and
+ * shows no dialog of its own. A turn-on is reported by the save dialog once the node reads the flag back.
+ */
 internal fun saveLora(
     viewModel: RadioConfigViewModel,
-    transparentMode: TransparentModeViewModel,
+    transparentMode: LoraSaveTransparentMode,
     isLocal: Boolean,
     reported: Config.LoRaConfig,
     saved: Config.LoRaConfig,
 ) {
     val save = loraSaveFor(isLocal, reported, saved)
-    // Confirming the toggle was the user's choice, so the connect notice does not ask again this session.
-    if (save.turnsOn) transparentMode.turnedOnByUser()
-    viewModel.setConfig(save.config, onSent = { if (save.turnOffAfter) transparentMode.turnOff() })
+    viewModel.setConfig(
+        save.config,
+        onSent = {
+            when {
+                save.turnOffAfter -> {
+                    viewModel.clearPacketResponse()
+                    transparentMode.turnOff()
+                }
+
+                save.turnsOn ->
+                    viewModel.settleSave {
+                        when (transparentMode.confirmTurnedOnByUser()) {
+                            true -> null
+                            false -> Res.string.transparent_mode_unsupported
+                            null -> Res.string.transparent_mode_turn_on_unconfirmed
+                        }
+                    }
+            }
+        },
+    )
 }
 
 /**

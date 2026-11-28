@@ -23,6 +23,7 @@ import dev.mokkery.mock
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -444,16 +445,41 @@ class TransparentModeControllerTest {
     }
 
     @Test
-    fun `turning it on from settings shows the indicator without the notice until the next connection`() = runTest {
+    fun `turning it on from settings holds the notice back and counts once the node reads it back on`() = runTest {
         val controller = newController()
         connect(normalLora)
 
-        controller.turnedOnByUser()
+        val confirmed = async { controller.confirmTurnedOnByUser() }
+        runCurrent()
+        // The save's optimistic cache write lands while the read-back is out.
         cache(transparentLora)
 
         assertEquals(TransparentModeState(active = true, noticeVisible = false), controller.state.first())
 
+        nodeAnswers(transparentLora)
+
+        assertEquals(true, confirmed.await())
+        assertEquals(TransparentModeState(active = true, noticeVisible = false), controller.state.first())
+
         reconnect(transparentLora)
+
+        assertEquals(TransparentModeState(active = true, noticeVisible = true), controller.state.first())
+    }
+
+    @Test
+    fun `a node that reads back off after turning it on is not taken as the choice of the user`() = runTest {
+        val controller = newController()
+        connect(normalLora)
+
+        val confirmed = async { controller.confirmTurnedOnByUser() }
+        runCurrent()
+        // Firmware without field 108 accepts the write and drops the flag.
+        nodeAnswers(normalLora)
+
+        assertEquals(false, confirmed.await())
+
+        // Turned on later in this connection, by another client say, the notice still asks.
+        cache(transparentLora)
 
         assertEquals(TransparentModeState(active = true, noticeVisible = true), controller.state.first())
     }

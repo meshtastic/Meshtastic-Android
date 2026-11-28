@@ -102,12 +102,14 @@ internal fun transparentModeStateFor(
     transparent: Boolean,
     leftOnSession: TransparentModeSession?,
     attempt: TransparentModeAttempt?,
+    turnOnReadBack: TransparentModeSession?,
 ): TransparentModeState {
     if (session == null) return TransparentModeState()
     val turnOff = attempt?.takeIf { it.session == session }?.progress
+    val asks = transparent && leftOnSession != session && turnOnReadBack != session
     return TransparentModeState(
         active = transparent || turnOff == TransparentModeTurnOff.IN_PROGRESS,
-        noticeVisible = turnOff != null || (transparent && leftOnSession != session),
+        noticeVisible = turnOff != null || asks,
         turnOff = turnOff,
     )
 }
@@ -141,6 +143,7 @@ class TransparentModeController(
     private val connectionIdentity: StateFlow<ConnectionIdentity?> = nodeManager.connectionIdentity
     private val leftOnSession = MutableStateFlow<TransparentModeSession?>(null)
     private val attempt = MutableStateFlow<TransparentModeAttempt?>(null)
+    private val turnOnReadBack = MutableStateFlow<TransparentModeSession?>(null)
 
     private val session: Flow<TransparentModeSession?> =
         combine(serviceRepository.connectionLifecycle, connectionIdentity, ::transparentModeSessionFor)
@@ -155,6 +158,7 @@ class TransparentModeController(
             radioConfigRepository.localConfigFlow.map { it.lora?.transparent_mode == true }.distinctUntilChanged(),
             leftOnSession,
             attempt,
+            turnOnReadBack,
             ::transparentModeStateFor,
         )
             .distinctUntilChanged()
@@ -174,9 +178,23 @@ class TransparentModeController(
         leftOnSession.value = null
     }
 
-    /** The user just chose to turn transparent mode on, which is the choice the notice would ask for. */
-    fun turnedOnByUser() {
-        leftOnSession.value = currentSession()
+    /**
+     * Reads `transparent_mode` back after the user saved it on from settings, and returns what the node reports, or
+     * null when it did not answer on this connection. The notice stays back while the read is out, and afterwards
+     * unless the node reports the mode off: firmware that does not know the field accepts the write and drops it, so
+     * that is not the user's choice taking effect.
+     */
+    suspend fun confirmTurnedOnByUser(): Boolean? {
+        val started = currentSession() ?: return null
+        turnOnReadBack.value = started
+        return try {
+            val reported = safeCatching { readLoraConfig(started.nodeNum) }.getOrNull()?.transparent_mode
+            val sameSession = currentSession() == started
+            if (sameSession && reported != false) leftOnSession.value = started
+            reported.takeIf { sameSession }
+        } finally {
+            turnOnReadBack.compareAndSet(started, null)
+        }
     }
 
     /**
