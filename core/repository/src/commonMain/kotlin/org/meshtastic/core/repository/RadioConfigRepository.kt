@@ -87,18 +87,8 @@ interface RadioConfigRepository {
      */
     val deviceUIConfigFlow: Flow<DeviceUIConfig?>
 
-    /**
-     * Flow of [FileInfo] packets accumulated during STATE_SEND_FILEMANIFEST.
-     *
-     * Cleared at the start of each new handshake via [clearFileManifest].
-     */
+    /** The connected device's file manifest from its handshake, in the order sent; empty with no session. */
     val fileManifestFlow: Flow<List<FileInfo>>
-
-    /** Appends a single [FileInfo] entry to [fileManifestFlow]. */
-    suspend fun addFileInfo(info: FileInfo)
-
-    /** Clears the accumulated file manifest; called at the start of each new handshake. */
-    suspend fun clearFileManifest()
 
     /**
      * The firmware's region to modem-preset compatibility map, from the active session's SDK config bundle. Null

@@ -17,6 +17,7 @@
 package org.meshtastic.core.testing
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSet
@@ -60,8 +61,7 @@ class FakeRadioConfigRepository :
     private val deviceUIConfigBacking = mutableStateFlow<DeviceUIConfig?>(null)
     override val deviceUIConfigFlow: Flow<DeviceUIConfig?> = deviceUIConfigBacking
 
-    private val fileManifestBacking = mutableStateFlow<List<FileInfo>>(emptyList())
-    override val fileManifestFlow: Flow<List<FileInfo>> = fileManifestBacking
+    override val fileManifestFlow: Flow<List<FileInfo>> = flowOf(emptyList())
 
     private val loraRegionPresetMapBacking = mutableStateFlow<LoRaRegionPresetMap?>(null)
     override val loraRegionPresetMapFlow: Flow<LoRaRegionPresetMap?> = loraRegionPresetMapBacking
@@ -74,9 +74,6 @@ class FakeRadioConfigRepository :
 
     val currentModuleConfig: LocalModuleConfig
         get() = moduleConfigBacking.value
-
-    val currentFileManifest: List<FileInfo>
-        get() = fileManifestBacking.value
 
     /**
      * Last [Config] passed to [setLocalConfig] (null until called). Tests should use [setLocalConfigDirect] to drive
@@ -151,14 +148,6 @@ class FakeRadioConfigRepository :
 
     override suspend fun setLocalModuleConfig(config: ModuleConfig) {
         lastSetModuleConfig = config
-    }
-
-    override suspend fun addFileInfo(info: FileInfo) {
-        fileManifestBacking.value = fileManifestBacking.value + info
-    }
-
-    override suspend fun clearFileManifest() {
-        fileManifestBacking.value = emptyList()
     }
 
     /** Directly sets the [LocalConfig] without merging (preferred for test setup). */
