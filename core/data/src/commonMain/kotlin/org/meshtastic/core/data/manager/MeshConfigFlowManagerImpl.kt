@@ -18,10 +18,7 @@ package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
 import kotlinx.atomicfu.atomic
-import kotlinx.coroutines.CoroutineStart
 import org.koin.core.annotation.Single
-import org.meshtastic.core.common.di.ServiceScope
-import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.MeshConfigFlowManager
@@ -35,7 +32,6 @@ import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.ServiceStateWriter
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.DeviceMetadata
-import org.meshtastic.proto.FileInfo
 import org.meshtastic.proto.FirmwareEdition
 import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.NodeInfo
@@ -45,7 +41,7 @@ import org.meshtastic.sdk.RadioSessionEvent
 import org.meshtastic.core.model.MyNodeInfo as SharedMyNodeInfo
 import org.meshtastic.proto.MyNodeInfo as ProtoMyNodeInfo
 
-@Suppress("LongParameterList", "TooManyFunctions")
+@Suppress("TooManyFunctions")
 @Single
 class MeshConfigFlowManagerImpl(
     private val nodeManager: NodeManager,
@@ -55,7 +51,6 @@ class MeshConfigFlowManagerImpl(
     private val analytics: PlatformAnalytics,
     private val notificationPrefs: NotificationPrefs,
     private val radioInterfaceService: RadioInterfaceService,
-    private val scope: ServiceScope,
 ) : MeshConfigFlowManager {
     private data class InstalledSnapshot(val session: RadioSessionContext, val myNode: SharedMyNodeInfo)
 
@@ -220,20 +215,6 @@ class MeshConfigFlowManagerImpl(
         radioConfigRepository.clearLocalModuleConfig()
         if (!isCurrent()) return
         radioConfigRepository.clearFileManifest()
-    }
-
-    override fun handleFileInfo(info: FileInfo, session: RadioSessionContext): Boolean {
-        val admitted =
-            runForSession(session) {
-                Logger.d { "FileInfo received: ${info.file_name} (${info.size_bytes} bytes)" }
-            }
-        if (admitted) {
-            scope.handledLaunch(start = CoroutineStart.UNDISPATCHED) {
-                runWhileForSession(session, "fileInfo persist") { radioConfigRepository.addFileInfo(info) }
-            }
-        }
-        if (!admitted) Logger.d { "Discarding FileInfo from stale transport session" }
-        return admitted
     }
 
     override fun refreshNodeInfo(): Boolean {

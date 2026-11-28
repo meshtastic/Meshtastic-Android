@@ -24,7 +24,6 @@ import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.isOtaStatusNotification
 import org.meshtastic.core.repository.FirmwareUpdateStatusRepository
-import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NodeManager
@@ -47,11 +46,9 @@ import org.meshtastic.sdk.MeshEvent
  * Applies the [MeshEvent]s an SDK session delivers after Ready. Callers hold the session's lease, so each synchronous
  * effect lands in the session that raised it.
  */
-@Suppress("LongParameterList")
 @Single
 class RadioSessionEventHandler(
     private val serviceStateWriter: ServiceStateWriter,
-    private val configFlowManager: Lazy<MeshConfigFlowManager>,
     private val mqttManager: MqttManager,
     private val nodeManager: NodeManager,
     private val serviceNotifications: MeshNotificationManager,
@@ -64,8 +61,6 @@ class RadioSessionEventHandler(
             is MeshEvent.Notification -> handleClientNotification(event.notification, session)
 
             is MeshEvent.MqttProxyMessage -> mqttManager.handleMqttProxyMessage(event.message)
-
-            is MeshEvent.FileInfoReceived -> configFlowManager.value.handleFileInfo(event.info, session)
 
             is MeshEvent.SecurityWarning.PublicKeyMismatch ->
                 recordRefusedKey(event.node.raw, event.offeredKey, session)

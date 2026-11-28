@@ -276,12 +276,10 @@ class SdkRoomReplayTest {
                     analytics = mock(MockMode.autofill),
                     notificationPrefs = FakeNotificationPrefs(),
                     radioInterfaceService = radio,
-                    scope = scope.asServiceScope(),
                 )
             val eventHandler =
                 RadioSessionEventHandler(
                     serviceStateWriter = mock(MockMode.autofill),
-                    configFlowManager = lazy { configFlowManager },
                     mqttManager = mock(MockMode.autofill),
                     nodeManager = nodeManager,
                     serviceNotifications = notificationManager,

@@ -373,7 +373,6 @@ class SdkTcpRoomTest {
                 mock(MockMode.autofill),
                 FakeNotificationPrefs(),
                 radio,
-                serviceScope,
             )
         private val outboundRepository = PacketRepositoryImpl(databases, dispatchers)
         private val outgoing =
@@ -454,7 +453,6 @@ class SdkTcpRoomTest {
         private val eventHandler =
             RadioSessionEventHandler(
                 serviceStateWriter = state,
-                configFlowManager = lazy { installer },
                 mqttManager = mock(MockMode.autofill),
                 nodeManager = nodeManager,
                 serviceNotifications = notifications,

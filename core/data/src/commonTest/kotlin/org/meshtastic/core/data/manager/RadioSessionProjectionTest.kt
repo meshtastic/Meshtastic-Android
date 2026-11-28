@@ -103,7 +103,6 @@ class RadioSessionProjectionTest {
                 analytics = mock(MockMode.autofill),
                 notificationPrefs = FakeNotificationPrefs(),
                 radioInterfaceService = radio,
-                scope = scope.asServiceScope(),
             )
         val projection =
             radioSessionProjection(

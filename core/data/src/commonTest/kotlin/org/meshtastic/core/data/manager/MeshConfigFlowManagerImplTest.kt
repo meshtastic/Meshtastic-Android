@@ -32,7 +32,6 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.encodeUtf8
-import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NotificationPrefs
@@ -147,7 +146,6 @@ class MeshConfigFlowManagerImplTest {
                 analytics = analytics,
                 notificationPrefs = notificationPrefs,
                 radioInterfaceService = radioInterfaceService,
-                scope = testScope.asServiceScope(),
             )
     }
 
