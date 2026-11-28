@@ -473,8 +473,12 @@ class GeminiNanoDocAssistant(
         val ourNode = nodeRepository.ourNodeInfo.value
         val nodeDb = nodeRepository.nodeDBbyNum.value
 
-        val channelUtilStr = ourNode?.deviceMetrics?.channel_utilization?.let { "${it.roundToInt()}%" } ?: "Unknown"
-        val airUtilStr = ourNode?.deviceMetrics?.air_util_tx?.let { "${it.roundToInt()}%" } ?: "Unknown"
+        // roundToInt throws on NaN.
+        val channelUtilStr =
+            ourNode?.deviceMetrics?.channel_utilization?.takeUnless { it.isNaN() }?.let { "${it.roundToInt()}%" }
+                ?: "Unknown"
+        val airUtilStr =
+            ourNode?.deviceMetrics?.air_util_tx?.takeUnless { it.isNaN() }?.let { "${it.roundToInt()}%" } ?: "Unknown"
 
         val hardwareInfo =
             if (myNode != null) {

@@ -30,11 +30,13 @@ import dev.mokkery.mock
 import dev.mokkery.verify
 import dev.mokkery.verify.VerifyMode.Companion.exactly
 import dev.mokkery.verifySuspend
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -2420,6 +2422,53 @@ class RadioConfigViewModelTest {
         runCurrent()
 
         assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Error)
+    }
+
+    // Regression: the deadline ran inside the call's coroutine, so a call cancelled from outside ended the request
+    // and left the overlay loading. Main settles every request at its deadline whatever its call did.
+    @Test
+    fun `a request whose call is cancelled from outside still times out`() = runTest {
+        val node = Node(num = 123, user = User.Builder().also { wb -> wb.id = "!123" }.build())
+        nodeRepository.setNodes(listOf(node))
+        everySuspend { adminController.getOwner(any()) } calls { throw CancellationException("session gone") }
+        viewModel = createViewModel()
+
+        viewModel.setResponseStateLoading(ConfigRoute.USER)
+        runCurrent()
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Loading)
+
+        advanceTimeBy(31_000)
+        runCurrent()
+
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Error)
+    }
+
+    // Regression: a read past its deadline kept its call waiting after nothing could use the answer. Main cancelled it
+    // when the screen closed.
+    @Test
+    fun `leaving the screen stops a read that timed out`() = runTest {
+        val node = Node(num = 123, user = User.Builder().also { wb -> wb.id = "!123" }.build())
+        nodeRepository.setNodes(listOf(node))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
+        var readCancelled = false
+        everySuspend { adminController.getOwner(any()) } calls
+            {
+                try {
+                    awaitCancellation()
+                } finally {
+                    readCancelled = true
+                }
+            }
+        viewModel = createViewModel()
+
+        viewModel.setResponseStateLoading(ConfigRoute.USER)
+        runCurrent()
+        advanceTimeBy(31_000)
+        runCurrent()
+        viewModel.clearPacketResponse()
+        runCurrent()
+
+        assertTrue(readCancelled)
     }
 
     // Regression: the restart-won branch of the request deadline lost or inverted, so a save whose ACK the reboot ate

@@ -1205,7 +1205,6 @@ open class RadioConfigViewModel(
 
     private fun settleAtDeadline(request: PendingRequest) {
         if (request !in pending || request.late) return
-        // Batch and DFU membership is read from the request before it leaves the list, as the old code did.
         val timedOutBatchRequest = request.kind == RequestKind.BATCH_WRITE
         val timedOutDfuRequest = request.kind == RequestKind.DFU
         if (request.kind == RequestKind.READ && isSingleResponseRemoteReadRoute(request.route)) {
@@ -1244,17 +1243,28 @@ open class RadioConfigViewModel(
                 val outcome = async { safeCatching { call() } }
                 val settled =
                     withTimeoutOrNull(REQUEST_TIMEOUT) {
-                        finish(request, outcome.await(), apply, late = false)
+                        // join, not await: a call cancelled from outside must not end the request before its deadline.
+                        outcome.join()
+                        if (!outcome.isCancelled) finish(request, outcome.await(), apply, late = false)
                         // An answer that settled nothing (a timeout, a lost link while a restart is expected, an ack
                         // the flow ignored) leaves the request to its deadline.
                         if (request in pending) awaitCancellation()
                     }
                 if (settled != null) return@safeLaunch
                 settleAtDeadline(request)
-                // Only a retained remote read waits on; any other call, a write's included, runs out in the background.
+                // Only a retained remote read waits on. Any other read's answer would be dropped, so its call stops;
+                // a write runs out in the background so its local projection lands.
+                if (!request.late) {
+                    if (request.kind == RequestKind.READ) outcome.cancel()
+                    return@safeLaunch
+                }
+                outcome.join()
                 if (!request.late) return@safeLaunch
-                val lateOutcome = outcome.await()
-                if (request.late) finish(request, lateOutcome, apply, late = true)
+                if (outcome.isCancelled) {
+                    pending.remove(request)
+                } else {
+                    finish(request, outcome.await(), apply, late = true)
+                }
             }
         return request
     }
