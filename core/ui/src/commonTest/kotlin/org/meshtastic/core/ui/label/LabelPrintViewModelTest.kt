@@ -375,4 +375,26 @@ class LabelPrintViewModelTest {
         assertEquals(2 to false, slow.connects to slow.connectedDuringDisconnect)
         assertEquals(LabelPrinterStatus.READY, viewModel.state.value.status)
     }
+
+    // The lost link's disconnect takes 5 s and the search that follows finds the printer at once, so a reconnect that
+    // did not wait would land first and that disconnect would then drop it.
+    @Test
+    fun `a print that loses the link finishes letting go before it reconnects`() = runTest(dispatcher) {
+        prefs.printerAddress.value = mine.address
+        scanner.emitDevice(mine)
+        val slow = SlowToLetGo(connection, firstConnectHangs = false)
+        val factory =
+            object : BleConnectionFactory {
+                override fun create(scope: CoroutineScope, tag: String): BleConnection = slow
+            }
+        val viewModel = LabelPrintViewModel(NiimbotPrinterFactory(scanner, factory), prefs)
+        viewModel.start()
+        connection.service.writeException = IllegalStateException("write failed")
+
+        viewModel.print(LabelBitmap(width = 96, height = 1))
+        advanceTimeBy(20.seconds)
+
+        assertEquals(2 to false, slow.connects to slow.connectedDuringDisconnect)
+        assertEquals(LabelPrinterStatus.READY, viewModel.state.value.status)
+    }
 }

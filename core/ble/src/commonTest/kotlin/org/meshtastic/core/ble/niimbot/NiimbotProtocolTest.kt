@@ -293,6 +293,30 @@ class NiimbotProtocolTest {
     }
 
     @Test
+    fun `a protocol v4 printer that refuses the print start or the dimensions stops the print before any row`() =
+        runTest {
+            val setup = listOf(NiimbotRequest.START_PRINT, NiimbotRequest.SET_DIMENSION)
+
+            val outcomes = setup.map { request ->
+                val printer = ScriptedPrinter(ScriptedPrinter.statusData(3, 0)).apply { rejects = request }
+                val failure = assertFailsWith<NiimbotException.Rejected> { NiimbotProtocol(printer).print(picture) }
+                failure.request to printer.sent.any { it.startsWith("555584") || it.startsWith("555585") }
+            }
+
+            assertEquals(setup.map { it to false }, outcomes)
+        }
+
+    @Test
+    fun `a fault answering the heartbeat stops the print with that fault`() = runTest {
+        val printer = ScriptedPrinter(ScriptedPrinter.statusData(3, 0)).apply { faultsAt = NiimbotRequest.HEARTBEAT }
+
+        val fault = assertFailsWith<NiimbotException.PrinterFault> { NiimbotProtocol(printer).print(picture) }
+
+        assertEquals(0x01, fault.code)
+        assertEquals(listOf("5555dc0101dcaaaa"), printer.sent)
+    }
+
+    @Test
     fun `a page end the printer answers with failure fails the print without waiting for the page`() = runTest {
         val printer =
             ScriptedPrinter(ScriptedPrinter.statusData(2, 4)).apply { rejects = NiimbotRequest.END_PAGE_PRINT }

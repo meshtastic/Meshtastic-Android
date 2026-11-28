@@ -82,7 +82,7 @@ object NiimbotRequest {
 /**
  * Collects bytes from the printer's notifications and yields whole packets. A notification can carry part of a packet
  * or several; bytes that don't start a packet are dropped until the next `55 55`. A frame with a bad checksum or tail
- * is dropped, and the search for the next one resumes just past its head.
+ * gives up only its first byte: the search resumes at its second `55`, which may be the real head after a stray one.
  */
 class NiimbotPacketParser {
     private var buffer = ByteArray(0)

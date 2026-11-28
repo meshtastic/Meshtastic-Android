@@ -118,4 +118,13 @@ class NiimbotEncodingTest {
 
         assertEquals(listOf(NiimbotPacket(0xC1, byteArrayOf(1))), packets)
     }
+
+    // The reply `55 55 02 01 01 02 aa aa` checksums 02 xor 01 xor 01 = 02. With a stray 55 ahead of it, the first
+    // candidate reads type 55 and length 02 and fails its checksum; the real head starts one byte later.
+    @Test
+    fun `a stray head byte right before a frame does not hide it`() {
+        val packets = NiimbotPacketParser().append("55555502010102aaaa".unhex())
+
+        assertEquals(listOf(NiimbotPacket(0x02, byteArrayOf(1))), packets)
+    }
 }
