@@ -123,6 +123,7 @@
     <string name="intro_show">Shfaq prezantimin</string>
     <string name="ip_address">Adresa IP:</string>
     <!-- KEY -->
+    <!-- LABEL -->
     <!-- LAYER -->
     <!-- LICENSED -->
     <!-- LIVE -->
@@ -281,6 +282,7 @@
     <string name="traceroute_direct">Direkt</string>
     <!-- TRAFFIC -->
     <!-- TRANSLATION -->
+    <!-- TRANSPARENT -->
     <!-- TRANSPORT -->
     <string name="two_days">48 Orë</string>
     <!-- UNITS -->

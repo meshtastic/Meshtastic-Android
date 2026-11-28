@@ -106,6 +106,7 @@
     <string name="intro_show">Prikaži uvod</string>
     <string name="ip_address">IP Adresa:</string>
     <!-- KEY -->
+    <!-- LABEL -->
     <!-- LAYER -->
     <!-- LICENSED -->
     <!-- LIVE -->
@@ -247,6 +248,7 @@
     <string name="traceroute_log">Traceroute</string>
     <!-- TRAFFIC -->
     <!-- TRANSLATION -->
+    <!-- TRANSPARENT -->
     <!-- TRANSPORT -->
     <string name="two_days">48 Sati</string>
     <!-- UNITS -->

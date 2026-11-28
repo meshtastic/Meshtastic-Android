@@ -208,6 +208,7 @@
     <string name="intro_show">Прикажи упутства</string>
     <string name="ip_address">IP адреса:</string>
     <!-- KEY -->
+    <!-- LABEL -->
     <string name="latitude">Ширина</string>
     <!-- LAYER -->
     <!-- LICENSED -->
@@ -467,6 +468,7 @@
     <string name="traceroute_no_response">Нема одговора</string>
     <!-- TRAFFIC -->
     <!-- TRANSLATION -->
+    <!-- TRANSPARENT -->
     <!-- TRANSPORT -->
     <string name="transport_ble">БЛЕ</string>
     <string name="transport_lora">LoRA</string>

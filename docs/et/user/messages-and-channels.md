@@ -1,7 +1,7 @@
 ---
 title: Sõnumid ja kanalid
 nav_order: 3
-last_updated: 2026-11-25
+last_updated: 2026-11-27
 description: Saada ja võta vastu sõnumeid, halda kanaleid, konfigureeri krüpteerimist ning kasuta kiirvestlust, reaktsioone ja sõnumitoiminguid.
 aliases:
   - kanalid
@@ -55,6 +55,8 @@ On the **Channels** screen, tap **Share Channels** to show a QR code and a link 
 
 - **Replace** overwrites every channel on their node with yours and applies your LoRa settings.
 - **Add** keeps their channels and LoRa settings and appends yours.
+
+On an Android phone with Bluetooth, **Print label** in that dialog prints the code as a channel label on a Niimbot D110 label printer, the same way a [contact prints as a name tag](nodes#printing-a-name-tag). The label names the first channel, its region and preset, and says whether scanning it adds channels or replaces them. A set of channels whose QR code would be too dense to scan from a 12 mm label is not printed; share fewer channels to print one.
 
 To take in someone else's channels, use the import button on the same screen: **Scan Shared Channels QR Code**, **Input Shared Channels URL**, or, on a phone with NFC, **Scan Shared Channels NFC**. The **Import channels** dialog lists the incoming channels. A code made with **Replace** opens with **Replace** selected, a code made with **Add** offers only **Add**, and the **Replace** and **Add** control only picks the mode: nothing changes on your node until you tap **Replace channels** or **Add channels**. A channel that forwards messages to or from MQTT, or shares your location, says so on its row.
 

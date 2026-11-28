@@ -807,6 +807,7 @@
     <string name="key_verification_final_title">Võtme kontrollimine on lõpule viidud</string>
     <string name="key_verification_request_title">Võtme kinnitamise taotlus</string>
     <string name="key_verification_title">Võtme kontrollimine</string>
+    <!-- LABEL -->
     <string name="last_heard_filter_label">Filtreeri viimase kuulmise aja järgi: %1$s</string>
     <string name="last_position_update">Viimase asukoha värskendus</string>
     <string name="latest_alpha_firmware">Viimane alfa</string>
@@ -1673,6 +1674,7 @@
     <string name="translation_failed">Sõnumit ei õnnestunud tõlkida</string>
     <string name="translation_model_download_failed">Tõlkemudeli allalaadimine ebaõnnestus</string>
     <string name="translation_not_required">Sõnum on juba teie keeles</string>
+    <!-- TRANSPARENT -->
     <!-- TRANSPORT -->
     <string name="transport">Transport</string>
     <string name="transport_api">API</string>

@@ -125,6 +125,7 @@
     <string name="ip_address">IP διεύθυνση:</string>
     <string name="ip_port">Θύρα:</string>
     <!-- KEY -->
+    <!-- LABEL -->
     <string name="latitude">Γεωγραφικό Πλάτος</string>
     <!-- LAYER -->
     <!-- LICENSED -->
@@ -276,6 +277,7 @@
     <string name="traceroute_log">Traceroute</string>
     <!-- TRAFFIC -->
     <!-- TRANSLATION -->
+    <!-- TRANSPARENT -->
     <!-- TRANSPORT -->
     <string name="transport_lora">LoRa</string>
     <string name="transport_mqtt">MQTT</string>

@@ -210,6 +210,8 @@
     <string name="ip_address">IP 주소:</string>
     <string name="ip_port">포트:</string>
     <!-- KEY -->
+    <!-- LABEL -->
+    <string name="label_print_print">인쇄</string>
     <string name="last_position_update">최근 위치 업데이트</string>
     <string name="latitude">위도</string>
     <!-- LAYER -->
@@ -487,6 +489,7 @@
     <!-- TRAFFIC -->
     <string name="traffic_management_enabled">모듈 활성화</string>
     <!-- TRANSLATION -->
+    <!-- TRANSPARENT -->
     <!-- TRANSPORT -->
     <string name="transport_ble">BLE</string>
     <string name="transport_lora">LoRa</string>

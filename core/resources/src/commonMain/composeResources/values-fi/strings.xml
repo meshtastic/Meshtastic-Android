@@ -822,6 +822,8 @@
     <string name="key_verification_final_title">Avaimen varmennus valmis</string>
     <string name="key_verification_request_title">Avaimen varmennuspyyntö</string>
     <string name="key_verification_title">Avaimen varmennus</string>
+    <!-- LABEL -->
+    <string name="label_print_print">Tulosta</string>
     <string name="last_heard_filter_label">Suodata viimeksi kuullun ajan mukaan: %1$s</string>
     <string name="last_position_update">Viimeisin sijainnin päivitys</string>
     <string name="latest_alpha_firmware">Viimeisin epävakaa (alpha)</string>
@@ -1723,6 +1725,7 @@
     <string name="translation_not_required">Viesti on jo omalla kielelläsi</string>
     <string name="transmit_disabled">Lähetys on poistettu käytöstä</string>
     <string name="transmit_disabled_summary">Tämä laite voi vastaanottaa, mutta ei lähetä mitään LoRa-verkon kautta.</string>
+    <!-- TRANSPARENT -->
     <!-- TRANSPORT -->
     <string name="transport">Kuljetus</string>
     <string name="transport_api">API</string>

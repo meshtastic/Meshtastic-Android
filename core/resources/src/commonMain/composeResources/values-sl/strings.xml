@@ -124,6 +124,7 @@
     <string name="intro_show">Pokaži napoved</string>
     <string name="ip_address">IP naslov:</string>
     <!-- KEY -->
+    <!-- LABEL -->
     <!-- LAYER -->
     <!-- LICENSED -->
     <!-- LIVE -->
@@ -295,6 +296,7 @@
     <string name="traceroute_log">Pot</string>
     <!-- TRAFFIC -->
     <!-- TRANSLATION -->
+    <!-- TRANSPARENT -->
     <!-- TRANSPORT -->
     <string name="twenty_four_hours">24ur</string>
     <string name="two_days">48 Ur</string>

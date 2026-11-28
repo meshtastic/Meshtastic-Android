@@ -191,6 +191,7 @@
     <string name="ip_address">IP adresa:</string>
     <string name="ip_port">Port:</string>
     <!-- KEY -->
+    <!-- LABEL -->
     <!-- LAYER -->
     <!-- LICENSED -->
     <!-- LIVE -->
@@ -448,6 +449,7 @@
     <string name="traceroute_log">Trasovanie</string>
     <!-- TRAFFIC -->
     <!-- TRANSLATION -->
+    <!-- TRANSPARENT -->
     <!-- TRANSPORT -->
     <string name="transport_lora">LoRa</string>
     <string name="transport_mqtt">MQTT</string>

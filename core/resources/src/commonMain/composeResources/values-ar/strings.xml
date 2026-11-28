@@ -119,6 +119,7 @@
     <string name="interval_unset">إلغاء تعيين</string>
     <string name="ip_address">عنوان الـ IP:</string>
     <!-- KEY -->
+    <!-- LABEL -->
     <!-- LAYER -->
     <!-- LICENSED -->
     <!-- LIVE -->
@@ -253,6 +254,7 @@
     <string name="traceroute_direct">مباشره</string>
     <!-- TRAFFIC -->
     <!-- TRANSLATION -->
+    <!-- TRANSPARENT -->
     <!-- TRANSPORT -->
     <string name="transport_lora">إعدادات لورا</string>
     <string name="transport_mqtt">MQTT</string>

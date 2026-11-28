@@ -429,6 +429,7 @@
     <string name="key_verification_final_title">Verificare cheie finalizată</string>
     <string name="key_verification_request_title">Solicitare de verificare cheie</string>
     <string name="key_verification_title">Verificare cheie</string>
+    <!-- LABEL -->
     <string name="last_heard_filter_label">Filtrați după ultima oră: %1$s</string>
     <string name="last_position_update">Ultima actualizare a poziției</string>
     <string name="latest_alpha_firmware">Ultimul alfa</string>
@@ -952,6 +953,7 @@
     <string name="traffic_management_router_preserve_hops">Păstrează Hops Router</string>
     <string name="traffic_management_unknown_packet_threshold">Prag de pachet necunoscut</string>
     <!-- TRANSLATION -->
+    <!-- TRANSPARENT -->
     <!-- TRANSPORT -->
     <string name="transport_lora">LoRa</string>
     <string name="transport_mqtt">MQTT</string>
