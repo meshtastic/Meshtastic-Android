@@ -71,8 +71,9 @@ import org.meshtastic.core.ui.icon.Wifi
 import org.meshtastic.feature.connections.model.DeviceListEntry
 import org.meshtastic.sdk.ConnectionState
 import org.meshtastic.sdk.isInProgress
+import kotlin.time.Duration.Companion.seconds
 
-private const val RSSI_UPDATE_RATE_MS = 2000L
+private val RSSI_UPDATE_RATE = 2.seconds
 
 @OptIn(ExperimentalFoundationApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
@@ -92,7 +93,7 @@ fun DeviceListItem(
     val currentRssi by rememberUpdatedState(rssi)
     LaunchedEffect(device.address) {
         while (true) {
-            delay(RSSI_UPDATE_RATE_MS)
+            delay(RSSI_UPDATE_RATE)
             displayedRssi = currentRssi
         }
     }

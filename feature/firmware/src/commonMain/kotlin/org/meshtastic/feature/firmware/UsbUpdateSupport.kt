@@ -34,8 +34,10 @@ import org.meshtastic.core.resources.firmware_update_rebooting
 import org.meshtastic.core.resources.firmware_update_retrieval_failed
 import org.meshtastic.core.resources.firmware_update_usb_failed
 import org.meshtastic.feature.firmware.ota.downloadWithProgress
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
-private const val USB_REBOOT_DELAY = 5000L
+private val USB_REBOOT_DELAY = 5.seconds
 
 /** Asks the node to reboot into its UF2 bootloader and gives the drive time to enumerate. */
 private suspend fun rebootToUf2Bootloader(
@@ -156,7 +158,7 @@ internal sealed interface UsbPassResult {
 }
 
 private const val DETACH_TIMEOUT_MS = 60_000L
-private const val POST_WRITE_SETTLE_MS = 1_500L
+private val POST_WRITE_SETTLE = 1_500.milliseconds
 private const val CDC_UNBLOCK_WAIT_MS = 15_000L
 private const val CDC_DTR_HOLD_MS = 2_000L
 
@@ -229,7 +231,7 @@ internal class UsbPassWriter(
         val detached = awaitDeviceDetach(DETACH_TIMEOUT_MS)
         if (!detached) {
             Logger.d { "No detach observed for $fileName; falling back to the read-back check" }
-            delay(POST_WRITE_SETTLE_MS)
+            delay(POST_WRITE_SETTLE)
             if (fileHandler.isDestinationReadable(destination)) {
                 // Still readable means the bytes are sitting somewhere persistent, i.e. this was never a UF2 volume.
                 Logger.w { "$fileName is still readable after writing — it did not land on a bootloader volume" }

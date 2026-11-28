@@ -83,6 +83,8 @@ import org.meshtastic.sdk.NodeId
 import org.meshtastic.sdk.PacedMessageHandle
 import org.meshtastic.sdk.RadioClient
 import kotlin.concurrent.Volatile
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * The admitted app session and the scope its work runs in. Cancelling the scope closes admission; joining it drains.
@@ -166,7 +168,7 @@ class SharedRadioInterfaceService(
 
     companion object {
         /** How often [revokeSession] reports a session drain that has not completed. */
-        private const val DRAIN_WAIT_LOG_INTERVAL_MILLIS = 15 * 1000L
+        private val DRAIN_WAIT_LOG_INTERVAL = 15.seconds
 
         /** The handshake stage a link failed at when the app could not install its snapshot. */
         private const val SNAPSHOT_INSTALL_STAGE = "snapshot install"
@@ -247,11 +249,11 @@ class SharedRadioInterfaceService(
             job.cancel()
             // The drain must finish before a replacement session is admitted, so keep waiting, but never silently: a
             // block stuck past the handler timeout means a handler ignored cancellation.
-            var waitedMillis = 0L
-            while (withTimeoutOrNull(DRAIN_WAIT_LOG_INTERVAL_MILLIS) { job.join() } == null) {
-                waitedMillis += DRAIN_WAIT_LOG_INTERVAL_MILLIS
+            var waited = Duration.ZERO
+            while (withTimeoutOrNull(DRAIN_WAIT_LOG_INTERVAL) { job.join() } == null) {
+                waited += DRAIN_WAIT_LOG_INTERVAL
                 Logger.e {
-                    "Session teardown blocked ${waitedMillis}ms waiting for ${job.children.count()} admitted session " +
+                    "Session teardown blocked $waited waiting for ${job.children.count()} admitted session " +
                         "operation(s) to release (generation=${open.active.generation})"
                 }
             }

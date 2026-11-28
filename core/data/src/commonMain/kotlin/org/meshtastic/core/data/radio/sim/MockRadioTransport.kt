@@ -50,6 +50,8 @@ import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.ToRadio
 import org.meshtastic.proto.User
 import org.meshtastic.sdk.TransportIdentity
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 import org.meshtastic.proto.Channel as ProtoChannel
 import org.meshtastic.proto.MyNodeInfo as ProtoMyNodeInfo
 
@@ -403,7 +405,7 @@ class MockRadioTransport(private val scope: CoroutineScope, val address: String)
             lifecycle.runIfOpen {
                 publish(peer.positionPacket(nextPacketId(), peer.secondsSinceHeard).encode())
             }
-            delay(SEED_SPACING_MS)
+            delay(SEED_SPACING)
         }
 
         scenario.peers.take(scenario.telemetryPeerCount).forEach { peer ->
@@ -412,7 +414,7 @@ class MockRadioTransport(private val scope: CoroutineScope, val address: String)
                     peer.deviceTelemetryPacket(nextPacketId(), tick = 0, ageSeconds = peer.secondsSinceHeard).encode(),
                 )
             }
-            delay(SEED_SPACING_MS)
+            delay(SEED_SPACING)
         }
 
         scenario.peers.forEach { peer ->
@@ -424,19 +426,19 @@ class MockRadioTransport(private val scope: CoroutineScope, val address: String)
                         .encode(),
                 )
             }
-            delay(SEED_SPACING_MS)
+            delay(SEED_SPACING)
         }
 
         lifecycle.runIfOpen {
             publish(scenario.peers[0].let { it.neighborInfoPacket(nextPacketId(), it.secondsSinceHeard) }.encode())
         }
-        delay(SEED_SPACING_MS)
+        delay(SEED_SPACING)
         scenario.peers.forEach { peer ->
             val status = peer.status ?: return@forEach
             lifecycle.runIfOpen {
                 publish(peer.nodeStatusPacket(nextPacketId(), status, peer.secondsSinceHeard).encode())
             }
-            delay(SEED_SPACING_MS)
+            delay(SEED_SPACING)
         }
 
         seedConversations()
@@ -465,7 +467,7 @@ class MockRadioTransport(private val scope: CoroutineScope, val address: String)
                         .encode(),
                 )
             }
-            delay(SEED_SPACING_MS)
+            delay(SEED_SPACING)
         }
 
         scenario.directConversation.forEachIndexed { index, text ->
@@ -481,7 +483,7 @@ class MockRadioTransport(private val scope: CoroutineScope, val address: String)
                         .encode(),
                 )
             }
-            delay(SEED_SPACING_MS)
+            delay(SEED_SPACING)
         }
     }
 
@@ -495,7 +497,7 @@ class MockRadioTransport(private val scope: CoroutineScope, val address: String)
     private suspend fun streamLiveTelemetry() {
         var tick = 1
         while (true) {
-            delay(LIVE_TICK_MS)
+            delay(LIVE_TICK)
             val peer = scenario.peers[tick % scenario.telemetryPeerCount]
             lifecycle.runIfOpen { publish(peer.deviceTelemetryPacket(nextPacketId(), tick).encode()) }
             val weatherPeer = scenario.peers.firstOrNull { it.environment != null }
@@ -525,7 +527,7 @@ class MockRadioTransport(private val scope: CoroutineScope, val address: String)
         val replyTo = if (isBroadcast) BROADCAST_ADDR else scenario.myNode
 
         transportScope.handledLaunch {
-            delay(REPLY_DELAY_MS)
+            delay(REPLY_DELAY)
             lifecycle.runIfOpen {
                 publish(
                     responder
@@ -638,7 +640,7 @@ class MockRadioTransport(private val scope: CoroutineScope, val address: String)
                                                             (channelUtilization ?: 6f) + (tick % 5) * 1.5f
                                                         wb.air_util_tx = (airUtilTx ?: 1.2f) + (tick % 4) * 0.4f
                                                         wb.uptime_seconds =
-                                                            uptimeSeconds + tick * (LIVE_TICK_MS / 1000).toInt()
+                                                            uptimeSeconds + tick * LIVE_TICK.inWholeSeconds.toInt()
                                                     }
                                                     .build()
                                         }
@@ -834,7 +836,7 @@ class MockRadioTransport(private val scope: CoroutineScope, val address: String)
     private fun sendFakeAck(pr: ToRadio) {
         val packet = pr.packet ?: return
         transportScope.handledLaunch {
-            delay(ACK_DELAY_MS)
+            delay(ACK_DELAY)
             lifecycle.runIfOpen {
                 val directPeer = scenario.peers[scenario.directPeerIndex]
                 publish(makeAck(directPeer.num, packet.from, packet.id).encode())
@@ -862,12 +864,12 @@ class MockRadioTransport(private val scope: CoroutineScope, val address: String)
         const val DEFAULT_HOP_START = 3
 
         /** Spacing between seeded frames; the app timestamps rows on persist, so a burst would collapse together. */
-        const val SEED_SPACING_MS = 120L
+        val SEED_SPACING = 120.milliseconds
         const val MESSAGE_SPACING_SECONDS = 240
-        const val LIVE_TICK_MS = 20_000L
+        val LIVE_TICK = 20.seconds
         const val WEATHER_TICK_INTERVAL = 3
-        const val REPLY_DELAY_MS = 2_500L
-        const val ACK_DELAY_MS = 2_000L
+        val REPLY_DELAY = 2_500.milliseconds
+        val ACK_DELAY = 2.seconds
 
         val FAKE_SESSION_PASSKEY: okio.ByteString = okio.ByteString.of(0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77)
     }

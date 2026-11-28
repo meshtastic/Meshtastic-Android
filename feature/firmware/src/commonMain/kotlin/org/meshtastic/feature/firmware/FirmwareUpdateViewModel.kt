@@ -103,14 +103,15 @@ import org.meshtastic.core.resources.firmware_update_unsupported_update_method
 import org.meshtastic.core.resources.unknown
 import org.meshtastic.sdk.AdminResult
 import org.meshtastic.sdk.ConnectionState
+import kotlin.time.Duration.Companion.seconds
 
 // Bench measurement (Wio Tracker L1, 2 MB UF2): consume + reboot can outlast 30 s by a hair.
-private const val DEVICE_DETACH_TIMEOUT = 60_000L
+private val DEVICE_DETACH_TIMEOUT = 60.seconds
 
 /** How long the post-update permission preflight waits for the updated firmware to enumerate. */
 private const val USB_REATTACH_PERMISSION_WAIT = 30_000L
-private const val VERIFY_TIMEOUT = 60_000L
-private const val VERIFY_DELAY = 2000L
+private val VERIFY_TIMEOUT = 60.seconds
+private val VERIFY_DELAY = 2.seconds
 private const val MIN_BATTERY_LEVEL = 10
 private const val LOCAL_RELEASE_ID = "local"
 

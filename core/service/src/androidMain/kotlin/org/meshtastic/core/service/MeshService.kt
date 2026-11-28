@@ -43,6 +43,7 @@ import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioLinks
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Android foreground service that hosts the Meshtastic mesh radio connection.
@@ -111,7 +112,7 @@ class MeshService : Service() {
          * valid value before concluding that no device is genuinely selected. Covers cold-start DataStore load time;
          * only the initial null/blank value is treated as transient.
          */
-        private const val DEVICE_ADDRESS_SETTLE_MS = 5_000L
+        private val DEVICE_ADDRESS_SETTLE = 5.seconds
     }
 
     override fun onCreate() {
@@ -207,7 +208,7 @@ class MeshService : Service() {
         addressWaitJob?.cancel()
         addressWaitJob = serviceScope.launch {
             val resolved =
-                withTimeoutOrNull(DEVICE_ADDRESS_SETTLE_MS) {
+                withTimeoutOrNull(DEVICE_ADDRESS_SETTLE) {
                     radioInterfaceService.currentDeviceAddressFlow.first(::isValidDeviceAddress)
                 }
             when (serviceStayAliveDecision(resolved, radioOperationLock.isActive, radioLinks::isAddressValid)) {

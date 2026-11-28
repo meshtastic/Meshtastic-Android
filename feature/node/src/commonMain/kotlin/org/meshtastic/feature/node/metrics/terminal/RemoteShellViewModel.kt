@@ -55,16 +55,17 @@ import org.meshtastic.core.resources.remote_shell_session_closed_reason
 import org.meshtastic.core.ui.input.RemoteKey
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.proto.RemoteShell
+import kotlin.time.Duration.Companion.milliseconds
 
 private const val MAX_OUTPUT_LINES = 1_000
 private const val DEFAULT_COLS = 80
 private const val DEFAULT_ROWS = 24
 
 /** Keystroke debounce in character mode, matching the python client's `INPUT_BATCH_WINDOW_SEC`. */
-private const val FLUSH_WINDOW_MS = 500L
+private val FLUSH_WINDOW = 500.milliseconds
 
 /** How often [RemoteShellLink.tick] runs: OPEN retries, a shut window, the heartbeat, prediction expiry. */
-private const val TICK_MS = 250L
+private val TICK = 250.milliseconds
 
 private const val MAX_HISTORY = 50
 private const val DEL = "\u007f"
@@ -210,7 +211,7 @@ class RemoteShellViewModel(
         tickJob =
             safeLaunch(context = dispatchers.io, tag = "remoteShellTick") {
                 while (true) {
-                    delay(TICK_MS)
+                    delay(TICK)
                     val closed = withLink { link ->
                         val now = nowMillis
                         echo.tick(now, link.health.roundTripMs)
@@ -300,7 +301,7 @@ class RemoteShellViewModel(
     private fun scheduleFlush() {
         flushJob?.cancel()
         flushJob = viewModelScope.launch {
-            delay(FLUSH_WINDOW_MS)
+            delay(FLUSH_WINDOW)
             flushBuffer()
         }
     }

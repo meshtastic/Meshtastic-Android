@@ -58,6 +58,7 @@ import org.meshtastic.core.repository.SignalSurveyRepository
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.sdk.ConnectionState
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.seconds
 
 @Single(binds = [SignalSurveyRepository::class])
 class SignalSurveyRepositoryImpl(
@@ -168,7 +169,7 @@ class SignalSurveyRepositoryImpl(
     private fun locationStates(): Flow<PhoneLocationState> = flow {
         while (true) {
             emitAll(phoneLocationProvider.locationUpdates())
-            delay(LOCATION_RETRY_MS)
+            delay(LOCATION_RETRY)
         }
     }
 
@@ -195,7 +196,7 @@ class SignalSurveyRepositoryImpl(
 
     private companion object {
         const val PACKET_BUFFER = 256
-        const val LOCATION_RETRY_MS = 2_000L
+        val LOCATION_RETRY = 2.seconds
 
         // Firmware hands over what it queued while disconnected right after the handshake. A radio with no clock
         // leaves those packets unstamped, so their age cannot rule them out.
