@@ -24,7 +24,7 @@ import org.meshtastic.core.repository.DisplayMirrorManager
 import org.meshtastic.core.repository.MirrorFrame
 import org.meshtastic.core.repository.MirrorPalette
 import org.meshtastic.proto.DisplayPalette
-import org.meshtastic.sdk.DisplayMirrorFrame
+import org.meshtastic.sdk.DisplayImage
 
 /** A [DisplayMirrorManager] with no frames; [resets] counts calls to [reset]. */
 class FakeDisplayMirrorManager : DisplayMirrorManager {
@@ -33,7 +33,7 @@ class FakeDisplayMirrorManager : DisplayMirrorManager {
 
     var resets = 0
 
-    override fun handleFrame(frame: DisplayMirrorFrame) {}
+    override fun handleImage(image: DisplayImage) {}
 
     override fun handlePalette(palette: DisplayPalette) {}
 

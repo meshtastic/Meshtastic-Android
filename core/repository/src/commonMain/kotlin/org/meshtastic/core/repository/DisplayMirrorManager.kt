@@ -18,12 +18,11 @@ package org.meshtastic.core.repository
 
 import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.proto.DisplayPalette
-import org.meshtastic.sdk.DisplayMirrorFrame
+import org.meshtastic.sdk.DisplayImage
 
 /**
  * Holds the connected device's mirrored display while mirroring is enabled (see `AdminMessage.set_display_mirror`). The
- * SDK reassembles the firmware's chunks; this validates each complete frame against its declared geometry and
- * composites RGB565 partial-update rectangles onto the panel.
+ * SDK reassembles, validates and composites the frames; this maps its image for the UI.
  */
 interface DisplayMirrorManager {
     /** Latest complete frame, or null before the first one arrives. */
@@ -32,14 +31,14 @@ interface DisplayMirrorManager {
     /** Latest complete color palette, or null when the device renders monochrome. */
     val palette: StateFlow<MirrorPalette?>
 
-    /** Publishes a complete frame from the SDK, or drops it when its bytes do not match its geometry. */
-    fun handleFrame(frame: DisplayMirrorFrame)
+    /** Publishes the SDK's current display image as a [MirrorFrame]. */
+    fun handleImage(image: DisplayImage)
 
     /** Publishes a complete palette from the SDK. */
     fun handlePalette(palette: DisplayPalette)
 
     /**
-     * Clears the latest frame and partial reassembly buffers. Call when a session ends or a fresh mirror UI opens, so a
+     * Clears the latest frame. Call when a session ends or a fresh mirror UI opens, so a
      * previous device's final screen is never shown as if live. The palette outlives a reset because the device sends
      * it once per connection.
      */

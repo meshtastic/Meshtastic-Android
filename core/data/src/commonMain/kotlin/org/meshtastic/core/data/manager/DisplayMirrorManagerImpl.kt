@@ -26,7 +26,7 @@ import org.meshtastic.core.repository.MirrorFrame
 import org.meshtastic.core.repository.MirrorPalette
 import org.meshtastic.proto.DisplayFrame
 import org.meshtastic.proto.DisplayPalette
-import org.meshtastic.sdk.DisplayMirrorFrame
+import org.meshtastic.sdk.DisplayImage
 
 /** This singleton outlives a session, so [reset] must be called when one ends. */
 @Single
@@ -38,21 +38,17 @@ class DisplayMirrorManagerImpl : DisplayMirrorManager {
     private val _palette = MutableStateFlow<MirrorPalette?>(null)
     override val palette = _palette.asStateFlow()
 
-    private val rects = MirrorRectCompositor()
-
-    override fun handleFrame(frame: DisplayMirrorFrame) {
-        if (frame.format == DisplayFrame.Format.RGB565) {
-            if (rects.composite(frame)) emitRectFrame(frame)
-        } else if (isAcceptableMono(frame)) {
-            _frame.value =
-                MirrorFrame(
-                    width = frame.width,
-                    height = frame.height,
-                    frameId = frame.frameId,
-                    paletteSignature = frame.paletteSignature,
-                    pixels = frame.data.toByteArray(),
-                )
-        }
+    override fun handleImage(image: DisplayImage) {
+        _frame.value =
+            MirrorFrame(
+                width = image.width,
+                height = image.height,
+                frameId = image.frameId,
+                paletteSignature = image.paletteSignature,
+                pixels = image.pixels.toByteArray(),
+                format =
+                    if (image.format == DisplayFrame.Format.RGB565) MirrorFormat.RGB565 else MirrorFormat.MONO_VLSB,
+            )
     }
 
     override fun handlePalette(palette: DisplayPalette) {
@@ -69,53 +65,12 @@ class DisplayMirrorManagerImpl : DisplayMirrorManager {
             )
     }
 
-    /**
-     * Format must be MONO_VLSB and width/height must describe exactly the bytes delivered; a zero or lying dimension
-     * would otherwise reach the renderer (aspectRatio requires > 0).
-     */
-    private fun isAcceptableMono(frame: DisplayMirrorFrame): Boolean {
-        val size = frame.data.size.toLong()
-        val expectedSize = frame.width.toLong() * ((frame.height.toLong() + PIXELS_PER_PAGE - 1) / PIXELS_PER_PAGE)
-        val acceptable =
-            frame.format == DisplayFrame.Format.MONO_VLSB &&
-                frame.width > 0 &&
-                frame.height > 0 &&
-                expectedSize == size &&
-                size <= MAX_FRAME_BYTES
-        if (!acceptable) {
-            Logger.w {
-                "DisplayMirror: dropping bad frame (format=${frame.format} ${frame.width}x${frame.height} size=$size)"
-            }
-        }
-        return acceptable
-    }
-
-    private fun emitRectFrame(frame: DisplayMirrorFrame) {
-        val pixels = rects.snapshot() ?: return
-        _frame.value =
-            MirrorFrame(
-                width = rects.width,
-                height = rects.height,
-                frameId = frame.frameId,
-                paletteSignature = 0,
-                pixels = pixels,
-                format = MirrorFormat.RGB565,
-            )
-    }
-
     override fun reset() {
-        rects.reset()
         _frame.value = null
     }
 
     private companion object {
-        // Generous sanity cap: 320x240 at 1bpp is 9600 bytes.
-        const val MAX_FRAME_BYTES = 16384
-
         // The firmware's region table caps at 48; anything past this is a bug or an attack.
         const val MAX_PALETTE_REGIONS = 512
-
-        // MONO_VLSB packs 8 vertically adjacent pixels per byte (one "page" row).
-        const val PIXELS_PER_PAGE = 8
     }
 }
