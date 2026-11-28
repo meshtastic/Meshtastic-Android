@@ -285,10 +285,11 @@ class SharedRadioInterfaceServiceTest {
         assertNull(service.activeSession.value)
         val state = assertIs<ConnectionState.Failed>(serviceRepository.connectionState.value)
         assertIs<MeshtasticException.HandshakeTimeout>(state.cause)
-        assertEquals(listOf(connectionErrorText(TransportDisconnectReason.HandshakeRecoveryExhausted)), errors)
 
         service.connect()
         assertEquals(2, links.opened.size, "Connect opens a fresh link")
+        // Last: on wasmJs the string resource loads asynchronously, and work launched after it would be queued.
+        assertEquals(listOf(connectionErrorText(TransportDisconnectReason.HandshakeRecoveryExhausted)), errors)
     }
 
     @Test
