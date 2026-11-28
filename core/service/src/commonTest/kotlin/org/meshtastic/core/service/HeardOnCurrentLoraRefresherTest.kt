@@ -32,6 +32,7 @@ import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.toByteString
+import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.common.state.RadioOperation
 import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.repository.MeshConfigFlowManager
@@ -93,7 +94,7 @@ class HeardOnCurrentLoraRefresherTest {
     private fun TestScope.controller() = AdminControllerImpl(
         nodeManager = nodeManager,
         radio = radio,
-        sessionAdmin = SessionAdmin(radio, backgroundScope),
+        sessionAdmin = SessionAdmin(radio, backgroundScope.asServiceScope()),
         heardOnCurrentLoraRefresher =
         HeardOnCurrentLoraRefresher(
             nodeManager = nodeManager,

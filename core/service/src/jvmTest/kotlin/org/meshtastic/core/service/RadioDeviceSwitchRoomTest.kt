@@ -186,6 +186,7 @@ class RadioDeviceSwitchRoomTest {
             packetHandler = mock(MockMode.autofill),
             nodeManager = nodeManager,
             radioInterfaceService = radio,
+            sessionAdmin = SessionAdmin(radio, backgroundScope.asServiceScope()),
             locationManager = mock(MockMode.autofill),
             packetRepository = lazy { mock(MockMode.autofill) },
             dataHandler = lazy { mock(MockMode.autofill) },

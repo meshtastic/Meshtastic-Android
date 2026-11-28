@@ -17,8 +17,9 @@
 package org.meshtastic.core.service
 
 import co.touchlab.kermit.Logger
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
+import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.RadioInterfaceService
@@ -28,7 +29,8 @@ import org.meshtastic.sdk.MeshtasticException
 import org.meshtastic.sdk.RadioClient
 
 /** Runs admin commands on the local node through the active radio session's SDK admin API. */
-internal class SessionAdmin(private val radio: RadioInterfaceService, private val scope: CoroutineScope) {
+@Single
+internal class SessionAdmin(private val radio: RadioInterfaceService, private val scope: ServiceScope) {
 
     /**
      * Starts [command] without waiting for the device's answer and logs a failure. The SDK enqueues the packet before
