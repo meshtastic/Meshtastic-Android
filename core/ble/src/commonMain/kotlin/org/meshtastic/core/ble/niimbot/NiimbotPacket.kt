@@ -81,8 +81,8 @@ object NiimbotRequest {
 
 /**
  * Collects bytes from the printer's notifications and yields whole packets. A notification can carry part of a packet
- * or several; bytes that don't start a packet are dropped until the next `55 55`, and so is a frame with a bad checksum
- * or tail.
+ * or several; bytes that don't start a packet are dropped until the next `55 55`. A frame with a bad checksum or tail
+ * is dropped, and the search for the next one resumes just past its head.
  */
 class NiimbotPacketParser {
     private var buffer = ByteArray(0)
@@ -95,8 +95,10 @@ class NiimbotPacketParser {
             val length = buffer[start + LENGTH_INDEX].toInt() and BYTE_MASK
             val end = start + length + FRAME_OVERHEAD
             if (buffer.size < end) break
-            frameAt(start, length)?.let(packets::add)
-            start = nextFrameStart(end)
+            val packet = frameAt(start, length)
+            // A damaged length can reach into the next frame, so a rejected candidate gives up only its own head.
+            if (packet != null) packets += packet
+            start = nextFrameStart(if (packet != null) end else start + 1)
         }
         buffer = buffer.copyOfRange(start, buffer.size)
         return packets

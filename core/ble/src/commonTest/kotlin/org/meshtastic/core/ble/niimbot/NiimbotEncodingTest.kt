@@ -110,4 +110,12 @@ class NiimbotEncodingTest {
         val badTail = first.copyOf().also { it[7] = 0x00 }
         assertEquals(listOf(NiimbotPacket(0xC2, byteArrayOf(1))), parser.append(badChecksum + badTail + first))
     }
+
+    // The broken frame's length 7 reaches to byte 14, past the head of the intact reply at byte 7.
+    @Test
+    fun `a corrupt frame whose length runs into the next frame does not swallow it`() {
+        val packets = NiimbotPacketParser().append("5555010701aaaa5555c10101c1aaaa".unhex())
+
+        assertEquals(listOf(NiimbotPacket(0xC1, byteArrayOf(1))), packets)
+    }
 }
