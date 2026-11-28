@@ -41,6 +41,9 @@ sealed class NiimbotException(message: String) : Exception(message) {
     /** The printer answered that it does not know [request]. */
     class Unsupported(val request: Int) : NiimbotException("Printer does not support request $request")
 
+    /** The printer answered a setup [request] with failure. */
+    class Rejected(val request: Int) : NiimbotException("Printer rejected request $request")
+
     /** The printer did not answer [request] in time. */
     class NoResponse(val request: Int) : NiimbotException("No reply to request $request")
 
@@ -191,7 +194,10 @@ class NiimbotProtocol(private val link: NiimbotLink) {
         0
     }
 
-    /** Sends [request] and waits for its reply; the write and the wait together get [REPLY_TIMEOUT]. */
+    /**
+     * Sends [request] and waits for its reply; the write and the wait together get [REPLY_TIMEOUT]. A [VERDICTS]
+     * request the printer answers with failure throws.
+     */
     private suspend fun transceive(request: Int, data: ByteArray, replyOffset: Int = 1): NiimbotPacket {
         val replyType = request + replyOffset and BYTE_MASK
         return try {
@@ -208,6 +214,7 @@ class NiimbotProtocol(private val link: NiimbotLink) {
     private suspend fun awaitReply(request: Int, replyType: Int): NiimbotPacket {
         var packet = checked(link.received.receive(), request)
         while (packet.type != replyType) packet = checked(link.received.receive(), request)
+        if (request in VERDICTS && packet.data.firstOrNull() == FAILURE) throw NiimbotException.Rejected(request)
         return packet
     }
 
@@ -223,10 +230,12 @@ class NiimbotProtocol(private val link: NiimbotLink) {
     private suspend fun attempt(block: suspend () -> Unit) {
         try {
             block()
+        } catch (fault: NiimbotException.PrinterFault) {
+            throw fault
         } catch (lost: NiimbotException.LinkLost) {
             throw lost
         } catch (_: NiimbotException) {
-            // Optional step: older firmware skips it and the print goes on, unless the link itself is gone.
+            // Optional step: older firmware skips it or stays silent, and the print goes on.
         }
     }
 
@@ -244,6 +253,21 @@ class NiimbotProtocol(private val link: NiimbotLink) {
 
     private companion object {
         val ONE = byteArrayOf(1)
+
+        /**
+         * Setup requests whose reply is the printer's verdict, `01` on success and `00` on failure. END_PRINT is not
+         * one: its `00` means the page is still printing.
+         */
+        val VERDICTS =
+            setOf(
+                NiimbotRequest.SET_LABEL_DENSITY,
+                NiimbotRequest.SET_LABEL_TYPE,
+                NiimbotRequest.START_PRINT,
+                NiimbotRequest.START_PAGE_PRINT,
+                NiimbotRequest.SET_DIMENSION,
+                NiimbotRequest.END_PAGE_PRINT,
+            )
+        const val FAILURE: Byte = 0
         val REPLY_TIMEOUT = 2.seconds
         val ROW_PACING = 10.milliseconds
         val STATUS_POLL_INTERVAL = 300.milliseconds

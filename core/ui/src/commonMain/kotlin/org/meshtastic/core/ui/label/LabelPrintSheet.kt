@@ -82,6 +82,7 @@ import org.meshtastic.core.resources.label_print_error_low_battery
 import org.meshtastic.core.resources.label_print_error_no_labels
 import org.meshtastic.core.resources.label_print_error_no_response
 import org.meshtastic.core.resources.label_print_error_other
+import org.meshtastic.core.resources.label_print_error_rejected
 import org.meshtastic.core.resources.label_print_error_scan_busy
 import org.meshtastic.core.resources.label_print_error_unsupported
 import org.meshtastic.core.resources.label_print_error_wrong_roll
@@ -371,6 +372,8 @@ private fun LabelPrintError.message(): String = when (this) {
     LabelPrintError.Unsupported -> stringResource(Res.string.label_print_error_unsupported)
 
     LabelPrintError.NoResponse -> stringResource(Res.string.label_print_error_no_response)
+
+    LabelPrintError.Rejected -> stringResource(Res.string.label_print_error_rejected)
 
     is LabelPrintError.Scan ->
         when (reason) {

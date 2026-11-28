@@ -47,6 +47,9 @@ sealed interface LabelPrintError {
 
     data object NoResponse : LabelPrintError
 
+    /** The printer turned down a step of the print. */
+    data object Rejected : LabelPrintError
+
     /** The search for printers could not start. [reason] is null when the platform gave none. */
     data class Scan(val reason: BleScanStartFailureReason?) : LabelPrintError
 }
@@ -215,6 +218,7 @@ class LabelPrintViewModel(printerFactory: NiimbotPrinterFactory, private val pre
 internal fun Throwable.toLabelPrintError(): LabelPrintError = when (this) {
     is NiimbotException.PrinterFault -> LabelPrintError.Fault(NiimbotFault.of(code), code)
     is NiimbotException.Unsupported -> LabelPrintError.Unsupported
+    is NiimbotException.Rejected -> LabelPrintError.Rejected
     else -> LabelPrintError.NoResponse
 }
 

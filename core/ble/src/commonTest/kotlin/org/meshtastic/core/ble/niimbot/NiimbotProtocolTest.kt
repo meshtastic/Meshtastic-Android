@@ -46,12 +46,23 @@ internal class ScriptedPrinter(private val statusData: ByteArray? = null) : Niim
 
     /** A request type whose write never returns while the link stays up. */
     var writeHangsAt: Int? = null
+
+    /** A request type the printer answers with its usual reply carrying `00`, failure. */
+    var rejects: Int? = null
+
+    /** A request type the printer answers with a fault packet, code 0x01 (cover open), instead of its reply. */
+    var faultsAt: Int? = null
     private var polls = 0
 
     override suspend fun send(packet: NiimbotPacket) {
         sent += packet.toBytes().hex()
         if (packet.type == linkLostAt) received.close()
         if (packet.type == writeHangsAt) awaitCancellation()
+        if (packet.type == faultsAt) {
+            received.trySend(NiimbotPacket(0xDB, byteArrayOf(0x01)))
+            return
+        }
+        val verdict = if (packet.type == rejects) byteArrayOf(0) else byteArrayOf(1)
         when (packet.type) {
             0x84,
             0x85,
@@ -67,9 +78,9 @@ internal class ScriptedPrinter(private val statusData: ByteArray? = null) : Niim
 
             0x21,
             0x23,
-            -> received.trySend(NiimbotPacket(packet.type + 16, byteArrayOf(1)))
+            -> received.trySend(NiimbotPacket(packet.type + 16, verdict))
 
-            else -> received.trySend(NiimbotPacket(packet.type + 1, byteArrayOf(1)))
+            else -> received.trySend(NiimbotPacket(packet.type + 1, verdict))
         }
     }
 
@@ -258,6 +269,50 @@ class NiimbotProtocolTest {
 
         assertEquals(listOf("5555dc0101dcaaaa"), printer.sent)
     }
+
+    // printers.niim.blue/interfacing/proto: these replies are "simple", data 01 on success and 00 on failure;
+    // niimprint's setters return bool(data[0]) for each.
+    @Test
+    fun `a setup step the printer answers with failure stops the print before any row`() = runTest {
+        val setup =
+            listOf(
+                NiimbotRequest.SET_LABEL_DENSITY,
+                NiimbotRequest.SET_LABEL_TYPE,
+                NiimbotRequest.START_PRINT,
+                NiimbotRequest.START_PAGE_PRINT,
+                NiimbotRequest.SET_DIMENSION,
+            )
+
+        val outcomes = setup.map { request ->
+            val printer = ScriptedPrinter(ScriptedPrinter.statusData(2, 4)).apply { rejects = request }
+            val failure = assertFailsWith<NiimbotException.Rejected> { NiimbotProtocol(printer).print(picture) }
+            failure.request to printer.sent.any { it.startsWith("555584") || it.startsWith("555585") }
+        }
+
+        assertEquals(setup.map { it to false }, outcomes)
+    }
+
+    @Test
+    fun `a page end the printer answers with failure fails the print without waiting for the page`() = runTest {
+        val printer =
+            ScriptedPrinter(ScriptedPrinter.statusData(2, 4)).apply { rejects = NiimbotRequest.END_PAGE_PRINT }
+
+        val failure = assertFailsWith<NiimbotException.Rejected> { NiimbotProtocol(printer).print(picture) }
+
+        assertEquals(NiimbotRequest.END_PAGE_PRINT, failure.request)
+        assertEquals(false, "5555a30101a3aaaa" in printer.sent)
+    }
+
+    @Test
+    fun `a fault answering the status data request stops the print instead of falling back to the legacy sequence`() =
+        runTest {
+            val printer = ScriptedPrinter(ScriptedPrinter.statusData(3, 0)).apply { faultsAt = 0xA5 }
+
+            val fault = assertFailsWith<NiimbotException.PrinterFault> { NiimbotProtocol(printer).print(picture) }
+
+            assertEquals(0x01, fault.code)
+            assertEquals(probe, printer.sent)
+        }
 
     @Test
     fun `fault codes read as niimprint's error table names them`() {
