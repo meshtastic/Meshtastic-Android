@@ -46,6 +46,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -225,7 +226,8 @@ class SharedRadioInterfaceService(
         if (activeLink.value !== active || active.closing) return null
         check(activeRadioSession == null) { "Cannot admit a session while the previous one is still draining" }
         val session = ActiveRadioSession(sessionGenerationCounter.incrementAndGet(), active.address)
-        val scope = CoroutineScope(dispatchers.default + SupervisorJob(active.scope.coroutineContext.job))
+        // Derived from the link's scope, so the session's work is a child of the link and ends with it.
+        val scope = active.scope + (dispatchers.default + SupervisorJob(active.scope.coroutineContext.job))
         activeRadioSession = OpenSession(session, scope)
         _activeSession.value = session.context
         _sessionGeneration.value = session.generation
