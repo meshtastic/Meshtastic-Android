@@ -18,5 +18,4 @@ package org.meshtastic.core.network.repository
 
 object NetworkConstants {
     const val SERVICE_PORT = 4403
-    const val SERVICE_TYPE = "_meshtastic._tcp"
 }

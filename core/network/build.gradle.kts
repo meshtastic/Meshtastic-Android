@@ -66,9 +66,10 @@ kotlin {
             dependencies {
                 implementation(libs.ktor.client.java)
                 implementation(libs.jserialcomm)
-                implementation(libs.jmdns)
             }
         }
+
+        getByName("jvmAndroidMain") { dependencies { implementation(libs.meshtastic.sdk.transport.tcp) } }
 
         androidMain.dependencies { implementation(libs.usb.serial.android) }
 
