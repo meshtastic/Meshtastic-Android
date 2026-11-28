@@ -27,13 +27,28 @@ import java.io.File
  * JVM/Desktop implementation of [SerialDevicePresence].
  *
  * Desktop serial publishes no hot-plug device set, so [deviceKeys] stays empty. [portExists] takes the port a desktop
- * selection stores: a Linux `/dev/serial/by-id` link, present while udev has it pointed at a device, or a system port
- * name (`ttyUSB0`, `COM3`) jSerialComm lists.
+ * selection stores and answers through [serialPortExists].
  */
 @Single
 class JvmSerialDevicePresence : SerialDevicePresence {
     override val deviceKeys: StateFlow<Set<String>> = MutableStateFlow<Set<String>>(emptySet()).asStateFlow()
 
-    override fun portExists(key: String): Boolean =
-        if (key.startsWith("/")) File(key).exists() else availableSerialPorts().any { it.name == key }
+    override fun portExists(key: String): Boolean = serialPortExists(key) { availableSerialPorts().map { it.name } }
+}
+
+/**
+ * Whether the port a stored serial address names exists. A path (a Linux `/dev/serial/by-id` link) exists while it
+ * resolves, and a system port name (`ttyUSB0`, `cu.usbmodem1101`, `tty.usbmodem1101`) while its node in [devDir] does,
+ * which is where serial open looks for it whether or not the port listing shows it. A Windows `COMn` name is not a
+ * file, so it exists while [listedNames] has it.
+ */
+internal fun serialPortExists(
+    key: String,
+    isWindows: Boolean = System.getProperty("os.name", "").lowercase().startsWith("windows"),
+    devDir: File = File("/dev"),
+    listedNames: () -> List<String>,
+): Boolean = when {
+    key.startsWith("/") -> File(key).exists()
+    isWindows -> key in listedNames()
+    else -> File(devDir, key).exists()
 }

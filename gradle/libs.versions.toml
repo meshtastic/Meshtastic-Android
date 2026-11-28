@@ -96,7 +96,6 @@ mcp-kotlin-sdk = "0.16.0"
 
 # Other
 aboutlibraries = "15.3.0"
-jserialcomm = "2.11.4"
 coil = "3.6.3"
 datadog-gradle = "1.32.0"
 dd-sdk-android = "3.16.0"
@@ -337,7 +336,6 @@ meshtastic-mqtt-client-core = { module = "org.meshtastic:mqtt-client-core" }
 meshtastic-mqtt-client-transport-tcp = { module = "org.meshtastic:mqtt-client-transport-tcp" }
 meshtastic-mqtt-client-transport-ws = { module = "org.meshtastic:mqtt-client-transport-ws" }
 
-jserialcomm = { module = "com.fazecast:jSerialComm", version.ref = "jserialcomm" }
 okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 okio-fakefilesystem = { module = "com.squareup.okio:okio-fakefilesystem", version.ref = "okio" }
 uri-kmp = { module = "com.eygraber:uri-kmp", version.ref = "uri-kmp" }

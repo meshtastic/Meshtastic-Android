@@ -47,4 +47,27 @@ class JvmSerialDevicePresenceTest {
         node.deleteExisting()
         assertFalse(presence.portExists(link.toString()))
     }
+
+    // macOS makes /dev/cu.X and /dev/tty.X for one USB device and the SDK listing drops tty names; a saved tty
+    // address must still count as present while the node exists, or the serial link waits forever.
+    @Test
+    fun `a saved macOS tty port exists while its node does though the listing omits it`() {
+        val cu = dev.resolve("cu.usbmodem1101").createFile()
+        val tty = dev.resolve("tty.usbmodem1101").createFile()
+        val listed = listOf("cu.usbmodem1101")
+
+        assertTrue(serialPortExists("tty.usbmodem1101", isWindows = false, devDir = dev.toFile()) { listed })
+        cu.deleteExisting()
+        tty.deleteExisting()
+        assertFalse(serialPortExists("tty.usbmodem1101", isWindows = false, devDir = dev.toFile()) { emptyList() })
+    }
+
+    // A Windows COM port is not a file, so its presence comes from the port listing.
+    @Test
+    fun `a Windows COM port exists while the listing has it`() {
+        val listed = listOf("COM3")
+
+        assertTrue(serialPortExists("COM3", isWindows = true, devDir = dev.toFile()) { listed })
+        assertFalse(serialPortExists("COM4", isWindows = true, devDir = dev.toFile()) { listed })
+    }
 }
