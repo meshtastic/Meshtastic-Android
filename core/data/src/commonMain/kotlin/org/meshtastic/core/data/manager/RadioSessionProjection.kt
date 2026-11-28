@@ -54,6 +54,7 @@ import org.meshtastic.sdk.DisplayImage
 import org.meshtastic.sdk.MeshEvent
 import org.meshtastic.sdk.NodeChange
 import org.meshtastic.sdk.RadioSessionEvent
+import org.meshtastic.sdk.redacted
 import kotlin.uuid.Uuid
 
 /**
@@ -168,7 +169,7 @@ class RadioSessionProjection(
      */
     fun onOutboundPacket(packet: MeshPacket, session: RadioSessionContext) {
         val decoded = packet.decoded ?: return
-        val loggedPacket = packet.redactedForLog()
+        val loggedPacket = packet.redacted()
         insertMeshLog(
             MeshLog(
                 uuid = Uuid.random().toString(),
@@ -221,7 +222,7 @@ class RadioSessionProjection(
                 }
                 .build()
         val decoded = packet.decoded ?: return
-        val loggedPacket = packet.redactedForLog()
+        val loggedPacket = packet.redacted()
         val log =
             MeshLog(
                 uuid = Uuid.random().toString(),
@@ -312,7 +313,7 @@ class RadioSessionProjection(
     private fun logEvent(event: MeshEvent, session: RadioSessionContext) {
         when (event) {
             is MeshEvent.Notification -> {
-                val notification = event.notification.redactedForLog()
+                val notification = event.notification.redacted()
                 logFromRadio(session, TYPE_CLIENT_NOTIFICATION, notification.toString()) {
                     it.clientNotification = notification
                 }
@@ -334,16 +335,16 @@ class RadioSessionProjection(
     private fun logConfigChanges(session: RadioSessionContext, bundle: ConfigBundle) {
         val previous = loggedConfig.getAndSet(bundle)
         (bundle.configs - previous?.configs.orEmpty().toSet()).forEach { changed ->
-            val config = changed.redactedForLog()
+            val config = changed.redacted()
             logFromRadio(session, TYPE_CONFIG, config.toOneLineString()) { it.config = config }
         }
         (bundle.moduleConfigs - previous?.moduleConfigs.orEmpty().toSet()).forEach { changed ->
-            val moduleConfig = changed.redactedForLog()
+            val moduleConfig = changed.redacted()
             logFromRadio(session, TYPE_MODULE_CONFIG, moduleConfig.toOneLineString()) { it.moduleConfig = moduleConfig }
         }
         bundle.deviceUIConfig
             ?.takeIf { it != previous?.deviceUIConfig }
-            ?.redactedForLog()
+            ?.redacted()
             ?.let { ui ->
                 logFromRadio(session, TYPE_DEVICE_UI_CONFIG, ui.toString()) { it.deviceuiConfig = ui }
             }
@@ -351,7 +352,7 @@ class RadioSessionProjection(
 
     private fun logChannels(session: RadioSessionContext, channels: List<org.meshtastic.proto.Channel>) {
         channels
-            .map { it.redactedForLog() }
+            .map { it.redacted() }
             .forEach { channel ->
                 logFromRadio(session, TYPE_CHANNEL, channel.toOneLineString()) { it.channel = channel }
             }
@@ -363,7 +364,7 @@ class RadioSessionProjection(
 
     /**
      * MeshLog rows keep their persisted [FromRadio] shape, which the debug view and history queries read. A
-     * credential-bearing message arrives as its `redactedForLog` copy, in both [message] and the frame.
+     * credential-bearing message arrives as its `redacted` copy, in both [message] and the frame.
      */
     private fun logFromRadio(
         session: RadioSessionContext,
