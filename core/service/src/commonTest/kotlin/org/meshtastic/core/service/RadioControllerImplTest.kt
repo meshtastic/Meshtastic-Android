@@ -1710,6 +1710,7 @@ class RadioControllerImplTest {
     // Regression: a null client treated as success would show the user as licensed on a radio that was never told.
     @Test
     fun setHamModeWithoutASessionIsUnreachableAndProjectsNothing() = runTest {
+        every { nodeManager.nodeDBbyNodeNum } returns emptyMap()
         val controller =
             editController(backgroundScope, recordingAdmin(), myNodeNum = 123, activeSession = MutableStateFlow(null))
 
