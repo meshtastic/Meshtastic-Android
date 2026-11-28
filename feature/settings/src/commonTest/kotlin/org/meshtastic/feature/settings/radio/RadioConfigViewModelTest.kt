@@ -1625,8 +1625,7 @@ class RadioConfigViewModelTest {
         assertEquals("bell.mp3", viewModel.radioConfigState.value.ringtone)
 
         // Error
-        everySuspend { adminController.getConfig(any(), any()) } returns
-            AdminResult.Failed(Routing.Error.NO_RESPONSE)
+        everySuspend { adminController.getConfig(any(), any()) } returns AdminResult.Failed(Routing.Error.NO_RESPONSE)
         viewModel.setResponseStateLoading(ConfigRoute.DEVICE)
         runCurrent()
         assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Error)

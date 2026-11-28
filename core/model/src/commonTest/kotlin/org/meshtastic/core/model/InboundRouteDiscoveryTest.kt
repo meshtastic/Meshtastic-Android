@@ -74,32 +74,33 @@ class InboundRouteDiscoveryTest {
 
     @Test
     fun `a reply with hop start zero and an empty bitfield keeps its return route endpoints`() {
-        val reply = MeshPacket.Builder()
-            .also { p ->
-                p.from = TRACER
-                p.to = US
-                p.hop_start = 0
-                p.decoded =
-                    Data.Builder()
-                        .also { d ->
-                            d.portnum = PortNum.TRACEROUTE_APP
-                            d.want_response = false
-                            d.request_id = 7
-                            d.bitfield = 0
-                            d.payload =
-                                RouteDiscovery.ADAPTER.encode(
-                                    RouteDiscovery.Builder()
-                                        .also { rd ->
-                                            rd.snr_towards = listOf(SNR)
-                                            rd.snr_back = listOf(SNR)
-                                        }
-                                        .build(),
-                                )
-                                    .toByteString()
-                        }
-                        .build()
-            }
-            .build()
+        val reply =
+            MeshPacket.Builder()
+                .also { p ->
+                    p.from = TRACER
+                    p.to = US
+                    p.hop_start = 0
+                    p.decoded =
+                        Data.Builder()
+                            .also { d ->
+                                d.portnum = PortNum.TRACEROUTE_APP
+                                d.want_response = false
+                                d.request_id = 7
+                                d.bitfield = 0
+                                d.payload =
+                                    RouteDiscovery.ADAPTER.encode(
+                                        RouteDiscovery.Builder()
+                                            .also { rd ->
+                                                rd.snr_towards = listOf(SNR)
+                                                rd.snr_back = listOf(SNR)
+                                            }
+                                            .build(),
+                                    )
+                                        .toByteString()
+                            }
+                            .build()
+                }
+                .build()
 
         assertEquals(listOf(TRACER, US), assertNotNull(reply.fullRouteDiscovery).route_back)
     }

@@ -1228,7 +1228,8 @@ class RadioControllerImplTest {
     ): AdminResult<Unit> {
         val result = async { controller.setHamMode(destNum, params) }
         runCurrent()
-        transport.outboundPackets()
+        transport
+            .outboundPackets()
             .lastOrNull { hamAdminOf(it)?.set_ham_mode != null }
             ?.let { transport.injectRoutingAck(it.id) }
         runCurrent()
@@ -1537,14 +1538,13 @@ class RadioControllerImplTest {
         verify { nodeManager.handleReceivedUser(42, any(), any(), true) }
     }
 
-    private fun hamParams(longName: String? = null) =
-        HamParameters.Builder()
-            .also { wb ->
-                wb.call_sign = "KK7ABC"
-                wb.short_name = "KK7A"
-                if (longName != null) wb.long_name = longName
-            }
-            .build()
+    private fun hamParams(longName: String? = null) = HamParameters.Builder()
+        .also { wb ->
+            wb.call_sign = "KK7ABC"
+            wb.short_name = "KK7A"
+            if (longName != null) wb.long_name = longName
+        }
+        .build()
 
     private fun TestScope.connectedHam(
         lora: Config.LoRaConfig?,

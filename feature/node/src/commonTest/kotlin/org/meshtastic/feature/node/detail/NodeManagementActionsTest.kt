@@ -17,7 +17,6 @@
 package org.meshtastic.feature.node.detail
 
 import dev.mokkery.MockMode
-import dev.mokkery.answering.returns
 import dev.mokkery.answering.throws
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any

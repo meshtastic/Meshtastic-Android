@@ -102,8 +102,8 @@ interface RadioConfigRepository {
 
     /**
      * The firmware's region to modem-preset compatibility map, from the active session's SDK config bundle. Null
-     * between sessions, including while reconnecting, or when the connected firmware predates this message (< 2.8).
-     * The local LoRa config UI uses it to constrain the preset picker to the presets legal in the selected region.
+     * between sessions, including while reconnecting, or when the connected firmware predates this message (< 2.8). The
+     * local LoRa config UI uses it to constrain the preset picker to the presets legal in the selected region.
      */
     val loraRegionPresetMapFlow: Flow<LoRaRegionPresetMap?>
 }

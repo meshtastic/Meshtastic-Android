@@ -25,9 +25,9 @@ import org.meshtastic.sdk.transport.tcp.DiscoveredTcpRadio
 import org.meshtastic.sdk.transport.tcp.TcpDiscoveryEvent
 
 /**
- * The radios a [org.meshtastic.sdk.transport.tcp.TcpDiscovery] has resolved and not lost, starting with an empty list so a
- * `combine` over this flow is not held back. A browse that cannot start is logged and ends the flow instead of failing the
- * shared collector.
+ * The radios a [org.meshtastic.sdk.transport.tcp.TcpDiscovery] has resolved and not lost, starting with an empty list
+ * so a `combine` over this flow is not held back. A browse that cannot start is logged and ends the flow instead of
+ * failing the shared collector.
  */
 internal fun Flow<TcpDiscoveryEvent>.toServiceList(): Flow<List<DiscoveredService>> =
     scan(emptyMap<String, DiscoveredTcpRadio>()) { known, event ->
