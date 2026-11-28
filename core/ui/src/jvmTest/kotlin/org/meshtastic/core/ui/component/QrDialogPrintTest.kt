@@ -30,8 +30,7 @@ import kotlin.test.Test
 
 /**
  * design#185 offers Print only where the app can reach the printer. The desktop app has no printer support, so a share
- * dialog given a label still shows no Print there. The Android side, where Print shows, has no Compose host tests in
- * this module.
+ * dialog given a label still shows no Print there; where the platform can print, the dialog is told so.
  */
 @OptIn(ExperimentalTestApi::class)
 class QrDialogPrintTest {
@@ -46,6 +45,27 @@ class QrDialogPrintTest {
     fun `a share dialog given a label offers no Print where the platform cannot print`() = runComposeUiTest {
         setContent {
             AppTheme { QrDialog(title = "Hiking", uriString = label.url, onDismiss = {}, label = label) }
+        }
+
+        onNodeWithText(getString(Res.string.share_action)).assertExists()
+        onNodeWithText(getString(Res.string.label_print_action)).assertDoesNotExist()
+    }
+
+    @Test
+    fun `a share dialog given a label offers Print where the platform can print`() = runComposeUiTest {
+        setContent {
+            AppTheme {
+                QrDialog(title = "Hiking", uriString = label.url, onDismiss = {}, label = label, printSupported = true)
+            }
+        }
+
+        onNodeWithText(getString(Res.string.label_print_action)).assertExists()
+    }
+
+    @Test
+    fun `a share dialog without a label offers no Print even where the platform can print`() = runComposeUiTest {
+        setContent {
+            AppTheme { QrDialog(title = "Hiking", uriString = label.url, onDismiss = {}, printSupported = true) }
         }
 
         onNodeWithText(getString(Res.string.share_action)).assertExists()

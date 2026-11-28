@@ -100,9 +100,8 @@ fun QrDialog(
     shareSubject: String = title,
     options: (@Composable () -> Unit)? = null,
     label: LabelSpec? = null,
+    printSupported: Boolean = isLabelPrintSupported(),
 ) {
-    // Print is offered only where the app can reach a label printer over Bluetooth LE.
-    val printSupported = isLabelPrintSupported()
     val printable = label?.takeIf { printSupported }
     var showPrint by rememberSaveable { mutableStateOf(false) }
     if (showPrint && printable != null) {

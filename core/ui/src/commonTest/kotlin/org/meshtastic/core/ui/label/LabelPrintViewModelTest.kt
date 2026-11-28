@@ -57,7 +57,7 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.Uuid
 
-private class FakeLabelPrintPrefs : LabelPrintPrefs {
+internal class FakeLabelPrintPrefs : LabelPrintPrefs {
     override val labelLengthMm = MutableStateFlow(LabelPrintPrefs.DEFAULT_LABEL_LENGTH_MM)
     override val printerAddress = MutableStateFlow<String?>(null)
 

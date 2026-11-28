@@ -124,15 +124,19 @@ private val LABEL_LENGTHS_MM = listOf(30, 40)
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LabelPrintSheet(spec: LabelSpec, onDismiss: () -> Unit, viewModel: LabelPrintViewModel = koinViewModel()) {
+fun LabelPrintSheet(
+    spec: LabelSpec,
+    onDismiss: () -> Unit,
+    viewModel: LabelPrintViewModel = koinViewModel(),
+    permission: PermissionUiState = rememberBluetoothPermissionState(),
+    bluetoothOff: Boolean = isBluetoothDisabled(),
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val lengthMm by viewModel.labelLengthMm.collectAsStateWithLifecycle()
     // A connect label can leave the pairing PIN out of its QR; the choice is made here, per print.
     var includePin by rememberSaveable { mutableStateOf(true) }
     val shown = if (spec is LabelSpec.Connect) spec.withPin(includePin) else spec
     val rendered = rememberRenderedLabel(shown, lengthMm)
-    val permission = rememberBluetoothPermissionState()
-    val bluetoothOff = isBluetoothDisabled()
 
     // The search runs while the sheet is up and Bluetooth can be used, and the connection ends with the sheet.
     DisposableEffect(viewModel, permission.isGranted, bluetoothOff) {
