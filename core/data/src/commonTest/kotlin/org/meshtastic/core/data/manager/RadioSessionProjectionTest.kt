@@ -294,6 +294,18 @@ class RadioSessionProjectionTest {
     }
 
     @Test
+    fun `a zero hop packet from a sender that stamps an empty bitfield is a direct neighbor`() = runTest {
+        val harness = Harness(backgroundScope)
+        harness.nodeManager.installNodeInfo(NodeInfo.Builder().also { it.num = REMOTE }.build())
+
+        harness.packet(loraPacket(hopStart = 0, hopLimit = 0, rssi = -80, bitfield = 0))
+        runCurrent()
+
+        val node = checkNotNull(harness.nodeManager.nodeDBbyNodeNum[REMOTE])
+        assertEquals(0, node.hopsAway)
+    }
+
+    @Test
     fun `a malformed waypoint from the mesh drops only that packet`() = runTest {
         val dataHandler = mock<MeshDataHandler>(MockMode.autofill)
         // MeshDataHandlerImpl decodes a WAYPOINT_APP payload with Waypoint.ADAPTER.decode, which throws on bad bytes.
@@ -540,6 +552,7 @@ class RadioSessionProjectionTest {
         payload: ByteString = ByteString.EMPTY,
         viaMqtt: Boolean = false,
         from: Int = REMOTE,
+        bitfield: Int? = null,
     ) = MeshPacket.Builder()
         .also {
             it.from = from
@@ -555,6 +568,7 @@ class RadioSessionProjectionTest {
                     .also { data ->
                         data.portnum = port
                         data.payload = payload
+                        data.bitfield = bitfield
                     }
                     .build()
         }

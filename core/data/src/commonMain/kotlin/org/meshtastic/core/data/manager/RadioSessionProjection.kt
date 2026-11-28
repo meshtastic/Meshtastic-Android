@@ -262,7 +262,7 @@ class RadioSessionProjection(
             when {
                 decoded.portnum == PortNum.RANGE_TEST_APP -> 0
                 viaMqtt -> HOPS_UNKNOWN
-                packet.hop_start == 0 && (decoded.bitfield ?: 0) == 0 -> HOPS_UNKNOWN
+                packet.hop_start == 0 && decoded.bitfield == null -> HOPS_UNKNOWN
                 packet.hop_limit > packet.hop_start -> HOPS_UNKNOWN
                 else -> packet.hop_start - packet.hop_limit
             }
