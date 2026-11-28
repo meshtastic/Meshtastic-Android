@@ -78,6 +78,7 @@ import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.service.LockdownState
 import org.meshtastic.core.network.repository.NetworkRepository
 import org.meshtastic.core.network.repository.SerialDevicePresence
+import org.meshtastic.core.repository.FirmwareUpdateStatusRepository
 import org.meshtastic.core.repository.LockdownPassphraseStore
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshNotificationManager
@@ -163,11 +164,19 @@ class SdkTcpRoomTest {
         }
     }
 
+    @Test
+    fun sdkTcpListsEachHandshakeFileOnceAfterTheHeldEventsFlush() = runBlocking {
+        withReplayTcpPeer(lockdownPassphrase = TEST_PASSPHRASE) { port ->
+            exerciseLockdown(port, autoUnlock = true, verifySettledManifest = true)
+        }
+    }
+
     private suspend fun exerciseLockdown(
         port: Int,
         autoUnlock: Boolean,
         verifyLocalDelivery: Boolean = false,
         verifyRemoteAck: Boolean = false,
+        verifySettledManifest: Boolean = false,
     ) {
         Dispatchers.setMain(Dispatchers.Unconfined)
         val job = SupervisorJob()
@@ -211,6 +220,12 @@ class SdkTcpRoomTest {
                 assertEquals(listOf(SdkRoomReplayTest.file), ingress.files.first())
                 assertEquals(SdkRoomReplayTest.regionPresets, ingress.regionPresets.first())
                 assertEquals(SdkRoomReplayTest.deviceUiConfig, ingress.deviceUi.first())
+                if (verifySettledManifest) {
+                    // The SDK flushes the held FileInfoReceived before the held text packet, so the text's
+                    // notification means the file event was handled.
+                    assertEquals(SdkRoomReplayTest.TEXT, ingress.notified.await())
+                    assertEquals(listOf(SdkRoomReplayTest.file), ingress.files.first())
+                }
                 val readySession = assertNotNull(radio.activeSession.value)
                 assertEquals(session.address, readySession.address)
                 // A session the radio rebooted out of before any event never reached the app; the client's next one
@@ -320,7 +335,7 @@ class SdkTcpRoomTest {
         passphraseStore: LockdownPassphraseStore = mock(MockMode.autofill),
         private val state: ServiceRepositoryImpl = ServiceRepositoryImpl(),
     ) {
-        private val notified = CompletableDeferred<String>()
+        val notified = CompletableDeferred<String>()
         private val notifications = mock<MeshNotificationManager>(MockMode.autofill)
         private val serviceScope = scope.asServiceScope()
         private val readNodes = SwitchingNodeInfoReadDataSource(databases)
@@ -358,7 +373,6 @@ class SdkTcpRoomTest {
                 mock(MockMode.autofill),
                 FakeNotificationPrefs(),
                 radio,
-                serviceScope,
             )
         private val outboundRepository = PacketRepositoryImpl(databases, dispatchers)
         private val outgoing =
@@ -436,6 +450,17 @@ class SdkTcpRoomTest {
             return packetId
         }
 
+        private val eventHandler =
+            RadioSessionEventHandler(
+                serviceStateWriter = state,
+                mqttManager = mock(MockMode.autofill),
+                nodeManager = nodeManager,
+                serviceNotifications = notifications,
+                firmwareUpdateStatusRepository = FirmwareUpdateStatusRepository(),
+                radioInterfaceService = radio,
+                scope = serviceScope,
+            )
+
         private val projection =
             createRoomReplayProjection(
                 scope,
@@ -446,6 +471,7 @@ class SdkTcpRoomTest {
                 config,
                 notifications,
                 configFlowManager = lazy { installer },
+                eventHandler = lazy { eventHandler },
             )
 
         private val connectionManager = mock<MeshConnectionManager>(MockMode.autofill)

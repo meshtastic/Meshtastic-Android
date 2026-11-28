@@ -66,7 +66,6 @@ class RadioSessionEventHandlerTest {
         val handler =
             RadioSessionEventHandler(
                 serviceStateWriter = serviceRepository,
-                configFlowManager = lazy { error("file manifest is not under test") },
                 mqttManager = mock(MockMode.autofill),
                 nodeManager = nodeManager,
                 serviceNotifications = notifications,

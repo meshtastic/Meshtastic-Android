@@ -16,18 +16,8 @@
  */
 package org.meshtastic.core.repository
 
-import org.meshtastic.proto.FileInfo
-
 /** Interface for managing the configuration flow, including local node info and metadata. */
 interface MeshConfigFlowManager {
-    /**
-     * Handles a [FileInfo] packet received during STATE_SEND_FILEMANIFEST.
-     *
-     * Each packet describes one file available on the device. Accumulated into [RadioConfigRepository.fileManifestFlow]
-     * and cleared at the start of each new handshake.
-     */
-    fun handleFileInfo(info: FileInfo, session: RadioSessionContext): Boolean
-
     /**
      * Re-requests the node database on the live transport after a config change the firmware applied without a reboot,
      * so per-node flags it only reports during the handshake are re-delivered. Leaves config, channels and the

@@ -142,7 +142,6 @@ class SdkRadioLinkSessionRoutingTest {
                 analytics = mock(MockMode.autofill),
                 notificationPrefs = FakeNotificationPrefs(),
                 radioInterfaceService = radio,
-                scope = scope.backgroundScope.asServiceScope(),
             )
         val host = RecordingHost(radio, log)
         val pipeline =
