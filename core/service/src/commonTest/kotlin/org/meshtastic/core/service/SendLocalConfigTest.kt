@@ -21,7 +21,10 @@ import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.mock
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -29,10 +32,12 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.ConnectionIdentity
 import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.PacketQueueRejectedException
+import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.TransparentModeController
 import org.meshtastic.core.testing.FakeCommandSender
@@ -75,8 +80,11 @@ class SendLocalConfigTest {
             }
             .build()
 
-    private fun TestScope.adminController() = AdminControllerImpl(
-        commandSender = commandSender,
+    private fun TestScope.adminController(
+        sender: CommandSender = commandSender,
+        refresherConfig: RadioConfigRepository = radioConfigRepository,
+    ) = AdminControllerImpl(
+        commandSender = sender,
         nodeManager = nodeManager,
         radioConfigRepository = radioConfigRepository,
         connectionStateProvider = serviceRepository,
@@ -85,7 +93,7 @@ class SendLocalConfigTest {
             nodeManager = nodeManager,
             meshConfigFlowManager = lazy { mock<MeshConfigFlowManager>(MockMode.autofill) },
             serviceRepository = serviceRepository,
-            radioConfigRepository = radioConfigRepository,
+            radioConfigRepository = refresherConfig,
             radioOperationLock = RadioOperationLock(),
             scope = backgroundScope,
         ),
@@ -133,7 +141,55 @@ class SendLocalConfigTest {
     }
 
     @Test
-    fun `a radio switch after the turn-off read but before the write is admitted sends nothing`() = runTest {
+    fun `a reconnect after the session check but before queue admission admits nothing to the new connection`() =
+        runTest {
+            // Admits a write only on the lifecycle version it is bound to, as PacketHandlerImpl does.
+            val admittingSender =
+                object : CommandSender by commandSender {
+                    override suspend fun sendAdminForConnection(
+                        destNum: Int,
+                        expectedConnectionVersion: Long,
+                        requestId: Int,
+                        wantResponse: Boolean,
+                        initFn: () -> AdminMessage,
+                    ) {
+                        val lifecycle = serviceRepository.connectionLifecycle.value
+                        if (
+                            lifecycle.state != ConnectionState.Connected ||
+                            lifecycle.version != expectedConnectionVersion
+                        ) {
+                            throw PacketQueueRejectedException("Admin command")
+                        }
+                        commandSender.sendAdminForConnection(
+                            destNum,
+                            expectedConnectionVersion,
+                            requestId,
+                            wantResponse,
+                            initFn,
+                        )
+                    }
+                }
+            // The reconnect lands while the write awaits the cached LoRa config, after its up-front check passed.
+            val reconnectingConfig =
+                object : RadioConfigRepository by radioConfigRepository {
+                    override val localConfigFlow: Flow<LocalConfig> = flow {
+                        serviceRepository.setConnectionState(ConnectionState.Disconnected)
+                        serviceRepository.setConnectionState(ConnectionState.Connected)
+                        emitAll(radioConfigRepository.localConfigFlow)
+                    }
+                }
+            val controller = adminController(sender = admittingSender, refresherConfig = reconnectingConfig)
+            val readOn = version()
+
+            assertFailsWith<PacketQueueRejectedException> {
+                controller.sendLocalConfig(config(transparentLora), NODE_NUM, readOn)
+            }
+            assertTrue(readOn != version())
+            assertTrue(setConfigWrites().isEmpty())
+        }
+
+    @Test
+    fun `a radio switch after the turn-off read but before the session check sends nothing`() = runTest {
         val admin = adminController()
         val fakeRadio = FakeRadioController().apply { nextPacketId = FIRST_REQUEST_ID }
         var writesCalled = 0

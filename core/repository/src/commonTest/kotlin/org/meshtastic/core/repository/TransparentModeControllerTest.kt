@@ -467,6 +467,20 @@ class TransparentModeControllerTest {
     }
 
     @Test
+    fun `an unanswered read-back after turning it on still holds the notice back for that connection`() = runTest {
+        val controller = newController()
+        connect(normalLora)
+
+        val confirmed = async { controller.confirmTurnedOnByUser() }
+        runCurrent()
+        cache(transparentLora)
+        advanceUntilIdle()
+
+        assertEquals(null, confirmed.await())
+        assertEquals(TransparentModeState(active = true, noticeVisible = false), controller.state.first())
+    }
+
+    @Test
     fun `a node that reads back off after turning it on is not taken as the choice of the user`() = runTest {
         val controller = newController()
         connect(normalLora)
