@@ -75,9 +75,8 @@ class MeshConfigFlowManagerImpl(
     private fun isActiveSession(session: RadioSessionContext): Boolean = radioInterfaceService.isSessionActive(session)
 
     /**
-     * Installs the SDK handshake snapshot for the app's current session. The session waits for this call to
-     * return true before delivering retained packets. False when the session closed first or the snapshot carries no
-     * my_info.
+     * Installs the SDK handshake snapshot for the app's current session. The session waits for this call to return true
+     * before delivering retained packets. False when the session closed first or the snapshot carries no my_info.
      */
     @Suppress("ReturnCount")
     internal suspend fun installRadioSnapshot(session: RadioSessionContext, ready: RadioSessionEvent.Ready): Boolean {

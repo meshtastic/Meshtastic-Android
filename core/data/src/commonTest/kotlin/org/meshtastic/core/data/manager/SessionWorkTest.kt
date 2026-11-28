@@ -155,16 +155,17 @@ class SessionWorkTest {
         val outerRelease = CompletableDeferred<Unit>()
         var nestedDone = false
 
-        val outer = launch(start = CoroutineStart.UNDISPATCHED) {
-            service.runInSession(session) {
-                service.launchSessionWork(backgroundScope, session) {
-                    nestedStarted.complete(Unit)
-                    nestedRelease.await()
-                    nestedDone = true
+        val outer =
+            launch(start = CoroutineStart.UNDISPATCHED) {
+                service.runInSession(session) {
+                    service.launchSessionWork(backgroundScope, session) {
+                        nestedStarted.complete(Unit)
+                        nestedRelease.await()
+                        nestedDone = true
+                    }
+                    outerRelease.await()
                 }
-                outerRelease.await()
             }
-        }
         assertTrue(nestedStarted.isCompleted, "a nested launch must reach its body before teardown can cancel it")
         // Teardown cancels the session scope on entry, before the nested launch could get a dispatcher turn.
         val disconnect = launch(start = CoroutineStart.UNDISPATCHED) { service.disconnect() }

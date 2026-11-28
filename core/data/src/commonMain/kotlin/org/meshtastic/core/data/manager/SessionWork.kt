@@ -64,10 +64,12 @@ internal fun RadioInterfaceService.launchSessionWork(
     val admitted = session?.let { sessionScope(it) }
     return when {
         session == null -> scope.handledLaunch { block() }
+
         admitted == null -> {
             onRejected()
             Job().apply { complete() }
         }
+
         else ->
             admitted.handledLaunch(start = CoroutineStart.UNDISPATCHED) {
                 if (!isActive) {

@@ -114,7 +114,8 @@ class RadioDeviceSwitchRoomTest {
                         admitted.complete(Unit)
                         release.await()
                         firstWriteSessionCurrent = radio.activeSession.value == firstSession
-                        // Enter Room only after the switch has begun. Teardown's join must protect even this writer.
+                        // Enter Room only after the switch has begun. Teardown's join must protect even this
+                        // writer.
                         databases.withDb { it.nodeInfoDao().upsert(NodeEntity(num = 101)) }
                         firstWriteDone = true
                     }

@@ -155,7 +155,9 @@ class RadioControllerImplTest {
         every { radioInterfaceService.activeSession } returns resolvedActiveSession
         every { radioInterfaceService.isSessionActive(any()) } calls { resolvedActiveSession.value == it.args[0] }
         every { radioInterfaceService.sessionScope(any()) } calls
-            { if (resolvedActiveSession.value == it.args[0]) scope else null }
+            {
+                if (resolvedActiveSession.value == it.args[0]) scope else null
+            }
         every { meshPrefs.deviceAddress } returns deviceAddress
         every { radioInterfaceService.getDeviceAddress() } returns deviceAddress.value
         return RadioControllerImpl(
