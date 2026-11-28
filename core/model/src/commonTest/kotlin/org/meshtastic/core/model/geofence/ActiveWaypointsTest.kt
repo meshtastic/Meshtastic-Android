@@ -99,6 +99,25 @@ class ActiveWaypointsTest {
         assertTrue(result.containsKey(3))
     }
 
+    // Firmware reads expire as uint32 (meshUtils.h); a signed compare drops values above Int.MAX_VALUE.
+    @Test
+    fun `an expiry above Int MAX_VALUE is read unsigned`() {
+        val far =
+            packet(
+                Waypoint.Builder()
+                    .also { wb ->
+                        wb.id = 4
+                        wb.geofence_radius = 100
+                        wb.expire = 4_000_000_000L.toInt()
+                    }
+                    .build(),
+            )
+
+        val result = listOf(far).activeWaypointPackets(now)
+
+        assertTrue(result.containsKey(4))
+    }
+
     private val myNodeNum = 7
 
     private fun geofence(id: Int) = Waypoint.Builder()

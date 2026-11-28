@@ -33,23 +33,20 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.common.state.RadioOperationLock
-import org.meshtastic.core.model.ConnectionEpochs
-import org.meshtastic.core.model.ConnectionLifecycle
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.repository.AdminController
 import org.meshtastic.core.repository.AdminEditScope
-import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.ConnectionIdentity
 import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.MeshLocationManager
-import org.meshtastic.core.repository.MeshMessageProcessor
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.MeshPrefs
 import org.meshtastic.core.repository.MessagingController
+import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.NodeController
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.QueryController
@@ -58,10 +55,13 @@ import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.TracerouteHandler
 import org.meshtastic.core.repository.UiPrefs
+import org.meshtastic.core.repository.runInSession
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Config
+import org.meshtastic.sdk.ConnectionState
 
 private data class AssociationSnapshot(
     val identity: ConnectionIdentity?,
@@ -92,7 +92,7 @@ internal suspend fun restoreLocalConfigurationIfOwned(
  * Rather than implementing every command itself, this class **assembles** four focused collaborators — one per
  * sub-interface — and delegates to them via Kotlin interface delegation, mirroring the SDK's layered API design
  * ([AdminController] → `AdminApi`, [MessagingController] → `RadioClient.send*`, [NodeController]/[QueryController] →
- * `AdminApi`/`TelemetryApi`/`RoutingApi`). When the SDK is adopted, each collaborator becomes a thin adapter and this
+ * `AdminApi`/`TelemetryApi`/`RoutingApi`). Each collaborator is a thin adapter over the session's SDK client, and this
  * class is the seam where they are wired together.
  *
  * Only the cross-cutting concerns that don't belong to any single sub-interface live here directly: connection-state
@@ -109,12 +109,15 @@ internal suspend fun restoreLocalConfigurationIfOwned(
         QueryController::class,
     ],
 )
-class RadioControllerImpl(
+internal class RadioControllerImpl(
     private val serviceRepository: ServiceRepository,
     nodeRepository: NodeRepository,
-    private val commandSender: CommandSender,
+    private val packetHandler: PacketHandler,
+    tracerouteHandler: TracerouteHandler,
+    neighborInfoHandler: NeighborInfoHandler,
     private val nodeManager: NodeManager,
     private val radioInterfaceService: RadioInterfaceService,
+    sessionAdmin: SessionAdmin,
     private val locationManager: MeshLocationManager,
     packetRepository: Lazy<PacketRepository>,
     dataHandler: Lazy<MeshDataHandler>,
@@ -123,7 +126,6 @@ class RadioControllerImpl(
     uiPrefs: UiPrefs,
     private val databaseManager: DatabaseManager,
     private val serviceNotifications: MeshNotificationManager,
-    private val messageProcessor: Lazy<MeshMessageProcessor>,
     meshConfigFlowManager: Lazy<MeshConfigFlowManager>,
     radioOperationLock: RadioOperationLock,
     radioConfigRepository: RadioConfigRepository,
@@ -131,10 +133,9 @@ class RadioControllerImpl(
     private val deviceAddressChangeHook: DeviceAddressChangeHook,
 ) : RadioController,
     AdminController by AdminControllerImpl(
-        commandSender = commandSender,
         nodeManager = nodeManager,
-        radioConfigRepository = radioConfigRepository,
-        connectionStateProvider = serviceRepository,
+        radio = radioInterfaceService,
+        sessionAdmin = sessionAdmin,
         heardOnCurrentLoraRefresher =
         HeardOnCurrentLoraRefresher(
             nodeManager = nodeManager,
@@ -144,18 +145,32 @@ class RadioControllerImpl(
             radioOperationLock = radioOperationLock,
             scope = scope,
         ),
-        scope = scope,
     ),
     MessagingController by MessagingControllerImpl(
-        commandSender,
+        packetHandler,
+        sessionAdmin,
         nodeManager,
         nodeRepository,
         dataHandler,
         analytics,
         packetRepository,
     ),
-    NodeController by NodeControllerImpl(commandSender, nodeManager, serviceNotifications, packetRepository, scope),
-    QueryController by QueryControllerImpl(commandSender, nodeManager, uiPrefs) {
+    NodeController by NodeControllerImpl(
+        sessionAdmin,
+        nodeManager,
+        serviceNotifications,
+        packetRepository,
+        scope,
+    ),
+    QueryController by QueryControllerImpl(
+        radioInterfaceService,
+        serviceRepository,
+        tracerouteHandler,
+        neighborInfoHandler,
+        nodeManager,
+        uiPrefs,
+        scope,
+    ) {
 
     private val deviceSwitchMutex = Mutex()
 
@@ -191,9 +206,10 @@ class RadioControllerImpl(
         // not depend on delivery order between independent StateFlows. The selected address is checked again at the
         // point of association to discard a session that became stale while queued for collection.
         //
-        // Collect the nullable identity together with both active-session coordinates. The admitted lifecycle lease
-        // closes new work on teardown but delays session rollover until association and any destination transaction
-        // commit return. collectLatest still cancels work whose identity or selected address changes independently.
+        // Collect the nullable identity together with both active-session coordinates. Association runs in the
+        // session's scope: teardown joins it, and its predicate stays true until that join, so session rollover cannot
+        // overlap a destination commit. collectLatest still cancels work whose identity or selected address changes
+        // independently.
         // CancellationException preserves structured cancellation; recoverable Exceptions are logged, and fatal
         // Errors propagate.
         @Suppress("TooGenericExceptionCaught")
@@ -225,13 +241,14 @@ class RadioControllerImpl(
                     }
                     try {
                         val admitted =
-                            radioInterfaceService.runWithSessionLease(authorizingSession) { lease ->
+                            radioInterfaceService.runInSession(authorizingSession) {
                                 databaseManager.associateDevice(
                                     identity.address,
                                     identity.nodeNum,
                                     identity.deviceId,
-                                    lease::isCurrent,
-                                )
+                                ) {
+                                    radioInterfaceService.activeSession.value == authorizingSession
+                                }
                             }
                         if (!admitted) {
                             Logger.d { "[DeviceAssociation] skip revoked-session node=${identity.nodeNum}" }
@@ -247,14 +264,8 @@ class RadioControllerImpl(
 
     // ── Connection State ────────────────────────────────────────────────────
 
-    override val connectionLifecycle: StateFlow<ConnectionLifecycle>
-        get() = serviceRepository.connectionLifecycle
-
     override val connectionState: StateFlow<ConnectionState>
         get() = serviceRepository.connectionState
-
-    override val connectionEpochs: StateFlow<ConnectionEpochs>
-        get() = serviceRepository.connectionEpochs
 
     override val clientNotification: StateFlow<ClientNotification?>
         get() = serviceRepository.clientNotification
@@ -265,7 +276,7 @@ class RadioControllerImpl(
 
     // ── Packet ID & Location ────────────────────────────────────────────────
 
-    override fun generatePacketId(): Int = commandSender.generatePacketId()
+    override fun generatePacketId(): Int = packetHandler.generatePacketId()
 
     override suspend fun restoreLocalConfiguration(
         expectedDeviceAddress: String?,
@@ -342,7 +353,6 @@ class RadioControllerImpl(
         nodeManager.clearConnectionIdentity()
         nodeManager.setAllowNodeDbWrites(false)
         Logger.d { "[DeviceAssociation] session-cleared before address switch" }
-        messageProcessor.value.clearEarlyPackets()
         databaseManager.switchActiveDatabase(deviceAddr)
         nodeManager.clear()
         serviceNotifications.clearNotifications()
@@ -373,7 +383,6 @@ class RadioControllerImpl(
             attemptRollback("fail-closed node-write disable") { nodeManager.setAllowNodeDbWrites(false) }
             attemptRollback("fail-closed connection-identity clear") { nodeManager.clearConnectionIdentity() }
             attemptRollback("fail-closed node-state clear") { nodeManager.clear() }
-            attemptRollback("fail-closed early-packet clear") { messageProcessor.value.clearEarlyPackets() }
             attemptRollback("fail-closed notification clear") { serviceNotifications.clearNotifications() }
             attemptRollback("fail-closed persisted selection") { meshPrefs.setDeviceAddress(null) }
             attemptRollback("fail-closed transport selection") {
@@ -386,7 +395,6 @@ class RadioControllerImpl(
         attemptRollback("node state") {
             nodeManager.clearConnectionIdentity()
             nodeManager.clear()
-            messageProcessor.value.clearEarlyPackets()
             serviceNotifications.clearNotifications()
             nodeManager.loadCachedNodeDB()
         }

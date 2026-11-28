@@ -60,8 +60,11 @@ kotlin {
             }
         }
 
+        jvmTest.dependencies { implementation(libs.androidx.datastore.preferences) }
+
         commonTest.dependencies {
             implementation(projects.core.testing)
+            implementation(libs.meshtastic.sdk.testing)
             // A mock of PacketRepository needs PagingData, which core:repository takes as implementation, on the wasmJs
             // test classpath; the Kotlin/Wasm IR serializer crashes on the unresolved type rather than reporting it.
             implementation(libs.androidx.paging.common)

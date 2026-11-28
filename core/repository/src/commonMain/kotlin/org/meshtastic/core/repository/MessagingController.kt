@@ -17,15 +17,15 @@
 package org.meshtastic.core.repository
 
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.proto.RemoteShell
 import org.meshtastic.proto.SharedContact
 
 /**
  * Messaging operations — sending data packets, reactions, and shared contacts.
  *
- * Mirrors the SDK's send/messaging surface. When the SDK is adopted, implementations delegate to `RadioClient.send()` /
- * `RadioClient.sendText()`.
+ * Data packets go through the SDK's paced send; remote shell frames go straight to the session client.
  *
- * @see RadioController which extends this interface for backward compatibility
+ * @see RadioController
  */
 interface MessagingController {
 
@@ -45,4 +45,14 @@ interface MessagingController {
      * @return `true` if the radio accepted the contact, `false` on timeout or failure.
      */
     suspend fun sendSharedContact(nodeNum: Int): Boolean
+
+    /** A fresh non-zero remote shell session ID, or null without a radio session. */
+    fun newRemoteShellSessionId(): Int?
+
+    /**
+     * Sends one remote shell [frame] to [destNum], PKI-encrypted with no `want_ack`.
+     *
+     * @throws PacketQueueRejectedException without a radio session, or with no public key stored for [destNum].
+     */
+    suspend fun sendRemoteShell(destNum: Int, frame: RemoteShell)
 }

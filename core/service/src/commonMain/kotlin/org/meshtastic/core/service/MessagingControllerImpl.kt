@@ -26,27 +26,33 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.Reaction
-import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.DataPair
 import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.MessagingController
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.PacketHandler
+import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
-import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.PortNum
+import org.meshtastic.proto.RemoteShell
 import org.meshtastic.proto.SharedContact
 import org.meshtastic.proto.User
+import org.meshtastic.sdk.AdminResult
+import org.meshtastic.sdk.MeshtasticException
+import org.meshtastic.sdk.NodeId
+import org.meshtastic.sdk.RadioClient
 
 /**
  * [MessagingController] implementation: sends data packets, reactions, and shared contacts.
  *
- * Focused collaborator of [RadioControllerImpl]. Mirrors the SDK's `RadioClient.send*` surface — when the SDK is
- * adopted this becomes a thin adapter over `RadioClient`.
+ * Focused collaborator of [RadioControllerImpl]. Data packets and reactions go through [PacketHandler], which queues
+ * them on the session's SDK paced queue and projects their delivery onto Room; contacts use the SDK admin API.
  */
 internal class MessagingControllerImpl(
-    private val commandSender: CommandSender,
+    private val packetHandler: PacketHandler,
+    private val sessionAdmin: SessionAdmin,
     private val nodeManager: NodeManager,
     private val nodeRepository: NodeRepository,
     private val dataHandler: Lazy<MeshDataHandler>,
@@ -58,7 +64,7 @@ internal class MessagingControllerImpl(
         get() = nodeManager.myNodeNum.value ?: 0
 
     override suspend fun sendMessage(packet: DataPacket) {
-        commandSender.sendData(packet)
+        packetHandler.sendData(packet)
         dataHandler.value.rememberDataPacket(packet, myNodeNum, false)
         val bytes = packet.bytes ?: ByteString.EMPTY
         analytics.track("data_send", DataPair("num_bytes", bytes.size), DataPair("type", packet.dataType))
@@ -67,6 +73,19 @@ internal class MessagingControllerImpl(
         if (packet.dataType != PortNum.TEXT_MESSAGE_APP.value) {
             val actionName = if (packet.dataType == PortNum.WAYPOINT_APP.value) "waypoint_send" else "data_send"
             analytics.trackAction(actionName, mapOf("port_num" to packet.dataType, "num_bytes" to bytes.size))
+        }
+    }
+
+    private fun activeClient(): RadioClient? = sessionAdmin.activeClient()
+
+    override fun newRemoteShellSessionId(): Int? = activeClient()?.remoteShell?.newSessionId()
+
+    override suspend fun sendRemoteShell(destNum: Int, frame: RemoteShell) {
+        val client = activeClient() ?: throw PacketQueueRejectedException("Remote shell frame")
+        try {
+            client.remoteShell.send(NodeId(destNum), frame)
+        } catch (e: MeshtasticException) {
+            throw PacketQueueRejectedException("Remote shell frame").apply { addSuppressed(e) }
         }
     }
 
@@ -91,7 +110,7 @@ internal class MessagingControllerImpl(
                 emoji = EMOJI_INDICATOR,
             )
                 .apply { from = nodeManager.getMyId().takeIf { it.isNotEmpty() } ?: NodeAddress.ID_LOCAL }
-        commandSender.sendData(dataPacket)
+        packetHandler.sendData(dataPacket)
         analytics.trackAction("reaction_send")
         val user =
             nodeManager.nodeDBbyNodeNum[myNum]?.user
@@ -116,7 +135,7 @@ internal class MessagingControllerImpl(
     }
 
     override suspend fun sendSharedContact(nodeNum: Int): Boolean {
-        val myNum = nodeManager.myNodeNum.value ?: return false
+        nodeManager.myNodeNum.value ?: return false
         val nodeDef = nodeRepository.getNode(NodeAddress.numToDefaultId(nodeNum))
         // Firmware assigns public_key unconditionally, so a keyless contact clears the key the radio already holds.
         return if (nodeDef.user.public_key.size == 0) {
@@ -131,17 +150,13 @@ internal class MessagingControllerImpl(
                         wb.manually_verified = nodeDef.manuallyVerified
                     }
                     .build()
-            safeCatching {
-                commandSender.sendAdminAwait(myNum) {
-                    AdminMessage.Builder().also { wb -> wb.add_contact = contact }.build()
-                }
-            }
+            safeCatching { sessionAdmin.await("Share contact") { addContact(contact) } is AdminResult.Success }
                 .getOrDefault(false)
         }
     }
 
     override suspend fun importContact(contact: SharedContact) {
-        val myNum = nodeManager.myNodeNum.value ?: return
+        nodeManager.myNodeNum.value ?: return
         val user = contact.user
         // An empty key is not a no-op on the radio: it overwrites a stored key and breaks a working conversation.
         if (contact.node_num == 0 || user == null || user.public_key.size == 0) {
@@ -150,7 +165,7 @@ internal class MessagingControllerImpl(
         }
         // Cross-platform policy: honor the verification state encoded by the sharer as-is
         // (see meshtastic/design standards/audits/nfc-alignment-audit.md).
-        commandSender.sendAdmin(myNum) { AdminMessage.Builder().also { wb -> wb.add_contact = contact }.build() }
+        sessionAdmin.launch("Import contact") { addContact(contact) }
         nodeManager.handleReceivedUser(contact.node_num, user, manuallyVerified = contact.manually_verified)
     }
 

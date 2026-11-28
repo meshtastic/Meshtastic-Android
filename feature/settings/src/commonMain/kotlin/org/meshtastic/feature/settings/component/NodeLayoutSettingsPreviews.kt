@@ -29,12 +29,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import org.meshtastic.core.common.util.MeasurementSystem
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.NodeListDensity
 import org.meshtastic.core.ui.component.NodeItem
 import org.meshtastic.core.ui.component.NodeItemCompact
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.feature.settings.NodeListSettingsState
+import org.meshtastic.sdk.ConnectionState
 
 @PreviewLightDark
 @Composable

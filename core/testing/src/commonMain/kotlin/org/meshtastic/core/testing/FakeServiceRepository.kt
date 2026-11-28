@@ -22,25 +22,24 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asFlow
-import org.meshtastic.core.model.ConnectionState
+import kotlinx.coroutines.flow.asStateFlow
 import org.meshtastic.core.model.service.LockdownState
 import org.meshtastic.core.model.service.LockdownTokenInfo
 import org.meshtastic.core.model.service.TracerouteResponse
-import org.meshtastic.core.repository.ConnectionStateHolder
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.MeshPacket
+import org.meshtastic.sdk.ConnectionState
 
 @Suppress("TooManyFunctions")
 class FakeServiceRepository : ServiceRepository {
     /** Canonical app-level connection state — the single source of truth for UI/feature tests. */
-    private val connectionStateHolder = ConnectionStateHolder()
-    override val connectionLifecycle = connectionStateHolder.connectionLifecycle
-    override val connectionState = connectionStateHolder.connectionState
-    override val connectionEpochs = connectionStateHolder.connectionEpochs
+    private val _connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
+    override val connectionState: StateFlow<ConnectionState> = _connectionState.asStateFlow()
 
-    override fun setConnectionState(connectionState: ConnectionState) =
-        connectionStateHolder.setConnectionState(connectionState)
+    override fun setConnectionState(connectionState: ConnectionState) {
+        _connectionState.value = connectionState
+    }
 
     private val _clientNotification = MutableStateFlow<ClientNotification?>(null)
     override val clientNotification: StateFlow<ClientNotification?> = _clientNotification
@@ -62,13 +61,6 @@ class FakeServiceRepository : ServiceRepository {
 
     override fun clearErrorMessage() {
         _errorMessage.value = null
-    }
-
-    private val _connectionProgress = MutableStateFlow<String?>(null)
-    override val connectionProgress: StateFlow<String?> = _connectionProgress
-
-    override fun setConnectionProgress(text: String) {
-        _connectionProgress.value = text
     }
 
     private val _meshPacketFlow = MutableSharedFlow<MeshPacket>()

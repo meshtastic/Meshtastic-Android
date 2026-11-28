@@ -32,7 +32,6 @@ import kotlinx.coroutines.withTimeout
 import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.data.datasource.SignalSurveyLocalDataSource
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.SignalSurveySession
@@ -49,6 +48,7 @@ import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.Position
+import org.meshtastic.sdk.ConnectionState
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals

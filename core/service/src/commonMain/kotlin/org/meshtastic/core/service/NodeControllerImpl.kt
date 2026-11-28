@@ -19,22 +19,23 @@ package org.meshtastic.core.service
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import org.meshtastic.core.common.util.handledLaunch
-import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.NodeController
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.PacketRepository
-import org.meshtastic.proto.AdminMessage
+import org.meshtastic.sdk.AdminResult
+import org.meshtastic.sdk.NodeId
 
 /**
  * [NodeController] implementation: favorite, ignore, mute, and remove nodes.
  *
- * Focused collaborator of [RadioControllerImpl]. Favorite/ignore are idempotent (no-op when already in the requested
- * state), mirroring the SDK's `AdminApi.setFavorite`/`setIgnored`.
+ * Focused collaborator of [RadioControllerImpl]. Commands go to the local node through the session's SDK admin API
+ * without waiting for its answer, and the local node DB is updated optimistically. Favorite/ignore are idempotent
+ * (no-op when already in the requested state).
  */
 internal class NodeControllerImpl(
-    private val commandSender: CommandSender,
+    private val sessionAdmin: SessionAdmin,
     private val nodeManager: NodeManager,
     private val serviceNotifications: MeshNotificationManager,
     private val packetRepository: Lazy<PacketRepository>,
@@ -45,13 +46,7 @@ internal class NodeControllerImpl(
         val myNum = nodeManager.myNodeNum.value ?: return
         val node = nodeManager.nodeDBbyNodeNum[nodeNum] ?: return
         if (node.isFavorite != favorite) {
-            commandSender.sendAdmin(myNum) {
-                if (favorite) {
-                    AdminMessage.Builder().also { wb -> wb.set_favorite_node = node.num }.build()
-                } else {
-                    AdminMessage.Builder().also { wb -> wb.remove_favorite_node = node.num }.build()
-                }
-            }
+            sessionAdmin.launch("Set favorite") { setFavorite(NodeId(node.num), favorite) }
             nodeManager.updateNode(node.num) { it.copy(isFavorite = favorite) }
             // Only favorites are warned about, so a warning left on an unfavorited node would never clear.
             if (!favorite && node.num != myNum) serviceNotifications.cancelLowBatteryNotification(node.num)
@@ -59,38 +54,35 @@ internal class NodeControllerImpl(
     }
 
     override suspend fun setIgnored(nodeNum: Int, ignored: Boolean) {
-        val myNum = nodeManager.myNodeNum.value ?: return
+        nodeManager.myNodeNum.value ?: return
         val node = nodeManager.nodeDBbyNodeNum[nodeNum] ?: return
         if (node.isIgnored != ignored) {
-            commandSender.sendAdmin(myNum) {
-                if (ignored) {
-                    AdminMessage.Builder().also { wb -> wb.set_ignored_node = node.num }.build()
-                } else {
-                    AdminMessage.Builder().also { wb -> wb.remove_ignored_node = node.num }.build()
-                }
-            }
+            sessionAdmin.launch("Set ignored") { setIgnored(NodeId(node.num), ignored) }
             nodeManager.updateNode(node.num) { it.copy(isIgnored = ignored) }
             scope.handledLaunch { packetRepository.value.updateFilteredBySender(node.user.id, ignored) }
         }
     }
 
     override suspend fun toggleMuted(nodeNum: Int) {
-        val myNum = nodeManager.myNodeNum.value ?: return
+        nodeManager.myNodeNum.value ?: return
         val node = nodeManager.nodeDBbyNodeNum[nodeNum] ?: return
-        commandSender.sendAdmin(myNum) { AdminMessage.Builder().also { wb -> wb.toggle_muted_node = node.num }.build() }
+        sessionAdmin.launch("Toggle muted") { toggleMuted(NodeId(node.num)) }
         nodeManager.updateNode(node.num) { it.copy(isMuted = !node.isMuted) }
     }
 
-    override suspend fun removeByNodenum(packetId: Int, nodeNum: Int) {
+    override suspend fun removeByNodenum(nodeNum: Int) {
         nodeManager.removeByNodenum(nodeNum)
-        val myNum = nodeManager.myNodeNum.value ?: return
+        nodeManager.myNodeNum.value ?: return
         try {
-            commandSender.sendAdmin(myNum, packetId) {
-                AdminMessage.Builder().also { wb -> wb.remove_by_nodenum = nodeNum }.build()
+            sessionAdmin.launch(
+                "Remove node",
+                onResult = { result -> if (result !is AdminResult.Success) nodeManager.cancelPendingRemoval(nodeNum) },
+            ) {
+                removeNode(NodeId(nodeNum))
             }
         } catch (e: PacketQueueRejectedException) {
-            // Node removal has always been local-first and is allowed while disconnected. Preserve that contract when
-            // the connected transport is transitioning and cannot admit the best-effort radio cleanup command.
+            // Node removal has always been local-first and is allowed while disconnected; the radio cleanup is
+            // best-effort.
             Logger.w(e) { "Remove-node admin command for $nodeNum was not admitted; local removal retained" }
         }
     }

@@ -65,8 +65,9 @@ class OperationLease internal constructor(internal val id: Long, val operation: 
  * Tracks which [RadioOperation]s are in flight, so the rest of the app can keep out of their way.
  *
  * Three consumers, which is why one lock replaced the single-purpose `FirmwareMaintenanceLock` it grew out of:
- * `SharedRadioInterfaceService` reads [suppressesTransport] to stay off the device, `MeshService` reads [holders] to
- * refuse to stop itself and to hold a wake lock, and the service notification reads it to say what is running.
+ * `SharedRadioInterfaceService` closes the radio's link while [holders] suppress the transport, `MeshService` reads
+ * [holders] to refuse to stop itself and to hold a wake lock, and the service notification reads it to say what is
+ * running.
  *
  * Holders are tracked as individual leases rather than a set of operation types. The set was wrong: a caller that
  * cancels a job and immediately starts a replacement — which `FirmwareUpdateViewModel` does, without joining — lets the

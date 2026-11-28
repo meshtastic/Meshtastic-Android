@@ -19,9 +19,9 @@ package org.meshtastic.core.takserver.di
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.TakCertificateStore
 import org.meshtastic.core.repository.TakPrefs
@@ -58,7 +58,7 @@ class CoreTakServerModule {
     @Single(binds = [TAKMeshIntegration::class, TakServerIntegration::class])
     fun provideTAKMeshIntegration(
         takServerManager: TAKServerManager,
-        commandSender: CommandSender,
+        packetHandler: PacketHandler,
         serviceRepository: ServiceRepository,
         meshConfigHandler: MeshConfigHandler,
         nodeRepository: NodeRepository,
@@ -66,7 +66,7 @@ class CoreTakServerModule {
         takPrefs: TakPrefs,
     ): TAKMeshIntegration = TAKMeshIntegration(
         takServerManager,
-        commandSender,
+        packetHandler,
         serviceRepository,
         meshConfigHandler,
         nodeRepository,

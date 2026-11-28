@@ -31,7 +31,6 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.common.di.ApplicationCoroutineScope
 import org.meshtastic.core.common.util.LocaleUnitsProvider
 import org.meshtastic.core.common.util.MeasurementSystem
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.effectiveLongName
@@ -39,6 +38,7 @@ import org.meshtastic.core.model.util.onlineTimeThreshold
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.sdk.ConnectionState
 
 /** What one Node Tracker instance renders. */
 sealed interface NodeTrackerWidgetState {

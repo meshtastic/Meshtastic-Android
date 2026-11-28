@@ -17,8 +17,6 @@
 package org.meshtastic.feature.map.hud
 
 import org.meshtastic.core.common.util.MeasurementSystem
-import org.meshtastic.core.common.util.bearing
-import org.meshtastic.core.common.util.latLongToMeter
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.geofence.Geofence
@@ -31,6 +29,7 @@ import org.meshtastic.core.model.util.verticalUncertaintyMetersOrNull
 import org.meshtastic.core.repository.PhoneLocation
 import org.meshtastic.core.repository.PhoneLocationState
 import org.meshtastic.proto.Waypoint
+import org.meshtastic.sdk.PositionUtils
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.cos
@@ -257,7 +256,7 @@ private fun PhoneLocation.targetAt(
     units: MeasurementSystem,
     targetVerticalM: Double? = null,
 ): HudTarget? {
-    val distance = latLongToMeter(this.latitude, this.longitude, latitude, longitude)
+    val distance = PositionUtils.distance(this.latitude, this.longitude, latitude, longitude)
     // The two errors are independent, so they combine as a root sum of squares, not a sum.
     val radius = hypot(targetRadiusM ?: 0.0, accuracyM?.toDouble() ?: 0.0)
     val halfAngle =
@@ -266,7 +265,7 @@ private fun PhoneLocation.targetAt(
         } else {
             null
         }
-    val trueBearing = bearing(this.latitude, this.longitude, latitude, longitude)
+    val trueBearing = PositionUtils.bearing(this.latitude, this.longitude, latitude, longitude)
     val verticalM = hypot(targetVerticalM ?: 0.0, verticalAccuracyM?.toDouble() ?: 0.0)
     return HudTarget(
         subject = subject,
@@ -293,8 +292,8 @@ private fun PhoneLocation.nearby(
     targetRadiusM: Double?,
     declination: Float,
 ): NearbyTarget {
-    val distance = latLongToMeter(this.latitude, this.longitude, latitude, longitude)
-    val trueBearing = bearing(this.latitude, this.longitude, latitude, longitude)
+    val distance = PositionUtils.distance(this.latitude, this.longitude, latitude, longitude)
+    val trueBearing = PositionUtils.bearing(this.latitude, this.longitude, latitude, longitude)
     val rad = trueBearing.toRadians()
     return NearbyTarget(
         subject = subject,
@@ -320,8 +319,10 @@ private fun PhoneLocation.fenceFor(waypoint: Waypoint, declination: Float): HudF
             edge =
             outline.map { (lat, lon) ->
                 FencePoint(
-                    bearingDeg = (bearing(latitude, longitude, lat, lon) - declination + FULL_CIRCLE) % FULL_CIRCLE,
-                    distanceM = latLongToMeter(latitude, longitude, lat, lon),
+                    bearingDeg =
+                    (PositionUtils.bearing(latitude, longitude, lat, lon) - declination + FULL_CIRCLE) %
+                        FULL_CIRCLE,
+                    distanceM = PositionUtils.distance(latitude, longitude, lat, lon),
                 )
             },
             inside = fence.contains(latitude, longitude),

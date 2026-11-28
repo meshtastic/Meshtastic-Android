@@ -17,14 +17,17 @@
 package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
-import co.touchlab.kermit.Severity
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
@@ -34,23 +37,14 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
-import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.common.util.safeCatching
-import org.meshtastic.core.common.util.safeCatchingAll
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.TelemetryType
-import org.meshtastic.core.model.TransportPhase
-import org.meshtastic.core.model.TransportStatus
-import org.meshtastic.core.repository.AdminRequestRegistry
 import org.meshtastic.core.repository.AppWidgetUpdater
-import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.DataPair
-import org.meshtastic.core.repository.HandshakeConstants
 import org.meshtastic.core.repository.HistoryManager
 import org.meshtastic.core.repository.LocalNodeUnavailableException
-import org.meshtastic.core.repository.LockdownCoordinator
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshLocationManager
 import org.meshtastic.core.repository.MeshNotificationManager
@@ -65,17 +59,20 @@ import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.ServiceRepository
-import org.meshtastic.core.repository.SessionManager
 import org.meshtastic.core.repository.UiPrefs
-import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.error_recovery_exhausted
-import org.meshtastic.core.resources.getStringSuspend
-import org.meshtastic.proto.AdminMessage
-import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalStats
+import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.PortNum
+import org.meshtastic.proto.Position
 import org.meshtastic.proto.Telemetry
-import org.meshtastic.proto.ToRadio
+import org.meshtastic.sdk.AdminResult
+import org.meshtastic.sdk.ConnectionState
+import org.meshtastic.sdk.MeshtasticException
+import org.meshtastic.sdk.NodeId
+import org.meshtastic.sdk.RadioClient
+import org.meshtastic.sdk.send
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -94,86 +91,46 @@ class MeshConnectionManagerImpl(
     private val mqttManager: MqttManager,
     private val historyManager: HistoryManager,
     private val radioConfigRepository: RadioConfigRepository,
-    private val commandSender: CommandSender,
-    private val sessionManager: SessionManager,
-    private val adminRequestRegistry: AdminRequestRegistry,
     private val nodeManager: NodeManager,
     private val analytics: PlatformAnalytics,
     private val packetRepository: PacketRepository,
     private val workerManager: MeshWorkerManager,
     private val appWidgetUpdater: AppWidgetUpdater,
-    private val heartbeatSender: DataLayerHeartbeatSender,
-    private val lockdownCoordinator: LockdownCoordinator,
     private val scope: ServiceScope,
     private val nodeRestartTracker: NodeRestartTracker,
 ) : MeshConnectionManager {
     /**
-     * Serializes [onConnectionChanged] to prevent TOCTOU races when multiple coroutines emit state transitions
-     * concurrently (e.g. flow collector vs. sleep-timeout coroutine).
+     * Serializes [onLinkPhase] to prevent TOCTOU races when multiple coroutines emit state transitions concurrently
+     * (e.g. flow collector vs. sleep-timeout coroutine).
      */
     private val connectionMutex = Mutex()
 
-    private var preHandshakeJob: Job? = null
-    private var sleepTimeout: Job? = null
     private var locationRequestsJob: Job? = null
-
-    /** Guarded by [connectionMutex]. */
     private var postHandshakeRequestsJob: Job? = null
-
-    private val handshakeTimeout = atomic<Job?>(null)
-
-    /**
-     * One-way latch set by [onHandshakeComplete] and cleared at the start of each fresh handshake in [handleConnected].
-     *
-     * Prevents late-arriving handshake-progress packets (e.g. a FileInfo that lands between NODE_INFO_NONCE and the
-     * completion of the async Room DB install) from re-arming the fast watchdog that [onHandshakeComplete] already
-     * cancelled. Without this latch, those late packets would re-introduce the slow-DB false-trip on large meshes that
-     * [onHandshakeComplete] was added to prevent: the app state is still Connecting during that window, so the existing
-     * Connecting-state guard inside [onHandshakeProgress] is insufficient on its own.
-     */
-    private val handshakeCompleteLatch = atomic(false)
     private val locationRejectionLogged = atomic(false)
-
-    /** Armed stage guard: stage, budget, and a generation so a stale re-arm racing a stage change always loses. */
-    private data class StageGuardSpec(val stage: Int, val timeout: Duration, val generation: Long)
-
-    private val armedStageGuard = atomic<StageGuardSpec?>(null)
-    private val stageGuardGeneration = atomic(0L)
-
-    /** Clears [armedStageGuard] once a stage has run for 10x its budget, ending re-arms from trickle progress. */
-    private val stageCapJob = atomic<Job?>(null)
-
-    /** Progress signals seen since the current stage was armed; 0 in a stall report means total silence. */
-    private val stageProgressSignals = atomic(0)
-
-    /**
-     * Consecutive handshake-recovery failure count for [runSiblingHandshakeRecovery].
-     *
-     * Incremented atomically on each recovery attempt. Reset to 0 by [onHandshakeComplete] (a successful handshake
-     * breaks the failure streak) and also reset when the cap is reached and a sticky error is surfaced (so a manual
-     * user retry starts fresh). When this reaches [MAX_CONSECUTIVE_RECOVERY_FAILURES], recovery stops and the sticky
-     * error is surfaced instead of silently retrying indefinitely.
-     */
-    private val consecutiveRecoveryFailures = atomic(0)
 
     private var connectTimeMsec = 0L
     private var connectionRestored = false
 
     init {
-        // Bridge transport-level state into the canonical app-level state.
-        // This is the ONLY consumer of RadioInterfaceService.connectionState — it applies
-        // light-sleep policy and handshake awareness before writing to ServiceRepository.
-        // Guarded per-emission: one uncaught throw here would kill the sole bridge collector and
-        // permanently freeze the app-level state (a stuck-"Connected" UI no transport event can fix).
-        radioInterfaceService.connectionState
-            .onEach { state ->
-                safeCatching { onRadioConnectionState(state) }
-                    .onFailure { Logger.e(it) { "Connection state bridge failed for $state; collector kept alive" } }
+        // The radio service publishes the SDK client's state; this ends what a session started when its link goes down.
+        // Guarded per-emission: one uncaught throw here would kill the collector for the rest of the process.
+        serviceRepository.connectionState
+            .map { it.linkPhase() }
+            .distinctUntilChanged()
+            // The state the process starts in ended no session.
+            .drop(1)
+            .onEach { phase ->
+                safeCatching { onLinkPhase(phase) }
+                    .onFailure { Logger.e(it) { "Connection teardown failed for $phase; collector kept alive" } }
             }
             .launchIn(scope)
 
         // Ensure notification title and content stay in sync with state changes
-        serviceRepository.connectionState.onEach { updateStatusNotification() }.launchIn(scope)
+        serviceRepository.connectionState
+            .distinctUntilChangedBy { it::class }
+            .onEach { updateStatusNotification() }
+            .launchIn(scope)
 
         // An expected node restart ends when the post-reboot config handshake completes.
         serviceRepository.connectionState
@@ -201,7 +158,7 @@ class MeshConnectionManagerImpl(
                             .onEach { shouldProvide ->
                                 if (shouldProvide) {
                                     locationManager.start(scope) { pos ->
-                                        val failure = safeCatching { commandSender.sendPosition(pos) }.exceptionOrNull()
+                                        val failure = safeCatching { sendOwnPosition(pos) }.exceptionOrNull()
                                         when (failure) {
                                             null -> locationRejectionLogged.value = false
 
@@ -235,293 +192,27 @@ class MeshConnectionManagerImpl(
             .launchIn(scope)
     }
 
-    /**
-     * Bridges a transport-level [ConnectionState] into the canonical app-level state.
-     *
-     * Applies light-sleep policy (power-saving / router role) to decide whether a [ConnectionState.DeviceSleep] event
-     * should be surfaced as sleep or as a full disconnect, then delegates to [onConnectionChanged] for the actual state
-     * transition.
-     */
-    private suspend fun onRadioConnectionState(newState: ConnectionState) {
-        val localConfig = radioConfigRepository.localConfigFlow.first()
-        val isRouter = localConfig.device?.role == Config.DeviceConfig.Role.ROUTER
-        val lsEnabled = localConfig.power?.is_power_saving == true || isRouter
+    private suspend fun onLinkPhase(phase: LinkPhase) = connectionMutex.withLock {
+        when (phase) {
+            LinkPhase.Asleep -> handleDeviceSleep()
 
-        val effectiveState =
-            when (newState) {
-                is ConnectionState.Connected -> ConnectionState.Connected
+            LinkPhase.Down -> handleDisconnected()
 
-                is ConnectionState.DeviceSleep ->
-                    if (lsEnabled) ConnectionState.DeviceSleep else ConnectionState.Disconnected
-
-                is ConnectionState.Connecting -> ConnectionState.Connecting
-
-                is ConnectionState.Disconnected -> ConnectionState.Disconnected
-            }
-        onConnectionChanged(effectiveState)
-    }
-
-    private suspend fun onConnectionChanged(c: ConnectionState, fromState: ConnectionState? = null): Boolean =
-        connectionMutex.withLock {
-            val current = serviceRepository.connectionState.value
-            if (fromState != null && current != fromState) {
-                Logger.d { "Skipping connection transition $current -> $c, expected current state $fromState" }
-                return@withLock false
-            }
-            if (current == c) return@withLock false
-
-            // If the transport reports 'Connected', but we are already in the middle of a handshake (Connecting)
-            if (c is ConnectionState.Connected && current is ConnectionState.Connecting) {
-                Logger.d { "Ignoring redundant transport connection signal while handshake is in progress" }
-                return@withLock false
-            }
-
-            Logger.i { "onConnectionChanged: $current -> $c" }
-
-            sleepTimeout?.cancel()
-            sleepTimeout = null
-            preHandshakeJob?.cancel()
-            preHandshakeJob = null
-            // Collapse cancel+clear into one atomic swap so a concurrent re-arm cannot
-            // orphan a job in the gap between cancel and reassign.
-            handshakeTimeout.getAndSet(null)?.cancel()
-            stageCapJob.getAndSet(null)?.cancel()
-
-            when (c) {
-                is ConnectionState.Connecting -> serviceRepository.setConnectionState(ConnectionState.Connecting)
-                is ConnectionState.Connected -> handleConnected()
-                is ConnectionState.DeviceSleep -> handleDeviceSleep()
-                is ConnectionState.Disconnected -> handleDisconnected()
-            }
-            true
+            LinkPhase.Pending,
+            LinkPhase.Up,
+            -> Unit
         }
-
-    private fun handleConnected() {
-        // Track whether this connection was restored from device sleep (vs. a fresh connect),
-        // matching Apple's "connectionRestored" attribute for cross-platform DataDog parity.
-        connectionRestored = serviceRepository.connectionState.value is ConnectionState.DeviceSleep
-        // The service state remains 'Connecting' until config is fully loaded
-        if (serviceRepository.connectionState.value != ConnectionState.Connected) {
-            serviceRepository.setConnectionState(ConnectionState.Connecting)
-        }
-        connectTimeMsec = nowMillis
-        // A fresh handshake is starting — clear the completion latch so progress signals during
-        // this handshake can re-arm the fast watchdog. The latch is set by onHandshakeComplete()
-        // and only matters in the window between Stage 2 completion and the subsequent Connected
-        // transition; without this reset, a recovery-restarted handshake would have its progress
-        // signals ignored (latch left set from the prior failed cycle). This covers both initial
-        // user-initiated connects and transport-restart recovery siblings.
-        handshakeCompleteLatch.value = false
-        // Fresh handshake: drop the stale stage-guard spec so early progress cannot re-arm the old stage.
-        armedStageGuard.value = null
-        lockdownCoordinator.onConnect()
-        // Send a wake-up heartbeat before the config request. The firmware may be in a
-        // power-saving state where the NimBLE callback context needs warming up. The 100ms
-        // delay ensures the heartbeat BLE write is enqueued before the want_config_id
-        // (sendToRadio is fire-and-forget through async coroutine launches).
-        preHandshakeJob = scope.handledLaunch {
-            heartbeatSender.sendHeartbeat("pre-handshake")
-            delay(PRE_HANDSHAKE_SETTLE_MS)
-            Logger.i { "Starting mesh handshake (Stage 1)" }
-            startConfigOnly()
-        }
-    }
-
-    private fun armStageGuard(stage: Int, timeout: Duration) {
-        val spec = StageGuardSpec(stage, timeout, stageGuardGeneration.incrementAndGet())
-        armedStageGuard.value = spec
-        // Hard ceiling: after 10x the budget of continuous re-arms, clear the spec so trickle
-        // progress can no longer extend this stage; the pending guard then expires on schedule.
-        stageCapJob
-            .getAndSet(
-                scope.handledLaunch {
-                    delay(timeout * STAGE_GUARD_TOTAL_CAP_FACTOR)
-                    armedStageGuard.compareAndSet(spec, null)
-                },
-            )
-            ?.cancel()
-        scheduleStallGuard(spec)
-    }
-
-    private fun rearmStageGuardOnProgress() {
-        while (true) {
-            val spec = armedStageGuard.value ?: return
-            scheduleStallGuard(spec)
-            // A newer stage can arm mid-swap; loop so the newest spec owns the pending guard job.
-            if (armedStageGuard.value === spec) return
-        }
-    }
-
-    private fun scheduleStallGuard(spec: StageGuardSpec) {
-        val stage = spec.stage
-        val fastTransport = isFastRecoveryTransport()
-        // On TCP/USB the firmware handshake completes in roughly 1s when healthy (logs show),
-        // while a wedged socket takes the full ~30s transport read timeout without any further
-        // progress. The aggressive 12s fast timeout recovers a stuck session quickly; BLE keeps
-        // the original generous budget because its GATT latency is high and variable.
-        val effectiveTimeout = if (fastTransport) FAST_HANDSHAKE_TIMEOUT else spec.timeout
-        val transportLabel = transportLabel()
-        // Collapse cancel+reassign into one atomic swap so a concurrent re-arm cannot orphan a
-        // job in the gap between cancel and reassign.
-        handshakeTimeout
-            .getAndSet(
-                scope.handledLaunch {
-                    delay(effectiveTimeout)
-                    if (serviceRepository.connectionState.value !is ConnectionState.Connecting) {
-                        return@handledLaunch
-                    }
-                    // A clean transport restart is the ONLY safe stall recovery on every transport.
-                    // The previous BLE branch re-sent want_config mid-session via action() here;
-                    // that re-send is now deliberately removed because firmware's handleStartConfig()
-                    // has no in-flight guard, so a second want_config on the same session re-enters
-                    // it and crashes the firmware (reproduced on T-Beam v2.7.25.104df5f in QA). The
-                    // firmware per-write dedup that was supposed to drop the retry is single-slot
-                    // (memcmp vs the previous write only), and interleaved heartbeats mean the re-sent
-                    // nonce is not byte-identical to the prior write — so it slips past dedup and
-                    // re-enters handleStartConfig(). A clean transport restart creates a fresh
-                    // session and re-enters the handshake naturally, which is both safer and more
-                    // deterministic than a same-session retry.
-                    // connectTimeMsec is 0 until the first transport Connected (e.g. reboot re-handshake).
-                    val sinceConnectMs = connectTimeMsec.takeIf { it > 0 }?.let { nowMillis - it } ?: -1
-                    Logger.e {
-                        "Handshake stall detected at Stage $stage on $transportLabel after " +
-                            "${effectiveTimeout.inWholeSeconds}s without progress " +
-                            "(progressSignals=${stageProgressSignals.value}, sinceConnectMs=$sinceConnectMs); " +
-                            "requesting forced transport restart"
-                    }
-                    runSiblingHandshakeRecovery()
-                },
-            )
-            ?.cancel()
-    }
-
-    /**
-     * Launches the deterministic two-phase stall-recovery sibling used by [scheduleStallGuard] on every transport.
-     *
-     * Phase 1 flips the app-level state from Connecting to Disconnected first, guarded by the connection mutex so a
-     * just-completed handshake cannot be torn down after winning the race. Phase 2 then calls
-     * [RadioInterfaceService.restartTransport], whose emissions (DeviceSleep → Connected) now arrive from app-level
-     * Disconnected, bypass the redundant-Connecting guard in [onConnectionChanged], and re-enter [handleConnected] to
-     * restart the handshake cleanly.
-     *
-     * We MUST NOT call [onConnectionChanged] from the [handshakeTimeout] coroutine after launching the sibling:
-     * [onConnectionChanged] cancels handshakeTimeout (the very job running this code), and any work chained after the
-     * launch is not guaranteed to run. We MUST ALSO NOT leave the explicit Disconnected call in this coroutine after
-     * the sibling launch — otherwise the sibling's restart emissions (DeviceSleep, then Connected) can arrive while the
-     * app-level state is still Connecting, causing [onConnectionChanged]'s redundant-Connected-while-Connecting guard
-     * to ignore the fresh Connected emission. That leaves the app Disconnected while transport is Connected — the same
-     * split-brain this restart path is meant to break.
-     *
-     * By the time the sibling runs, handshakeTimeout has already completed naturally (it launched the sibling and
-     * returned), so the cancellation [onConnectionChanged] would attempt is a no-op on an already-completed job — and
-     * because the sibling is parented to `scope`, not to handshakeTimeout, it survives independently.
-     *
-     * Concurrent-recovery protection is layered across three independent mechanisms, each sufficient on its own:
-     * 1. The [connectionMutex] serializes the [onConnectionChanged]`(Disconnected, fromState=Connecting)` call inside
-     *    the sibling. If a concurrent sibling already transitioned the app state to Disconnected, a second caller's
-     *    `fromState=Connecting` precondition fails and [onConnectionChanged] returns `false`, so the `if (disconnected
-     *    && ...)` gate skips `restartTransport()`.
-     * 2. The transport-level `isRestarting` CAS inside `SharedRadioInterfaceService.restartTransport()` provides
-     *    authoritative dedup at the layer that actually tears down and re-creates the transport, independent of the
-     *    app-level state machine above it.
-     * 3. The atomic [consecutiveRecoveryFailures]`getAndIncrement()` ensures each concurrent caller observes a unique
-     *    `priorFailures` slot, so the give-up decision (and the backoff duration) is race-free even if two siblings
-     *    race the same stall window.
-     *
-     * Backoff and give-up cap: each call atomically increments [consecutiveRecoveryFailures]. Prior failures trigger an
-     * exponential [delay] (2 s base, doubling each failure, capped at 30 s) before the transport restart so a node that
-     * keeps crashing under handshake re-entry is not re-driven in a tight loop. After
-     * [MAX_CONSECUTIVE_RECOVERY_FAILURES] consecutive failed recoveries, recovery stops and a sticky user-facing error
-     * is surfaced (Disconnected + error message) instead of silently retrying indefinitely; the user must manually
-     * re-select the node to retry, which resets the streak. The streak is also reset to 0 by [onHandshakeComplete] (a
-     * successful handshake).
-     */
-    private fun runSiblingHandshakeRecovery() {
-        // Atomically claim a failure slot. getAndIncrement guarantees each concurrent caller
-        // observes a unique priorFailures value, so the give-up decision is race-free.
-        val priorFailures = consecutiveRecoveryFailures.getAndIncrement()
-        scope.handledLaunch {
-            // After MAX_CONSECUTIVE_RECOVERY_FAILURES consecutive failed recoveries, stop retrying
-            // and surface a sticky error. A node that keeps failing the handshake is likely
-            // crashing firmware under re-entry (reproduced on T-Beam v2.7.25.104df5f), and
-            // re-driving it indefinitely only makes things worse. Reset the counter here so a
-            // manual retry from the user starts a fresh streak.
-            if (priorFailures >= MAX_CONSECUTIVE_RECOVERY_FAILURES) {
-                Logger.e {
-                    "Handshake recovery exhausted after $MAX_CONSECUTIVE_RECOVERY_FAILURES consecutive " +
-                        "failures; surfacing sticky error"
-                }
-                consecutiveRecoveryFailures.value = 0
-                serviceRepository.setConnectionProgress("")
-                onConnectionChanged(ConnectionState.Disconnected, fromState = ConnectionState.Connecting)
-                // safeCatchingAll swallows Skiko ExceptionInInitializerError on headless JVM tests
-                // where compose-resources can't load native libs. Production resolves the localized
-                // string normally; tests fall back to empty and setErrorMessage is still called.
-                val errorMessage = safeCatchingAll {
-                    getStringSuspend(Res.string.error_recovery_exhausted)
-                }
-                    .getOrDefault("")
-                serviceRepository.setErrorMessage(errorMessage, Severity.Error)
-                return@handledLaunch
-            }
-            // Exponential backoff before the next attempt: 2 s base, doubling for each prior
-            // failure, hard-capped at 30 s. Skipped on the first attempt (no prior failures).
-            // The delay is parented to `scope`, so it is cancelled cleanly if the user
-            // disconnects, navigates away, or the service shuts down (structured concurrency).
-            if (priorFailures > 0) {
-                val backoffSeconds =
-                    (RECOVERY_BACKOFF_BASE_SECONDS shl (priorFailures - 1)).coerceAtMost(RECOVERY_BACKOFF_CAP_SECONDS)
-                Logger.w {
-                    "Handshake recovery backoff: waiting ${backoffSeconds}s before retry (attempt ${priorFailures + 1})"
-                }
-                delay(backoffSeconds.seconds)
-            }
-            // Re-check state after backoff: the user may have disconnected during the delay.
-            if (serviceRepository.connectionState.value !is ConnectionState.Connecting) return@handledLaunch
-            // Surface the forced-recovery progress to the UI before the app-level Disconnected
-            // transition lands, so the user sees "Reconnecting…" rather than a stale
-            // "Loading node list" while the transport is being torn down and re-established.
-            //
-            // This progress is intentionally NOT cleared on the recovery's Disconnected window
-            // (i.e. NOT in handleDisconnected or this sibling). If recovery fails permanently,
-            // "Reconnecting…" may persist on the Disconnected screen until the user retries or
-            // navigates away. That leak is acceptable UX: the transport restart has been
-            // requested and may still be in flight (restartTransport is one-shot — if the fresh
-            // transport also fails, nothing here retries automatically; transport-level
-            // network-recovery listeners may independently re-bring-up the transport, and the
-            // user can manually retry). Clearing it here would race the deliberate UX signal:
-            // handleDisconnected runs synchronously after this call inside the same
-            // onConnectionChanged transition, so any clear there would clobber the signal before
-            // restartTransport runs. Stale progress is instead cleared at the first downstream
-            // setConnectionProgress call during the recovery handshake (e.g. "Device config
-            // received" or "Loading node list"), not by handleConnected itself — and at the
-            // ViewModel level the Connecting state already dominates progress (the CONNECTING
-            // status ignores the progress string), so the UI is correct regardless.
-            serviceRepository.setConnectionProgress(ServiceRepository.RECONNECTING_PROGRESS_TEXT)
-            val disconnected = onConnectionChanged(ConnectionState.Disconnected, fromState = ConnectionState.Connecting)
-            if (disconnected && serviceRepository.connectionState.value is ConnectionState.Disconnected) {
-                radioInterfaceService.restartTransport()
-            }
-        }
-    }
-
-    override fun recoverPostHandshakeFailure() {
-        Logger.w { "Recovering from post-handshake failure by restarting transport" }
-        runSiblingHandshakeRecovery()
     }
 
     private fun tearDownConnection() {
         postHandshakeRequestsJob?.cancel()
         postHandshakeRequestsJob = null
-        packetHandler.stopPacketQueue()
-        sessionManager.clearAll() // Prevent stale per-node passkeys on reconnect.
-        adminRequestRegistry.clearAll()
         locationManager.stop()
         mqttManager.stop()
     }
 
     private fun handleDeviceSleep() {
-        serviceRepository.setConnectionState(ConnectionState.DeviceSleep)
+        connectionRestored = true
         tearDownConnection()
 
         if (connectTimeMsec != 0L) {
@@ -533,23 +224,11 @@ class MeshConnectionManagerImpl(
                 DataPair(EVENT_CONNECTED_SECONDS, duration.milliseconds.toDouble(DurationUnit.SECONDS)),
             )
         }
-
-        sleepTimeout = scope.handledLaunch {
-            val localConfig = radioConfigRepository.localConfigFlow.first()
-            val rawTimeout = (localConfig.power?.ls_secs ?: 0) + DEVICE_SLEEP_TIMEOUT_SECONDS
-            // Cap the timeout so routers or power-saving configs (ls_secs=3600) don't
-            // leave the UI stuck in DeviceSleep for over an hour.
-            val timeout = rawTimeout.coerceAtMost(MAX_SLEEP_TIMEOUT_SECONDS)
-            Logger.d { "Waiting for sleeping device, timeout=$timeout secs (raw=$rawTimeout)" }
-            delay(timeout.seconds)
-            Logger.w { "Device timed out, setting disconnected" }
-            onConnectionChanged(ConnectionState.Disconnected)
-        }
     }
 
     private fun handleDisconnected() {
-        serviceRepository.setConnectionState(ConnectionState.Disconnected)
-        lockdownCoordinator.onDisconnect()
+        connectionRestored = false
+        connectTimeMsec = 0L
         tearDownConnection()
         // A different radio may connect next, and localStats only overwrites on a fresh local_stats telemetry
         // packet - without this, signal-quality rating would silently blend the *previous* radio's noise floor into
@@ -565,30 +244,12 @@ class MeshConnectionManagerImpl(
         analytics.track(EVENT_NUM_NODES, DataPair(KEY_NUM_NODES, nodeManager.nodeDBbyNodeNum.size))
     }
 
-    override fun startConfigOnly() {
-        radioInterfaceService.onStatus(TransportStatus(TransportPhase.HandshakeConfig))
-        stageProgressSignals.value = 0
-        armStageGuard(1, HANDSHAKE_TIMEOUT_STAGE1)
-        packetHandler.sendToRadio(
-            ToRadio.Builder().also { wb -> wb.want_config_id = HandshakeConstants.CONFIG_NONCE }.build(),
-        )
-    }
-
     override fun clearRadioConfig() {
         scope.handledLaunch {
             radioConfigRepository.clearLocalConfig()
             radioConfigRepository.clearChannelSet()
             radioConfigRepository.clearLocalModuleConfig()
         }
-    }
-
-    override fun startNodeInfoOnly() {
-        radioInterfaceService.onStatus(TransportStatus(TransportPhase.HandshakeNodes))
-        stageProgressSignals.value = 0
-        armStageGuard(2, HANDSHAKE_TIMEOUT_STAGE2)
-        packetHandler.sendToRadio(
-            ToRadio.Builder().also { wb -> wb.want_config_id = HandshakeConstants.NODE_INFO_NONCE }.build(),
-        )
     }
 
     override fun onRadioConfigLoaded() {
@@ -605,27 +266,8 @@ class MeshConnectionManagerImpl(
         }
     }
 
-    override fun onMyNodeInfoReceived(myNodeNum: Int) {
-        // A handshake restart drops the radio's pending requests, and a renumbered radio no longer answers to the
-        // old node number, so nothing registered before this point can be answered.
-        adminRequestRegistry.clearAll()
-        // Set device time as early as possible: MyNodeInfo is the first Stage 1 frame, so this
-        // lands before the firmware flushes its queued packet backlog and lets it stamp those
-        // packets with a corrected clock (firmware #11274). A single small write ahead of the
-        // config/node-info bursts avoids the GATT contention that pushed the old
-        // onRadioConfigLoaded-time send out of Stage 1. Must bypass the outbound packet queue:
-        // it only drains once Connected, which would hold this until after the backlog flush.
-        commandSender.sendAdminImmediate(myNodeNum) {
-            AdminMessage.Builder().also { wb -> wb.set_time_only = nowSeconds.toInt() }.build()
-        }
-    }
-
     override suspend fun onNodeDbReady() {
-        // Collapse cancel+clear into one atomic swap so a concurrent re-arm cannot
-        // orphan a job in the gap between cancel and reassign.
-        handshakeTimeout.getAndSet(null)?.cancel()
-        stageCapJob.getAndSet(null)?.cancel()
-
+        connectTimeMsec = nowMillis
         schedulePostHandshakeRequests()
 
         // Start MQTT if enabled
@@ -644,8 +286,8 @@ class MeshConnectionManagerImpl(
         postHandshakeRequestsJob?.cancelAndJoin()
         postHandshakeRequestsJob = null
         val myNodeNum = nodeManager.myNodeNum.value
-        val connectedLifecycle = serviceRepository.connectionLifecycle.value
-        if (myNodeNum == null || connectedLifecycle.state !is ConnectionState.Connected) {
+        val session = radioInterfaceService.activeSession.value
+        if (myNodeNum == null || session == null) {
             Logger.w { "Skipping post-handshake requests because the connected local-node state is unavailable" }
             return@withLock
         }
@@ -653,30 +295,14 @@ class MeshConnectionManagerImpl(
             // The requests are independent. One unexpected request failure must not cancel the others, and
             // teardown serializes with this job publication through connectionMutex.
             supervisorScope {
-                launch {
-                    retryPostHandshakeRequest("Session-passkey seed", myNodeNum, connectedLifecycle.version) {
-                        commandSender.sendAdminForConnection(
-                            destNum = myNodeNum,
-                            expectedConnectionVersion = connectedLifecycle.version,
-                            wantResponse = true,
-                        ) {
-                            AdminMessage.Builder().also { wb -> wb.get_owner_request = true }.build()
-                        }
-                    }
-                }
                 listOf(TelemetryType.LOCAL_STATS, TelemetryType.DEVICE).forEach { type ->
                     launch {
                         retryPostHandshakeRequest(
                             label = "$type telemetry request",
                             myNodeNum = myNodeNum,
-                            connectedVersion = connectedLifecycle.version,
+                            session = session,
                         ) {
-                            commandSender.requestTelemetryForConnection(
-                                commandSender.generatePacketId(),
-                                myNodeNum,
-                                type.ordinal,
-                                connectedLifecycle.version,
-                            )
+                            requestLocalTelemetry(type, myNodeNum, session)
                         }
                     }
                 }
@@ -685,14 +311,14 @@ class MeshConnectionManagerImpl(
                     retryPostHandshakeRequest(
                         label = "History replay",
                         myNodeNum = myNodeNum,
-                        connectedVersion = connectedLifecycle.version,
+                        session = session,
                     ) {
                         historyManager.requestHistoryReplay(
                             trigger = "onNodeDbReady",
                             myNodeNum = myNodeNum,
                             storeForwardConfig = config,
                             transport = "Unknown",
-                            expectedConnectionVersion = connectedLifecycle.version,
+                            session = session,
                         )
                     }
                 }
@@ -708,23 +334,58 @@ class MeshConnectionManagerImpl(
         }
     }
 
-    private fun ownsPostHandshakeRequests(myNodeNum: Int, connectedVersion: Long): Boolean =
-        serviceRepository.connectionLifecycle.value.let { lifecycle ->
-            lifecycle.version == connectedVersion &&
-                lifecycle.state is ConnectionState.Connected &&
-                nodeManager.myNodeNum.value == myNodeNum
+    /** The client of [session], or of the active session when none is given, while that session is active. */
+    private fun activeClient(operation: String, session: RadioSessionContext? = null): RadioClient {
+        val target = session ?: radioInterfaceService.activeSession.value
+        return target?.let(radioInterfaceService::clientForSession) ?: throw PacketQueueRejectedException(operation)
+    }
+
+    /** Sends the phone's fix to our own node with the send builder, so its time and precision survive. */
+    private suspend fun sendOwnPosition(pos: Position) {
+        val myNum = nodeManager.myNodeNum.value ?: throw LocalNodeUnavailableException("Position update")
+        val client = activeClient("Position update")
+        try {
+            client.send {
+                data(PortNum.POSITION_APP, pos.encode())
+                to(NodeId(myNum))
+                priority(MeshPacket.Priority.BACKGROUND)
+            }
+        } catch (e: MeshtasticException) {
+            throw PacketQueueRejectedException("Position update").apply { addSuppressed(e) }
         }
+        if (radioConfigRepository.localConfigFlow.first().position?.fixed_position != true) {
+            nodeManager.handleReceivedPosition(myNum, myNum, pos, nowMillis)
+        }
+    }
+
+    /** Asks our own node for [type] telemetry, only while [session] is still active. */
+    private suspend fun requestLocalTelemetry(type: TelemetryType, myNodeNum: Int, session: RadioSessionContext) {
+        val operation = "$type telemetry request"
+        val telemetry = activeClient(operation, session).telemetry
+        val local = type == TelemetryType.LOCAL_STATS
+        val result =
+            try {
+                if (local) telemetry.requestLocalStats() else telemetry.requestDevice(NodeId(myNodeNum))
+            } catch (e: MeshtasticException) {
+                throw PacketQueueRejectedException(operation).apply { addSuppressed(e) }
+            }
+        // An unanswered request retries like a refused one, within the same attempt cap.
+        if (result !is AdminResult.Success) throw PacketQueueRejectedException(operation)
+    }
+
+    private fun ownsPostHandshakeRequests(myNodeNum: Int, session: RadioSessionContext): Boolean =
+        radioInterfaceService.isSessionActive(session) && nodeManager.myNodeNum.value == myNodeNum
 
     private suspend fun retryPostHandshakeRequest(
         label: String,
         myNodeNum: Int,
-        connectedVersion: Long,
+        session: RadioSessionContext,
         send: suspend () -> Unit,
     ) {
         var rejectionCount = 0
         var rejectionLogged = false
         var complete = false
-        while (!complete && ownsPostHandshakeRequests(myNodeNum, connectedVersion)) {
+        while (!complete && ownsPostHandshakeRequests(myNodeNum, session)) {
             try {
                 send()
                 complete = true
@@ -755,32 +416,6 @@ class MeshConnectionManagerImpl(
         }
     }
 
-    /**
-     * Synchronously cancels the transport-aware handshake watchdog the moment Stage 2 completes (NODE_INFO_NONCE
-     * received). Does NOT replicate [onNodeDbReady]'s post-NodeDB side effects (analytics, MQTT start, history replay,
-     * telemetry requests) — those remain gated on [onNodeDbReady] at the end of the async DB install block.
-     *
-     * See [MeshConnectionManager.onHandshakeComplete] for the full rationale.
-     */
-    override fun onHandshakeComplete() {
-        // Collapse cancel+clear into one atomic swap so a concurrent re-arm cannot orphan a
-        // job in the gap between cancel and reassign.
-        handshakeTimeout.getAndSet(null)?.cancel()
-        stageCapJob.getAndSet(null)?.cancel()
-        // Set the completion latch so late-arriving progress packets (e.g. FileInfo that lands
-        // between NODE_INFO_NONCE and the async Room DB install completion) cannot re-arm the
-        // fast watchdog we just cancelled. Without this latch, those late packets would
-        // re-introduce the slow-DB false-trip on large meshes that this method was added to
-        // prevent — the app state is still Connecting during that window, so the Connecting-
-        // state guard inside onHandshakeProgress() is insufficient on its own. The latch is
-        // cleared at the start of the next fresh handshake in handleConnected().
-        handshakeCompleteLatch.value = true
-        radioInterfaceService.onStatus(TransportStatus(TransportPhase.Connected))
-        // A successful handshake breaks the recovery failure streak — reset the consecutive
-        // failure counter so the next stall starts from a fresh count.
-        consecutiveRecoveryFailures.value = 0
-    }
-
     private fun reportConnection() {
         val myNode = nodeManager.getMyNodeInfo()
         val radioModel = DataPair(KEY_RADIO_MODEL, myNode?.model ?: "unknown")
@@ -807,74 +442,19 @@ class MeshConnectionManagerImpl(
         updateStatusNotification(t)
     }
 
-    /**
-     * True when the active transport is a TCP or USB serial connection, or the Demo Mode mock — i.e. one whose
-     * handshake reliably completes in roughly 1s when healthy and therefore benefits from aggressive silent-restart on
-     * stall. BLE is excluded because its GATT latency budget is high and variable enough that the long-and-retry
-     * stall-guard budgets remain the right trade-off.
-     */
-    private fun isFastRecoveryTransport(): Boolean =
-        currentDeviceType() in FAST_RECOVERY_TYPES || currentVirtualInterface() == InterfaceId.MOCK
-
     private fun currentDeviceType(): DeviceType? =
         radioInterfaceService.getDeviceAddress()?.let { DeviceType.fromAddress(it) }
 
     private fun currentVirtualInterface(): InterfaceId? =
         radioInterfaceService.getDeviceAddress()?.firstOrNull()?.let(InterfaceId::forIdChar)?.takeIf { it.isVirtual }
 
-    /**
-     * Names the concrete transport (BLE, TCP, USB, MOCK, REPLAY) in stall reports. TCP and USB share the fast-recovery
-     * budget but fail for different reasons, and the field reports can only be split by transport if the report says
-     * which one.
-     */
-    private fun transportLabel(): String =
-        currentDeviceType()?.name ?: currentVirtualInterface()?.name ?: UNKNOWN_TRANSPORT_LABEL
-
-    override fun onHandshakeProgress() {
-        // Progress only matters while a handshake is live, before the completion latch has fired.
-        if (serviceRepository.connectionState.value !is ConnectionState.Connecting || handshakeCompleteLatch.value) {
-            return
-        }
-        stageProgressSignals.incrementAndGet()
-        if (!isFastRecoveryTransport()) {
-            // BLE: re-arm the stage guard with its full budget so it acts as an inactivity window.
-            // Fixes false stalls on big meshes that drain past the fixed budget (Crashlytics e61fc83f).
-            rearmStageGuardOnProgress()
-            return
-        }
-        // Atomic swap: cancel any in-flight fast watchdog and re-arm it with the full fast
-        // timeout in a single operation. This keeps the watchdog quiet as long as meaningful
-        // progress keeps arriving within the window, while a true stall still fires on
-        // schedule. getAndSet prevents a concurrent re-arm from orphaning a job in the gap
-        // between cancel and reassign.
-        handshakeTimeout
-            .getAndSet(
-                scope.handledLaunch {
-                    delay(FAST_HANDSHAKE_TIMEOUT)
-                    if (serviceRepository.connectionState.value !is ConnectionState.Connecting) {
-                        return@handledLaunch
-                    }
-                    // Warn, not error: the watchdog firing is the recovery mechanism working, and the cause is a
-                    // stalled radio or link rather than a defect here. A throwable-less Logger.e still synthesises a
-                    // non-fatal in Crashlytics and a RUM error, which made this one of the loudest issues in triage.
-                    // Track it as a rate over this log line instead.
-                    Logger.w {
-                        "Fast-handshake watchdog expired on ${transportLabel()} after progress stalled — " +
-                            "requesting forced transport restart"
-                    }
-                    runSiblingHandshakeRecovery()
-                },
-            )
-            ?.cancel()
-    }
-
     override fun updateStatusNotification(telemetry: Telemetry?) {
         val state = serviceRepository.connectionState.value
         // During an expected node restart the disconnect is transient; keep the persistent notification on the
         // connecting presentation instead of flashing "disconnected".
         val presented =
-            if (state == ConnectionState.Disconnected && nodeRestartTracker.restartExpected.value) {
-                ConnectionState.Connecting
+            if (state.linkPhase() == LinkPhase.Down && nodeRestartTracker.restartExpected.value) {
+                ConnectionState.Connecting(attempt = 1)
             } else {
                 state
             }
@@ -882,28 +462,6 @@ class MeshConnectionManagerImpl(
     }
 
     companion object {
-        // Hoisted constant — used on every meaningful handshake packet via
-        // isFastRecoveryTransport(); avoids allocating a fresh Set per packet.
-        private val FAST_RECOVERY_TYPES = setOf(DeviceType.TCP, DeviceType.USB)
-
-        private const val UNKNOWN_TRANSPORT_LABEL = "unknown transport"
-
-        private const val DEVICE_SLEEP_TIMEOUT_SECONDS = 30
-
-        // Maximum time (in seconds) to wait for a sleeping device before declaring it
-        // disconnected, regardless of the device's ls_secs configuration. Without this
-        // cap, routers (ls_secs=3600) leave the UI in DeviceSleep for over an hour.
-        private const val MAX_SLEEP_TIMEOUT_SECONDS = 300
-
-        /**
-         * Delay between the pre-handshake heartbeat and the want_config_id send.
-         *
-         * Ensures the heartbeat BLE write completes and the firmware's NimBLE callback context is warmed up before the
-         * config request arrives. 100ms is well above observed ESP32 task scheduling latency (~10–50ms) while adding
-         * negligible connection latency.
-         */
-        private const val PRE_HANDSHAKE_SETTLE_MS = 100L
-
         internal const val MAX_POST_HANDSHAKE_ADMISSION_ATTEMPTS = 8
         private val POST_HANDSHAKE_ADMISSION_INITIAL_RETRY_DELAY = 1.seconds
         private const val POST_HANDSHAKE_ADMISSION_MAX_BACKOFF_EXPONENT = 3
@@ -914,69 +472,6 @@ class MeshConnectionManagerImpl(
             return POST_HANDSHAKE_ADMISSION_INITIAL_RETRY_DELAY * (1 shl exponent)
         }
 
-        /** Total-cap multiple: a stage may re-arm for at most this many budgets before the guard must fire. */
-        private const val STAGE_GUARD_TOTAL_CAP_FACTOR = 10
-
-        /** Stage 1 budget. On BLE it is an inactivity window: each progress packet re-arms the full budget. */
-        private val HANDSHAKE_TIMEOUT_STAGE1 = 30.seconds
-
-        /**
-         * Stage 2 drains the full node database, which can be significantly larger than Stage 1 config on big meshes.
-         * 60 s matches the meshtastic-client SDK timeout and avoids premature stall-guard triggers on meshes with 50+
-         * nodes. On BLE it is an inactivity window: each progress packet re-arms the full budget, so a large nodeDB
-         * that streams for longer than the budget is never misread as a stall.
-         */
-        private val HANDSHAKE_TIMEOUT_STAGE2 = 60.seconds
-
-        /**
-         * Transport-aware fast-recovery timeout for the handshake stall guard, applied only to TCP and USB serial
-         * transports.
-         *
-         * Production logs on TCP/USB show a healthy firmware handshake completes in roughly 1 second, while a wedged
-         * socket sits idle for the full transport-level read timeout (~30s) without any further progress. 12s sits
-         * comfortably above the healthy success envelope and well below the transport read timeout, so firing a silent
-         * [RadioInterfaceService.restartTransport] at 12s recovers a stuck TCP/USB session quickly without
-         * false-positiving on healthy connections.
-         *
-         * BLE is intentionally excluded — its GATT latency budget is variable enough that the existing
-         * [HANDSHAKE_TIMEOUT_STAGE1] (30s) and [HANDSHAKE_TIMEOUT_STAGE2] (60s) budgets remain the right trade-off.
-         * Both transports now recover exclusively via [runSiblingHandshakeRecovery] (transport restart); the previous
-         * BLE mid-session want_config retry has been removed (see [scheduleStallGuard] for the firmware crash
-         * rationale).
-         */
-        private val FAST_HANDSHAKE_TIMEOUT = 12.seconds
-
-        /**
-         * Maximum consecutive handshake-recovery attempts before surfacing a sticky error to the user.
-         *
-         * Each call to [runSiblingHandshakeRecovery] counts as one attempt. After this many consecutive attempts fail
-         * to lead to a successful handshake, recovery stops and a sticky Disconnected + error state is surfaced,
-         * requiring the user to manually re-select the node to retry. This prevents indefinite re-driving of a node
-         * whose firmware is crashing under handshake re-entry (reproduced on T-Beam v2.7.25.104df5f).
-         */
-        private const val MAX_CONSECUTIVE_RECOVERY_FAILURES = 3
-
-        /**
-         * Base delay (seconds) for the exponential backoff applied between consecutive recovery attempts in
-         * [runSiblingHandshakeRecovery]. Doubled for each prior failure and hard-capped at
-         * [RECOVERY_BACKOFF_CAP_SECONDS].
-         *
-         * 2 s base gives the firmware and transport a brief breather after a failed restart without adding perceptible
-         * latency to the first retry; doubling bounds the worst-case loop tightly under the 3-strike cap.
-         */
-        private const val RECOVERY_BACKOFF_BASE_SECONDS = 2L
-
-        /**
-         * Hard cap (seconds) for the exponential backoff between recovery attempts.
-         *
-         * Keeps the per-attempt delay bounded even if [MAX_CONSECUTIVE_RECOVERY_FAILURES] is raised in the future. 30 s
-         * matches the transport-level read timeout envelope, so a backed-off retry never waits longer than the
-         * underlying transport would have taken to fail on its own.
-         */
-        // Cap unreachable while MAX_CONSECUTIVE_RECOVERY_FAILURES=3 (max computed delay is 4s);
-        // retained as defense-in-depth if MAX is raised in the future.
-        private const val RECOVERY_BACKOFF_CAP_SECONDS = 30L
-
         private const val EVENT_CONNECTED_SECONDS = "connected_seconds"
         private const val EVENT_MESH_DISCONNECT = "mesh_disconnect"
         private const val EVENT_NUM_NODES = "num_nodes"
@@ -986,4 +481,28 @@ class MeshConnectionManagerImpl(
         private const val KEY_NUM_ONLINE = "num_online"
         private const val KEY_RADIO_MODEL = "radio_model"
     }
+}
+
+/** What a connection state means for the work a session started. */
+private enum class LinkPhase {
+    Up,
+    Asleep,
+    Down,
+    Pending,
+}
+
+private fun ConnectionState.linkPhase(): LinkPhase = when (this) {
+    ConnectionState.Connected -> LinkPhase.Up
+
+    is ConnectionState.DeviceSleeping -> LinkPhase.Asleep
+
+    ConnectionState.Disconnected,
+    ConnectionState.Disconnecting,
+    is ConnectionState.Failed,
+    is ConnectionState.Reconnecting,
+    -> LinkPhase.Down
+
+    is ConnectionState.Connecting,
+    is ConnectionState.Configuring,
+    -> LinkPhase.Pending
 }

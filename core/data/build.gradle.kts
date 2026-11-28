@@ -28,6 +28,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(projects.core.repository)
+            implementation(projects.core.ble)
             implementation(projects.core.common)
             implementation(projects.core.database)
             implementation(projects.core.datastore)
@@ -35,6 +36,8 @@ kotlin {
             implementation(projects.core.model)
             implementation(projects.core.network)
             implementation(libs.meshtastic.protobufs)
+            implementation(libs.meshtastic.sdk.transport.ble)
+            implementation(libs.meshtastic.sdk.transport.websocket)
 
             implementation(libs.jetbrains.lifecycle.runtime)
             implementation(libs.androidx.paging.common)
@@ -54,15 +57,26 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.androidx.core.ktx)
             implementation(libs.androidx.core.location.altitude)
+            implementation(libs.meshtastic.sdk.transport.tcp)
+            implementation(libs.meshtastic.sdk.transport.serial)
+            implementation(libs.usb.serial.android)
+        }
+        getByName("jvmMain").dependencies {
+            implementation(libs.meshtastic.sdk.transport.tcp)
+            implementation(libs.meshtastic.sdk.transport.serial)
         }
 
-        commonTest.dependencies { implementation(projects.core.testing) }
+        commonTest.dependencies {
+            implementation(projects.core.testing)
+            implementation(libs.meshtastic.sdk.testing)
+        }
+
+        getByName("jvmTest").dependencies {
+            implementation(projects.core.service)
+            implementation(projects.core.ble)
+            implementation(libs.androidx.datastore.preferences)
+        }
 
         getByName("androidHostTest") { dependencies { runtimeOnly(libs.androidx.sqlite.bundled.jvm) } }
     }
 }
-
-// The sticky error is a string resource, which the browser loads asynchronously; the assertion runs first.
-meshtasticWeb.browserTestExclusions.add(
-    "*MeshConnectionManagerImplTest.Recovery exhaustion after three consecutive failures surfaces sticky error*",
-)

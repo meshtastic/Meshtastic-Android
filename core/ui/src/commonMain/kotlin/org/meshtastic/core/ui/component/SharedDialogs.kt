@@ -19,10 +19,10 @@ package org.meshtastic.core.ui.component
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
 import org.meshtastic.core.ui.share.SharedContactImportDialog
 import org.meshtastic.core.ui.viewmodel.UIViewModel
+import org.meshtastic.sdk.ConnectionState
 
 /**
  * Shared composable that conditionally renders [SharedContactImportDialog] and [ScannedQrCodeDialog] when the device is

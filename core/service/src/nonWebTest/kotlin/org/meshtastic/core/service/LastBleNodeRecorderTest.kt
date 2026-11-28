@@ -29,7 +29,6 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.datastore.FirmwareRecoveryDataSource
 import org.meshtastic.core.datastore.model.PendingFirmwareRecovery
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.ConnectionIdentity
@@ -38,6 +37,7 @@ import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeServiceRepository
 import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.User
+import org.meshtastic.sdk.ConnectionState
 import kotlin.test.Test
 
 class LastBleNodeRecorderTest {
@@ -144,15 +144,8 @@ class LastBleNodeRecorderTest {
         hasGPS = false,
         model = null,
         firmwareVersion = null,
-        couldUpdate = false,
-        shouldUpdate = false,
-        currentPacketId = 0,
-        messageTimeoutMsec = 0,
         minAppVersion = 0,
-        maxChannels = 8,
         hasWifi = false,
-        channelUtilization = 0f,
-        airUtilTx = 0f,
         deviceId = null,
         pioEnv = pioEnv,
     )

@@ -2,7 +2,7 @@
 title: Architecture
 parent: Developer Guide
 nav_order: 1
-last_updated: 2026-11-20
+last_updated: 2026-11-23
 description: How the Android, Desktop and web apps split into androidApp/desktopApp/webApp, feature modules, and core modules, and how radio control and navigation are layered across them.
 aliases:
   - layers
@@ -45,7 +45,6 @@ The Desktop (Linux/macOS/Windows) entry point:
 - Compose Desktop window management
 - Desktop-specific DI (`DesktopKoinModule`)
 - Platform stubs for Android-only capabilities
-- `DesktopRadioTransportFactory`, which wires up the transports. The transports themselves are shared code in `core:network`: BLE built on `core:ble`'s primitives, TCP, and the jSerialComm-based `SerialTransport` in `core:network`'s `jvmMain`
 
 ### `webApp/` — Web Application
 
@@ -53,7 +52,7 @@ The browser (Kotlin/Wasm) entry point, opt-in with `-Pmeshtastic.web=true`; see 
 - `ComposeViewport` into `index.html`'s `webApp` element, with a service worker (`sw.js`) for notifications and offline reloads and a PWA manifest
 - Web-specific DI (`WebKoinModule`, whose `includes` mirror `DesktopKoinModule`'s)
 - The Room database on SQLite's OPFS SAH pool, held by one tab at a time
-- `WasmJsRadioTransportFactory` in `core:network`'s `wasmJsMain`: BLE through Kable over Web Bluetooth, Web Serial, and WebSocket; no raw TCP
+- `WebRadioLinks` in `core:data`'s `wasmJsMain`: BLE through Kable over Web Bluetooth, Web Serial, and WebSocket; no raw TCP
 
 ### `appShell/` — Shared Main Screen
 
@@ -101,7 +100,7 @@ Shared infrastructure used by all features:
 | `core:ui` | Shared Compose components, icons, theme |
 | `core:resources` | Shared string resources |
 | `core:model` | Domain models |
-| `core:data` | Repository implementations, data sources and managers |
+| `core:data` | Repository implementations, data sources and managers; each platform's `RadioLinks`, which build the selected radio's SDK client |
 | `core:domain` | Use cases / business logic |
 | `core:database` | Room KMP database |
 | `core:datastore` | DataStore preferences |
@@ -109,7 +108,7 @@ Shared infrastructure used by all features:
 | `core:repository` | Repository interfaces |
 | `core:service` | Mesh service layer |
 | `core:di` | DI utilities |
-| `core:network` | HTTP/serial/transport |
+| `core:network` | HTTP, MQTT and LAN discovery |
 | `core:ble` | Bluetooth LE abstractions |
 | `core:barcode` | QR / barcode scanning (channel-share QR codes); Android library |
 | `core:nfc` | NFC read/write support; Android library |
@@ -190,10 +189,11 @@ focused sub-interfaces so callers can depend on just the slice they need:
 `RadioControllerImpl` (`core:service`) is the in-process composition root for all targets
 (Desktop, iOS, single-process Android). It assembles the four sub-controllers via Kotlin interface
 delegation and adds the cross-cutting concerns (connection state, packet-id, location,
-device-address switching). Commands are direct suspend calls; admin writes are fire-and-forget
-because the device is the source of truth (local persistence is an optimistic cache). The layered
-shape mirrors the [meshtastic-sdk](https://github.com/meshtastic/meshtastic-sdk)
-`AdminApi`/`TelemetryApi` design to ease a future SDK migration.
+device-address switching). Commands are direct suspend calls on the active session's
+[meshtastic-sdk](https://github.com/meshtastic/meshtastic-sdk) client, whose `AdminApi`/`TelemetryApi`
+layering the controllers mirror. An acknowledged local admin write reaches the app's repositories through
+the SDK session events (`ConfigChanged`, `ChannelsChanged`, `NodeChanged`); the device remains the source
+of truth and reports its full config on every connection.
 
 ## Service Repository
 
@@ -202,7 +202,7 @@ It is decomposed into focused provider interfaces following the Interface Segreg
 
 | Interface | Responsibility |
 |-----------|---------------|
-| `ConnectionStateProvider` | Read-only `connectionState`, plus `connectionLifecycle` and `connectionEpochs` for code that has to correlate state with connection departures and completed handshakes |
+| `ConnectionStateProvider` | Read-only `connectionState` |
 | `TracerouteResponseProvider` | Traceroute response state + clear |
 | `NeighborInfoResponseProvider` | Neighbor info response state + clear |
 | `ServiceStateWriter` | Write-side for handlers (set*, emit*, clear*) |

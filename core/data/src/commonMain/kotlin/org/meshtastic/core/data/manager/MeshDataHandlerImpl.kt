@@ -20,7 +20,6 @@ import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.firstOrNull
-import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.di.ServiceScope
@@ -45,11 +44,9 @@ import org.meshtastic.core.model.util.MeshDataMapper
 import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.core.model.util.isAlreadyJoined
 import org.meshtastic.core.model.util.isValidCodePoint
-import org.meshtastic.core.model.util.relayIsRfHop
 import org.meshtastic.core.model.util.snrOrNull
 import org.meshtastic.core.model.util.toOneLiner
 import org.meshtastic.core.repository.ActiveConversationTracker
-import org.meshtastic.core.repository.AdminPacketHandler
 import org.meshtastic.core.repository.DataPair
 import org.meshtastic.core.repository.DiscoveryPacketCollectorRegistry
 import org.meshtastic.core.repository.MeshBeaconRepository
@@ -59,7 +56,6 @@ import org.meshtastic.core.repository.MessageAnnouncement
 import org.meshtastic.core.repository.MessageFilter
 import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.NodeManager
-import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
@@ -83,8 +79,10 @@ import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.Routing
 import org.meshtastic.proto.StatusMessage
-import org.meshtastic.proto.User
 import org.meshtastic.proto.Waypoint
+import org.meshtastic.sdk.MeshEvent
+import org.meshtastic.sdk.isExpired
+import kotlin.time.Instant
 
 /**
  * Implementation of [MeshDataHandler] that decodes and routes incoming mesh data packets.
@@ -99,7 +97,6 @@ import org.meshtastic.proto.Waypoint
 @Single
 class MeshDataHandlerImpl(
     private val nodeManager: NodeManager,
-    private val packetHandler: PacketHandler,
     private val serviceStateWriter: ServiceStateWriter,
     private val packetRepository: Lazy<PacketRepository>,
     private val serviceNotifications: MeshNotificationManager,
@@ -111,7 +108,6 @@ class MeshDataHandlerImpl(
     private val messageFilter: MessageFilter,
     private val storeForwardHandler: StoreForwardPacketHandler,
     private val telemetryHandler: TelemetryPacketHandler,
-    private val adminPacketHandler: AdminPacketHandler,
     private val remoteShellHandler: RemoteShellHandler,
     private val collectorRegistry: DiscoveryPacketCollectorRegistry,
     private val geofenceMonitor: GeofenceMonitor,
@@ -129,10 +125,9 @@ class MeshDataHandlerImpl(
         logInsertJob: Job?,
     ) {
         val dataPacket = dataMapper.toDataPacket(packet) ?: return
-        val fromUs = myNodeNum == packet.from
         dataPacket.status = MessageStatus.RECEIVED
 
-        handleDataPacket(packet, dataPacket, myNodeNum, fromUs, session, logUuid, logInsertJob)
+        handleDataPacket(packet, dataPacket, myNodeNum, session, logUuid, logInsertJob)
 
         analytics.track("num_data_receive", DataPair("num_data_receive", 1))
 
@@ -150,7 +145,6 @@ class MeshDataHandlerImpl(
         packet: MeshPacket,
         dataPacket: DataPacket,
         myNodeNum: Int,
-        fromUs: Boolean,
         session: RadioSessionContext,
         logUuid: String?,
         logInsertJob: Job?,
@@ -161,8 +155,8 @@ class MeshDataHandlerImpl(
             PortNum.NODE_STATUS_APP -> handleNodeStatus(packet, dataPacket, myNodeNum, session)
             PortNum.ALERT_APP -> rememberDataPacket(dataPacket, myNodeNum, session = session)
             PortNum.WAYPOINT_APP -> handleWaypoint(packet, dataPacket, myNodeNum, session)
-            PortNum.POSITION_APP -> handlePosition(packet, dataPacket, myNodeNum, session)
-            PortNum.NODEINFO_APP -> if (!fromUs) handleNodeInfo(packet, session)
+            PortNum.POSITION_APP -> handlePosition(packet, myNodeNum, session)
+            PortNum.NODEINFO_APP -> Unit
             PortNum.TELEMETRY_APP -> telemetryHandler.handleTelemetry(packet, dataPacket, myNodeNum, session)
             else -> handleSpecializedDataPacket(packet, dataPacket, myNodeNum, session, logUuid, logInsertJob)
         }
@@ -182,9 +176,8 @@ class MeshDataHandlerImpl(
                 tracerouteHandler.handleTraceroute(packet, logUuid, logInsertJob, session)
             }
 
-            PortNum.ROUTING_APP -> {
-                handleRouting(packet, session)
-            }
+            // Settled from the SDK's RoutingReport, which follows this packet on the session stream.
+            PortNum.ROUTING_APP -> Unit
 
             PortNum.PAXCOUNTER_APP -> {
                 handlePaxCounter(packet, session)
@@ -198,9 +191,7 @@ class MeshDataHandlerImpl(
                 storeForwardHandler.handleStoreForwardPlusPlus(packet, session)
             }
 
-            PortNum.ADMIN_APP -> {
-                adminPacketHandler.handleAdminMessage(packet, myNodeNum, session)
-            }
+            PortNum.ADMIN_APP -> Unit
 
             PortNum.REMOTE_SHELL_APP -> {
                 remoteShellHandler.handleRemoteShell(packet)
@@ -274,16 +265,10 @@ class MeshDataHandlerImpl(
         nodeManager.handleReceivedPaxcounter(packet.from, p, session)
     }
 
-    private fun handlePosition(
-        packet: MeshPacket,
-        dataPacket: DataPacket,
-        myNodeNum: Int,
-        session: RadioSessionContext,
-    ) {
+    private fun handlePosition(packet: MeshPacket, myNodeNum: Int, session: RadioSessionContext) {
         val payload = packet.decoded?.payload ?: return
         val p = Position.ADAPTER.decodeOrNull(payload, Logger) ?: return
         Logger.d { "Position from ${packet.from}: ${Position.ADAPTER.toOneLiner(p)}" }
-        nodeManager.handleReceivedPosition(packet.from, myNodeNum, p, dataPacket.time, session)
         geofenceMonitor.onPositionReceived(packet.from, myNodeNum, p, session)
     }
 
@@ -304,12 +289,12 @@ class MeshDataHandlerImpl(
             Logger.w { "Clearing an out-of-range waypoint icon code point (${u.icon})" }
             dataPacket.bytes = Waypoint.ADAPTER.encode(u.newBuilder().also { wb -> wb.icon = 0 }.build()).toByteString()
         }
-        val updateNotification = u.expire > nowSeconds.toInt()
+        val updateNotification = !u.isExpired(Instant.fromEpochSeconds(nowSeconds))
         radioInterfaceService.launchSessionWork(scope, session) {
             // Persisted-owner enforcement: a stored, locked waypoint may only be modified by the node it is locked to.
             // The inbound check above only validates the incoming payload, so without this a non-owner could hijack a
             // stored locked waypoint by replaying its id with locked_to = 0 (unlock) or their own num (takeover). The
-            // read and the write share this one lease so the check sees a committed snapshot (see [persistDataPacket]).
+            // read and the write share one launch so the check sees a committed snapshot (see [persistDataPacket]).
             if (!storedWaypointModifiableBy(u.id, packet.from)) return@launchSessionWork
             persistDataPacket(dataPacket, myNodeNum, updateNotification)
         }
@@ -348,27 +333,6 @@ class MeshDataHandlerImpl(
         }
     }
 
-    private fun handleNodeInfo(packet: MeshPacket, session: RadioSessionContext) {
-        val payload = packet.decoded?.payload ?: return
-        val u =
-            User.ADAPTER.decode(payload)
-                .let {
-                    if (it.is_licensed == true) {
-                        it.newBuilder().also { wb -> wb.public_key = ByteString.EMPTY }.build()
-                    } else {
-                        it
-                    }
-                }
-                .let {
-                    if (packet.via_mqtt == true && !it.long_name.endsWith(" (MQTT)")) {
-                        it.newBuilder().also { wb -> wb.long_name = "${it.long_name} (MQTT)" }.build()
-                    } else {
-                        it
-                    }
-                }
-        nodeManager.handleReceivedUser(packet.from, u, packet.channel, session = session)
-    }
-
     private fun handleNodeStatus(
         packet: MeshPacket,
         dataPacket: DataPacket,
@@ -381,48 +345,24 @@ class MeshDataHandlerImpl(
         rememberDataPacket(dataPacket, myNodeNum, session = session)
     }
 
-    /**
-     * The relay an ack names, or null when its byte is only the acking node's own: an ack heard over the air with no
-     * hops used carries the transmitter's byte, and one from MQTT a node across the bridge. An implicit ack is built
-     * locally with `hop_start` 0 from an overheard rebroadcast, so it keeps the relayer's byte.
-     */
-    private fun ackRelayNode(packet: MeshPacket): Int? {
-        val heardDirect = packet.hop_start != 0 && packet.hop_limit == packet.hop_start
-        return packet.relay_node.takeUnless {
-            heardDirect || !relayIsRfHop(packet.transport_mechanism.value, packet.via_mqtt == true)
-        }
-    }
-
-    private fun handleRouting(packet: MeshPacket, session: RadioSessionContext) {
-        val payload = packet.decoded?.payload ?: return
-        val r = Routing.ADAPTER.decodeOrNull(payload, Logger) ?: return
-        if (r.error_reason == Routing.Error.DUTY_CYCLE_LIMIT) {
+    override fun handleRoutingReport(report: MeshEvent.RoutingReport, session: RadioSessionContext) {
+        if (report.error == Routing.Error.DUTY_CYCLE_LIMIT) {
             radioInterfaceService.launchSessionWork(scope, session) {
                 serviceStateWriter.setErrorMessage(getStringSuspend(Res.string.error_duty_cycle), Severity.Warn)
             }
         }
-        handleAckNak(
-            packet.decoded?.request_id ?: 0,
-            packet.from,
-            r.error_reason?.value ?: 0,
-            ackRelayNode(packet),
-            session,
-            ackProofStatus = packet.ack_proof_status.value,
-        )
+        handleAckNak(report, session)
     }
 
     @Suppress("CyclomaticComplexMethod", "LongMethod")
-    private fun handleAckNak(
-        requestId: Int,
-        fromNum: Int,
-        routingError: Int,
-        relayNode: Int?,
-        session: RadioSessionContext,
-        ackProofStatus: Int = MeshPacket.AckProofStatus.ACK_PROOF_ABSENT.value,
-    ) {
-        val fromId = nodeManager.toNodeID(fromNum)
+    private fun handleAckNak(report: MeshEvent.RoutingReport, session: RadioSessionContext) {
+        val requestId = report.requestId.raw
+        val routingError = report.error.value
+        val relayNode = report.relayNode
+        val ackProofStatus = report.ackProof.value
+        val fromId = nodeManager.toNodeID(report.from.raw)
         radioInterfaceService.launchSessionWork(scope, session) {
-            val isAck = routingError == Routing.Error.NONE.value
+            val isAck = report.isAck
             val absentAckProof = MeshPacket.AckProofStatus.ACK_PROOF_ABSENT.value
             val provenAckProof = MeshPacket.AckProofStatus.ACK_PROOF_VALID.value
             val allPackets = packetRepository.value.findPacketsWithId(requestId)
@@ -491,7 +431,6 @@ class MeshDataHandlerImpl(
                     packetRepository.value.updateReaction(settled.copy(ackProofStatus = provenAckProof))
                 }
             }
-            packetHandler.completeDispatchedResponse(requestId, complete = isAck, from = fromNum)
         }
     }
 
@@ -509,9 +448,9 @@ class MeshDataHandlerImpl(
 
     /**
      * Deduplicates, filters, persists, and (when appropriate) notifies for a single [dataPacket]. Runs inside a session
-     * lease — callers must launch it via [RadioInterfaceService.launchSessionWork] and must have already confirmed the
+     * scope: callers must launch it via [RadioInterfaceService.launchSessionWork] and must have already confirmed the
      * packet's [DataPacket.dataType] is one of [PERSISTED_DATA_PORT_NUMBERS]. Split out from [rememberDataPacket] so
-     * the waypoint path can gate persistence on a repository read within the same lease (see [handleWaypoint]).
+     * the waypoint path can gate persistence on a repository read within the same launch (see [handleWaypoint]).
      */
     private suspend fun persistDataPacket(dataPacket: DataPacket, myNodeNum: Int, updateNotification: Boolean) {
         val fromLocal = dataPacket.isFromLocal(myNodeNum)

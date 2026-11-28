@@ -260,6 +260,7 @@ dependencies {
     implementation(libs.androidx.profileinstaller)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.usb.serial.android)
+    implementation(libs.meshtastic.sdk.transport.serial)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.koin.android)
     implementation(libs.koin.compose.viewmodel)

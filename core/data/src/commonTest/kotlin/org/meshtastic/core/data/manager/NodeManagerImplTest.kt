@@ -32,6 +32,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
@@ -47,16 +48,16 @@ import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
-import org.meshtastic.core.repository.RadioSessionLease
+import org.meshtastic.core.testing.FakeRadioInterfaceService
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.DeviceMetrics
 import org.meshtastic.proto.EnvironmentMetrics
 import org.meshtastic.proto.HardwareModel
+import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.Paxcount
-import org.meshtastic.proto.SoilWaterMetrics
 import org.meshtastic.proto.StatusMessage
-import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.User
+import org.meshtastic.sdk.NodeField
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -346,20 +347,8 @@ class NodeManagerImplTest {
         assertEquals("second", nodeManager.nodeDBbyNodeNum[nodeNum]?.nodeStatus)
     }
 
-    private fun admitLeases(session: RadioSessionContext) {
-        everySuspend { radioInterfaceService.runWithSessionLease(session, any()) } calls
-            {
-                @Suppress("UNCHECKED_CAST")
-                val block = it.args[1] as (suspend (RadioSessionLease) -> Unit)
-                block(
-                    object : RadioSessionLease {
-                        override val session: RadioSessionContext = session
-
-                        override fun isCurrent(): Boolean = true
-                    },
-                )
-                true
-            }
+    private fun admitSessionScope(session: RadioSessionContext) {
+        every { radioInterfaceService.sessionScope(session) } returns testScope.backgroundScope
     }
 
     @Test
@@ -368,7 +357,7 @@ class NodeManagerImplTest {
         val session = RadioSessionContext(generation = 7L, address = "ble:same")
         nodeManager.setNodeDbReady(true)
         nodeManager.setAllowNodeDbWrites(true)
-        admitLeases(session)
+        admitSessionScope(session)
         val firstWriteStarted = CompletableDeferred<Unit>()
         val releaseFirstWrite = CompletableDeferred<Unit>()
         val persisted = mutableListOf<Node>()
@@ -389,7 +378,7 @@ class NodeManagerImplTest {
         assertTrue(persisted.isEmpty(), "later writes must queue behind the first on the node's lane")
 
         releaseFirstWrite.complete(Unit)
-        advanceUntilIdle()
+        runCurrent()
 
         assertEquals(listOf(1, 3), persisted.map(Node::lastHeard))
         assertEquals(3, nodeManager.nodeDBbyNodeNum[nodeNum]?.lastHeard)
@@ -402,8 +391,8 @@ class NodeManagerImplTest {
         val newSession = RadioSessionContext(generation = 8L, address = "ble:same")
         nodeManager.setNodeDbReady(true)
         nodeManager.setAllowNodeDbWrites(true)
-        admitLeases(oldSession)
-        admitLeases(newSession)
+        admitSessionScope(oldSession)
+        admitSessionScope(newSession)
         val releaseFirstWrite = CompletableDeferred<Unit>()
         var writes = 0
         everySuspend { nodeRepository.upsert(any()) } calls { if (++writes == 1) releaseFirstWrite.await() }
@@ -413,9 +402,9 @@ class NodeManagerImplTest {
         nodeManager.updateNodeForSession(nodeNum, newSession) { node -> node.copy(lastHeard = 3) }
         runCurrent()
 
-        verifySuspend(exactly(1)) { radioInterfaceService.runWithSessionLease(newSession, any()) }
+        verify(exactly(1)) { radioInterfaceService.sessionScope(newSession) }
         releaseFirstWrite.complete(Unit)
-        advanceUntilIdle()
+        runCurrent()
     }
 
     @Test
@@ -425,8 +414,8 @@ class NodeManagerImplTest {
         val newSession = RadioSessionContext(generation = 8L, address = "ble:same")
         nodeManager.setNodeDbReady(true)
         nodeManager.setAllowNodeDbWrites(true)
-        everySuspend { radioInterfaceService.runWithSessionLease(oldSession, any()) } returns false
-        admitLeases(newSession)
+        every { radioInterfaceService.sessionScope(oldSession) } returns null
+        admitSessionScope(newSession)
         val persisted = mutableListOf<Node>()
         everySuspend { nodeRepository.upsert(any()) } calls { persisted += it.arg<Node>(0) }
 
@@ -444,7 +433,7 @@ class NodeManagerImplTest {
         val oldSession = RadioSessionContext(generation = 7L, address = "ble:same")
         nodeManager.setNodeDbReady(true)
         nodeManager.setAllowNodeDbWrites(true)
-        everySuspend { radioInterfaceService.runWithSessionLease(oldSession, any()) } returns false
+        every { radioInterfaceService.sessionScope(oldSession) } returns null
 
         nodeManager.updateNodeForSession(nodeNum, oldSession) { node -> node.copy(lastHeard = 42) }
         runCurrent()
@@ -738,98 +727,6 @@ class NodeManagerImplTest {
         val result = nodeManager.nodeDBbyNodeNum[myNum]
         // Should still be null since the empty position for local node is ignored
         assertNull(result)
-    }
-
-    @Test
-    fun `handleReceivedTelemetry updates lastHeard`() {
-        val nodeNum = 1234
-        nodeManager.updateNode(nodeNum) { it.copy(lastHeard = 1000) }
-
-        val telemetry =
-            Telemetry.Builder()
-                .also { wb ->
-                    wb.time = 2000
-                    wb.device_metrics = DeviceMetrics.Builder().also { wb -> wb.battery_level = 50 }.build()
-                }
-                .build()
-
-        nodeManager.handleReceivedTelemetry(nodeNum, telemetry)
-
-        val result = nodeManager.nodeDBbyNodeNum[nodeNum]
-        assertEquals(2000, result!!.lastHeard)
-    }
-
-    @Test
-    fun `handleReceivedTelemetry updates device metrics`() {
-        val nodeNum = 1234
-        val telemetry =
-            Telemetry.Builder()
-                .also { wb ->
-                    wb.device_metrics =
-                        DeviceMetrics.Builder()
-                            .also { wb ->
-                                wb.battery_level = 75
-                                wb.voltage = 3.8f
-                            }
-                            .build()
-                }
-                .build()
-
-        nodeManager.handleReceivedTelemetry(nodeNum, telemetry)
-
-        val result = nodeManager.nodeDBbyNodeNum[nodeNum]
-        assertNotNull(result!!.deviceMetrics)
-        assertEquals(75, result.deviceMetrics.battery_level)
-        assertEquals(3.8f, result.deviceMetrics.voltage)
-    }
-
-    @Test
-    fun `handleReceivedTelemetry updates environment metrics`() {
-        val nodeNum = 1234
-        val telemetry =
-            Telemetry.Builder()
-                .also { wb ->
-                    wb.environment_metrics =
-                        EnvironmentMetrics.Builder()
-                            .also { wb ->
-                                wb.temperature = 22.5f
-                                wb.relative_humidity = 45.0f
-                            }
-                            .build()
-                }
-                .build()
-
-        nodeManager.handleReceivedTelemetry(nodeNum, telemetry)
-
-        val result = nodeManager.nodeDBbyNodeNum[nodeNum]
-        assertNotNull(result!!.environmentMetrics)
-        assertEquals(22.5f, result.environmentMetrics.temperature)
-        assertEquals(45.0f, result.environmentMetrics.relative_humidity)
-    }
-
-    @Test
-    fun `handleReceivedTelemetry updates soil water metrics`() {
-        val nodeNum = 1234
-        val telemetry =
-            Telemetry.Builder()
-                .also { wb ->
-                    wb.soil_water_metrics =
-                        SoilWaterMetrics.Builder()
-                            .also { wb ->
-                                wb.soil_ph = 6.5f
-                                wb.nitrogen = 0f
-                            }
-                            .build()
-                }
-                .build()
-
-        nodeManager.handleReceivedTelemetry(nodeNum, telemetry)
-
-        val result = nodeManager.nodeDBbyNodeNum[nodeNum]
-        assertEquals(6.5f, result!!.soilWaterMetrics.soil_ph)
-        // A reported 0 mg/kg is a reading, not absence.
-        assertEquals(0f, result.soilWaterMetrics.nitrogen)
-        assertNull(result.soilWaterMetrics.potassium)
     }
 
     @Test
@@ -1242,15 +1139,8 @@ class NodeManagerImplTest {
                 hasGPS = false,
                 model = "tbeam",
                 firmwareVersion = "2.5.0",
-                couldUpdate = false,
-                shouldUpdate = false,
-                currentPacketId = 100L,
-                messageTimeoutMsec = 5000,
                 minAppVersion = 30000,
-                maxChannels = 8,
                 hasWifi = false,
-                channelUtilization = 0f,
-                airUtilTx = 0f,
                 deviceId = null,
             )
         every { nodeRepository.myNodeInfo } returns MutableStateFlow(repoInfo)
@@ -1293,15 +1183,8 @@ class NodeManagerImplTest {
                 hasGPS = false,
                 model = null,
                 firmwareVersion = "2.5.0",
-                couldUpdate = false,
-                shouldUpdate = false,
-                currentPacketId = 100L,
-                messageTimeoutMsec = 5000,
                 minAppVersion = 30000,
-                maxChannels = 8,
                 hasWifi = false,
-                channelUtilization = 0f,
-                airUtilTx = 0f,
                 deviceId = null,
             )
         every { nodeRepository.myNodeInfo } returns MutableStateFlow(repoInfo)
@@ -1314,21 +1197,6 @@ class NodeManagerImplTest {
 
         assertNotNull(result)
         assertEquals("HELTEC_V3", result.model)
-    }
-
-    @Test
-    fun `handleReceivedTelemetry with null metrics does not crash`() {
-        val nodeNum = 1234
-        nodeManager.updateNode(nodeNum) { it.copy(lastHeard = 1000) }
-
-        // Telemetry with no metrics at all
-        val telemetry = Telemetry.Builder().also { wb -> wb.time = 3000 }.build()
-
-        nodeManager.handleReceivedTelemetry(nodeNum, telemetry)
-
-        val result = nodeManager.nodeDBbyNodeNum[nodeNum]
-        assertNotNull(result)
-        assertEquals(3000, result.lastHeard)
     }
 
     @Test
@@ -1397,12 +1265,9 @@ class NodeManagerImplTest {
         nodeManager.applyTrustedIdentityMigrations(listOf(retiredNum))
         enableDbWrites()
 
-        nodeManager.handleReceivedTelemetry(
-            retiredNum,
-            Telemetry.Builder()
-                .also { wb -> wb.device_metrics = DeviceMetrics.Builder().also { wb -> wb.battery_level = 50 }.build() }
-                .build(),
-        )
+        nodeManager.updateNode(retiredNum) { node ->
+            node.copy(deviceMetrics = DeviceMetrics.Builder().also { wb -> wb.battery_level = 50 }.build())
+        }
         nodeManager.handleReceivedPosition(
             retiredNum,
             myNodeNum = 9999,
@@ -1586,21 +1451,15 @@ class NodeManagerImplTest {
     fun `clear starts a new session without retired-number suppression`() {
         val retiredNum = validPk.noncanonicalNum(4400)
         nodeManager.applyTrustedIdentityMigrations(listOf(retiredNum))
-        nodeManager.handleReceivedTelemetry(
-            retiredNum,
-            Telemetry.Builder()
-                .also { wb -> wb.device_metrics = DeviceMetrics.Builder().also { wb -> wb.battery_level = 10 }.build() }
-                .build(),
-        )
+        nodeManager.updateNode(retiredNum) { node ->
+            node.copy(deviceMetrics = DeviceMetrics.Builder().also { wb -> wb.battery_level = 10 }.build())
+        }
         assertNull(nodeManager.nodeDBbyNodeNum[retiredNum])
 
         nodeManager.clear()
-        nodeManager.handleReceivedTelemetry(
-            retiredNum,
-            Telemetry.Builder()
-                .also { wb -> wb.device_metrics = DeviceMetrics.Builder().also { wb -> wb.battery_level = 90 }.build() }
-                .build(),
-        )
+        nodeManager.updateNode(retiredNum) { node ->
+            node.copy(deviceMetrics = DeviceMetrics.Builder().also { wb -> wb.battery_level = 90 }.build())
+        }
 
         assertEquals(90, nodeManager.nodeDBbyNodeNum[retiredNum]?.deviceMetrics?.battery_level)
     }
@@ -2591,8 +2450,8 @@ class NodeManagerImplTest {
                     ),
             )
 
-        val index12 = NodeManagerImpl.NodeIndex.fromByNum(nodes12)
-        val index21 = NodeManagerImpl.NodeIndex.fromByNum(nodes21)
+        val index12 = NodeIndex.fromByNum(nodes12)
+        val index21 = NodeIndex.fromByNum(nodes21)
 
         // Both should produce the same byId representative (node2, non-placeholder)
         assertEquals(index12.byId[userId]!!.num, index21.byId[userId]!!.num)
@@ -3008,7 +2867,7 @@ class NodeManagerImplTest {
         val keyB = ByteArray(32) { 12 }.toByteString()
         val sharedId = "!shared"
         val replacementId = "!replacement"
-        var index = NodeManagerImpl.NodeIndex()
+        var index = NodeIndex()
         index =
             index.put(
                 1,
@@ -3454,15 +3313,8 @@ class NodeManagerImplTest {
                 hasGPS = false,
                 model = null,
                 firmwareVersion = "2.5.0",
-                couldUpdate = false,
-                shouldUpdate = false,
-                currentPacketId = 0L,
-                messageTimeoutMsec = 0,
                 minAppVersion = 0,
-                maxChannels = 0,
                 hasWifi = false,
-                channelUtilization = 0f,
-                airUtilTx = 0f,
                 deviceId = null,
             )
         val snapshotRead = CompletableDeferred<Unit>()
@@ -3498,15 +3350,8 @@ class NodeManagerImplTest {
                 hasGPS = false,
                 model = null,
                 firmwareVersion = "2.5.0",
-                couldUpdate = false,
-                shouldUpdate = false,
-                currentPacketId = 0L,
-                messageTimeoutMsec = 0,
                 minAppVersion = 0,
-                maxChannels = 0,
                 hasWifi = false,
-                channelUtilization = 0f,
-                airUtilTx = 0f,
                 deviceId = null,
             )
         val liveLearnedNum = 8008
@@ -3585,31 +3430,14 @@ class NodeManagerImplTest {
     @Test
     fun `a stalled normalization from a superseded session cannot clear the next session's unheard flags`() =
         testScope.runTest {
-            val sessionA = RadioSessionContext(generation = 7L, address = "ble:same")
-            val sessionB = RadioSessionContext(generation = 8L, address = "ble:same")
-            val admissionGate = CompletableDeferred<Unit>()
+            val radio = FakeRadioInterfaceService(backgroundScope)
+            val manager = NodeManagerImpl(nodeRepository, serviceNotifications, radio, testScope.asServiceScope())
+            radio.setDeviceAddress("ble:same")
+            radio.connect()
+            val sessionA = assertNotNull(radio.activeSession.value)
             val writeGate = CompletableDeferred<Unit>()
-            var sessionASuperseded = false
             // The node database as the repository resolves it when the write finally runs: session B's rows.
             val heardByNum = mutableMapOf<Int, Boolean>()
-            everySuspend { radioInterfaceService.runWithSessionLease(sessionA, any()) } calls
-                {
-                    admissionGate.await()
-                    if (sessionASuperseded) {
-                        false
-                    } else {
-                        @Suppress("UNCHECKED_CAST")
-                        val block = it.args[1] as (suspend (RadioSessionLease) -> Unit)
-                        block(
-                            object : RadioSessionLease {
-                                override val session: RadioSessionContext = sessionA
-
-                                override fun isCurrent(): Boolean = true
-                            },
-                        )
-                        true
-                    }
-                }
             everySuspend { nodeRepository.markAllHeardOnCurrentLora() } calls
                 {
                     writeGate.await()
@@ -3617,15 +3445,24 @@ class NodeManagerImplTest {
                 }
 
             // Session A: firmware without the capability, so normalization is launched and stalls.
-            nodeManager.setFirmwareVersion("2.5.0", sessionA)
+            manager.setFirmwareVersion("2.5.0", sessionA)
             runCurrent()
 
-            // Session A is superseded by session B, which reports the capability and installs unheard nodes.
-            sessionASuperseded = true
-            nodeManager.setFirmwareVersion("2.8.1", sessionB)
+            // Teardown joins session A's write before session B can exist.
+            val teardown = launch { radio.disconnect() }
+            runCurrent()
+            assertFalse(teardown.isCompleted, "teardown must wait for the stalled write")
+            assertEquals(sessionA, radio.activeSession.value)
+            writeGate.complete(Unit)
+            teardown.join()
+
+            // Session B reports the capability and installs unheard nodes.
+            radio.connect()
+            val sessionB = assertNotNull(radio.activeSession.value)
+            manager.setFirmwareVersion("2.8.1", sessionB)
             val unheard = listOf(0x11, 0x22)
             unheard.forEach { num ->
-                nodeManager.installNodeInfo(
+                manager.installNodeInfo(
                     ProtoNodeInfo.Builder()
                         .also { wb ->
                             wb.num = num
@@ -3635,15 +3472,274 @@ class NodeManagerImplTest {
                 )
                 heardByNum[num] = false
             }
-
-            // The stalled work completes.
-            admissionGate.complete(Unit)
-            writeGate.complete(Unit)
             advanceUntilIdle()
 
             unheard.forEach { num ->
                 assertEquals(false, heardByNum[num], "session B's node $num was marked heard by session A's write")
             }
-            assertTrue(nodeManager.reportsHeardOnCurrentLora.value)
+            assertTrue(manager.reportsHeardOnCurrentLora.value)
         }
+
+    @Test
+    fun `a live SDK node update strips a licensed operator's key and marks an MQTT-heard name`() {
+        val num = 0x5150
+        val key = ByteArray(Node.PUBLIC_KEY_SIZE) { 0x33 }.toByteString()
+        val info =
+            ProtoNodeInfo.Builder()
+                .also { wb ->
+                    wb.num = num
+                    wb.via_mqtt = true
+                    wb.user =
+                        User.Builder()
+                            .also { u ->
+                                u.id = NodeAddress.numToDefaultId(num)
+                                u.long_name = "Ham Shack"
+                                u.short_name = "HAM"
+                                u.hw_model = HardwareModel.TLORA_V2
+                                u.is_licensed = true
+                                u.public_key = key
+                            }
+                            .build()
+                }
+                .build()
+
+        nodeManager.applySessionNode(info, changed = null, RadioSessionContext(1L, "tcp:live"))
+
+        val node = nodeManager.nodeDBbyNodeNum.getValue(num)
+        assertEquals("Ham Shack (MQTT)", node.user.long_name)
+        assertEquals(ByteString.EMPTY, node.user.public_key)
+        assertEquals(ByteString.EMPTY, node.publicKey)
+    }
+
+    // ---------- Live SDK node changes ----------
+
+    private val liveSession = RadioSessionContext(7L, "tcp:live")
+
+    private fun sdkNode(
+        num: Int = LIVE_NODE,
+        favorite: Boolean = false,
+        muted: Boolean = false,
+        channel: Int = 0,
+        lastHeard: Int = 1_000,
+        hopsAway: Int? = null,
+        position: ProtoPosition? = null,
+        user: User? = liveUser(num),
+    ) = ProtoNodeInfo.Builder()
+        .also { wb ->
+            wb.num = num
+            wb.user = user
+            wb.is_favorite = favorite
+            wb.is_muted = muted
+            wb.channel = channel
+            wb.last_heard = lastHeard
+            wb.hops_away = hopsAway
+            wb.position = position
+        }
+        .build()
+
+    private fun liveUser(num: Int) = User.Builder()
+        .also { wb ->
+            wb.id = NodeAddress.numToDefaultId(num)
+            wb.long_name = "Live Node"
+            wb.short_name = "LIVE"
+            wb.hw_model = HardwareModel.TLORA_V2
+        }
+        .build()
+
+    @Test
+    fun `a LastSeen update keeps a local mute the radio has not acknowledged yet`() {
+        nodeManager.installNodeInfo(sdkNode(muted = false))
+        nodeManager.updateNode(LIVE_NODE) { it.copy(isMuted = true) }
+
+        nodeManager.applySessionNode(sdkNode(muted = false, lastHeard = 2_000), setOf(NodeField.LastSeen), liveSession)
+
+        assertTrue(nodeManager.nodeDBbyNodeNum.getValue(LIVE_NODE).isMuted)
+    }
+
+    @Test
+    fun `an Other update applies the flag the radio changed and keeps the one it did not`() {
+        nodeManager.installNodeInfo(sdkNode(favorite = false, muted = false))
+        nodeManager.updateNode(LIVE_NODE) { it.copy(isMuted = true) }
+
+        nodeManager.applySessionNode(sdkNode(favorite = true, muted = false), setOf(NodeField.Other), liveSession)
+
+        val node = nodeManager.nodeDBbyNodeNum.getValue(LIVE_NODE)
+        assertTrue(node.isFavorite)
+        assertTrue(node.isMuted)
+    }
+
+    @Test
+    fun `a NodeInfo heard on another channel moves the node to that channel`() {
+        nodeManager.installNodeInfo(sdkNode(channel = 0))
+
+        nodeManager.applySessionNode(sdkNode(channel = 2), setOf(NodeField.Other), liveSession)
+
+        assertEquals(2, nodeManager.nodeDBbyNodeNum.getValue(LIVE_NODE).channel)
+    }
+
+    @Test
+    fun `a live update leaves the packet-derived hop count alone`() {
+        nodeManager.installNodeInfo(sdkNode())
+        // The packet projection marks an MQTT-heard sender's hops unknown.
+        nodeManager.updateNode(LIVE_NODE) { it.copy(hopsAway = -1) }
+
+        nodeManager.applySessionNode(sdkNode(hopsAway = 2), setOf(NodeField.SignalQuality), liveSession)
+
+        assertEquals(-1, nodeManager.nodeDBbyNodeNum.getValue(LIVE_NODE).hopsAway)
+    }
+
+    @Test
+    fun `a stale SDK position does not overwrite a fixed position without a position change`() {
+        val fixed =
+            ProtoPosition.Builder()
+                .also { wb ->
+                    wb.latitude_i = 375_000_000
+                    wb.longitude_i = -1_220_000_000
+                }
+                .build()
+        val stale =
+            ProtoPosition.Builder()
+                .also { wb ->
+                    wb.latitude_i = 100_000_000
+                    wb.longitude_i = 200_000_000
+                }
+                .build()
+        nodeManager.installNodeInfo(sdkNode())
+        nodeManager.updateNode(LIVE_NODE) { it.copy(position = fixed) }
+
+        nodeManager.applySessionNode(
+            sdkNode(position = stale, lastHeard = 2_000),
+            setOf(NodeField.LastSeen),
+            liveSession,
+        )
+
+        assertEquals(375_000_000, nodeManager.nodeDBbyNodeNum.getValue(LIVE_NODE).position.latitude_i)
+    }
+
+    @Test
+    fun `a live position without a time takes the packet receive time`() {
+        // Main stamped an untimed position with the packet's rx time; the SDK carries it as last_heard.
+        val untimed =
+            ProtoPosition.Builder()
+                .also { wb ->
+                    wb.latitude_i = 375_000_000
+                    wb.longitude_i = -1_220_000_000
+                }
+                .build()
+        nodeManager.installNodeInfo(sdkNode())
+
+        nodeManager.applySessionNode(
+            sdkNode(position = untimed, lastHeard = 2_000),
+            setOf(NodeField.Position, NodeField.LastSeen),
+            liveSession,
+        )
+
+        assertEquals(2_000, nodeManager.nodeDBbyNodeNum.getValue(LIVE_NODE).position.time)
+    }
+
+    @Test
+    fun `a node the user removed stays gone until the radio confirms the removal`() {
+        admitSessionScope(liveSession)
+        enableDbWrites()
+        nodeManager.installNodeInfo(sdkNode())
+        nodeManager.removeByNodenum(LIVE_NODE)
+
+        nodeManager.updateNodeForSession(LIVE_NODE, liveSession) { it.copy(rssi = -90) }
+        nodeManager.applySessionNode(sdkNode(lastHeard = 2_000), setOf(NodeField.LastSeen), liveSession)
+        testScope.advanceUntilIdle()
+
+        assertNull(nodeManager.nodeDBbyNodeNum[LIVE_NODE])
+        verifySuspend(mode = VerifyMode.not) { serviceNotifications.showNewNodeSeenNotification(any(), any()) }
+
+        nodeManager.applySessionNodeRemoved(LIVE_NODE)
+        nodeManager.applySessionNode(sdkNode(lastHeard = 3_000), changed = null, liveSession)
+
+        assertNotNull(nodeManager.nodeDBbyNodeNum[LIVE_NODE])
+    }
+
+    // Regression: a removal the radio refused kept the node suppressed until the next handshake.
+    @Test
+    fun `a node whose removal the radio refused comes back with its next update`() {
+        admitSessionScope(liveSession)
+        enableDbWrites()
+        nodeManager.installNodeInfo(sdkNode())
+        nodeManager.removeByNodenum(LIVE_NODE)
+
+        nodeManager.cancelPendingRemoval(LIVE_NODE)
+        nodeManager.applySessionNode(sdkNode(lastHeard = 2_000), setOf(NodeField.LastSeen), liveSession)
+
+        assertNotNull(nodeManager.nodeDBbyNodeNum[LIVE_NODE])
+    }
+
+    @Test
+    fun `a node the radio adds with its hardware posts the new-node notification`() {
+        admitSessionScope(liveSession)
+        enableDbWrites()
+
+        nodeManager.applySessionNode(sdkNode(), changed = null, liveSession)
+        testScope.advanceUntilIdle()
+
+        verifySuspend(mode = VerifyMode.exactly(1)) { serviceNotifications.showNewNodeSeenNotification(any(), any()) }
+    }
+
+    @Test
+    fun `a user change keeps the columns only the app writes`() {
+        val environment = EnvironmentMetrics.Builder().also { wb -> wb.temperature = 21.5f }.build()
+        nodeManager.installNodeInfo(sdkNode())
+        nodeManager.updateNode(LIVE_NODE) {
+            it.copy(
+                rssi = -97,
+                snr = 6.25f,
+                lastTransport = MeshPacket.TransportMechanism.TRANSPORT_LORA.value,
+                environmentMetrics = environment,
+                nodeStatus = "On duty",
+                notes = "Ridge repeater",
+            )
+        }
+        val renamed = liveUser(LIVE_NODE).newBuilder().also { wb -> wb.long_name = "Renamed" }.build()
+
+        nodeManager.applySessionNode(sdkNode(user = renamed), setOf(NodeField.User, NodeField.Name), liveSession)
+
+        val node = nodeManager.nodeDBbyNodeNum.getValue(LIVE_NODE)
+        assertEquals("Renamed", node.user.long_name)
+        assertEquals(-97, node.rssi)
+        assertEquals(6.25f, node.snr)
+        assertEquals(MeshPacket.TransportMechanism.TRANSPORT_LORA.value, node.lastTransport)
+        assertEquals(environment, node.environmentMetrics)
+        assertEquals("On duty", node.nodeStatus)
+        assertEquals("Ridge repeater", node.notes)
+    }
+
+    @Test
+    fun `a node the radio re-adds from a packet keeps the mute and channel and signing the app holds`() {
+        // Firmware clears an evicted node's bitfield (NodeDB.cpp), and the SDK builds the re-heard node from the
+        // packet.
+        nodeManager.updateNode(LIVE_NODE) {
+            it.copy(user = liveUser(LIVE_NODE), isMuted = true, channel = 2, signsPackets = true)
+        }
+
+        nodeManager.applySessionNode(sdkNode(user = null, lastHeard = 2_000), changed = null, liveSession)
+        nodeManager.applySessionNode(sdkNode(user = null, lastHeard = 3_000), setOf(NodeField.LastSeen), liveSession)
+
+        val node = nodeManager.nodeDBbyNodeNum.getValue(LIVE_NODE)
+        assertEquals(3_000, node.lastHeard)
+        assertTrue(node.isMuted)
+        assertEquals(2, node.channel)
+        assertTrue(node.signsPackets)
+    }
+
+    @Test
+    fun `a node the radio re-adds with firmware's flags takes them`() {
+        nodeManager.updateNode(LIVE_NODE) { it.copy(user = liveUser(LIVE_NODE)) }
+        // The SDK's set_ignored write creates an unknown node with only is_ignored set.
+        val ignored = sdkNode(user = null).newBuilder().also { it.is_ignored = true }.build()
+
+        nodeManager.applySessionNode(ignored, changed = null, liveSession)
+
+        assertTrue(nodeManager.nodeDBbyNodeNum.getValue(LIVE_NODE).isIgnored)
+    }
+
+    private companion object {
+        const val LIVE_NODE = 0x2468
+    }
 }

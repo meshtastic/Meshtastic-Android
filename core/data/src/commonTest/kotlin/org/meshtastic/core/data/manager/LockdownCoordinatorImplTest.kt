@@ -16,13 +16,17 @@
  */
 package org.meshtastic.core.data.manager
 
+import kotlinx.coroutines.flow.MutableStateFlow
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.service.LockdownState
 import org.meshtastic.core.repository.LockdownPassphraseStore
 import org.meshtastic.core.repository.MeshConnectionManager
+import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.StoredPassphrase
-import org.meshtastic.core.testing.FakeCommandSender
 import org.meshtastic.core.testing.FakeRadioInterfaceService
 import org.meshtastic.core.testing.FakeServiceRepository
+import org.meshtastic.proto.LockdownAuth
 import org.meshtastic.proto.LockdownStatus
 import org.meshtastic.proto.Telemetry
 import kotlin.test.Test
@@ -66,18 +70,9 @@ class LockdownCoordinatorImplTest {
     }
 
     private class FakeConnectionManager : MeshConnectionManager {
-        var configOnlyCalled = false
         var clearRadioConfigCalled = false
 
         override fun onRadioConfigLoaded() = Unit
-
-        override fun startConfigOnly() {
-            configOnlyCalled = true
-        }
-
-        override fun startNodeInfoOnly() = Unit
-
-        override fun onMyNodeInfoReceived(myNodeNum: Int) = Unit
 
         override suspend fun onNodeDbReady() = Unit
 
@@ -88,26 +83,42 @@ class LockdownCoordinatorImplTest {
         override fun clearRadioConfig() {
             clearRadioConfigCalled = true
         }
-
-        override fun onHandshakeComplete() = Unit
-
-        override fun onHandshakeProgress() = Unit
-
-        override fun recoverPostHandshakeFailure() = Unit
     }
+
+    /** Records every lockdown command the coordinator hands to the link, accepted or not. */
+    private class LockdownRadio(fake: FakeRadioInterfaceService = FakeRadioInterfaceService()) :
+        RadioInterfaceService by fake {
+        override val activeSession = MutableStateFlow<RadioSessionContext?>(RadioSessionContext(1, "test"))
+        val attempts = mutableListOf<LockdownAuth>()
+        var accept = true
+        var onDispatchAttempt: (() -> Unit)? = null
+
+        val lastAuth: LockdownAuth?
+            get() = attempts.lastOrNull { !it.lock_now }
+
+        val lockNowCalled: Boolean
+            get() = attempts.any { it.lock_now }
+
+        override fun tryLockdown(session: RadioSessionContext, auth: LockdownAuth): Boolean {
+            attempts += auth
+            onDispatchAttempt?.invoke()
+            return accept
+        }
+    }
+
+    /** Whole hours from now until [LockdownAuth.valid_until_epoch], rounded. */
+    private fun LockdownAuth.hours(): Long = (valid_until_epoch - nowMillis / 1000 + 1800) / 3600
 
     // endregion
 
     private val serviceRepo = FakeServiceRepository()
-    private val commandSender = FakeCommandSender()
     private val passphraseStore = FakePassphraseStore()
-    private val radioService = FakeRadioInterfaceService()
+    private val radioService = LockdownRadio()
     private val connectionManager = FakeConnectionManager()
 
     private val coordinator =
         LockdownCoordinatorImpl(
             serviceRepository = serviceRepo,
-            commandSender = commandSender,
             passphraseStore = passphraseStore,
             radioInterfaceService = radioService,
             connectionManager = lazy { connectionManager },
@@ -208,7 +219,7 @@ class LockdownCoordinatorImplTest {
         radioService.setDeviceAddress(testDeviceAddress)
         passphraseStore.saved[testDeviceAddress] = StoredPassphrase("secret", 10, 24)
         var stateDuringDispatch: LockdownState? = null
-        commandSender.onLockdownPassphraseDispatchAttempt = { stateDuringDispatch = serviceRepo.lockdownState.value }
+        radioService.onDispatchAttempt = { stateDuringDispatch = serviceRepo.lockdownState.value }
 
         coordinator.handleLockdownStatus(
             LockdownStatus.Builder()
@@ -219,9 +230,9 @@ class LockdownCoordinatorImplTest {
                 .build(),
         )
 
-        assertEquals("secret", commandSender.lastPassphrase)
-        assertEquals(10, commandSender.lastBoots)
-        assertEquals(24, commandSender.lastHours)
+        assertEquals("secret", radioService.lastAuth?.passphrase?.utf8())
+        assertEquals(10, radioService.lastAuth?.boots_remaining)
+        assertEquals(24L, radioService.lastAuth?.hours())
         assertFalse(stateDuringDispatch is LockdownState.AwaitingResponse)
         assertIs<LockdownState.AwaitingResponse>(serviceRepo.lockdownState.value)
     }
@@ -238,7 +249,7 @@ class LockdownCoordinatorImplTest {
         coordinator.handleLockdownStatus(
             LockdownStatus.Builder().also { wb -> wb.state = LockdownStatus.State.UNLOCKED }.build(),
         )
-        commandSender.lockdownPassphraseDispatchAccepted = false
+        radioService.accept = false
 
         coordinator.handleLockdownStatus(
             LockdownStatus.Builder()
@@ -276,7 +287,7 @@ class LockdownCoordinatorImplTest {
         )
 
         assertIs<LockdownState.Locked>(serviceRepo.lockdownState.value)
-        assertNull(commandSender.lastPassphrase)
+        assertNull(radioService.lastAuth?.passphrase?.utf8())
     }
 
     // endregion
@@ -300,7 +311,6 @@ class LockdownCoordinatorImplTest {
 
         assertTrue(serviceRepo.sessionAuthorized.value)
         assertIs<LockdownState.Unlocked>(serviceRepo.lockdownState.value)
-        assertTrue(connectionManager.configOnlyCalled)
 
         val stored = passphraseStore.saved[testDeviceAddress]
         assertEquals("mypass", stored?.passphrase)
@@ -540,7 +550,7 @@ class LockdownCoordinatorImplTest {
     @Test
     fun `lockNow followed by LOCKED triggers LockNowAcknowledged`() {
         coordinator.lockNow()
-        assertTrue(commandSender.lockNowCalled)
+        assertTrue(radioService.lockNowCalled)
 
         coordinator.handleLockdownStatus(
             LockdownStatus.Builder()
@@ -558,7 +568,7 @@ class LockdownCoordinatorImplTest {
 
     @Test
     fun `rejected lockNow does not arm the acknowledgement transition`() {
-        commandSender.lockNowDispatchAccepted = false
+        radioService.accept = false
 
         assertFalse(coordinator.lockNow())
         coordinator.handleLockdownStatus(
@@ -602,13 +612,13 @@ class LockdownCoordinatorImplTest {
         coordinator.lockNow()
         serviceRepo.setLockdownState(LockdownState.Locked("needs_auth"))
         var stateDuringDispatch: LockdownState? = null
-        commandSender.onLockdownPassphraseDispatchAttempt = { stateDuringDispatch = serviceRepo.lockdownState.value }
+        radioService.onDispatchAttempt = { stateDuringDispatch = serviceRepo.lockdownState.value }
 
         assertTrue(coordinator.submitPassphrase("test", boots = 5, hours = 12))
 
-        assertEquals("test", commandSender.lastPassphrase)
-        assertEquals(5, commandSender.lastBoots)
-        assertEquals(12, commandSender.lastHours)
+        assertEquals("test", radioService.lastAuth?.passphrase?.utf8())
+        assertEquals(5, radioService.lastAuth?.boots_remaining)
+        assertEquals(12L, radioService.lastAuth?.hours())
         assertIs<LockdownState.Locked>(stateDuringDispatch)
         assertIs<LockdownState.AwaitingResponse>(serviceRepo.lockdownState.value)
 
@@ -624,7 +634,7 @@ class LockdownCoordinatorImplTest {
     fun `rejected submitPassphrase preserves retryable state and does not stage credentials`() {
         radioService.setDeviceAddress(testDeviceAddress)
         serviceRepo.setLockdownState(LockdownState.Locked("needs_auth"))
-        commandSender.lockdownPassphraseDispatchAccepted = false
+        radioService.accept = false
 
         assertFalse(coordinator.submitPassphrase("not-sent", boots = 5, hours = 12))
 
@@ -646,7 +656,7 @@ class LockdownCoordinatorImplTest {
 
         assertTrue(coordinator.submitPassphrase("original", boots = 0, hours = 0, disable = true))
 
-        assertTrue(commandSender.lastDisable)
+        assertTrue(radioService.lastAuth?.disable == true)
         assertTrue(passphraseStore.saved.isEmpty())
         assertIs<LockdownState.AwaitingResponse>(serviceRepo.lockdownState.value)
     }
@@ -656,7 +666,7 @@ class LockdownCoordinatorImplTest {
         radioService.setDeviceAddress(testDeviceAddress)
         passphraseStore.saved[testDeviceAddress] = StoredPassphrase("original", 50, 0)
         serviceRepo.setLockdownState(LockdownState.Unlocked)
-        commandSender.lockdownPassphraseDispatchAccepted = false
+        radioService.accept = false
 
         assertFalse(coordinator.submitPassphrase("original", boots = 0, hours = 0, disable = true))
 
@@ -667,7 +677,7 @@ class LockdownCoordinatorImplTest {
     @Test
     fun `submitPassphrase without disable does not set disable flag`() {
         coordinator.submitPassphrase("p", boots = 5, hours = 0)
-        assertFalse(commandSender.lastDisable)
+        assertFalse(radioService.lastAuth?.disable == true)
     }
 
     // endregion

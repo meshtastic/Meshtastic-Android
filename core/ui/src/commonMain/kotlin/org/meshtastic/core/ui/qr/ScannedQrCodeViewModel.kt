@@ -17,9 +17,7 @@
 package org.meshtastic.core.ui.qr
 
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.flow.map
 import org.koin.core.annotation.KoinViewModel
-import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.ui.util.SnackbarManager
@@ -34,19 +32,11 @@ internal const val DEFAULT_MAX_CHANNELS = 8
 class ScannedQrCodeViewModel(
     private val radioConfigRepository: RadioConfigRepository,
     private val radioController: RadioController,
-    nodeRepository: NodeRepository,
     private val snackbarManager: SnackbarManager,
 ) : ViewModel() {
 
     val channels =
         radioConfigRepository.channelSetFlow.stateInWhileSubscribed(initialValue = ChannelSet.Builder().build())
-
-    val maxChannels =
-        nodeRepository.myNodeInfo
-            .map { it?.maxChannels?.takeIf { max -> max > 0 } ?: DEFAULT_MAX_CHANNELS }
-            .stateInWhileSubscribed(
-                initialValue = nodeRepository.myNodeInfo.value?.maxChannels?.takeIf { it > 0 } ?: DEFAULT_MAX_CHANNELS,
-            )
 
     /**
      * Set the radio config (also updates our saved copy in preferences). The dialog has closed by now, so a failure is

@@ -41,7 +41,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.common.state.RadioOperationLock
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.FirmwareUpdateProgress
@@ -70,6 +69,7 @@ import org.meshtastic.proto.DeviceMetrics
 import org.meshtastic.proto.LocalStats
 import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.User
+import org.meshtastic.sdk.ConnectionState
 import org.robolectric.Shadows
 import org.robolectric.annotation.Config
 import kotlin.test.assertEquals
@@ -218,7 +218,7 @@ class MeshNotificationManagerImplTest {
         val notifications = createManager(renderScope)
         notifications.initChannels()
 
-        notifications.updateServiceStateNotification(ConnectionState.Connecting, populatedTelemetry())
+        notifications.updateServiceStateNotification(ConnectionState.Connecting(attempt = 1), populatedTelemetry())
         notifications.updateServiceStateNotification(ConnectionState.Disconnected, populatedTelemetry())
 
         advanceUntilIdle()

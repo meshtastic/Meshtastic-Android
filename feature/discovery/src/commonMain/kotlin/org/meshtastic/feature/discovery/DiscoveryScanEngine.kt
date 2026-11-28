@@ -40,7 +40,6 @@ import org.meshtastic.core.common.di.ApplicationCoroutineScope
 import org.meshtastic.core.common.state.OperationLease
 import org.meshtastic.core.common.state.RadioOperation
 import org.meshtastic.core.common.state.RadioOperationLock
-import org.meshtastic.core.common.util.latLongToMeter
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.database.dao.DiscoveryDao
 import org.meshtastic.core.database.entity.DiscoveredNodeEntity
@@ -49,9 +48,7 @@ import org.meshtastic.core.database.entity.DiscoverySessionEntity
 import org.meshtastic.core.database.entity.DiscoverySessionStatus
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ChannelOption
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
-import org.meshtastic.core.model.numChannels
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.core.model.util.snrOrNull
@@ -71,6 +68,10 @@ import org.meshtastic.proto.NeighborInfo
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.Telemetry
+import org.meshtastic.sdk.ConnectionState
+import org.meshtastic.sdk.LoRaFrequency
+import org.meshtastic.sdk.PositionUtils
+import kotlin.time.Duration.Companion.seconds
 import org.meshtastic.core.model.Channel as ChannelModel
 
 /**
@@ -301,7 +302,7 @@ class DiscoveryScanEngine(
     }
 
     private suspend fun readInitialConfigSnapshot(): Pair<Config.LoRaConfig?, ChannelSettings?>? =
-        withTimeoutOrNull(CONFIG_SNAPSHOT_TIMEOUT_MS) {
+        withTimeoutOrNull(CONFIG_SNAPSHOT_TIMEOUT) {
             radioConfigRepository.localConfigFlow.first().lora to
                 radioConfigRepository.channelSetFlow.first().settings.firstOrNull()
         }
@@ -622,7 +623,8 @@ class DiscoveryScanEngine(
             // Bound the pinned slot against the config we are about to apply, not the one we are leaving: a nonzero
             // channel_num is taken verbatim, so an unaddressable slot would tune the scan to a frequency that does
             // not exist. Zero puts us back on deriving it from the offered name.
-            val frequencySlot = target.frequencySlot?.takeIf { it in 1..targetLora.numChannels } ?: 0
+            val frequencySlot =
+                target.frequencySlot?.takeIf { it in 1..LoRaFrequency.plan(targetLora, "").numChannels } ?: 0
             radioController.setLocalConfig(
                 Config.Builder()
                     .also { wb ->
@@ -675,7 +677,7 @@ class DiscoveryScanEngine(
 
     private suspend fun waitForConnection(): Boolean {
         val result =
-            withTimeoutOrNull(RECONNECT_TIMEOUT_MS) {
+            withTimeoutOrNull(RECONNECT_TIMEOUT) {
                 serviceRepository.connectionState.first { it is ConnectionState.Connected }
             }
         return result != null
@@ -687,10 +689,11 @@ class DiscoveryScanEngine(
      */
     private suspend fun requestNeighborInfoAtDwellBoundary() {
         val myNodeNum = nodeRepository.myNodeInfo.value?.myNodeNum ?: return
-        val packetId = radioController.generatePacketId()
         try {
-            radioController.requestNeighborInfo(packetId, myNodeNum)
-            Logger.d { "DiscoveryScanEngine: requested NeighborInfo from local node $myNodeNum (packetId=$packetId)" }
+            val request = radioController.requestNeighborInfo(myNodeNum)
+            Logger.d {
+                "DiscoveryScanEngine: requested NeighborInfo from local node $myNodeNum (packetId=${request.requestId})"
+            }
         } catch (e: CancellationException) {
             throw e
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
@@ -714,7 +717,7 @@ class DiscoveryScanEngine(
                     )
                 canContinue = transitionScanState(dwellState)
                 if (canContinue) {
-                    delay(TICK_INTERVAL_MS)
+                    delay(TICK_INTERVAL)
                     remaining--
                 }
             }
@@ -906,7 +909,7 @@ class DiscoveryScanEngine(
         val lon = longitude
         val distance =
             if (lat != null && lon != null && hasValidCoordinates(lat, lon) && hasValidCoordinates(userLat, userLon)) {
-                latLongToMeter(userLat, userLon, lat, lon)
+                PositionUtils.distance(userLat, userLon, lat, lon)
             } else {
                 null
             }
@@ -1031,7 +1034,7 @@ class DiscoveryScanEngine(
     // endregion
 
     companion object {
-        private const val CONFIG_SNAPSHOT_TIMEOUT_MS = 5_000L
+        private val CONFIG_SNAPSHOT_TIMEOUT = 5.seconds
 
         /**
          * The default public channel is the empty name with the one-byte default key. Only the empty name moves with
@@ -1051,8 +1054,8 @@ class DiscoveryScanEngine(
             }
             .build()
 
-        private const val RECONNECT_TIMEOUT_MS = 60_000L
-        private const val TICK_INTERVAL_MS = 1_000L
+        private val RECONNECT_TIMEOUT = 60.seconds
+        private val TICK_INTERVAL = 1.seconds
         private const val POSITION_DIVISOR = 1e7
         private const val MIN_DEVICE_METRICS_PACKETS = 2
         private const val PERCENT_MULTIPLIER = 100.0

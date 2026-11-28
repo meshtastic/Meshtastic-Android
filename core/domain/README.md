@@ -36,8 +36,6 @@ src/commonMain/kotlin/org/meshtastic/core/domain/
         ├── ImportSecurityConfigUseCase.kt
         ├── InstallProfileUseCase.kt
         ├── IsOtaCapableUseCase.kt
-        ├── ProcessRadioResponseUseCase.kt
-        ├── RadioConfigUseCase.kt
         └── SetMeshLogSettingsUseCase.kt
 ```
 
@@ -45,37 +43,21 @@ src/commonMain/kotlin/org/meshtastic/core/domain/
 
 ### `EnsureRemoteAdminSessionUseCase`
 
-Ensures a per-node remote-admin passkey session exists before entering the remote admin UI. Uses a `Mutex`-guarded `inFlight` map so that double-taps coalesce onto a single `Deferred`.
+Opens the SDK's remote admin session for a node before entering the remote admin UI by reading its device metadata. Uses a `Mutex`-guarded `inFlight` map so that double-taps coalesce onto a single `Deferred`.
 
 ```kotlin
 sealed interface EnsureSessionResult {
     data object AlreadyActive   : EnsureSessionResult  // passkey already fresh
     data object Refreshed       : EnsureSessionResult  // metadata response arrived
     data object Timeout         : EnsureSessionResult  // no response within 30 s
-    data class  Rejected(val nak: RoutingNak) : EnsureSessionResult  // a routing NAK answered the request
+    data class  Rejected(val routingError: Int) : EnsureSessionResult  // the target refused the request
     data object Disconnected    : EnsureSessionResult  // radio not connected
 }
 ```
 
-### `RadioConfigUseCase`
-
-Node configuration read/write operations. Each admin request returns its `packetId` for async tracking, except `setFixedPosition`, `removeFixedPosition`, `setRingtone` and `setCannedMessages`, which return nothing:
-
-| Method | Description |
-|---|---|
-| `setOwner` / `getOwner` | Node owner info |
-| `setHamMode` | Licensed (ham) mode parameters |
-| `setConfig` / `getConfig` | `Config` proto (device, position, power, …) |
-| `setModuleConfig` / `getModuleConfig` | `ModuleConfig` proto |
-| `getChannel` / `setRemoteChannel` | Channel configuration |
-| `setFixedPosition` / `removeFixedPosition` | Fixed GPS position |
-| `setRingtone` / `getRingtone` | External notification ringtone |
-| `setCannedMessages` / `getCannedMessages` | Canned message slots |
-| `getDeviceConnectionStatus` | The node's `DeviceConnectionStatus` |
-
 ### `AdminActionsUseCase`
 
-Each call also takes an optional `onRequestId` callback and returns the request's packet id.
+Each call suspends until the device answers and returns the SDK's `AdminResult`. A reset of the connected node clears the local NodeDB only once the device reports it applied.
 
 ```kotlin
 reboot(destNum)

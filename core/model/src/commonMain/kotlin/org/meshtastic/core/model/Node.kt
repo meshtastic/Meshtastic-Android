@@ -21,8 +21,6 @@ import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.util.GPSFormat
 import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.common.util.MetricFormatter
-import org.meshtastic.core.common.util.bearing
-import org.meshtastic.core.common.util.latLongToMeter
 import org.meshtastic.core.model.util.onlineTimeThreshold
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.proto.AirQualityMetrics
@@ -37,6 +35,7 @@ import org.meshtastic.proto.Position
 import org.meshtastic.proto.PowerMetrics
 import org.meshtastic.proto.SoilWaterMetrics
 import org.meshtastic.proto.User
+import org.meshtastic.sdk.PositionUtils
 
 /**
  * Domain model representing a node in the mesh network.
@@ -177,10 +176,7 @@ data class Node(
     val longitude
         get() = (position.longitude_i ?: 0) * 1e-7
 
-    private fun hasValidPosition(): Boolean = latitude != 0.0 &&
-        longitude != 0.0 &&
-        (latitude >= -90 && latitude <= 90.0) &&
-        (longitude >= -180 && longitude <= 180)
+    private fun hasValidPosition(): Boolean = PositionUtils.isValidPosition(latitude, longitude)
 
     val validPosition: Position?
         get() = position.takeIf { hasValidPosition() }
@@ -188,7 +184,7 @@ data class Node(
     // @return distance in meters to some other node (or null if unknown)
     fun distance(o: Node): Int? = when {
         validPosition == null || o.validPosition == null -> null
-        else -> latLongToMeter(latitude, longitude, o.latitude, o.longitude).toInt()
+        else -> PositionUtils.distance(latitude, longitude, o.latitude, o.longitude).toInt()
     }
 
     // @return formatted distance string to another node, using the given display units
@@ -197,7 +193,7 @@ data class Node(
     // @return bearing to the other position in degrees
     fun bearing(o: Node?): Int? = when {
         validPosition == null || o?.validPosition == null -> null
-        else -> bearing(latitude, longitude, o.latitude, o.longitude).toInt()
+        else -> PositionUtils.bearing(latitude, longitude, o.latitude, o.longitude).toInt()
     }
 
     fun gpsString(): String = GPSFormat.toDec(latitude, longitude)

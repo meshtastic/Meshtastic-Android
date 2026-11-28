@@ -25,9 +25,8 @@ import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeoutOrNull
-import org.meshtastic.core.model.ConnectionEpochs
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.service.TracerouteResponse
+import org.meshtastic.sdk.ConnectionState
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -40,10 +39,8 @@ class ServiceRepositoryImplTest {
         val repository = ServiceRepositoryImpl()
 
         assertEquals(ConnectionState.Disconnected, repository.connectionState.value)
-        assertEquals(ConnectionEpochs(), repository.connectionEpochs.value)
         assertNull(repository.clientNotification.value)
         assertNull(repository.errorMessage.value)
-        assertNull(repository.connectionProgress.value)
         assertNull(repository.tracerouteResponse.value)
         assertNull(repository.neighborInfoResponse.value)
 
@@ -61,39 +58,10 @@ class ServiceRepositoryImplTest {
         val emittedState = async { repository.connectionState.drop(1).first() }
 
         runCurrent()
-        repository.setConnectionState(ConnectionState.Connecting)
+        repository.setConnectionState(ConnectionState.Connecting(attempt = 1))
 
-        assertEquals(ConnectionState.Connecting, emittedState.await())
-        assertEquals(ConnectionState.Connecting, repository.connectionState.value)
-    }
-
-    @Test
-    fun connectionEpochsPreserveRapidDepartureAndHandshakeTransitions() = runTest {
-        val repository = ServiceRepositoryImpl()
-        repository.setConnectionState(ConnectionState.Connected)
-        val baseline = repository.connectionEpochs.value
-
-        repository.setConnectionState(ConnectionState.Disconnected)
-        repository.setConnectionState(ConnectionState.Connecting)
-        repository.setConnectionState(ConnectionState.Connected)
-
-        assertEquals(ConnectionState.Connected, repository.connectionState.value)
-        assertEquals(baseline.departures + 1, repository.connectionEpochs.value.departures)
-        assertEquals(baseline.completedHandshakes + 1, repository.connectionEpochs.value.completedHandshakes)
-        assertEquals(baseline.completedHandshakes, repository.connectionEpochs.value.handshakesAtLastDeparture)
-        assertEquals(ConnectionState.Disconnected, repository.connectionEpochs.value.lastDepartureState)
-    }
-
-    @Test
-    fun duplicateConnectionStatesDoNotAdvanceEpochs() = runTest {
-        val repository = ServiceRepositoryImpl()
-        repository.setConnectionState(ConnectionState.Connected)
-        val afterHandshake = repository.connectionEpochs.value
-
-        repository.setConnectionState(ConnectionState.Connected)
-
-        assertEquals(ConnectionEpochs(completedHandshakes = 1), afterHandshake)
-        assertEquals(afterHandshake, repository.connectionEpochs.value)
+        assertEquals(ConnectionState.Connecting(attempt = 1), emittedState.await())
+        assertEquals(ConnectionState.Connecting(attempt = 1), repository.connectionState.value)
     }
 
     @Test

@@ -16,20 +16,9 @@
  */
 package org.meshtastic.core.data.manager
 
-import dev.mokkery.MockMode
-import dev.mokkery.answering.returns
-import dev.mokkery.every
-import dev.mokkery.everySuspend
-import dev.mokkery.matcher.any
-import dev.mokkery.matcher.capture.capture
-import dev.mokkery.mock
-import dev.mokkery.verify
-import dev.mokkery.verify.VerifyMode.Companion.exactly
-import dev.mokkery.verifySuspend
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.LocalNodeUnavailableException
-import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.testing.FakeMeshPrefs
 import org.meshtastic.proto.MeshPacket
@@ -39,42 +28,17 @@ import org.meshtastic.proto.StoreAndForward
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 
 class HistoryManagerImplTest {
-    private val commandSender = mock<CommandSender>(MockMode.autofill)
-
-    private fun manager(meshPrefs: FakeMeshPrefs, packetHandler: PacketHandler) =
-        HistoryManagerImpl(meshPrefs, packetHandler, commandSender)
-
-    @Test
-    fun `buildStoreForwardHistoryRequest copies positive parameters`() {
-        val request =
-            HistoryManagerImpl.buildStoreForwardHistoryRequest(
-                lastRequest = 42,
-                historyReturnWindow = 15,
-                historyReturnMax = 25,
-            )
-
-        assertEquals(StoreAndForward.RequestResponse.CLIENT_HISTORY, request.rr)
-        assertEquals(42, request.history?.last_request)
-        assertEquals(15, request.history?.window)
-        assertEquals(25, request.history?.history_messages)
-    }
-
-    @Test
-    fun `buildStoreForwardHistoryRequest clamps non-positive parameters`() {
-        val request =
-            HistoryManagerImpl.buildStoreForwardHistoryRequest(
-                lastRequest = 0,
-                historyReturnWindow = -1,
-                historyReturnMax = 0,
-            )
-
-        assertEquals(StoreAndForward.RequestResponse.CLIENT_HISTORY, request.rr)
-        assertEquals(0, request.history?.last_request)
-        assertEquals(0, request.history?.window)
-        assertEquals(0, request.history?.history_messages)
-    }
+    private val config =
+        ModuleConfig.StoreForwardConfig.Builder()
+            .also { wb ->
+                wb.enabled = true
+                wb.history_return_window = 30
+                wb.history_return_max = 10
+            }
+            .build()
 
     @Test
     fun `resolveHistoryRequestParameters uses config values when positive`() {
@@ -93,91 +57,84 @@ class HistoryManagerImplTest {
     }
 
     @Test
-    fun `requestHistoryReplay rejects a missing local node before queue admission`() = runTest {
-        val packetHandler = mock<PacketHandler>(MockMode.autofill)
-        val meshPrefs = FakeMeshPrefs().apply { setDeviceAddress("bAA:BB:CC:DD:EE:FF") }
+    fun `requestHistoryReplay rejects a missing local node before sending`() = runTest {
+        val fixture = sdkClientFixture(LOCAL_NODE)
+        val meshPrefs = FakeMeshPrefs().apply { setDeviceAddress(ADDRESS) }
 
         assertFailsWith<LocalNodeUnavailableException> {
-            manager(meshPrefs, packetHandler)
-                .requestHistoryReplay(
-                    trigger = "test",
-                    myNodeNum = null,
-                    storeForwardConfig =
-                    ModuleConfig.StoreForwardConfig.Builder().also { wb -> wb.enabled = true }.build(),
-                    transport = "BLE",
-                    expectedConnectionVersion = 17L,
-                )
+            HistoryManagerImpl(meshPrefs, fixture.radio)
+                .requestHistoryReplay("test", myNodeNum = null, config, "BLE", fixture.radio.activeSession.value!!)
         }
 
-        verifySuspend(exactly(0)) { packetHandler.sendToRadioForConnection(any(), any()) }
+        assertTrue(fixture.storeForwardPackets().isEmpty())
+        fixture.client.disconnect()
     }
 
     @Test
-    fun `requestHistoryReplay rejects a missing device before queue admission`() = runTest {
-        val packetHandler = mock<PacketHandler>(MockMode.autofill)
-        val meshPrefs = FakeMeshPrefs()
+    fun `requestHistoryReplay rejects a missing device before sending`() = runTest {
+        val fixture = sdkClientFixture(LOCAL_NODE)
 
         assertFailsWith<LocalNodeUnavailableException> {
-            manager(meshPrefs, packetHandler)
+            HistoryManagerImpl(FakeMeshPrefs(), fixture.radio)
                 .requestHistoryReplay(
-                    trigger = "test",
-                    myNodeNum = 123,
-                    storeForwardConfig =
-                    ModuleConfig.StoreForwardConfig.Builder().also { wb -> wb.enabled = true }.build(),
-                    transport = "BLE",
-                    expectedConnectionVersion = 17L,
+                    "test",
+                    myNodeNum = LOCAL_NODE,
+                    config,
+                    "BLE",
+                    fixture.radio.activeSession.value!!,
                 )
         }
 
-        verifySuspend(exactly(0)) { packetHandler.sendToRadioForConnection(any(), any()) }
+        assertTrue(fixture.storeForwardPackets().isEmpty())
+        fixture.client.disconnect()
     }
 
     @Test
-    fun `requestHistoryReplay binds queue admission to the expected connection`() = runTest {
-        val packetHandler = mock<PacketHandler>(MockMode.autofill)
-        val meshPrefs = FakeMeshPrefs().apply { setDeviceAddress("bAA:BB:CC:DD:EE:FF") }
-        val packets = mutableListOf<MeshPacket>()
-        everySuspend { packetHandler.sendToRadioForConnection(capture(packets), 17L) } returns true
-        every { commandSender.generatePacketId() } returns 42
+    fun `requestHistoryReplay asks our own node for history since the stored marker`() = runTest {
+        val fixture = sdkClientFixture(LOCAL_NODE)
+        val meshPrefs =
+            FakeMeshPrefs().apply {
+                setDeviceAddress(ADDRESS)
+                setStoreForwardLastRequest(ADDRESS, 1_700_000_000)
+            }
 
-        manager(meshPrefs, packetHandler)
-            .requestHistoryReplay(
-                trigger = "test",
-                myNodeNum = 123,
-                storeForwardConfig = ModuleConfig.StoreForwardConfig.Builder().also { wb -> wb.enabled = true }.build(),
-                transport = "BLE",
-                expectedConnectionVersion = 17L,
-            )
+        HistoryManagerImpl(meshPrefs, fixture.radio)
+            .requestHistoryReplay("test", myNodeNum = LOCAL_NODE, config, "BLE", fixture.radio.activeSession.value!!)
+        runCurrent()
 
-        verifySuspend { packetHandler.sendToRadioForConnection(any(), 17L) }
-        verify { commandSender.generatePacketId() }
-        val queued = packets.single()
-        assertEquals(42, queued.id)
-        assertEquals(123, queued.from)
-        assertEquals(123, queued.to)
-        assertEquals(PortNum.STORE_FORWARD_APP, queued.decoded?.portnum)
-        assertEquals(MeshPacket.Priority.BACKGROUND, queued.priority)
-        val request = StoreAndForward.ADAPTER.decode(checkNotNull(queued.decoded).payload)
+        val sent = fixture.storeForwardPackets().single()
+        assertEquals(LOCAL_NODE, sent.to)
+        assertEquals(MeshPacket.Priority.BACKGROUND, sent.priority)
+        val request = StoreAndForward.ADAPTER.decode(checkNotNull(sent.decoded).payload)
         assertEquals(StoreAndForward.RequestResponse.CLIENT_HISTORY, request.rr)
+        assertEquals(1_700_000_000, request.history?.last_request)
+        assertEquals(30, request.history?.window)
+        assertEquals(10, request.history?.history_messages)
+        fixture.client.disconnect()
     }
 
     @Test
-    fun `requestHistoryReplay surfaces owned queue rejection`() = runTest {
-        val packetHandler = mock<PacketHandler>(MockMode.autofill)
-        val meshPrefs = FakeMeshPrefs().apply { setDeviceAddress("bAA:BB:CC:DD:EE:FF") }
-        everySuspend { packetHandler.sendToRadioForConnection(any(), 23L) } returns false
-        every { commandSender.generatePacketId() } returns 43
+    fun `requestHistoryReplay from a closed session sends nothing`() = runTest {
+        val fixture = sdkClientFixture(LOCAL_NODE)
+        val meshPrefs = FakeMeshPrefs().apply { setDeviceAddress(ADDRESS) }
+        val captured = fixture.radio.activeSession.value!!
+        fixture.radio.disconnect()
+        fixture.radio.connect()
 
         assertFailsWith<PacketQueueRejectedException> {
-            manager(meshPrefs, packetHandler)
-                .requestHistoryReplay(
-                    trigger = "test",
-                    myNodeNum = 123,
-                    storeForwardConfig =
-                    ModuleConfig.StoreForwardConfig.Builder().also { wb -> wb.enabled = true }.build(),
-                    transport = "BLE",
-                    expectedConnectionVersion = 23L,
-                )
+            HistoryManagerImpl(meshPrefs, fixture.radio)
+                .requestHistoryReplay("test", myNodeNum = LOCAL_NODE, config, "BLE", captured)
         }
+
+        assertTrue(fixture.storeForwardPackets().isEmpty())
+        fixture.client.disconnect()
+    }
+
+    private fun SdkClientFixture.storeForwardPackets(): List<MeshPacket> =
+        transport.outboundPackets().filter { it.decoded?.portnum == PortNum.STORE_FORWARD_APP }
+
+    private companion object {
+        const val LOCAL_NODE = 123
+        const val ADDRESS = "bAA:BB:CC:DD:EE:FF"
     }
 }

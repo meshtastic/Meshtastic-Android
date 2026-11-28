@@ -34,7 +34,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.nowMillis
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceAddress
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.FirmwareRelease
@@ -57,39 +56,7 @@ import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalConfig
-
-/**
- * Derived, UI-friendly summary of the device connection lifecycle. Combines [ServiceRepository.connectionState] with
- * the [ServiceRepository.RECONNECTING_PROGRESS_TEXT] handshake-recovery signal and expected-restart state.
- * Configuration health is modeled separately so region, lockdown, and managed-mode policy cannot leak into the
- * connection label.
- */
-enum class ConnectionStatus {
-    /** No device has been selected or we are otherwise disconnected. */
-    NOT_CONNECTED,
-
-    /** A device has been selected and we are working through bonding/handshake. */
-    CONNECTING,
-
-    /**
-     * Transport is recovering from a WiFi/TCP handshake stall (the watchdog tore the link down and is bringing it back
-     * up). Distinct from [NOT_CONNECTED] so the UI can show an in-progress recovery instead of a final failure.
-     */
-    RECONNECTING,
-
-    /**
-     * The node is applying a change that reboots it (config save or reboot command) and the transport drop is expected.
-     * Distinct from [NOT_CONNECTED] so the UI presents an in-progress restart instead of a failure. Ends when the node
-     * finishes its post-reboot handshake or the [NodeRestartTracker] window expires.
-     */
-    RESTARTING,
-
-    /** Transport connected. */
-    CONNECTED,
-
-    /** Connected but the device is in deep sleep. */
-    CONNECTED_SLEEPING,
-}
+import org.meshtastic.sdk.ConnectionState
 
 @KoinViewModel
 class ConnectionsViewModel(
@@ -192,41 +159,10 @@ class ConnectionsViewModel(
             .stateInWhileSubscribed(initialValue = false)
 
     /**
-     * Single source of truth for the UI's connection lifecycle label. Kept independent from configuration state so
-     * region, lockdown, and managed-mode changes cannot rewrite a transient connection label.
-     *
-     * The [ConnectionStatus.RECONNECTING] case is signalled by the WiFi/TCP handshake watchdog writing
-     * [ServiceRepository.RECONNECTING_PROGRESS_TEXT] to [ServiceRepository.connectionProgress] immediately before its
-     * recovery sibling transitions to [ConnectionState.Disconnected]. See
-     * [ServiceRepository.RECONNECTING_PROGRESS_TEXT] for the cross-track contract.
+     * Whether the node is applying a change that reboots it, so a drop and the reconnect that follows present as a
+     * restart rather than a failure.
      */
-    val connectionStatus: StateFlow<ConnectionStatus> =
-        combine(connectionState, serviceRepository.connectionProgress, nodeRestartTracker.restartExpected) {
-                state,
-                progress,
-                restartExpected,
-            ->
-            when (state) {
-                is ConnectionState.Connected -> ConnectionStatus.CONNECTED
-
-                // While an expected node restart is in flight, the drop and the reconnect attempts are the restart
-                // —
-                // present them as such instead of as a failure.
-                ConnectionState.Connecting ->
-                    if (restartExpected) ConnectionStatus.RESTARTING else ConnectionStatus.CONNECTING
-
-                ConnectionState.Disconnected ->
-                    when {
-                        restartExpected -> ConnectionStatus.RESTARTING
-                        progress == ServiceRepository.RECONNECTING_PROGRESS_TEXT -> ConnectionStatus.RECONNECTING
-                        else -> ConnectionStatus.NOT_CONNECTED
-                    }
-
-                ConnectionState.DeviceSleep -> ConnectionStatus.CONNECTED_SLEEPING
-            }
-        }
-            .distinctUntilChanged()
-            .stateInWhileSubscribed(initialValue = ConnectionStatus.NOT_CONNECTED)
+    val restartExpected: StateFlow<Boolean> = nodeRestartTracker.restartExpected
 
     private val _hasShownNotPairedWarning = MutableStateFlow(uiPrefs.hasShownNotPairedWarning.value)
     val hasShownNotPairedWarning: StateFlow<Boolean> = _hasShownNotPairedWarning.asStateFlow()

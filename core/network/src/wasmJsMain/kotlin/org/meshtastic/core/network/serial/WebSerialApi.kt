@@ -91,8 +91,6 @@ internal external interface JsWritableStream : JsAny {
 internal external interface JsWritableStreamDefaultWriter : JsAny {
     fun write(chunk: JsAny): Promise<JsAny?>
 
-    fun close(): Promise<JsAny?>
-
     fun releaseLock()
 }
 
@@ -130,10 +128,6 @@ internal suspend fun JsReadableStreamDefaultReader.cancelSuspend() {
 
 internal suspend fun JsWritableStreamDefaultWriter.writeBytes(bytes: ByteArray) {
     write(bytes.toInt8Array()).awaitOrThrowException()
-}
-
-internal suspend fun JsWritableStreamDefaultWriter.closeSuspend() {
-    close().awaitOrThrowException()
 }
 
 /** [JsStreamReadResult.value] as a [ByteArray], or `null` when the stream carried no chunk (e.g. at end-of-stream). */

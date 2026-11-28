@@ -157,7 +157,7 @@
           unrelated settings read; any allocation would have thrown at that point, the heap was simply
           full. largeHeap raises the ceiling (device dependent, commonly 2 to 4x) rather than reducing
           footprint; it buys headroom for legitimately large meshes while the real fix (bounding/streaming
-          the in-memory log + node caches; see DebugViewModel and MeshMessageProcessorImpl) remains the
+          the in-memory log + node caches; see DebugViewModel and NodeManagerImpl) remains the
           long-term mitigation.
 
           TREAT THIS AS A TEMPORARY STOPGAP, not a permanent setting. It is a global,
@@ -166,7 +166,7 @@
           small-mesh use on low-RAM devices, which never come near the OOM this guards against. That
           tradeoff (a tail-scenario safety net paid for by every user) is why Android's own docs
           caution against relying on largeHeap alone. Remove it once the cache-bounding/streaming work
-          in DebugViewModel + MeshMessageProcessorImpl fully bounds footprint; validate that removal
+          in DebugViewModel + NodeManagerImpl fully bounds footprint; validate that removal
           on a low-RAM device AND under the large-mesh + chaos-fuzz soak that motivated this, not just
           the flagship test device.
         -->

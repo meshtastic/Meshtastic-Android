@@ -22,19 +22,14 @@ import co.touchlab.kermit.Logger
 import kotlinx.atomicfu.atomic
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -44,193 +39,82 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.flow.runningFold
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
-import okio.ByteString.Companion.toByteString
-import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
-import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.common.di.PROCESS_LIFECYCLE
+import org.meshtastic.core.common.state.RadioOperation
 import org.meshtastic.core.common.state.RadioOperationLock
+import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.ignoreExceptionSuspend
-import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.safeCatching
-import org.meshtastic.core.common.util.safeCatchingAll
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.model.DeviceAddress
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.MeshActivity
-import org.meshtastic.core.model.TransportPhase
-import org.meshtastic.core.model.TransportStatus
 import org.meshtastic.core.model.util.anonymize
-import org.meshtastic.core.network.repository.NetworkRepository
-import org.meshtastic.core.network.repository.SerialDevicePresence
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioLinks
 import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.RadioSessionContext
-import org.meshtastic.core.repository.RadioSessionLease
-import org.meshtastic.core.repository.RadioTransport
-import org.meshtastic.core.repository.RadioTransportFactory
-import org.meshtastic.core.repository.ReceivedRadioFrame
+import org.meshtastic.core.repository.RadioSessionHost
+import org.meshtastic.core.repository.ServiceStateWriter
 import org.meshtastic.core.repository.TransportDisconnectReason
-import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.getStringSuspend
-import org.meshtastic.core.resources.usb_permission_denied
-import org.meshtastic.core.resources.websocket_connect_failed
-import org.meshtastic.core.resources.websocket_handshake_rejected
-import org.meshtastic.core.resources.websocket_message_too_big
-import org.meshtastic.core.resources.websocket_not_supported
-import org.meshtastic.core.resources.websocket_replaced_by_another_client
-import org.meshtastic.core.resources.websocket_slot_contested
-import org.meshtastic.core.resources.websocket_tls_failed
-import org.meshtastic.proto.ToRadio
+import org.meshtastic.proto.LockdownAuth
+import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.MqttClientProxyMessage
+import org.meshtastic.sdk.AdminSessionStatus
+import org.meshtastic.sdk.ConfigPhase
+import org.meshtastic.sdk.ConnectionState
+import org.meshtastic.sdk.MeshtasticException
+import org.meshtastic.sdk.NodeId
+import org.meshtastic.sdk.PacedMessageHandle
+import org.meshtastic.sdk.RadioClient
 import kotlin.concurrent.Volatile
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 /**
- * Immutable per-start transport identity. [generation] is bumped on every transport start (including same-address
- * reconnect) so the [SharedRadioInterfaceService] and its consumers can discard state retained from a previous
- * transport instance even when the selected address is unchanged.
+ * The admitted app session and the scope its work runs in. Cancelling the scope closes admission; joining it drains.
  */
-data class RadioTransportSession(val generation: Long, val address: String) {
-    /** Immutable context carried with every frame admitted by this session. */
-    val context = RadioSessionContext(generation = generation, address = address)
-
-    /** Prevent accidental disclosure of the raw transport address in diagnostic interpolation. */
-    override fun toString(): String = "RadioTransportSession(generation=$generation, address=...)"
-}
-
-private class SessionOperationState(var admittedOperations: Int = 0, var drainWaiter: CompletableDeferred<Unit>? = null)
-
-private data class SelectedSerialPresence(val key: String?, val present: Boolean)
-
-private data class UsbRecoverySnapshot(val presence: SelectedSerialPresence, val state: ConnectionState)
-
-private data class UsbRecoveryTriggerState(
-    val key: String? = null,
-    val present: Boolean = false,
-    val armedByAbsence: Boolean = false,
-    val triggerRecovery: Boolean = false,
-)
-
-private fun selectedSerialPresence(address: String?, keys: Set<String>): SelectedSerialPresence {
-    val key =
-        DeviceAddress.parse(address)
-            ?.takeIf { it.interfaceId == InterfaceId.SERIAL }
-            ?.identity
-            ?.takeIf { it.isNotEmpty() }
-    return SelectedSerialPresence(key = key, present = key != null && key in keys)
-}
-
-private fun UsbRecoveryTriggerState.next(snapshot: UsbRecoverySnapshot): UsbRecoveryTriggerState {
-    val key = snapshot.presence.key
-    val present = snapshot.presence.present
-    return when {
-        key == null -> UsbRecoveryTriggerState()
-
-        snapshot.state == ConnectionState.Disconnected -> UsbRecoveryTriggerState(key = key, present = present)
-
-        key != this.key ->
-            UsbRecoveryTriggerState(
-                key = key,
-                present = present,
-                armedByAbsence = !present && snapshot.state == ConnectionState.DeviceSleep,
-            )
-
-        !present ->
-            UsbRecoveryTriggerState(
-                key = key,
-                armedByAbsence = armedByAbsence || this.present || snapshot.state == ConnectionState.DeviceSleep,
-            )
-
-        else -> {
-            val trigger = armedByAbsence && snapshot.state == ConnectionState.DeviceSleep
-            UsbRecoveryTriggerState(
-                key = key,
-                present = true,
-                armedByAbsence = armedByAbsence && !trigger,
-                triggerRecovery = trigger,
-            )
-        }
-    }
-}
-
-/** The user-facing text for [reason]. Lookup fails only outside a full resource runtime; the name beats silence. */
-internal suspend fun connectionErrorText(reason: TransportDisconnectReason): String = safeCatchingAll {
-    getStringSuspend(reason.toConnectionErrorMessage())
-}
-    .getOrDefault(reason.name)
-
-private fun TransportDisconnectReason.toConnectionErrorMessage(): StringResource = when (this) {
-    TransportDisconnectReason.UsbPermissionDenied -> Res.string.usb_permission_denied
-    TransportDisconnectReason.ReplacedByAnotherClient -> Res.string.websocket_replaced_by_another_client
-    TransportDisconnectReason.WebSocketConnectFailed -> Res.string.websocket_connect_failed
-    TransportDisconnectReason.WebSocketHandshakeRejected -> Res.string.websocket_handshake_rejected
-    TransportDisconnectReason.WebSocketNotSupported -> Res.string.websocket_not_supported
-    TransportDisconnectReason.WebSocketTlsFailed -> Res.string.websocket_tls_failed
-    TransportDisconnectReason.WebSocketMessageTooBig -> Res.string.websocket_message_too_big
-    TransportDisconnectReason.WebSocketSlotContested -> Res.string.websocket_slot_contested
-}
-
-private val LINK_UP_PHASES =
-    setOf(TransportPhase.HandshakeConfig, TransportPhase.HandshakeNodes, TransportPhase.Connected)
-
-/** Permanent closes that only the user's next connect may undo. */
-private val USER_CONNECT_REASONS =
-    setOf(
-        TransportDisconnectReason.ReplacedByAnotherClient,
-        TransportDisconnectReason.WebSocketMessageTooBig,
-        TransportDisconnectReason.WebSocketSlotContested,
-    )
+private class OpenSession(val active: ActiveRadioSession, val scope: CoroutineScope)
 
 /**
- * Shared multiplatform connection orchestrator for Meshtastic radios.
+ * The selected radio's SDK client and the app sessions it carries.
  *
- * Manages the connection lifecycle (connect, active, disconnect, reconnect loop), device address state flows, and
- * hardware state observability (BLE/Network toggles). Delegates the actual raw byte transport mapping to a
- * platform-specific [RadioTransportFactory].
+ * The SDK client owns connecting, backoff and reconnecting. This service builds one client per selected device through
+ * the platform's [RadioLinks], connects and disconnects it, asks it to retry at once when Bluetooth, the network or the
+ * selected USB device comes back, keeps it off the radio while a [RadioOperation] needs the port, and publishes its
+ * [ConnectionState] to [ServiceStateWriter]. [ConnectionState.Connected] shows only once the app holds the session's
+ * config and nodes.
  */
-@Suppress("LargeClass", "LongParameterList", "TooManyFunctions")
+@Suppress("LongParameterList", "TooManyFunctions")
 @Single
 class SharedRadioInterfaceService(
     private val dispatchers: CoroutineDispatchers,
-    private val bluetoothRepository: BluetoothRepository,
-    private val networkRepository: NetworkRepository,
-    private val serialDevicePresence: SerialDevicePresence,
+    private val environment: LinkEnvironmentObserver,
     @Named(PROCESS_LIFECYCLE) private val processLifecycle: Lifecycle,
     private val radioPrefs: RadioPrefs,
-    private val transportFactory: RadioTransportFactory,
+    private val links: RadioLinks,
     private val analytics: PlatformAnalytics,
     private val radioOperationLock: RadioOperationLock,
+    private val serviceStateWriter: ServiceStateWriter,
 ) : RadioInterfaceService {
 
     override val supportedDeviceTypes: List<DeviceType>
-        get() = transportFactory.supportedDeviceTypes
-
-    /**
-     * Transport-level connection state reflecting the raw hardware link status.
-     *
-     * Updated directly by [onConnect] and [onDisconnect] when the physical transport (BLE, TCP, Serial) connects or
-     * disconnects. This is consumed exclusively by
-     * [MeshConnectionManager][org.meshtastic.core.repository.MeshConnectionManager], which reconciles it into the
-     * canonical app-level
-     * [ServiceRepository.connectionState][org.meshtastic.core.repository.ServiceRepository.connectionState].
-     */
-    private val _connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
-    override val connectionState: StateFlow<ConnectionState> = _connectionState.asStateFlow()
+        get() = links.supportedDeviceTypes
 
     private val _currentDeviceAddressFlow = MutableStateFlow<String?>(radioPrefs.devAddr.value)
     override val currentDeviceAddressFlow: StateFlow<String?> = _currentDeviceAddressFlow.asStateFlow()
@@ -240,9 +124,6 @@ class SharedRadioInterfaceService(
     /** Set by the first [setDeviceAddress]; from then on this process owns the selection, not the prefs mirror. */
     private var selectionPublished = false
 
-    // Monotonically increasing generation bumped on every transport start (including same-address reconnect). Exposed
-    // through [sessionGeneration] so the controller layer can clear connection-session identity at each session
-    // boundary instead of only when the selected address changes.
     private val sessionGenerationCounter = atomic(0L)
     private val _sessionGeneration = MutableStateFlow(0L)
     override val sessionGeneration: StateFlow<Long> = _sessionGeneration.asStateFlow()
@@ -251,242 +132,29 @@ class SharedRadioInterfaceService(
     override val activeSession: StateFlow<RadioSessionContext?> = _activeSession.asStateFlow()
 
     /**
-     * The transport session that owns lifecycle completion. [stopTransportLocked] closes its admission first, waits for
-     * every already-admitted operation, then clears this token before closing the underlying transport. Close-time and
-     * post-close callbacks are rejected as soon as admission closes.
+     * The session that owns lifecycle completion. [revokeSession] cancels its scope first (admission closes), joins the
+     * work already admitted, then clears this token.
      */
-    @Volatile private var activeTransportSession: RadioTransportSession? = null
+    @Volatile private var activeRadioSession: OpenSession? = null
 
-    /** Serializes session publication/revocation with callback and suspend-operation admission. */
-    private val sessionCallbackLock = SynchronizedObject()
+    private val activeLink = MutableStateFlow<ActiveLink?>(null)
 
-    /** Guarded by [sessionCallbackLock]. New work is rejected immediately when teardown closes this gate. */
-    private var sessionAdmissionOpen = false
+    /** Shown when no link is open: Disconnected, or Failed for a selected radio whose link could not open. */
+    private val idleState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
 
-    /** The generation whose link is up: set by its transport's connect, cleared on any disconnect. Lock-guarded. */
-    private var linkedGeneration: Long? = null
-
-    /** Per-generation operation ownership, guarded by [sessionCallbackLock]. */
-    private val sessionOperationStates = mutableMapOf<Long, SessionOperationState>()
-
-    /** Preserves FIFO ordering for handshake work without blocking independently leased packet side effects. */
-    private val sessionOperationMutex = Mutex()
-
-    override fun isSessionActive(session: RadioSessionContext): Boolean =
-        synchronized(sessionCallbackLock) { sessionAdmissionOpen && activeTransportSession?.context == session }
-
-    override fun runIfSessionActive(session: RadioSessionContext, block: () -> Unit): Boolean =
-        synchronized(sessionCallbackLock) {
-            if (!sessionAdmissionOpen || activeTransportSession?.context != session) return@synchronized false
-            block()
-            true
-        }
-
-    override suspend fun runWithSessionLease(
-        session: RadioSessionContext,
-        block: suspend (RadioSessionLease) -> Unit,
-    ): Boolean {
-        val admittedSession =
-            synchronized(sessionCallbackLock) {
-                val active = activeTransportSession
-                if (!sessionAdmissionOpen || active?.context != session) {
-                    null
-                } else {
-                    checkNotNull(sessionOperationStates[active.generation]).admittedOperations++
-                    active
-                }
-            } ?: return false
-
-        val lease =
-            object : RadioSessionLease {
-                override val session: RadioSessionContext = session
-
-                override fun isCurrent(): Boolean =
-                    synchronized(sessionCallbackLock) { activeTransportSession === admittedSession }
-            }
-
-        try {
-            block(lease)
-            return true
-        } finally {
-            releaseSessionOperation(admittedSession)
-        }
-    }
-
-    override suspend fun runWhileSessionActive(
-        session: RadioSessionContext,
-        label: String,
-        block: suspend () -> Unit,
-    ): Boolean = sessionOperationMutex.withLock {
-        runWithSessionLease(session) {
-            // Bound the handler: it holds sessionOperationMutex (the whole inbound pipeline) and an admitted
-            // lease (which teardown's drain awaits), so an indefinite suspension here is a total wedge, not a
-            // slow packet. Cancelling the block releases both. Only OUR timeout is swallowed — ensureActive()
-            // rethrows if the surrounding scope was cancelled concurrently.
-            try {
-                withTimeout(SESSION_HANDLER_TIMEOUT_MILLIS) { block() }
-            } catch (timeout: TimeoutCancellationException) {
-                currentCoroutineContext().ensureActive()
-                Logger.e(timeout) {
-                    "Session handler exceeded ${SESSION_HANDLER_TIMEOUT_MILLIS}ms and was cancelled; " +
-                        "dropping its packet to keep the receive pipeline alive (handler=$label)"
-                }
-            }
-        }
-    }
-
-    private fun releaseSessionOperation(admittedSession: RadioTransportSession) {
-        val drainWaiter =
-            synchronized(sessionCallbackLock) {
-                val state = sessionOperationStates[admittedSession.generation]
-                if (state == null) {
-                    Logger.e { "Session operation released after generation ${admittedSession.generation} was revoked" }
-                    return@synchronized null
-                }
-                if (state.admittedOperations <= 0) {
-                    Logger.e { "Session operation count underflow for generation ${admittedSession.generation}" }
-                    return@synchronized state.drainWaiter.also { state.drainWaiter = null }
-                }
-                state.admittedOperations--
-                if (state.admittedOperations == 0) {
-                    state.drainWaiter.also { state.drainWaiter = null }
-                } else {
-                    null
-                }
-            }
-        drainWaiter?.complete(Unit)
-    }
-
-    /** Removes a drained session's operation state without letting a diagnostic invariant failure block teardown. */
-    private fun removeDrainedSessionStateLocked(session: RadioTransportSession): CompletableDeferred<Unit>? {
-        val state = sessionOperationStates.remove(session.generation)
-        if (state == null) {
-            Logger.e { "Session generation ${session.generation} lost its operation state during drain" }
-            return null
-        }
-        if (state.admittedOperations != 0) {
-            Logger.e {
-                "Session generation ${session.generation} revoked with " +
-                    "${state.admittedOperations} admitted operation(s) still outstanding"
-            }
-        }
-        return state.drainWaiter?.also {
-            Logger.e { "Session generation ${session.generation} retained a drain waiter" }
-            state.drainWaiter = null
-        }
-    }
-
-    private sealed interface TransportSendAdmission {
-        data class Admitted(val session: RadioTransportSession, val transport: RadioTransport) : TransportSendAdmission
-
-        data object AdmissionClosed : TransportSendAdmission
-
-        data object NoActiveSession : TransportSendAdmission
-
-        data object NoTransport : TransportSendAdmission
-    }
-
-    /** Admits one synchronous transport handoff under the same gate drained by [revokeTransportSession]. */
-    private fun admitTransportSend(): TransportSendAdmission = synchronized(sessionCallbackLock) {
-        val session = activeTransportSession
-        val transport = radioTransport
-        when {
-            !sessionAdmissionOpen -> TransportSendAdmission.AdmissionClosed
-
-            session == null -> TransportSendAdmission.NoActiveSession
-
-            transport == null -> TransportSendAdmission.NoTransport
-
-            else -> {
-                val state = sessionOperationStates[session.generation]
-                if (state == null) {
-                    Logger.e { "Session generation ${session.generation} has no operation state at send admission" }
-                    TransportSendAdmission.NoActiveSession
-                } else {
-                    state.admittedOperations++
-                    TransportSendAdmission.Admitted(session = session, transport = transport)
-                }
-            }
-        }
-    }
-
-    /** Runs a callback only while [session] still owns admission, atomically with session teardown. */
-    private inline fun runIfTransportSessionActive(session: RadioTransportSession, block: () -> Unit): Boolean =
-        synchronized(sessionCallbackLock) {
-            if (!sessionAdmissionOpen || activeTransportSession !== session) return@synchronized false
-            block()
-            true
-        }
+    /** The generation whose handshake snapshot the app has installed. */
+    private val installedGeneration = MutableStateFlow<Long?>(null)
 
     /**
-     * Closes admission for [session], waits for its existing suspend operations, then publishes lifecycle completion.
-     * The closed gate rejects queued callbacks and new operations immediately; the retained session token prevents a
-     * replacement generation from overlapping an admitted database commit.
+     * True while the user wants the selected radio connected: set by [connect] and by selecting a radio, cleared by
+     * [disconnect] and by deselecting. Guarded by [linkMutex].
      */
-    private suspend fun revokeTransportSession(session: RadioTransportSession?) {
-        if (session == null) return
-        withContext(NonCancellable) {
-            val drainWaiter =
-                synchronized(sessionCallbackLock) {
-                    if (activeTransportSession !== session) return@synchronized null
-                    sessionAdmissionOpen = false
-                    val state = sessionOperationStates[session.generation]
-                    if (state == null) {
-                        Logger.e { "Session generation ${session.generation} has no operation state at revocation" }
-                        null
-                    } else if (state.admittedOperations == 0) {
-                        null
-                    } else {
-                        state.drainWaiter ?: CompletableDeferred<Unit>().also { state.drainWaiter = it }
-                    }
-                }
-            if (drainWaiter != null) {
-                // The drain must complete before a replacement generation is admitted (DB-atomicity contract), so we
-                // keep waiting — but never silently. A lease stuck past the handler timeout means a handler ignored
-                // cancellation; these error-level reports are the observability surface for that wedge (this wait
-                // previously blocked disconnect()/restart forever with no telemetry at all).
-                var waitedMillis = 0L
-                while (withTimeoutOrNull(DRAIN_WAIT_LOG_INTERVAL_MILLIS) { drainWaiter.await() } == null) {
-                    waitedMillis += DRAIN_WAIT_LOG_INTERVAL_MILLIS
-                    val outstanding =
-                        synchronized(sessionCallbackLock) {
-                            sessionOperationStates[session.generation]?.admittedOperations ?: 0
-                        }
-                    Logger.e {
-                        "Transport teardown blocked ${waitedMillis}ms waiting for $outstanding admitted session " +
-                            "operation(s) to release (generation=${session.generation})"
-                    }
-                }
-            }
-            val retainedDrainWaiter =
-                synchronized(sessionCallbackLock) {
-                    if (activeTransportSession === session) {
-                        val waiter = removeDrainedSessionStateLocked(session)
-                        activeTransportSession = null
-                        _activeSession.value = null
-                        waiter
-                    } else {
-                        null
-                    }
-                }
-            retainedDrainWaiter?.complete(Unit)
-        }
-    }
+    @Volatile private var connectionRequested = false
 
-    // A Channel preserves strict FIFO delivery of incoming radio bytes, which the firmware
-    // handshake depends on (initial config packet ordering). A SharedFlow with `launch { emit() }`
-    // per packet reorders under concurrent dispatch and breaks config load. trySend never
-    // suspends, so handleFromRadio can remain a non-suspend synchronous callback.
-    //
-    // Bounded rather than UNLIMITED: inbound frames arrive faster than they can be processed under
-    // sustained traffic, and an unbounded queue grows with no drop policy at all. At the cap
-    // trySend fails and the newest frame is dropped, which keeps the already-queued (earlier)
-    // frames and so preserves the ordering the handshake relies on.
-    private val _receivedData = Channel<ReceivedRadioFrame>(RECEIVE_QUEUE_CAPACITY)
-    override val receivedData: Flow<ReceivedRadioFrame> = _receivedData.receiveAsFlow()
+    /** A firmware update asked for the next Bluetooth link to refresh its GATT cache. */
+    private val gattRefreshPending = atomic(false)
 
-    /** Running count of frames dropped because the queue was full. Diagnostic only; see [enqueueReceivedData]. */
-    private var droppedFrameCount = 0L
+    private val linkMutex = Mutex()
 
     private val _meshActivity =
         MutableSharedFlow<MeshActivity>(extraBufferCapacity = 64, onBufferOverflow = BufferOverflow.DROP_OLDEST)
@@ -495,414 +163,296 @@ class SharedRadioInterfaceService(
     private val _connectionError = MutableSharedFlow<String>(extraBufferCapacity = 64)
     override val connectionError: Flow<String> = _connectionError.asFlow()
 
-    private val _transportStatus = MutableStateFlow<TransportStatus?>(null)
-    override val transportStatus: StateFlow<TransportStatus?> = _transportStatus.asStateFlow()
-
-    override val serviceScope: CoroutineScope
-        get() = _serviceScope
-
-    private var _serviceScope = CoroutineScope(dispatchers.io + SupervisorJob())
-
-    @Volatile private var radioTransport: RadioTransport? = null
-    private var runningTransportId: InterfaceId? = null
-    private var isStarted = false
-
-    /**
-     * True while an explicit connection lifecycle is active (set by [connect]/[setDeviceAddress], cleared by
-     * [disconnect]). The hardware ([bluetoothRepository.state]) and network ([networkRepository.networkAvailable])
-     * listeners and the [checkLiveness] zombie-recovery path consult this to avoid starting a transport the user has
-     * torn down — without it, BT/network recovery emissions can wake a transport after explicit disconnect, leaving the
-     * app "connected" with no orchestrator collector and an unloaded NodeDB/channels.
-     *
-     * Guarded by [transportMutex]; every read/write site holds the lock. The @Volatile keeps diagnostic reads honest.
-     */
-    @Volatile private var connectionRequested = false
-
-    // A link that gave the radio's one client slot away, or that the radio refused, stays down until the user connects
-    // again: a recovery restart would take the slot back from the client that now holds it.
-    @Volatile private var awaitingUserConnect = false
-
-    private val gattCacheInvalidationRequested = atomic(false)
-
-    /** Prevents concurrent liveness-induced transport restarts from stacking. */
-    private val isRestarting = atomic(false)
-
-    private val listenersInitialized = atomic(false)
-    private var heartbeatJob: Job? = null
-    private var lastHeartbeatMillis = 0L
-
-    @Volatile private var lastDataReceivedMillis = 0L
-
-    /**
-     * Internal test seam for deterministic clock injection. Production uses [nowMillis]; tests override this to a
-     * controllable clock so [onConnect], [handleFromRadio], [checkLiveness], and [keepAlive] all share one coherent
-     * time source. Not a constructor parameter to avoid breaking Koin @Single annotation generation (which would try to
-     * resolve `() -> Long` from the DI graph).
-     */
-    @Volatile
-    @Suppress("MemberVisibilityCanBePrivate")
-    internal var clockMillis: () -> Long = { nowMillis }
-
-    /** The current time from the injected clock. */
-    private fun now(): Long = clockMillis()
+    // Text lookup suspends, so one consumer keeps the errors in the order their states arrived.
+    private val connectionErrorReasons = Channel<TransportDisconnectReason>(Channel.UNLIMITED)
 
     companion object {
-        /**
-         * Capacity of the inbound frame queue.
-         *
-         * Sized against the burst a connect produces, which is roughly `35 + 5N` frames for a NodeDB of N nodes:
-         * - ~35 fixed: `my_info`, metadata, ~10 config, ~14 moduleConfig, 8 channels, deviceui, `config_complete`.
-         * - N thin `NodeInfo` frames — one per *hot-store* node. Warm-tier entries (firmware `WARM_NODE_COUNT`, up to
-         *   2000 on a native host) are identity-only records for evicted nodes and are NOT streamed to the phone, so
-         *   they do not contribute here.
-         * - Up to 4N more from the post-`config_complete` replay drain, which re-sends stored position, telemetry,
-         *   environment and status as ordinary mesh packets — one of each per node.
-         *
-         * N is firmware `MAX_NUM_NODES`: 250 on portduino/native-host and top-tier ESP32-S3, 120 on nRF52840 and
-         * generic ESP32, 10 on STM32WL. So the realistic worst case is a Linux/Pi node at N=250 → ~1285 frames, and
-         * those arrive over TCP, the transport most able to outrun the consumer. 8192 keeps roughly 6x headroom over
-         * that; a custom build raising `MAX_NUM_NODES` past ~1630 would need this raised too.
-         *
-         * Memory stays bounded at capacity x frame size. On the stream transports a frame cannot exceed
-         * `StreamFrameCodec.MAX_TO_FROM_RADIO_SIZE` (512 B); the BLE path passes through whatever the GATT read
-         * returned, which ATT caps at 512 B in practice rather than by anything enforced here. A thin `NodeInfo` is
-         * closer to 100 B, so the realistic ceiling is well under the ~4 MB absolute worst case.
-         */
-        const val RECEIVE_QUEUE_CAPACITY = 8192
+        /** How often [revokeSession] reports a session drain that has not completed. */
+        private val DRAIN_WAIT_LOG_INTERVAL = 15.seconds
 
-        /** Log one dropped-frame warning per this many drops. See [enqueueReceivedData]. */
-        private const val DROP_LOG_INTERVAL = 512L
+        /** The handshake stage a link failed at when the app could not install its snapshot. */
+        private const val SNAPSHOT_INSTALL_STAGE = "snapshot install"
 
-        /**
-         * Per-frame ceiling, matching `StreamFrameCodec.MAX_TO_FROM_RADIO_SIZE`.
-         *
-         * Duplicated rather than imported because `core:service` does not depend on `core:network`; the stream codec
-         * enforces the same number on its own path, and ATT caps BLE at the same value in practice.
-         */
-        const val MAX_FRAME_BYTES = 512
-
-        private const val HEARTBEAT_INTERVAL_MILLIS = 30 * 1000L
-
-        // If we haven't received any data from the radio within this window after sending a
-        // heartbeat while the connection is nominally "Connected", the connection is likely a
-        // zombie (BLE stack didn't report disconnect). Two missed heartbeat intervals gives
-        // the firmware a reasonable window to respond or send telemetry.
-        private const val LIVENESS_TIMEOUT_MILLIS = HEARTBEAT_INTERVAL_MILLIS * 2
-
-        /**
-         * Upper bound on how long we wait for the polite `ToRadio(disconnect = true)` frame to flush before tearing the
-         * transport down. 500ms gives BLE's write-retry path (`BleRetry` backs off 500ms) room for one attempt on a
-         * flaky GATT connection. Serial and TCP typically flush well under this window.
-         */
-        private const val POLITE_DISCONNECT_DRAIN_MS = 500L
-
-        /**
-         * Ceiling on a single [runWhileSessionActive] handler. The block holds [sessionOperationMutex] — the whole
-         * inbound pipeline — so a handler that suspends indefinitely wedges packet processing, fills [_receivedData],
-         * and deadlocks teardown's lease drain (a Connected-looking zombie only a force-stop clears; observed in the
-         * field as multi-hour "receive queue at capacity" sessions). 2 minutes is far above any legitimate handler
-         * (large-mesh config DB installs run seconds) while still bounding the wedge.
-         */
-        private const val SESSION_HANDLER_TIMEOUT_MILLIS = 2 * 60 * 1000L
-
-        /** How often [revokeTransportSession] reports a lease drain that has not completed. */
-        private const val DRAIN_WAIT_LOG_INTERVAL_MILLIS = 15 * 1000L
+        private val APP_CONFIGURING = ConnectionState.Configuring(ConfigPhase.Stage2, 1f)
     }
 
-    private val initLock = Mutex()
-    private val transportMutex = Mutex()
-
     init {
-        // Address sync runs INDEPENDENTLY of connect() so that observers (notably
-        // MeshServiceOrchestrator) see a valid currentDeviceAddressFlow BEFORE the transport
-        // starts. Previously this mirror lived inside initStateListeners()'s devAddr listener and
-        // was coupled to startTransportLocked() — but initStateListeners() is only invoked from
-        // connect(), so the flow never updated until connect() ran. That created a cold-start race:
-        // the orchestrator's currentDeviceAddressFlow observer could fire AFTER the transport had
-        // already started, violating the invariant that the active DB must be switched to the
-        // selected device's DB before its transport starts.
-        //
-        // This listener ONLY mirrors radioPrefs.devAddr into _currentDeviceAddressFlow; it never
-        // starts a transport. Transport start remains driven exclusively by connect() (initial),
-        // setDeviceAddress() (explicit user switch), BLE/network state changes (environment
-        // recovery), and liveness restarts (zombie recovery) — see startTransportLocked() callers.
-        // It stops at the first setDeviceAddress(): prefs commit asynchronously, so a later emission can carry an
-        // older selection than the one already published.
+        publishConnectionState()
+
+        // Mirrors the saved selection so observers (MeshServiceOrchestrator switches the database) see it before any
+        // link opens. It stops at the first setDeviceAddress(): prefs commit asynchronously, so a later emission can
+        // carry an older selection than the one already published.
         radioPrefs.devAddr
             .onEach { addr ->
                 synchronized(selectionLock) { if (!selectionPublished) _currentDeviceAddressFlow.value = addr }
             }
             .catch { Logger.e(it) { "radioPrefs.devAddr address-sync flow crashed" } }
             .launchIn(processLifecycle.coroutineScope)
+        processLifecycle.coroutineScope.launch(dispatchers.default) {
+            for (reason in connectionErrorReasons) _connectionError.emit(connectionErrorText(reason))
+        }
     }
 
-    private fun initStateListeners() {
-        if (listenersInitialized.value) return
-        processLifecycle.coroutineScope.launch {
-            initLock.withLock {
-                if (listenersInitialized.value) return@withLock
-                listenersInitialized.value = true
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun publishConnectionState() {
+        combine(
+            activeLink.flatMapLatest { it?.link?.connection ?: idleState },
+            installedGeneration,
+            _activeSession,
+        ) { sdk, installed, session ->
+            // The SDK's Connected is the app's only once the app holds this session's snapshot.
+            if (sdk is ConnectionState.Connected && (session == null || installed != session.generation)) {
+                APP_CONFIGURING
+            } else {
+                sdk
+            }
+        }
+            .distinctUntilChanged()
+            .onEach { serviceStateWriter.setConnectionState(it) }
+            .catch { Logger.e(it) { "Connection state publication failed" } }
+            .launchIn(processLifecycle.coroutineScope)
+    }
 
-                bluetoothRepository.state
-                    .onEach { state ->
-                        transportMutex.withLock {
-                            if (state.enabled) {
-                                // Environmental recovery only: don't wake a transport the user has
-                                // explicitly disconnected from. stopTransportLocked() below still fires on
-                                // BLE-disabled to tear down a running BLE link, but we deliberately do NOT
-                                // clear connectionRequested here — that is disconnect()'s job.
-                                if (
-                                    connectionRequested &&
-                                    !awaitingUserConnect &&
-                                    !radioOperationLock.suppressesTransport
-                                ) {
-                                    startTransportLocked()
-                                }
-                            } else if (runningTransportId == InterfaceId.BLUETOOTH) {
-                                stopTransportLocked()
-                            }
-                        }
-                    }
-                    .catch { Logger.e(it) { "bluetoothRepository.state flow crashed" } }
-                    .launchIn(processLifecycle.coroutineScope)
+    // ── Session admission ───────────────────────────────────────────────────
 
-                networkRepository.networkAvailable
-                    .onEach { state ->
-                        transportMutex.withLock {
-                            if (state) {
-                                // Environmental recovery only — see the BLE listener above for rationale.
-                                if (
-                                    connectionRequested &&
-                                    !awaitingUserConnect &&
-                                    !radioOperationLock.suppressesTransport
-                                ) {
-                                    startTransportLocked()
-                                }
-                            } else if (runningTransportId?.isNetwork == true) {
-                                stopTransportLocked()
-                            }
-                        }
-                    }
-                    .catch { Logger.e(it) { "networkRepository.networkAvailable flow crashed" } }
-                    .launchIn(processLifecycle.coroutineScope)
+    private fun openFor(session: RadioSessionContext): OpenSession? = activeRadioSession?.takeIf {
+        it.active.context == session && it.scope.isActive
+    }
 
-                observeUsbRecoveryTriggers()
+    override fun isSessionActive(session: RadioSessionContext): Boolean = openFor(session) != null
+
+    override fun sessionScope(session: RadioSessionContext): CoroutineScope? = openFor(session)?.scope
+
+    /** Admits a new session for [active], or null once [active] is no longer the selected radio's open link. */
+    private fun admitSession(active: ActiveLink): RadioSessionContext? {
+        if (activeLink.value !== active || active.closing) return null
+        check(activeRadioSession == null) { "Cannot admit a session while the previous one is still draining" }
+        val session = ActiveRadioSession(sessionGenerationCounter.incrementAndGet(), active.address)
+        // Derived from the link's scope, so the session's work is a child of the link and ends with it.
+        val scope = active.scope + (dispatchers.default + SupervisorJob(active.scope.coroutineContext.job))
+        activeRadioSession = OpenSession(session, scope)
+        _activeSession.value = session.context
+        _sessionGeneration.value = session.generation
+        Logger.i { "Admitted session ${session.generation} for ${active.address.anonymize}" }
+        return session.context
+    }
+
+    /**
+     * Closes admission for [open] by cancelling its scope, joins the operations already admitted, then publishes
+     * lifecycle completion. The retained session token prevents a replacement session from overlapping an admitted
+     * database commit.
+     */
+    private suspend fun revokeSession(open: OpenSession?) {
+        if (open == null) return
+        withContext(NonCancellable) {
+            val job = open.scope.coroutineContext.job
+            job.cancel()
+            // The drain must finish before a replacement session is admitted, so keep waiting, but never silently: a
+            // block stuck past the handler timeout means a handler ignored cancellation.
+            var waited = Duration.ZERO
+            while (withTimeoutOrNull(DRAIN_WAIT_LOG_INTERVAL) { job.join() } == null) {
+                waited += DRAIN_WAIT_LOG_INTERVAL
+                Logger.e {
+                    "Session teardown blocked $waited waiting for ${job.children.count()} admitted session " +
+                        "operation(s) to release (generation=${open.active.generation})"
+                }
+            }
+            if (activeRadioSession === open) {
+                activeRadioSession = null
+                _activeSession.value = null
             }
         }
     }
 
-    /**
-     * Observes selected-SERIAL-device presence and transport state to auto-restart USB serial after replug.
-     *
-     * Recovery arms only after the selected serial key is observed absent, then fires when that same key is present
-     * while the transport is in [ConnectionState.DeviceSleep]. This prevents normal unplug races from restarting
-     * against stale presence before UsbRepository removes the key.
-     *
-     * Including [_connectionState] closes the race where presence returns before the I/O-death callback flips state to
-     * [ConnectionState.DeviceSleep]. Each physical replug consumes one armed edge, and recovery remains gated by
-     * [connectionRequested] and [runningTransportId] so explicit disconnects cannot resurrect a transport.
-     */
-    private fun observeUsbRecoveryTriggers() {
-        val selectedPresence =
-            combine(currentDeviceAddressFlow, serialDevicePresence.deviceKeys, ::selectedSerialPresence)
-                .distinctUntilChanged()
+    private fun sessionFor(context: RadioSessionContext): OpenSession? = activeRadioSession?.takeIf {
+        it.active.context == context
+    }
 
-        combine(selectedPresence, _connectionState, ::UsbRecoverySnapshot)
-            .runningFold(UsbRecoveryTriggerState()) { triggerState, snapshot -> triggerState.next(snapshot) }
-            .distinctUntilChanged()
-            .drop(1)
-            .filter { it.triggerRecovery }
-            .onEach {
-                transportMutex.withLock {
-                    if (!connectionRequested) return@withLock
-                    // A USB firmware-maintenance sequence owns the port: the device is enumerating as bare erase or
-                    // bootloader firmware, and binding a mesh transport to it would claim the port the flow needs.
-                    if (radioOperationLock.suppressesTransport) return@withLock
-                    if (runningTransportId != InterfaceId.SERIAL) return@withLock
-                    // Race-defense: the combine snapshot may be stale by the time we acquire
-                    // transportMutex — another path (setDeviceAddress, BLE liveness restart) may
-                    // have just brought this transport up to Connected/Connecting. The combine-level
-                    // state filter narrows the trigger; this check guards the emission → mutex
-                    // acquisition window so we never tear down a fresh healthy transport.
-                    val state = _connectionState.value
-                    if (state is ConnectionState.Connected || state is ConnectionState.Connecting) {
-                        return@withLock
-                    }
-                    // Re-check presence under the lock — the combine snapshot may be stale
-                    // if the device was unplugged or the selection changed while awaiting
-                    // the mutex. Mirrors the race-defense pattern of the state check above.
-                    val currentKeys = serialDevicePresence.deviceKeys.value
-                    if (!selectedSerialPresence(_currentDeviceAddressFlow.value, currentKeys).present) {
-                        return@withLock
-                    }
-                    // A previously-started SERIAL transport that died on unplug is still held in
-                    // radioTransport (the I/O-death path emits DeviceSleep but does not null it). Tear it
-                    // down silently so startTransportLocked() can build a fresh one for the replugged
-                    // device. Mirrors the BLE liveness recovery shape: notifyPermanent=false (no
-                    // user-facing Disconnected), sendPoliteDisconnect=false (the link is already gone).
-                    // Keep teardown and bring-up isolated: a transient USB close error must not skip
-                    // the fresh start, and neither error should terminate this long-lived recovery flow.
-                    ignoreExceptionSuspend {
-                        stopTransportLocked(notifyPermanent = false, sendPoliteDisconnect = false)
-                    }
-                    ignoreExceptionSuspend { startTransportLocked() }
+    /** The host one link's pipeline admits its sessions through; it stops admitting once that link closes. */
+    private inner class LinkHost(private val active: ActiveLink) :
+        RadioSessionHost,
+        RadioInterfaceService by this@SharedRadioInterfaceService {
+        override fun openSession(): RadioSessionContext? = admitSession(active)
+
+        override suspend fun closeSession(session: RadioSessionContext) {
+            revokeSession(sessionFor(session))
+        }
+
+        override fun onSnapshotInstalled(session: RadioSessionContext) {
+            installedGeneration.value = session.generation
+        }
+
+        // The pipeline cannot close the link it runs on, so the close runs beside it.
+        override fun onSnapshotInstallFailed(session: RadioSessionContext) {
+            processLifecycle.coroutineScope.launch {
+                linkMutex.withLock {
+                    if (activeLink.value !== active) return@withLock
+                    ignoreExceptionSuspend { closeLinkLocked() }
+                    idleState.value =
+                        ConnectionState.Failed(MeshtasticException.HandshakeTimeout(SNAPSHOT_INSTALL_STAGE))
+                    connectionErrorReasons.trySend(TransportDisconnectReason.HandshakeRecoveryExhausted)
                 }
             }
-            .catch { Logger.e(it) { "serialDevicePresence recovery flow crashed" } }
-            .launchIn(processLifecycle.coroutineScope)
+        }
+    }
+
+    // ── The selected radio's link ───────────────────────────────────────────
+
+    private fun onLinkState(active: ActiveLink, state: ConnectionState) {
+        if (state is ConnectionState.Connected) {
+            active.connected = true
+            active.shownReason = null
+        }
+        val reason = active.failureReason(state) ?: return
+        if (reason == active.shownReason) return
+        active.shownReason = reason
+        connectionErrorReasons.trySend(reason)
+    }
+
+    /** Opens the selected radio's link and starts its client. Must be called under [linkMutex]. */
+    private fun openLinkLocked() {
+        val address = getBondedDeviceAddress()
+        when {
+            activeLink.value != null -> Unit
+            radioOperationLock.suppressesTransport -> Logger.d { "No link while an operation holds the port" }
+            address == null -> Logger.d { "No valid address to connect to" }
+            else -> openLink(address)
+        }
+    }
+
+    private fun openLink(address: String) {
+        val scope = CoroutineScope(dispatchers.io + SupervisorJob())
+        val link = safeCatching {
+            links.open(address, scope)
+        }
+            .onFailure { Logger.w(it) { "Could not open a link for ${address.anonymize}" } }
+            .getOrNull()
+        if (link == null) {
+            scope.cancel()
+            idleState.value =
+                ConnectionState.Failed(MeshtasticException.Transport("No link could be opened for the selected radio"))
+            return
+        }
+        if (gattRefreshPending.value && link.refreshGattCacheOnNextConnect()) gattRefreshPending.value = false
+        val active = ActiveLink(address, link, scope)
+        activeLink.value = active
+        Logger.i { "Opened the link for ${address.anonymize}" }
+        active.pipeline = scope.handledLaunch { link.run(LinkHost(active)) }
+        link.connection
+            .onEach { onLinkState(active, it) }
+            .catch { Logger.e(it) { "Link state handling failed for ${address.anonymize}" } }
+            .launchIn(scope)
+        active.connect = scope.launch {
+            // With auto-reconnect on, connect() returns at the first Connected and throws only on Failed, which
+            // the state already shows.
+            safeCatching { link.connect() }.onFailure { Logger.w { "Connect ended: ${it::class.simpleName}" } }
+        }
+    }
+
+    /** Drains the open link's session, disconnects its client and releases it. Must be called under [linkMutex]. */
+    private suspend fun closeLinkLocked() = withContext(NonCancellable) {
+        val active = activeLink.value
+        if (active == null) {
+            // A link that never opened, or one closed after its install failed, left Failed with nothing to close.
+            idleState.value = ConnectionState.Disconnected
+            return@withContext
+        }
+        active.closing = true
+        revokeSession(activeRadioSession)
+        try {
+            active.link.disconnect()
+        } finally {
+            // The session collector's inline handlers stop here, before a caller switches the database.
+            active.pipeline?.cancelAndJoin()
+            idleState.value = ConnectionState.Disconnected
+            activeLink.value = null
+            ignoreExceptionSuspend { active.link.close() }
+            active.scope.cancel("link closed")
+            Logger.i { "Closed the link for ${active.address.anonymize}" }
+        }
+    }
+
+    private fun retryNow() {
+        activeLink.value?.link?.retryNow()
+    }
+
+    private fun initStateListeners() {
+        environment.start(currentDeviceAddressFlow, ::retryNow) { suppressed ->
+            linkMutex.withLock {
+                if (suppressed) {
+                    ignoreExceptionSuspend { closeLinkLocked() }
+                } else if (connectionRequested) {
+                    openLinkLocked()
+                }
+            }
+        }
     }
 
     override fun connect() {
         processLifecycle.coroutineScope.launch {
-            transportMutex.withLock {
-                // Mark the connection lifecycle as active BEFORE starting so concurrent
-                // hardware/network listeners observe the gate as open.
+            linkMutex.withLock {
                 connectionRequested = true
-                // A link that stopped for good still holds its transport, which would make the start below a no-op.
-                if (awaitingUserConnect) {
-                    awaitingUserConnect = false
-                    ignoreExceptionSuspend {
-                        stopTransportLocked(notifyPermanent = false, sendPoliteDisconnect = false)
+                val active = activeLink.value
+                val state = active?.link?.connection?.value
+                val stopped =
+                    state is ConnectionState.Failed ||
+                        (state is ConnectionState.Disconnected && active.connect?.isCompleted == true)
+                when {
+                    active == null -> openLinkLocked()
+
+                    // A client that failed or stopped gets replaced: its session stream ended with it.
+                    stopped -> {
+                        ignoreExceptionSuspend { closeLinkLocked() }
+                        openLinkLocked()
                     }
+
+                    else -> active.link.retryNow()
                 }
-                // connect() is fire-and-forget, so a recoverable factory failure has no caller to receive it. The
-                // start path already rolls back partial session state; contain the failure here so it does not become
-                // an uncaught lifecycle-scope exception, while CancellationException and fatal Errors still propagate.
-                ignoreExceptionSuspend { startTransportLocked() }
             }
         }
         initStateListeners()
     }
 
     override suspend fun disconnect() {
-        transportMutex.withLock {
-            // Tear the gate down BEFORE stopTransportLocked() so a concurrent state-listener
-            // emission arriving while we wait for the mutex cannot re-start the transport.
+        linkMutex.withLock {
             connectionRequested = false
-            gattCacheInvalidationRequested.value = false
-            ignoreExceptionSuspend { stopTransportLocked() }
-        }
-    }
-
-    override suspend fun restartTransport() {
-        // CAS BEFORE the mutex, mirroring checkLiveness()'s coordination structure: both
-        // restart paths CAS synchronously, one wins, one loses immediately. Performing the
-        // CAS inside transportMutex.withLock races checkLiveness's outer
-        // `finally { isRestarting = false }` (which runs AFTER mutex release): a queued
-        // restartTransport that resumes from mutex.wait can observe isRestarting == false,
-        // win the CAS, and produce an extra transport cycle (3 instead of 2) under the JVM's
-        // real dispatcher. The loser here observes isRestarting == true and defers to the
-        // in-flight cycle. startTransportLocked() is idempotent w.r.t. an existing transport,
-        // but the CAS also prevents a double stop/stop race on the teardown side.
-        if (!isRestarting.compareAndSet(expect = false, update = true)) {
-            Logger.d { "restartTransport: skipped, concurrent restart in progress" }
-            return
-        }
-        try {
-            transportMutex.withLock {
-                // Silent recovery for app-level handshake stalls. The transport may still be physically
-                // up (TCP socket alive, firmware unresponsive to want_config_id), so cycling it in place
-                // WITHOUT clearing connectionRequested avoids the split-brain where setDeviceAddress's
-                // fast-path would otherwise block same-node reconnect. The caller (MeshConnectionManager)
-                // is responsible for the app-level Disconnected flip; this method only cycles the
-                // transport and emits the transport-level DeviceSleep -> Connected transitions via
-                // callbacks (no Connecting — that is an app-level state, not a transport emission).
-                if (!connectionRequested) {
-                    Logger.d { "restartTransport: skipped-not-requested" }
-                    return@withLock
-                }
-                if (getBondedDeviceAddress() == null) {
-                    Logger.d { "restartTransport: skipped-no-address" }
-                    return@withLock
-                }
-                // Honor the documented "safe no-op when no transport running" contract: environmental
-                // stops (network unavailable, BLE disabled) intentionally preserve
-                // connectionRequested=true so the recovery listeners above can re-bring-up the
-                // transport later. A stale restart job running after such a stop must NOT bypass that
-                // recovery path by creating a transport directly via startTransportLocked().
-                if (radioTransport == null) {
-                    Logger.d { "restartTransport: skipped-no-transport" }
-                    return@withLock
-                }
-                Logger.w { "restartTransport: restarting transport for ${getDeviceAddress()?.anonymize}" }
-                // Mirror checkLiveness()'s coordination contract: emit a transport-level
-                // Connected -> DeviceSleep transition before the stop/start cycle so
-                // transport-level observers see a full DeviceSleep -> Connected cycle when
-                // the fresh transport's onConnect() fires and can re-trigger their onConnected
-                // logic. The caller (runSiblingHandshakeRecovery) flips the app-level state to
-                // Disconnected before invoking restartTransport(), so this emission exists for
-                // transport-level coordination, not for app-level StateFlow dedupe. Silent:
-                // transient DeviceSleep, not a permanent Disconnected.
-                onDisconnect(isPermanent = false)
-                // notifyPermanent=false below (no user-facing Disconnected modal — the app-level
-                // state machine drives that separately) and sendPoliteDisconnect=false (firmware
-                // is unresponsive, writing a goodbye frame into a dead link only delays teardown).
-                ignoreExceptionSuspend { stopTransportLocked(notifyPermanent = false, sendPoliteDisconnect = false) }
-                // Defense-in-depth mirroring the liveness recovery gate; today all
-                // connectionRequested mutators (connect/disconnect/setDeviceAddress) hold
-                // transportMutex so this re-check is unreachable, but it guards against future
-                // refactors that mutate the gate without serialization.
-                if (!connectionRequested) {
-                    Logger.d { "restartTransport: aborted, disconnect requested during stop" }
-                    return@withLock
-                }
-                // Drop whatever the dead session left queued before admitting the replacement. The consumer discards
-                // stale-generation frames on dequeue, but they still occupy slots until then — and now that the queue
-                // is bounded, a backlog carried across the cycle can make the fresh session's handshake frames fail
-                // trySend. `MeshServiceOrchestrator.start()` drains for its own stop/start path, but a transport-level
-                // restart does not go through it, so the drain has to happen here too.
-                resetReceivedBuffer()
-                // startTransportLocked() re-validates the selected address (no-op if null) and emits
-                // Connected through the transport callbacks (via the new transport's onConnect) once
-                // the fresh transport comes up — there is no Connecting emission at the transport
-                // layer (that is an app-level state owned by MeshConnectionManager).
-                startTransportLocked()
-                Logger.i { "restartTransport: completed" }
-            }
-        } finally {
-            isRestarting.value = false
+            gattRefreshPending.value = false
+            ignoreExceptionSuspend { closeLinkLocked() }
         }
     }
 
     override fun requestGattCacheInvalidationOnNextConnect() {
-        gattCacheInvalidationRequested.value = true
-        Logger.d { "GATT cache invalidation requested for next BLE connect" }
+        val applied = activeLink.value?.link?.refreshGattCacheOnNextConnect() == true
+        gattRefreshPending.value = !applied
+        Logger.d { "GATT cache refresh requested for the next Bluetooth connect" }
     }
 
-    override fun consumeGattCacheInvalidationRequest(): Boolean = gattCacheInvalidationRequested.getAndSet(false)
-
     override val mockTransportEnabled: StateFlow<Boolean>
-        get() = transportFactory.mockTransportEnabled
+        get() = links.mockTransportEnabled
 
     override val isReplayTransportAvailable: Boolean
-        get() = transportFactory.isReplayTransportAvailable
+        get() = links.isReplayTransportAvailable
 
     override fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String =
-        transportFactory.toInterfaceAddress(interfaceId, rest)
+        links.toInterfaceAddress(interfaceId, rest)
 
     override fun getDeviceAddress(): String? = _currentDeviceAddressFlow.value
 
-    private fun getBondedDeviceAddress(): String? {
-        val address = getDeviceAddress()
-        return if (transportFactory.isAddressValid(address)) {
-            address
-        } else {
-            null
-        }
-    }
+    private fun getBondedDeviceAddress(): String? = getDeviceAddress()?.takeIf(links::isAddressValid)
 
     override fun setDeviceAddress(deviceAddr: String?): Boolean {
         val sanitized = if (deviceAddr == "n" || deviceAddr.isNullOrBlank()) null else deviceAddr
 
-        if (getBondedDeviceAddress() == sanitized && isStarted && _connectionState.value == ConnectionState.Connected) {
-            Logger.w { "Ignoring setBondedDevice ${sanitized?.anonymize}, already using that device" }
+        val active = activeLink.value
+        if (
+            active != null && active.address == sanitized && active.link.connection.value is ConnectionState.Connected
+        ) {
+            Logger.w { "Ignoring setBondedDevice ${active.address.anonymize}, already using that device" }
             return false
         }
 
         val previousAddress = getBondedDeviceAddress()
-
         analytics.track("mesh_bond")
-
         Logger.d { "Setting bonded device to ${sanitized?.anonymize}" }
         radioPrefs.setDevAddr(sanitized)
         synchronized(selectionLock) {
@@ -911,477 +461,64 @@ class SharedRadioInterfaceService(
         }
 
         processLifecycle.coroutineScope.launch {
-            transportMutex.withLock {
-                // The sanitized address is the single source of truth for the connectionRequested
-                // gate: a real address arms the lifecycle (connect() equivalent) so environmental
-                // listeners cannot race the rebind into a "down" state; null/("n") is a deselect
-                // that MUST clear the gate so subsequent BT/network recovery cannot resurrect a
-                // transport for a device the user explicitly tore down. Only start a fresh
-                // transport when an address was actually selected.
+            linkMutex.withLock {
+                // A real address arms the connection, so environment observers cannot race the switch into a down
+                // state; a deselect clears it, so nothing can bring back a radio the user put away.
                 connectionRequested = sanitized != null
-                awaitingUserConnect = false
                 if (sanitized != null && previousAddress != null && sanitized != previousAddress) {
-                    gattCacheInvalidationRequested.value = false
+                    gattRefreshPending.value = false
                 }
-                ignoreExceptionSuspend { stopTransportLocked() }
-                if (sanitized != null) {
-                    // setDeviceAddress() is fire-and-forget. startTransportLocked() has already rolled back any
-                    // partially admitted session, so contain a recoverable factory failure instead of crashing the
-                    // process-lifecycle scope. Explicit suspend restart callers still receive their failures.
-                    ignoreExceptionSuspend { startTransportLocked() }
-                }
+                ignoreExceptionSuspend { closeLinkLocked() }
+                if (sanitized != null) openLinkLocked()
             }
         }
+        initStateListeners()
         return true
     }
 
-    /** Must be called under [transportMutex]. */
-    @Suppress("TooGenericExceptionCaught")
-    private suspend fun startTransportLocked() {
-        if (radioTransport != null) return
+    // ── Session-bound client access ─────────────────────────────────────────
 
-        // Never autoconnect to the simulated node. The mock transport may be offered in the
-        // device-picker UI on debug builds, but it must only connect when the user explicitly
-        // selects it (i.e. its address is stored in radioPrefs).
-        val address = getBondedDeviceAddress()
+    override fun clientForSession(session: RadioSessionContext): RadioClient? =
+        if (isSessionActive(session)) activeLink.value?.link?.client else null
 
-        if (address == null) {
-            Logger.d { "No valid address to connect to" }
-            return
-        }
-
-        // Build a fresh per-instance session and admit it BEFORE constructing the transport so the wrapper captures
-        // the new session. Bumping the public generation also signals downstream consumers (e.g.
-        // RadioControllerImpl)
-        // to invalidate session-scoped state from any previous transport instance.
-        val generation = sessionGenerationCounter.incrementAndGet()
-        val session = RadioTransportSession(generation = generation, address = address)
-        synchronized(sessionCallbackLock) {
-            check(activeTransportSession == null && sessionOperationStates.isEmpty()) {
-                "Cannot admit a transport while the previous session is still draining"
-            }
-            sessionOperationStates[generation] = SessionOperationState()
-            activeTransportSession = session
-            sessionAdmissionOpen = true
-            _activeSession.value = session.context
-            _sessionGeneration.value = generation
-        }
-        val sessionBoundService = SessionBoundRadioInterfaceService(session)
-        val connectionStateBeforeStart = _connectionState.value
-
-        Logger.i { "Starting radio transport for ${address.anonymize} (generation=$generation)" }
-        val newTransport =
-            try {
-                transportFactory.createTransport(address, sessionBoundService)
-            } catch (failure: Throwable) {
-                // A failed factory call consumed a generation that may already have reached observers. Keep the
-                // generation monotonic, but revoke the admitted session and every transport-lifecycle field before
-                // rethrowing the original failure. A later retry will receive a strictly newer generation.
-                revokeTransportSession(session)
-                radioTransport = null
-                runningTransportId = null
-                isStarted = false
-                _connectionState.value = connectionStateBeforeStart
-                throw failure
-            }
-        val published =
-            synchronized(sessionCallbackLock) {
-                if (activeTransportSession !== session || !sessionAdmissionOpen) {
-                    // A replaced or cleared token has no revoker left to reclaim this generation's operation state.
-                    // A closed gate with a matching token means revokeTransportSession is mid-flight; it owns removal
-                    // inside its NonCancellable block, so do not remove the entry here.
-                    if (activeTransportSession !== session) sessionOperationStates.remove(generation)
-                    false
-                } else {
-                    radioTransport = newTransport
-                    true
-                }
-            }
-        if (!published) {
-            // Revocation already closed this session's admission and owns the canonical lifecycle rollback. Do not
-            // restore connectionStateBeforeStart here; that would overwrite the newer teardown state.
-            val publicationFailure =
-                IllegalStateException("Transport session was revoked before its transport could be published")
-            try {
-                withContext(NonCancellable) { newTransport.close() }
-            } catch (closeFailure: Exception) {
-                if (closeFailure is CancellationException) currentCoroutineContext().ensureActive()
-                publicationFailure.addSuppressed(closeFailure)
-            }
-            throw publicationFailure
-        }
-        runningTransportId = DeviceAddress.parse(address)?.interfaceId
-        isStarted = true
-        startHeartbeat()
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun adminSessionStatus(node: NodeId): Flow<AdminSessionStatus> = activeLink.flatMapLatest {
+        it?.link?.client?.adminSessionStatus(node) ?: flowOf(AdminSessionStatus.NoSession)
     }
 
-    /**
-     * Must be called under [transportMutex].
-     *
-     * @param notifyPermanent When `true`, emits a permanent disconnect state to [connectionState]. Set `false` during
-     *   automatic liveness recovery to avoid surfacing a user-facing disconnect.
-     * @param sendPoliteDisconnect When `true`, sends a `ToRadio(disconnect = true)` frame to the firmware before
-     *   tearing down. Set `false` when the transport is already dead (zombie session) to avoid writing into a broken
-     *   link.
-     */
-    private suspend fun stopTransportLocked(notifyPermanent: Boolean = true, sendPoliteDisconnect: Boolean = true) =
-        withContext(NonCancellable) { finishTransportTeardown(notifyPermanent, sendPoliteDisconnect) }
+    override fun requestNodeDbRefresh(session: RadioSessionContext): Boolean =
+        clientForSession(session)?.requestNodeDbRefresh() == true
 
-    /** Completes teardown after admission closes, even if its requester is cancelled while leases drain. */
-    private suspend fun finishTransportTeardown(notifyPermanent: Boolean, sendPoliteDisconnect: Boolean) {
-        val currentTransport = radioTransport
-        val currentSession = synchronized(sessionCallbackLock) { activeTransportSession }
-        // Reject queued callbacks and new suspend work immediately, then drain existing leases before admitting a
-        // replacement generation or closing the old transport.
-        revokeTransportSession(currentSession)
-        heartbeatJob?.cancel()
-        heartbeatJob = null
-        Logger.i { "Stopping transport $currentTransport" }
-        // Best-effort polite goodbye: tell the firmware we're disconnecting on purpose so it can
-        // tear down its side of the link cleanly instead of relying on timeouts / hardware events.
-        // Session admission is already revoked, so normal packets cannot race behind this direct transport write.
-        // Skip only when already Disconnected; firmware can still consume the goodbye while handshaking or sleeping,
-        // so it's worth sending in every other state. The send is fire-and-forget through the
-        // transport's own scope; the drain delay gives async transports a window to flush before
-        // close() cancels their write scope. BLE's retry path backs off 500ms, so this window
-        // also covers one retry on flaky GATT links.
-        try {
-            if (
-                sendPoliteDisconnect &&
-                currentTransport != null &&
-                _connectionState.value != ConnectionState.Disconnected
-            ) {
-                ignoreExceptionSuspend {
-                    currentTransport.handleSendToRadio(
-                        ToRadio.Builder().also { wb -> wb.disconnect = true }.build().encode(),
-                    )
-                    delay(POLITE_DISCONNECT_DRAIN_MS)
-                }
-            }
-        } finally {
-            isStarted = false
-            radioTransport = null
-            runningTransportId = null
-            // Admission is already revoked, so no late status from the stopped transport can land after this.
-            _transportStatus.value = null
-            try {
-                currentTransport?.close()
-            } finally {
-                _serviceScope.cancel("stopping transport")
-                _serviceScope = CoroutineScope(dispatchers.io + SupervisorJob())
-
-                if (notifyPermanent && currentTransport != null) {
-                    onDisconnect(isPermanent = true)
-                }
-            }
-        }
+    /** Runs [send] on [session]'s client while that session owns admission; teardown does not wait for the handoff. */
+    private inline fun <T> withAdmittedClient(session: RadioSessionContext?, send: (ActiveLink) -> T?): T? {
+        val open = activeRadioSession?.takeIf { it.scope.isActive && (session == null || it.active.context == session) }
+        val link = activeLink.value
+        if (open == null || link == null) return null
+        return safeCatching { send(link) }.onFailure { Logger.w(it) { "Active session handoff failed" } }.getOrNull()
     }
 
-    private fun startHeartbeat() {
-        heartbeatJob?.cancel()
-        lastDataReceivedMillis = now()
-        heartbeatJob = serviceScope.launch {
-            while (true) {
-                delay(HEARTBEAT_INTERVAL_MILLIS)
-                keepAlive()
-                checkLiveness()
-            }
+    override fun sendPaced(session: RadioSessionContext, packet: MeshPacket): PacedMessageHandle? {
+        val (handle, linkScope) =
+            withAdmittedClient(session) { it.link.client.sendPaced(packet) to it.scope } ?: return null
+        linkScope.launch {
+            if (handle.awaitDispatch() && isSessionActive(session)) _meshActivity.tryEmit(MeshActivity.Send)
         }
+        return handle
     }
 
-    /**
-     * Detects zombie connections where the BLE stack didn't report a disconnect.
-     *
-     * If we believe we're connected but haven't received any data from the radio within [LIVENESS_TIMEOUT_MILLIS], the
-     * connection is likely dead. Signal a non-permanent disconnect so the reconnect machinery can take over.
-     *
-     * Uses [clockMillis] for the current time so tests can inject a deterministic clock.
-     */
-    internal fun checkLiveness() {
-        if (_connectionState.value != ConnectionState.Connected) return
-
-        val silenceMs = now() - lastDataReceivedMillis
-        if (silenceMs > LIVENESS_TIMEOUT_MILLIS) {
-            // "Silence" = lastDataReceivedMillis not updated by handleFromRadio (no inbound
-            // packets). Only BLE suffers from silent zombie sessions (no disconnect signal from
-            // stack), so the liveness-restart path is BLE-only. For non-BLE transports we return
-            // WITHOUT emitting a disconnect or mutating ConnectionState — there is no
-            // transport-level timeout contract proving that silence past this threshold means
-            // the session is dead.
-            if (runningTransportId != InterfaceId.BLUETOOTH) {
-                Logger.d { "Ignoring liveness timeout for non-BLE transport (silence: ${silenceMs}ms)" }
-                return
-            }
-
-            Logger.w {
-                "Liveness check failed: no data received for ${silenceMs}ms " +
-                    "(threshold: ${LIVENESS_TIMEOUT_MILLIS}ms). Restarting BLE transport."
-            }
-
-            // Force transport restart to recover from silent zombie sessions where the BLE stack
-            // did not report a disconnect. Uses the same processLifecycle scope and transportMutex
-            // pattern as setDeviceAddress() to guarantee clean teardown/restart sequencing.
-            // The onDisconnect notification is emitted INSIDE the compareAndSet guard so that a
-            // double liveness-timeout (timer not cancelled between fires) does not produce
-            // duplicate disconnect notifications for a single restart cycle.
-            if (isRestarting.compareAndSet(expect = false, update = true)) {
-                // Silent recovery: emit the non-permanent state transition (DeviceSleep) so the
-                // reconnect machinery takes over, but do NOT pass an errorMessage. Automatic
-                // liveness recovery is self-healing — surfacing a modal dialog for a transient
-                // condition the app already handled is confusing UX. The warning log above
-                // remains the observability surface for this event.
-                //
-                // Ordering note (pre-existing): onDisconnect fires here, BEFORE the launched
-                // restart coroutine's `connectionRequested` check below. If an explicit disconnect()
-                // races this timeout, a spurious DeviceSleep emission can leak to observers. The
-                // connectionRequested gate still prevents the worse outcome — transport resurrection
-                // — so this is a benign UI-level transient, not a state-machine bug.
-                onDisconnect(isPermanent = false)
-                processLifecycle.coroutineScope.launch {
-                    try {
-                        transportMutex.withLock {
-                            // Defense against a race between checkLiveness() firing and a
-                            // concurrent disconnect(): if the user has torn the connection down
-                            // since the heartbeat scheduled this restart, leave it down. The
-                            // transport is already null after disconnect()'s stopTransportLocked().
-                            if (!connectionRequested) {
-                                Logger.d { "Skipping liveness restart: connection no longer requested" }
-                                return@withLock
-                            }
-                            ignoreExceptionSuspend {
-                                stopTransportLocked(notifyPermanent = false, sendPoliteDisconnect = false)
-                            }
-                            // This restart is launched from a heartbeat callback and has no caller to receive a
-                            // recoverable factory exception. The start path rolls back the failed session first;
-                            // contain the rethrow here so a failed reconnect does not crash the app.
-                            ignoreExceptionSuspend { startTransportLocked() }
-                        }
-                    } finally {
-                        isRestarting.value = false
-                    }
-                }
-            }
-        }
+    override fun tryLockdown(session: RadioSessionContext, auth: LockdownAuth): Boolean {
+        val sent = withAdmittedClient(session) { it.link.client.tryLockdown(auth) } == true
+        if (sent) _meshActivity.tryEmit(MeshActivity.Send)
+        return sent
     }
 
-    fun keepAlive(now: Long = now()) {
-        if (now - lastHeartbeatMillis < HEARTBEAT_INTERVAL_MILLIS) return
-
-        when (val admission = admitTransportSend()) {
-            is TransportSendAdmission.Admitted -> {
-                if (keepAliveThroughAdmittedTransport(admission)) lastHeartbeatMillis = now
-            }
-
-            TransportSendAdmission.AdmissionClosed,
-            TransportSendAdmission.NoActiveSession,
-            ->
-                Logger.d { "keepAlive: no admitted transport session, dropping heartbeat" }
-
-            TransportSendAdmission.NoTransport ->
-                Logger.d { "keepAlive: admitted session has no radio transport, dropping heartbeat" }
-        }
+    override suspend fun deliverMqttProxy(message: MqttClientProxyMessage): Boolean {
+        val sent = withAdmittedClient(null) { it.link.client.mqttProxy.deliver(message) } == true
+        if (sent) _meshActivity.tryEmit(MeshActivity.Send)
+        return sent
     }
 
-    private fun keepAliveThroughAdmittedTransport(admission: TransportSendAdmission.Admitted): Boolean = try {
-        safeCatching { admission.transport.keepAlive() }
-            .onFailure { Logger.w(it) { "keepAlive: active transport rejected heartbeat" } }
-            .isSuccess
-    } finally {
-        releaseSessionOperation(admission.session)
-    }
-
-    override fun trySendToRadio(bytes: ByteArray): Boolean =
-        // Admission and teardown share one session gate. Once accepted, teardown drains the synchronous handoff before
-        // revoking the session; transport implementations still own their asynchronous delivery outcome.
-        when (val admission = admitTransportSend()) {
-            is TransportSendAdmission.Admitted -> sendThroughAdmittedTransport(admission, bytes)
-
-            TransportSendAdmission.AdmissionClosed,
-            TransportSendAdmission.NoActiveSession,
-            -> {
-                Logger.d { "trySendToRadio: no admitted transport session, dropping ${bytes.size} bytes" }
-                false
-            }
-
-            TransportSendAdmission.NoTransport -> {
-                Logger.w { "trySendToRadio: admitted session has no radio transport, dropping ${bytes.size} bytes" }
-                false
-            }
-        }
-
-    private fun sendThroughAdmittedTransport(admission: TransportSendAdmission.Admitted, bytes: ByteArray): Boolean =
-        try {
-            val sent = safeCatching {
-                admission.transport.handleSendToRadio(bytes)
-            }
-                .onFailure { Logger.w(it) { "trySendToRadio: active transport rejected ${bytes.size} bytes" } }
-                .getOrDefault(false)
-            if (sent) {
-                safeCatching { _meshActivity.tryEmit(MeshActivity.Send) }
-                    .onFailure { Logger.w(it) { "trySendToRadio: failed to publish mesh activity" } }
-            }
-            sent
-        } finally {
-            releaseSessionOperation(admission.session)
-        }
-
-    @Suppress("TooGenericExceptionCaught")
-    override fun handleFromRadio(bytes: ByteArray) {
-        val admitted =
-            synchronized(sessionCallbackLock) {
-                val session = activeTransportSession ?: return@synchronized false
-                enqueueReceivedData(bytes, session)
-                true
-            }
-        if (!admitted) {
-            Logger.d { "Dropping ${bytes.size} received bytes without an active transport session" }
-        }
-    }
-
-    @Suppress("TooGenericExceptionCaught")
-    private fun enqueueReceivedData(bytes: ByteArray, session: RadioTransportSession) {
-        try {
-            // trySend synchronously onto the Channel so packet order matches arrival order. The
-            // previous `launch { emit() }` pattern dispatched each packet onto a fresh coroutine,
-            // letting the scheduler reorder them — which broke the firmware config handshake
-            // (see PhoneAPI.cpp initial-handshake sequence).
-            // Reject before the copy: the channel bounds the frame COUNT, so without a per-frame ceiling a transport
-            // handing over an oversized buffer defeats the memory bound the capacity is supposed to give. The stream
-            // codec already enforces this on its own path; BLE passes through whatever the GATT read returned.
-            if (bytes.size > MAX_FRAME_BYTES) {
-                Logger.w { "Discarding oversized ${bytes.size}-byte frame (max $MAX_FRAME_BYTES)" }
-                return
-            }
-            val frame = ReceivedRadioFrame(payload = bytes.toByteString(), session = session.context)
-            val result = _receivedData.trySend(frame)
-            if (result.isSuccess) {
-                // Stamp liveness only for frames actually admitted to the queue. Stamping on arrival kept
-                // checkLiveness() satisfied while a wedged consumer dropped every frame — a Connected-looking zombie
-                // the watchdog existed to catch. A full queue now reads as silence and trips liveness recovery.
-                lastDataReceivedMillis = now()
-            }
-            if (result.isFailure) {
-                // Rate-limited on purpose: drops only happen under sustained inbound traffic, and Kermit forwards to
-                // Datadog/Crashlytics, so logging every drop would turn a bounded memory problem into unbounded
-                // network and battery use. The counter is deliberately unsynchronised — a racy count only skews a
-                // diagnostic line. A full queue reports failure with no exception; a closed channel carries one.
-                val drops = ++droppedFrameCount
-                if (drops == 1L || drops % DROP_LOG_INTERVAL == 0L) {
-                    Logger.w(result.exceptionOrNull()) {
-                        "Dropped ${bytes.size} received bytes ($drops total); receive queue at capacity " +
-                            "$RECEIVE_QUEUE_CAPACITY or closed"
-                    }
-                }
-            }
-            _meshActivity.tryEmit(MeshActivity.Receive)
-        } catch (t: Throwable) {
-            Logger.e(t) { "handleFromRadio failed while emitting data" }
-        }
-    }
-
-    override fun resetReceivedBuffer() {
-        // Drain any bytes buffered while no collector was attached. Without this, a stop/start cycle
-        // would replay stale bytes ahead of the next session's firmware handshake, since the channel
-        // outlives the orchestrator's per-start scope.
-        @Suppress("EmptyWhileBlock", "ControlFlowWithEmptyBody")
-        while (_receivedData.tryReceive().isSuccess) {}
-    }
-
-    override fun onConnect() {
-        synchronized(sessionCallbackLock) { publishConnected() }
-    }
-
-    /** Applies a callback already admitted under [sessionCallbackLock]. */
-    private fun publishConnected() {
-        // MutableStateFlow.value is thread-safe (backed by atomics) — assign directly rather than
-        // launching a coroutine. The async launch pattern introduced a window where a concurrent
-        // onDisconnect launch could execute AFTER an onConnect launch, leaving the service stuck
-        // in Connected while the transport was actually disconnected.
-        lastDataReceivedMillis = now()
-        linkedGeneration = activeTransportSession?.generation
-        if (_connectionState.value != ConnectionState.Connected) {
-            Logger.d { "Broadcasting connection state change to Connected" }
-            _connectionState.value = ConnectionState.Connected
-        }
-    }
-
-    override fun onDisconnect(isPermanent: Boolean, errorMessage: String?, reason: TransportDisconnectReason?) {
-        synchronized(sessionCallbackLock) { publishDisconnected(isPermanent, errorMessage, reason) }
-    }
-
-    /**
-     * Handshake-level phases arrive here directly. They apply only while the admitted session's own link is up, so a
-     * phase a superseded session's handshake reports late never lands on its replacement.
-     */
-    override fun onStatus(status: TransportStatus) {
-        synchronized(sessionCallbackLock) {
-            val session = activeTransportSession
-            if (session != null && session.generation == linkedGeneration) _transportStatus.value = status
-        }
-    }
-
-    /** Applies a callback already admitted under [sessionCallbackLock]. */
-    private fun publishDisconnected(isPermanent: Boolean, errorMessage: String?, reason: TransportDisconnectReason?) {
-        if (errorMessage != null || reason != null) {
-            processLifecycle.coroutineScope.launch(dispatchers.default) {
-                val message = errorMessage ?: reason?.let { connectionErrorText(it) }
-                if (message != null) _connectionError.emit(message)
-            }
-        }
-        if (isPermanent && reason in USER_CONNECT_REASONS) awaitingUserConnect = true
-        linkedGeneration = null
-        // A handshake phase outlives its link otherwise: transports without phases of their own never replace it.
-        if (_transportStatus.value?.phase in LINK_UP_PHASES) _transportStatus.value = null
-        val newTargetState = if (isPermanent) ConnectionState.Disconnected else ConnectionState.DeviceSleep
-        if (_connectionState.value != newTargetState) {
-            Logger.d { "Broadcasting connection state change to $newTargetState" }
-            _connectionState.value = newTargetState
-        }
-    }
-
-    /**
-     * Per-transport-session wrapper around this service. Delegates every [RadioInterfaceService] surface (scope,
-     * address, sendToRadio, etc.) to the enclosing service; only the three [RadioTransportCallback] entry points are
-     * gated on the captured [session] still being the [activeTransportSession]. Admission and the synchronous callback
-     * side effect share [sessionCallbackLock] with teardown, eliminating a check-then-use window. Late callbacks from a
-     * torn-down transport are dropped BEFORE bytes enter the shared received-data channel or connection/config state
-     * mutates. Address is logged with [anonymize] and the session generation only — never the raw address bytes.
-     */
-    private inner class SessionBoundRadioInterfaceService(val session: RadioTransportSession) :
-        RadioInterfaceService by this@SharedRadioInterfaceService {
-        override fun onConnect() {
-            val admitted = runIfTransportSessionActive(session, ::publishConnected)
-            if (!admitted) {
-                Logger.d { "Dropping stale onConnect gen=${session.generation} addr=${session.address.anonymize}" }
-            }
-        }
-
-        override fun onDisconnect(isPermanent: Boolean, errorMessage: String?, reason: TransportDisconnectReason?) {
-            val admitted =
-                runIfTransportSessionActive(session) { publishDisconnected(isPermanent, errorMessage, reason) }
-            if (!admitted) {
-                Logger.d { "Dropping stale onDisconnect gen=${session.generation} addr=${session.address.anonymize}" }
-            }
-        }
-
-        override fun onStatus(status: TransportStatus) {
-            val admitted = runIfTransportSessionActive(session) { _transportStatus.value = status }
-            if (!admitted) {
-                Logger.d { "Dropping stale onStatus gen=${session.generation} addr=${session.address.anonymize}" }
-            }
-        }
-
-        override fun handleFromRadio(bytes: ByteArray) {
-            val admitted =
-                runIfTransportSessionActive(session) {
-                    this@SharedRadioInterfaceService.enqueueReceivedData(bytes, session)
-                }
-            if (!admitted) {
-                Logger.d {
-                    "Dropping stale handleFromRadio (${bytes.size} bytes) gen=${session.generation} " +
-                        "addr=${session.address.anonymize}"
-                }
-            }
-        }
+    override fun reportReceiveActivity() {
+        _meshActivity.tryEmit(MeshActivity.Receive)
     }
 }

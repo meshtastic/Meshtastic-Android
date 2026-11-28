@@ -16,12 +16,13 @@
  */
 package org.meshtastic.core.data.repository
 
-import co.touchlab.kermit.Logger
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import org.koin.core.annotation.Single
 import org.meshtastic.core.data.datasource.SwitchingChannelSetDataSource
 import org.meshtastic.core.datastore.LocalConfigDataSource
@@ -29,6 +30,7 @@ import org.meshtastic.core.datastore.ModuleConfigDataSource
 import org.meshtastic.core.model.util.getChannelUrl
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
@@ -40,13 +42,12 @@ import org.meshtastic.proto.LoRaRegionPresetMap
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.ModuleConfig
+import org.meshtastic.sdk.ConfigBundle
 
 /**
  * Class responsible for radio configuration data. Combines access to [nodeDB], [ChannelSet], [LocalConfig] &
  * [LocalModuleConfig].
  */
-private const val MAX_FILE_MANIFEST_ENTRIES = 4096
-
 @Single
 @Suppress("TooManyFunctions") // All functions mandated by RadioConfigRepository interface; logically grouped by concern
 open class RadioConfigRepositoryImpl(
@@ -54,6 +55,7 @@ open class RadioConfigRepositoryImpl(
     private val channelSetDataSource: SwitchingChannelSetDataSource,
     private val localConfigDataSource: LocalConfigDataSource,
     private val moduleConfigDataSource: ModuleConfigDataSource,
+    radioInterfaceService: RadioInterfaceService,
 ) : RadioConfigRepository {
 
     /** Flow representing the [ChannelSet] data store. */
@@ -121,62 +123,24 @@ open class RadioConfigRepositoryImpl(
         moduleConfigDataSource.setLocalModuleConfig(config)
     }
 
-    // DeviceUIConfig is session-scoped data received fresh in every handshake — no persistence needed.
-    private val _deviceUIConfigFlow = MutableStateFlow<DeviceUIConfig?>(null)
-    override val deviceUIConfigFlow: Flow<DeviceUIConfig?> = _deviceUIConfigFlow.asStateFlow()
-
-    override suspend fun setDeviceUIConfig(config: DeviceUIConfig) {
-        _deviceUIConfigFlow.value = config
-    }
-
-    override suspend fun clearDeviceUIConfig() {
-        _deviceUIConfigFlow.value = null
-    }
-
-    // FileInfo manifest is session-scoped: accumulated during STATE_SEND_FILEMANIFEST, cleared on each new handshake.
-    private val _fileManifestFlow = MutableStateFlow<List<FileInfo>>(emptyList())
-    override val fileManifestFlow: Flow<List<FileInfo>> = _fileManifestFlow.asStateFlow()
-
-    override suspend fun addFileInfo(info: FileInfo) {
-        // A real device's manifest is bounded by its flash storage (realistically a handful to a few
-        // hundred entries). A rogue/adversarial peer, however, can emit FileInfo packets in a tight loop
-        // for the lifetime of a session -- clearFileManifest only runs on the *next* handshake, so nothing
-        // else bounds this accumulator in between. Cap it defensively, same pattern as the early-packet
-        // buffer in MeshMessageProcessorImpl.
-        //
-        // handleFileInfo dispatches each packet on its own scope.handledLaunch, so addFileInfo calls can
-        // run concurrently -- a plain read-then-write would race (lost updates, or two callers both seeing
-        // size-1 and bypassing the cap). update{} makes the read/cap/append atomic (CAS retry loop).
-        var capped = false
-        _fileManifestFlow.update { current ->
-            if (current.size >= MAX_FILE_MANIFEST_ENTRIES) {
-                capped = true
-                current
-            } else {
-                capped = false
-                current + info
-            }
+    // The SDK client's config bundle follows the active session; with no session or no bundle yet both flows are null.
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val sessionConfigBundle: Flow<ConfigBundle?> =
+        radioInterfaceService.activeSession.flatMapLatest { session ->
+            session?.let(radioInterfaceService::clientForSession)?.configBundle ?: flowOf(null)
         }
-        if (capped) {
-            Logger.w { "File manifest capped at $MAX_FILE_MANIFEST_ENTRIES entries, dropping further FileInfo" }
+
+    override val deviceUIConfigFlow: Flow<DeviceUIConfig?> =
+        sessionConfigBundle.map { it?.deviceUIConfig }.distinctUntilChanged()
+
+    override val loraRegionPresetMapFlow: Flow<LoRaRegionPresetMap?> =
+        sessionConfigBundle.map { it?.regionPresets }.distinctUntilChanged()
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override val fileManifestFlow: Flow<List<FileInfo>> =
+        radioInterfaceService.activeSession.flatMapLatest { session ->
+            session?.let(radioInterfaceService::clientForSession)?.fileManifest ?: flowOf(emptyList())
         }
-    }
-
-    override suspend fun clearFileManifest() {
-        _fileManifestFlow.value = emptyList()
-    }
-
-    // Region→preset compatibility map is session-scoped: delivered once per handshake, cleared on each new handshake.
-    private val _loraRegionPresetMapFlow = MutableStateFlow<LoRaRegionPresetMap?>(null)
-    override val loraRegionPresetMapFlow: Flow<LoRaRegionPresetMap?> = _loraRegionPresetMapFlow.asStateFlow()
-
-    override suspend fun setLoraRegionPresetMap(map: LoRaRegionPresetMap) {
-        _loraRegionPresetMapFlow.value = map
-    }
-
-    override suspend fun clearLoraRegionPresetMap() {
-        _loraRegionPresetMapFlow.value = null
-    }
 
     /** Flow representing the combined [DeviceProfile] protobuf. */
     override val deviceProfileFlow: Flow<DeviceProfile> =

@@ -36,7 +36,6 @@ import okio.ByteString.Companion.toByteString
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.repository.PacketRepository
@@ -44,6 +43,7 @@ import org.meshtastic.core.repository.PersistedPacket
 import org.meshtastic.core.repository.PersistedPacketId
 import org.meshtastic.core.service.worker.SendMessageWorker
 import org.meshtastic.core.testing.FakeRadioController
+import org.meshtastic.sdk.ConnectionState
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import kotlin.test.assertEquals

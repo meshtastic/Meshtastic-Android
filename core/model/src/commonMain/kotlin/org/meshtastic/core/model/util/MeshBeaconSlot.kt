@@ -16,25 +16,25 @@
  */
 package org.meshtastic.core.model.util
 
-import org.meshtastic.core.model.Channel
-import org.meshtastic.core.model.numChannels
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config.LoRaConfig
 import org.meshtastic.proto.MeshBeacon
+import org.meshtastic.sdk.LoRaFrequency
 
 // Both ends of a Mesh Beacon's frequency slot: what an incoming offer says it sits on, and what an outgoing offer
 // should say about us. A slot is 1-based to match LoRaConfig.channel_num and 0 means "not sent".
 
 /**
  * The frequency slot this beacon advertises outright, or `null` when it advertises none and the slot must be derived
- * from the offered region, channel name and preset the way [LoRaConfig.channelNum] does.
+ * from the offered region, channel name and preset the way [LoRaConfig.resolveFrequencySlot] does.
  *
  * A mesh sends this only when derivation would produce the wrong answer — it pins a slot the offered name does not hash
  * to. A value outside [lora]'s slot count is unaddressable here, so it falls back to derivation rather than refusing
  * the join: that is the behaviour we had before the field existed, and the offer is advisory either way.
  */
-internal fun MeshBeacon.advertisedFrequencySlot(lora: LoRaConfig): Int? =
-    offer_frequency_slot?.takeIf { it in 1..lora.numChannels }
+internal fun MeshBeacon.advertisedFrequencySlot(lora: LoRaConfig): Int? = offer_frequency_slot?.takeIf {
+    it in 1..LoRaFrequency.plan(lora, "").numChannels
+}
 
 /**
  * The frequency slot to advertise alongside an outgoing offer, or `null` to leave the field unset.
@@ -50,9 +50,17 @@ fun beaconOfferFrequencySlot(
     primaryChannel: ChannelSettings?,
     radioLora: LoRaConfig,
 ): Int? {
-    if (offerChannel == null || radioLora.numChannels <= 0) return null
-    val actual = Channel(primaryChannel ?: ChannelSettings.Builder().build(), radioLora).channelNum
+    val actual = offerChannel?.let { radioLora.resolveFrequencySlot(primaryChannel?.name.orEmpty()) }
     // Derive the way a receiver must: off the offered channel's name with our own pin removed.
-    val derived = Channel(offerChannel, radioLora.newBuilder().also { wb -> wb.channel_num = 0 }.build()).channelNum
-    return actual.takeIf { it != derived }
+    return actual?.takeIf { it != radioLora.resolveFrequencySlot(offerChannel.name, channelNum = 0) }
+}
+
+/**
+ * The slot firmware's `resolveFrequencySlot` picks for [channelName], which ignores `override_frequency`; null when the
+ * region has no slots.
+ */
+internal fun LoRaConfig.resolveFrequencySlot(channelName: String, channelNum: Int = channel_num): Int? {
+    val plan = LoRaFrequency.plan(this, channelName)
+    val hashed = LoRaFrequency.hashedChannelName(channelName, use_preset, modem_preset)
+    return LoRaFrequency.resolveSlot(plan.region, plan.numChannels, hashed, channelNum)
 }

@@ -33,13 +33,13 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PersistedPacket
 import org.meshtastic.core.repository.PersistedPacketId
 import org.meshtastic.core.testing.FakeRadioController
+import org.meshtastic.sdk.ConnectionState
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -123,7 +123,7 @@ class InProcessMessageQueueTest {
     fun `a re-enqueue during the handshake sends once the radio is connected`() = runTest {
         val dispatcher = StandardTestDispatcher(testScheduler)
         val repository = mock<PacketRepository>(MockMode.autofill)
-        val radio = FakeRadioController().apply { setConnectionState(ConnectionState.Connecting) }
+        val radio = FakeRadioController().apply { setConnectionState(ConnectionState.Connecting(attempt = 1)) }
         val id = PersistedPacketId(myNodeNum = 42, uuid = 99L)
         val packet = queuedPacket()
         everySuspend { repository.claimQueuedPacket(id) } returns PersistedPacket(id, packet)
@@ -144,7 +144,7 @@ class InProcessMessageQueueTest {
     fun `a handshake that fails leaves the packet queued`() = runTest {
         val dispatcher = StandardTestDispatcher(testScheduler)
         val repository = mock<PacketRepository>(MockMode.autofill)
-        val radio = FakeRadioController().apply { setConnectionState(ConnectionState.Connecting) }
+        val radio = FakeRadioController().apply { setConnectionState(ConnectionState.Connecting(attempt = 1)) }
         val id = PersistedPacketId(myNodeNum = 42, uuid = 99L)
 
         queue(repository, radio, dispatcher).enqueueSendMessage(id)

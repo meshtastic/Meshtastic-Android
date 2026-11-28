@@ -49,7 +49,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.rememberResourceEnvironment
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.effectiveLongName
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.action_select_device
@@ -70,8 +69,11 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Usb
 import org.meshtastic.core.ui.icon.Wifi
 import org.meshtastic.feature.connections.model.DeviceListEntry
+import org.meshtastic.sdk.ConnectionState
+import org.meshtastic.sdk.isInProgress
+import kotlin.time.Duration.Companion.seconds
 
-private const val RSSI_UPDATE_RATE_MS = 2000L
+private val RSSI_UPDATE_RATE = 2.seconds
 
 @OptIn(ExperimentalFoundationApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
@@ -91,7 +93,7 @@ fun DeviceListItem(
     val currentRssi by rememberUpdatedState(rssi)
     LaunchedEffect(device.address) {
         while (true) {
-            delay(RSSI_UPDATE_RATE_MS)
+            delay(RSSI_UPDATE_RATE)
             displayedRssi = currentRssi
         }
     }
@@ -101,7 +103,7 @@ fun DeviceListItem(
             is DeviceListEntry.Ble ->
                 if (connectionState is ConnectionState.Connected) {
                     MeshtasticIcons.BluetoothConnected
-                } else if (connectionState is ConnectionState.Connecting) {
+                } else if (connectionState.isInProgress) {
                     MeshtasticIcons.BluetoothSearching
                 } else {
                     MeshtasticIcons.Bluetooth
@@ -182,7 +184,7 @@ fun DeviceListItem(
                     Rssi(rssi = displayedRssi, label = rssiLabel.orEmpty())
                 }
 
-                if (connectionState is ConnectionState.Connecting) {
+                if (connectionState.isInProgress) {
                     CircularWavyProgressIndicator(modifier = Modifier.size(32.dp))
                 } else {
                     RadioButton(selected = connectionState is ConnectionState.Connected, onClick = null)

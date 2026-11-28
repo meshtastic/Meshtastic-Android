@@ -16,12 +16,12 @@
  */
 package org.meshtastic.core.repository
 
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.FirmwareUpdateNotice
 import org.meshtastic.core.model.MeshBeaconOffer
 import org.meshtastic.core.model.Node
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Telemetry
+import org.meshtastic.sdk.ConnectionState
 
 const val SERVICE_NOTIFY_ID = 101
 

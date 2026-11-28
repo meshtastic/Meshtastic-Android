@@ -23,8 +23,8 @@ import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.repository.DisplayMirrorManager
 import org.meshtastic.core.repository.MirrorFrame
 import org.meshtastic.core.repository.MirrorPalette
-import org.meshtastic.proto.DisplayFrame
 import org.meshtastic.proto.DisplayPalette
+import org.meshtastic.sdk.DisplayImage
 
 /** A [DisplayMirrorManager] with no frames; [resets] counts calls to [reset]. */
 class FakeDisplayMirrorManager : DisplayMirrorManager {
@@ -33,9 +33,9 @@ class FakeDisplayMirrorManager : DisplayMirrorManager {
 
     var resets = 0
 
-    override fun handleIncomingFrame(chunk: DisplayFrame) {}
+    override fun handleImage(image: DisplayImage) {}
 
-    override fun handleIncomingPalette(chunk: DisplayPalette) {}
+    override fun handlePalette(palette: DisplayPalette) {}
 
     override fun reset() {
         resets++

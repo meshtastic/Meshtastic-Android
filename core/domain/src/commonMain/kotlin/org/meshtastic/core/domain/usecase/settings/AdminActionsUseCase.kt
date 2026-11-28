@@ -16,18 +16,22 @@
  */
 package org.meshtastic.core.domain.usecase.settings
 
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioController
+import org.meshtastic.core.repository.routingErrorOrNull
+import org.meshtastic.sdk.AdminResult
 
 /**
  * Use case for performing administrative and destructive actions on mesh nodes.
  *
- * This component provides methods for rebooting, shutting down, or resetting nodes within the mesh. It also handles
- * local database synchronization when these actions are performed on the locally connected device.
- *
- * Each method's `onRequestId` callback fires with the request's packet ID *before* the send is issued; callers that
- * correlate responses by request ID must register there (see [RadioConfigUseCase] for the ordering rationale).
+ * This component provides methods for rebooting, shutting down, or resetting nodes within the mesh. Each suspends until
+ * the device answers and returns that answer. A reset of the locally connected node also clears the phone's node
+ * database, unless the device refuses the reset.
  */
 @Single
 open class AdminActionsUseCase
@@ -35,103 +39,50 @@ constructor(
     private val radioController: RadioController,
     private val nodeRepository: NodeRepository,
 ) {
-    /**
-     * Reboots the radio.
-     *
-     * @param destNum The node number to reboot.
-     * @return The packet ID of the request.
-     */
-    open suspend fun reboot(destNum: Int, onRequestId: (Int) -> Unit = {}): Int {
-        val packetId = radioController.generatePacketId()
-        onRequestId(packetId)
-        radioController.reboot(destNum, packetId)
-        return packetId
-    }
+    /** Reboots [destNum]. */
+    open suspend fun reboot(destNum: Int): AdminResult<Unit> = radioController.reboot(destNum)
+
+    /** Reboots an nRF52 [destNum] into its DFU bootloader; firmware answers nothing, so success means sent. */
+    open suspend fun rebootToDfu(destNum: Int): AdminResult<Unit> = radioController.rebootToDfu(destNum)
+
+    /** Shuts down [destNum]. */
+    open suspend fun shutdown(destNum: Int): AdminResult<Unit> = radioController.shutdown(destNum)
+
+    /** Factory resets [destNum]; [isLocal] also clears the phone's node database, which would be out of sync. */
+    open suspend fun factoryReset(destNum: Int, isLocal: Boolean): AdminResult<Unit> =
+        resetting(isLocal, clearLocal = { nodeRepository.clearNodeDB() }) { radioController.factoryReset(destNum) }
 
     /**
-     * Reboots an nRF52 radio into its DFU bootloader.
-     *
-     * @param destNum The node number to reboot.
-     * @return The packet ID of the request.
+     * Runs a reset and, for the connected node, clears the phone's copy unless the radio refused it. The radio reboots
+     * after a reset, so its answer can be lost, and the caller can go away before it arrives.
      */
-    open suspend fun rebootToDfu(destNum: Int, onRequestId: (Int) -> Unit = {}): Int {
-        val packetId = radioController.generatePacketId()
-        onRequestId(packetId)
-        radioController.rebootToDfu(destNum, packetId)
-        return packetId
-    }
-
-    /**
-     * Shuts down the radio.
-     *
-     * @param destNum The node number to shut down.
-     * @return The packet ID of the request.
-     */
-    open suspend fun shutdown(destNum: Int, onRequestId: (Int) -> Unit = {}): Int {
-        val packetId = radioController.generatePacketId()
-        onRequestId(packetId)
-        radioController.shutdown(destNum, packetId)
-        return packetId
-    }
-
-    /**
-     * Factory resets the radio.
-     *
-     * @param destNum The node number to reset.
-     * @param isLocal Whether the reset is being performed on the locally connected node.
-     * @return The packet ID of the request.
-     */
-    open suspend fun factoryReset(destNum: Int, isLocal: Boolean, onRequestId: (Int) -> Unit = {}): Int {
-        val packetId = radioController.generatePacketId()
-        onRequestId(packetId)
-        radioController.factoryReset(destNum, packetId)
-
-        if (isLocal) {
-            // If it's the local node, we should also clear the phone's node database as it will be out of sync.
-            nodeRepository.clearNodeDB()
-        }
-
-        return packetId
-    }
-
-    /**
-     * Syncs the node's real-time clock to the phone's current time.
-     *
-     * Lets a user correct a remote node whose RTC has drifted without being on-site or using the CLI.
-     *
-     * @param destNum The node number to update.
-     * @return The packet ID of the request.
-     */
-    open suspend fun setTime(destNum: Int, onRequestId: (Int) -> Unit = {}): Int {
-        val packetId = radioController.generatePacketId()
-        onRequestId(packetId)
-        radioController.setTime(destNum, packetId)
-        return packetId
-    }
-
-    /**
-     * Resets the NodeDB on the radio.
-     *
-     * @param destNum The node number to reset.
-     * @param preserveFavorites Whether to keep favorite nodes in the database.
-     * @param isLocal Whether the reset is being performed on the locally connected node.
-     * @return The packet ID of the request.
-     */
-    open suspend fun nodedbReset(
-        destNum: Int,
-        preserveFavorites: Boolean,
+    private suspend fun resetting(
         isLocal: Boolean,
-        onRequestId: (Int) -> Unit = {},
-    ): Int {
-        val packetId = radioController.generatePacketId()
-        onRequestId(packetId)
-        radioController.nodedbReset(destNum, packetId, preserveFavorites)
-
-        if (isLocal) {
-            // If it's the local node, we should also clear the phone's node database.
-            nodeRepository.clearNodeDB(preserveFavorites)
+        clearLocal: suspend () -> Unit,
+        send: suspend () -> AdminResult<Unit>,
+    ): AdminResult<Unit> {
+        var result: AdminResult<Unit>? = null
+        try {
+            val answer = send()
+            result = answer
+            return answer
+        } finally {
+            val answer = result
+            val abandoned = answer == null && !currentCoroutineContext().isActive
+            val notRefused = answer != null && answer.routingErrorOrNull() == null
+            if (isLocal && (abandoned || notRefused)) withContext(NonCancellable) { clearLocal() }
         }
-
-        return packetId
     }
+
+    /**
+     * Syncs the node's real-time clock to the phone's current time, so a remote node whose RTC has drifted can be
+     * corrected without being on-site or using the CLI.
+     */
+    open suspend fun setTime(destNum: Int): AdminResult<Unit> = radioController.setTime(destNum)
+
+    /** Resets the NodeDB on [destNum]; [isLocal] also clears the phone's node database the same way. */
+    open suspend fun nodedbReset(destNum: Int, preserveFavorites: Boolean, isLocal: Boolean): AdminResult<Unit> =
+        resetting(isLocal, clearLocal = { nodeRepository.clearNodeDB(preserveFavorites) }) {
+            radioController.nodedbReset(destNum, preserveFavorites)
+        }
 }

@@ -39,7 +39,7 @@ class SitePlannerLaunch(val initialParams: SitePlannerParams, private val select
  */
 fun Node?.toSitePlannerParams(channelSet: ChannelSet?): SitePlannerParams {
     val lora = channelSet?.lora_config
-    val freqMhz = channelSet?.primaryChannel?.radioFreq?.toDouble()?.takeIf { it > 0.0 }
+    val freqMhz = channelSet?.primaryChannel?.frequencyPlan?.frequencyMHz?.toDouble()?.takeIf { it > 0.0 }
     return SitePlannerParams(
         name = this?.effectiveLongName?.takeIf { it.isNotBlank() } ?: "Coverage",
         latitude = this?.latitude ?: 0.0,

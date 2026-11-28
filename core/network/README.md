@@ -1,7 +1,7 @@
 # `:core:network`
 
 ## Overview
-The `:core:network` module handles all internet-based communication: firmware metadata, device hardware definitions and the other shared resources from `api.meshtastic.org`, plus the MQTT client and local network discovery. It also provides the radio transport layer (`TcpTransport`/`TcpRadioTransport`, `WebSocketRadioTransport`, `SerialTransport`, `SerialRadioTransport`, `BleRadioTransport`).
+The `:core:network` module handles all internet-based communication: firmware metadata, device hardware definitions and the other shared resources from `api.meshtastic.org`, plus the MQTT client and local network discovery. The virtual radios for Demo Mode and capture replay live in `:core:data`.
 
 ## Key Components
 
@@ -14,21 +14,13 @@ The module uses **Ktor** as its HTTP client. `ApiService` (`service/`) defines t
 - **`DeviceLinksRemoteDataSource`**, **`EventFirmwareRemoteDataSource`**, **`BootloaderOtaQuirksRemoteDataSource`**, **`MaintenanceUf2RemoteDataSource`**, **`MqttRootsRemoteDataSource`**, **`DeviceModelRemoteDataSource`**: The other `api.meshtastic.org` resources, and the flasher's GLB device models.
 
 ### 3. Transports
-- **`TcpTransport`** (`transport/`) + **`TcpRadioTransport`** (`radio/`): Multiplatform TCP transport and its `RadioTransport` adapter.
-- **`WebSocketRadioTransport`** (`radio/`): Firmware's WebSocket phone API (`w` addresses, default path `/api/v1/ws`; released firmware does not serve it yet) over Ktor, CIO off the web and the browser's engine on wasm (`webSocketHttpClient`). No client installs HTTP logging; the transport's own log label carries only the scheme, host and port (a public host anonymized), never the path, query or credentials.
-- **`ReconnectBackoff`** (`transport/`): The reconnect schedule TCP and WebSocket share.
-- **`WasmJsRadioTransportFactory`** (`wasmJsMain`) + **`WasmJsSerialTransport`**: The web factory, over Web Bluetooth, Web Serial and WebSocket; it refuses raw TCP.
-- **`SerialTransport`** (`jvmMain`): Desktop USB/serial transport powered by jSerialComm. Android uses `SerialRadioTransport` over usb-serial-for-android instead.
-- **`StreamFrameCodec`** (`transport/`): START1/START2 + 16-bit length framing for serial and TCP. A payload over 512 bytes is dropped with a size-only warning and the link stays up.
-- **`BleRadioTransport`** (`radio/`): The `RadioTransport` implementation for Bluetooth devices.
-- **`MockRadioTransport`**, **`ReplayRadioTransport`**, **`NopRadioTransport`**: Demo Mode and no-op transports that reach no node.
-- **`BaseRadioTransportFactory`**: Common factory that dispatches every address on its prefix. BLE, WebSocket, mock and no-device are built here on every platform; an unknown prefix opens `NopRadioTransport`, and `r` opens the mock unless a platform supplies a capture (only `AndroidRadioTransportFactory` does, from a debug-build asset). TCP and serial are platform hooks.
+The [Meshtastic SDK](https://github.com/meshtastic/meshtastic-sdk) owns framing, the PhoneAPI session and every TCP, WebSocket, serial and BLE link; address-to-link selection is `BaseRadioLinks` in `:core:data`.
 
 ### 4. Repositories
 - **`MQTTRepository`**: The MQTT client used to proxy mesh traffic to and from a broker, over TCP or WebSockets. A downlink message whose encoded `ToRadio` exceeds the 512-byte phone API frame limit is dropped, and a channel whose name holds `+`, `#` or `/` gets no subscription. A publish is sent only when its topic is the connection's root topic, a `/` and a non-empty remainder, with no wildcard; the root is compared as configured, the same string the subscriptions use.
-- **`NetworkRepository`**: Network availability and discovered Meshtastic services (Android NSD, JmDNS on Desktop).
+- **`NetworkRepository`**: Network availability and discovered Meshtastic services (the SDK's `TcpDiscovery`: `NsdManager` on Android, JmDNS on Desktop).
 
-> **BLE:** the `RadioTransport` implementation (`BleRadioTransport`) lives **here** in `radio/`; it delegates to the lower-level Kable connection primitives (`BleConnection`, `BleScanner`, `BluetoothRepository`, …) provided by [`:core:ble`](../ble/README.md). `BaseRadioTransportFactory` instantiates it when an address with the `x` (or `!`) prefix is resolved.
+> **BLE:** the SDK's BLE transport runs the link; pairing, scanning and GATT repair come from the Kable primitives in [`:core:ble`](../ble/README.md). An address with the `x` (or `!`) prefix selects it.
 
 
 ## Dependency Graph
@@ -41,7 +33,6 @@ graph TB
   :core:network -.-> :core:common
   :core:network -.-> :core:di
   :core:network -.-> :core:model
-  :core:network -.-> :core:ble
   :core:network -.-> :core:testing
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

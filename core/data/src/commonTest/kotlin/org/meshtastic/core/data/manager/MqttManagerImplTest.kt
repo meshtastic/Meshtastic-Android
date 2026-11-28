@@ -21,20 +21,22 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.model.MqttConnectionState
 import org.meshtastic.core.network.repository.MQTTRepository
 import org.meshtastic.core.network.repository.MqttRootWildcardException
-import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.ServiceStateWriter
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.mqtt_error_proxy_failed
 import org.meshtastic.core.resources.mqtt_root_has_wildcard
 import org.meshtastic.core.testing.FakeNodeRepository
+import org.meshtastic.core.testing.FakeRadioInterfaceService
 import org.meshtastic.mqtt.ConnectionState
 import org.meshtastic.mqtt.MqttException
 import org.meshtastic.mqtt.ReasonCode
@@ -43,6 +45,23 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class MqttManagerImplTest {
+
+    @Test
+    fun `broker messages reach the radio through the SDK MQTT client proxy`() = runTest {
+        val message =
+            MqttClientProxyMessage.Builder()
+                .also {
+                    it.topic = "msh/US/2/e/LongFast/!0a0b0c0d"
+                    it.data_ = byteArrayOf(1, 2, 3).toByteString()
+                }
+                .build()
+        val harness = createHarness(proxyMessages = flowOf(message))
+
+        harness.manager.startProxy(enabled = true, proxyToClientEnabled = true)
+        runCurrent()
+
+        assertEquals(listOf(message), harness.radio.deliveredMqttProxyMessages)
+    }
 
     @Test
     fun `a connection with every filter granted reads as connected`() = runTest {
@@ -124,25 +143,29 @@ class MqttManagerImplTest {
         granted = granted,
     )
 
-    private fun TestScope.createHarness(): Harness {
-        val repository = FakeMqttRepository()
+    private fun TestScope.createHarness(proxyMessages: Flow<MqttClientProxyMessage> = emptyFlow()): Harness {
+        val repository = FakeMqttRepository(proxyMessages)
+        val radio = FakeRadioInterfaceService()
         val manager =
             MqttManagerImpl(
                 mqttRepository = repository,
-                packetHandler = mock<PacketHandler>(),
+                radioInterfaceService = radio,
                 serviceStateWriter = mock<ServiceStateWriter>(),
                 nodeRepository = FakeNodeRepository(),
                 scope = CoroutineScope(StandardTestDispatcher(testScheduler)).asServiceScope(),
             )
-        return Harness(manager, repository)
+        return Harness(manager, repository, radio)
     }
 
-    private class Harness(val manager: MqttManagerImpl, val repository: FakeMqttRepository)
+    private class Harness(
+        val manager: MqttManagerImpl,
+        val repository: FakeMqttRepository,
+        val radio: FakeRadioInterfaceService,
+    )
 
-    private class FakeMqttRepository : MQTTRepository {
+    private class FakeMqttRepository(override val proxyMessageFlow: Flow<MqttClientProxyMessage>) : MQTTRepository {
         override val connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected.Idle)
         override val subscriptionRefusal = MutableStateFlow<MqttException.SubscriptionRefused?>(null)
-        override val proxyMessageFlow: Flow<MqttClientProxyMessage> = emptyFlow()
 
         override fun disconnect() {}
 

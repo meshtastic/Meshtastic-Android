@@ -23,13 +23,13 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.repository.MeshWorkerManager
 import org.meshtastic.core.repository.MessageQueue
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PersistedPacketId
 import org.meshtastic.core.repository.RadioController
+import org.meshtastic.sdk.ConnectionState
 
 /**
  * [MessageQueue] and [MeshWorkerManager] for hosts without a background work scheduler (desktop and web): both hand the
@@ -57,7 +57,11 @@ class InProcessMessageQueue(
     @Suppress("SuspendFunSwallowedCancellation")
     private suspend fun send(persistedId: PersistedPacketId) {
         if (persistedId.uuid <= 0L) return
-        val connected = radioController.connectionState.first { it != ConnectionState.Connecting }
+        // A handshake in progress settles one way or the other; a radio that is down leaves the packet queued.
+        val connected =
+            radioController.connectionState.first {
+                it !is ConnectionState.Connecting && it !is ConnectionState.Configuring
+            }
         val claimed =
             if (connected == ConnectionState.Connected) packetRepository.claimQueuedPacket(persistedId) else null
         if (claimed?.packet?.status != MessageStatus.QUEUED) return

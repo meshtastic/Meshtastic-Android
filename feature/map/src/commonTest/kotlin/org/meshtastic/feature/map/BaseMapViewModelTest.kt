@@ -31,7 +31,6 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.common.util.nowSeconds
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
@@ -48,6 +47,7 @@ import org.meshtastic.core.testing.TestDataFactory
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.Waypoint
+import org.meshtastic.sdk.ConnectionState
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test

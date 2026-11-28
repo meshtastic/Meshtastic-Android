@@ -24,12 +24,12 @@ import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.common.util.nowSeconds
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.node_not_heard_on_current_lora
 import org.meshtastic.proto.User
+import org.meshtastic.sdk.ConnectionState
 import kotlin.test.Test
 
 /**

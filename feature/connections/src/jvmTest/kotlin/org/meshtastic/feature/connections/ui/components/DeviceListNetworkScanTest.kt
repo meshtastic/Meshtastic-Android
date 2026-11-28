@@ -22,7 +22,6 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.v2.runComposeUiTest
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.getString
@@ -30,6 +29,7 @@ import org.meshtastic.core.resources.network_scan_unavailable
 import org.meshtastic.core.resources.no_network_devices_saved
 import org.meshtastic.core.resources.no_network_devices_seen
 import org.meshtastic.core.resources.scan_network_devices
+import org.meshtastic.sdk.ConnectionState
 import kotlin.test.Test
 
 /** The Network pane offers a scan only where something can discover a radio; a browser adds one by address. */

@@ -72,8 +72,8 @@ class UsbRepository(
                 // Key by a stable identity, NOT the raw deviceList key (the /dev/bus/usb/BBB/DDD path). Android
                 // reassigns that path on every re-enumeration — each reboot or replug bumps it (…/002 → …/008) — so a
                 // path-keyed map can't recognise the same physical node across a firmware-update reboot, and the
-                // auto-reconnect in SharedRadioInterfaceService (which matches the saved address against these keys)
-                // never re-arms. usbSerialStableKey() survives re-enumeration.
+                // link waiting for the saved address (which it matches against these keys) never finds it again.
+                // usbSerialStableKey() survives re-enumeration.
                 buildMap {
                     serialDevices.values.forEach { device ->
                         val driver = serialProber.probeDevice(device) ?: return@forEach
@@ -96,13 +96,6 @@ class UsbRepository(
         }
     }
 
-    /**
-     * Creates a USB serial connection to the specified USB device. State changes and data arrival result in async
-     * callbacks on the supplied listener.
-     */
-    fun createSerialConnection(device: UsbSerialDriver, listener: SerialConnectionListener): SerialConnection =
-        SerialConnectionImpl(usbManagerLazy, device, listener)
-
     fun requestPermission(device: UsbDevice): Flow<Boolean> =
         usbManagerLazy.value?.requestPermission(application, device) ?: emptyFlow()
 
@@ -113,9 +106,9 @@ class UsbRepository(
      * Opens [driver]'s port, asserts DTR/RTS for [holdMillis], and closes it again.
      *
      * Exists because some firmware waits for a host before it will run: the nRF52 factory-erase image blocks in `while
-     * (!Serial)` before formatting, and `Serial` only becomes truthy once DTR is asserted. Deliberately does not go
-     * through [createSerialConnection], which welds the assertion to a `SerialInputOutputManager` reader thread and a
-     * mandatory listener — there is no Meshtastic protocol on the other end here, just a blocked `setup()`.
+     * (!Serial)` before formatting, and `Serial` only becomes truthy once DTR is asserted. Deliberately opens the port
+     * directly with no reader thread or listener: there is no Meshtastic protocol on the other end here, just a blocked
+     * `setup()`.
      *
      * @return true when the port was opened and DTR held; false if permission is missing or the port could not be
      *   opened.

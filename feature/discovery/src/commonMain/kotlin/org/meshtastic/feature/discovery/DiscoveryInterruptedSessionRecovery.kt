@@ -29,9 +29,9 @@ import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.database.dao.DiscoveryDao
 import org.meshtastic.core.database.entity.DiscoverySessionEntity
 import org.meshtastic.core.database.entity.DiscoverySessionStatus
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.repository.MeshPrefs
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.sdk.ConnectionState
 
 /** Restores persisted discovery sessions only while their original radio still owns the recovery. */
 internal class DiscoveryInterruptedSessionRecovery(

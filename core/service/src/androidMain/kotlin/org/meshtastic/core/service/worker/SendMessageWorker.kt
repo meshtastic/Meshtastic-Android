@@ -21,12 +21,12 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import kotlinx.coroutines.CancellationException
 import org.koin.android.annotation.KoinWorker
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PersistedPacket
 import org.meshtastic.core.repository.PersistedPacketId
 import org.meshtastic.core.repository.RadioController
+import org.meshtastic.sdk.ConnectionState
 
 @KoinWorker
 class SendMessageWorker(

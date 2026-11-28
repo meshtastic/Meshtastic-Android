@@ -19,7 +19,6 @@ package org.meshtastic.app.di
 import android.app.Application
 import android.content.Context
 import android.net.ConnectivityManager
-import android.net.nsd.NsdManager
 import coil3.ImageLoader
 import coil3.annotation.ExperimentalCoilApi
 import coil3.disk.DiskCache
@@ -62,10 +61,6 @@ class NetworkModule {
     @Single
     fun provideConnectivityManager(application: Application): ConnectivityManager =
         application.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-
-    @Single
-    fun provideNsdManager(application: Application): NsdManager =
-        application.getSystemService(Context.NSD_SERVICE) as NsdManager
 
     @OptIn(ExperimentalCoilApi::class)
     @Single

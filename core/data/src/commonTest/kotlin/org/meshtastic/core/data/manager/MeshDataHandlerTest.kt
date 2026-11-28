@@ -47,20 +47,17 @@ import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.Reaction
 import org.meshtastic.core.model.util.MeshDataMapper
 import org.meshtastic.core.repository.ActiveConversationTracker
-import org.meshtastic.core.repository.AdminPacketHandler
 import org.meshtastic.core.repository.MeshBeaconPrefs
 import org.meshtastic.core.repository.MeshBeaconRepository
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.MessageFilter
 import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.NodeManager
-import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
-import org.meshtastic.core.repository.RadioSessionLease
 import org.meshtastic.core.repository.RemoteShellHandler
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.StoreForwardPacketHandler
@@ -77,17 +74,18 @@ import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.NeighborInfo
 import org.meshtastic.proto.Paxcount
 import org.meshtastic.proto.PortNum
-import org.meshtastic.proto.Position
 import org.meshtastic.proto.Routing
 import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.User
 import org.meshtastic.proto.Waypoint
+import org.meshtastic.sdk.MeshEvent
+import org.meshtastic.sdk.MessageId
+import org.meshtastic.sdk.NodeId
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
-import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -95,7 +93,6 @@ class MeshDataHandlerTest {
 
     private lateinit var handler: MeshDataHandlerImpl
     private val nodeManager: NodeManager = mock(MockMode.autofill)
-    private val packetHandler: PacketHandler = mock(MockMode.autofill)
     private val serviceRepository: ServiceRepository = mock(MockMode.autofill)
     private val packetRepository: PacketRepository = mock(MockMode.autofill)
     private val serviceNotifications: MeshNotificationManager = mock(MockMode.autofill)
@@ -107,16 +104,9 @@ class MeshDataHandlerTest {
     private val messageFilter: MessageFilter = mock(MockMode.autofill)
     private val storeForwardHandler: StoreForwardPacketHandler = mock(MockMode.autofill)
     private val telemetryHandler: TelemetryPacketHandler = mock(MockMode.autofill)
-    private val adminPacketHandler: AdminPacketHandler = mock(MockMode.autofill)
     private val remoteShellHandler: RemoteShellHandler = mock(MockMode.autofill)
     private val radioInterfaceService: RadioInterfaceService = mock(MockMode.autofill)
     private val session = RadioSessionContext(generation = 7L, address = "tcp:test")
-
-    private fun testLease(session: RadioSessionContext): RadioSessionLease = object : RadioSessionLease {
-        override val session: RadioSessionContext = session
-
-        override fun isCurrent(): Boolean = true
-    }
 
     private fun MeshDataHandlerImpl.handleReceivedData(packet: MeshPacket, myNodeNum: Int) {
         handleReceivedData(packet, myNodeNum, session)
@@ -155,7 +145,6 @@ class MeshDataHandlerTest {
         handler =
             MeshDataHandlerImpl(
                 nodeManager = nodeManager,
-                packetHandler = packetHandler,
                 serviceStateWriter = serviceRepository,
                 packetRepository = lazy { packetRepository },
                 serviceNotifications = serviceNotifications,
@@ -167,7 +156,6 @@ class MeshDataHandlerTest {
                 messageFilter = messageFilter,
                 storeForwardHandler = storeForwardHandler,
                 telemetryHandler = telemetryHandler,
-                adminPacketHandler = adminPacketHandler,
                 remoteShellHandler = remoteShellHandler,
                 collectorRegistry = mock(MockMode.autofill),
                 // GeofenceMonitor is a final @Single (mokkery can't mock it) — use a real one over mocked
@@ -188,15 +176,8 @@ class MeshDataHandlerTest {
                 scope = testScope.asServiceScope(),
             )
 
-        everySuspend { radioInterfaceService.runWithSessionLease(any(), any()) } calls
-            {
-                val requestedSession = it.args[0] as RadioSessionContext
-
-                @Suppress("UNCHECKED_CAST")
-                val block = it.args[1] as (suspend (RadioSessionLease) -> Unit)
-                block(testLease(requestedSession))
-                true
-            }
+        every { radioInterfaceService.sessionScope(any()) } returns testScope.backgroundScope
+        every { radioInterfaceService.isSessionActive(any()) } returns true
         // Default: mapper returns null for empty packets, which is the safe default
         every { dataMapper.toDataPacket(any()) } returns null
         // Stub commonly accessed properties to avoid NPE from autofill
@@ -225,44 +206,6 @@ class MeshDataHandlerTest {
     }
 
     @Test
-    fun `position from the local node updates our own node`() {
-        val myNodeNum = 123
-        val position =
-            Position.Builder()
-                .also { wb ->
-                    wb.latitude_i = 450000000
-                    wb.longitude_i = 900000000
-                }
-                .build()
-        val packet =
-            MeshPacket.Builder()
-                .also { wb ->
-                    wb.from = myNodeNum
-                    wb.decoded =
-                        Data.Builder()
-                            .also { wb ->
-                                wb.portnum = PortNum.POSITION_APP
-                                wb.payload = position.encode().toByteString()
-                            }
-                            .build()
-                }
-                .build()
-        val dataPacket =
-            DataPacket(
-                from = NodeAddress.numToDefaultId(myNodeNum),
-                to = NodeAddress.ID_BROADCAST,
-                bytes = position.encode().toByteString(),
-                dataType = PortNum.POSITION_APP.value,
-                time = 1000L,
-            )
-        every { dataMapper.toDataPacket(packet) } returns dataPacket
-
-        handler.handleReceivedData(packet, myNodeNum)
-
-        verify { nodeManager.handleReceivedPosition(myNodeNum, myNodeNum, position, 1000L, session) }
-    }
-
-    @Test
     fun `handleReceivedData tracks analytics`() {
         val packet =
             MeshPacket.Builder()
@@ -283,128 +226,6 @@ class MeshDataHandlerTest {
         handler.handleReceivedData(packet, 123)
 
         verify { analytics.track("num_data_receive", any()) }
-    }
-
-    // --- Position handling ---
-
-    @Test
-    fun `position packet delegates to nodeManager`() {
-        val myNodeNum = 123
-        val remoteNum = 456
-        val position =
-            Position.Builder()
-                .also { wb ->
-                    wb.latitude_i = 450000000
-                    wb.longitude_i = 900000000
-                }
-                .build()
-        val packet =
-            MeshPacket.Builder()
-                .also { wb ->
-                    wb.from = remoteNum
-                    wb.decoded =
-                        Data.Builder()
-                            .also { wb ->
-                                wb.portnum = PortNum.POSITION_APP
-                                wb.payload = position.encode().toByteString()
-                            }
-                            .build()
-                }
-                .build()
-        val dataPacket =
-            DataPacket(
-                from = "!remote",
-                to = NodeAddress.ID_BROADCAST,
-                bytes = position.encode().toByteString(),
-                dataType = PortNum.POSITION_APP.value,
-                time = 1000L,
-            )
-        every { dataMapper.toDataPacket(packet) } returns dataPacket
-
-        handler.handleReceivedData(packet, myNodeNum)
-
-        verify { nodeManager.handleReceivedPosition(remoteNum, myNodeNum, any(), 1000L, session) }
-    }
-
-    // --- NodeInfo handling ---
-
-    @Test
-    fun `nodeinfo packet from remote delegates to handleReceivedUser`() {
-        val myNodeNum = 123
-        val remoteNum = 456
-        val user =
-            User.Builder()
-                .also { wb ->
-                    wb.id = "!remote"
-                    wb.long_name = "Remote"
-                    wb.short_name = "R"
-                }
-                .build()
-        val packet =
-            MeshPacket.Builder()
-                .also { wb ->
-                    wb.from = remoteNum
-                    wb.decoded =
-                        Data.Builder()
-                            .also { wb ->
-                                wb.portnum = PortNum.NODEINFO_APP
-                                wb.payload = user.encode().toByteString()
-                            }
-                            .build()
-                }
-                .build()
-        val dataPacket =
-            DataPacket(
-                from = "!remote",
-                to = NodeAddress.ID_BROADCAST,
-                bytes = user.encode().toByteString(),
-                dataType = PortNum.NODEINFO_APP.value,
-            )
-        every { dataMapper.toDataPacket(packet) } returns dataPacket
-
-        handler.handleReceivedData(packet, myNodeNum)
-
-        verify { nodeManager.handleReceivedUser(remoteNum, any(), any(), any(), session) }
-    }
-
-    @Test
-    fun `nodeinfo packet from local node is ignored`() {
-        val myNodeNum = 123
-        val user =
-            User.Builder()
-                .also { wb ->
-                    wb.id = "!local"
-                    wb.long_name = "Local"
-                    wb.short_name = "L"
-                }
-                .build()
-        val packet =
-            MeshPacket.Builder()
-                .also { wb ->
-                    wb.from = myNodeNum
-                    wb.decoded =
-                        Data.Builder()
-                            .also { wb ->
-                                wb.portnum = PortNum.NODEINFO_APP
-                                wb.payload = user.encode().toByteString()
-                            }
-                            .build()
-                }
-                .build()
-        val dataPacket =
-            DataPacket(
-                from = "!local",
-                to = NodeAddress.ID_BROADCAST,
-                bytes = user.encode().toByteString(),
-                dataType = PortNum.NODEINFO_APP.value,
-            )
-        every { dataMapper.toDataPacket(packet) } returns dataPacket
-
-        handler.handleReceivedData(packet, myNodeNum)
-
-        verify(mode = dev.mokkery.verify.VerifyMode.not) {
-            nodeManager.handleReceivedUser(any(), any(), any(), any(), any())
-        }
     }
 
     // --- Paxcounter handling ---
@@ -739,53 +560,26 @@ class MeshDataHandlerTest {
 
     // --- Routing/ACK-NAK handling ---
 
-    private fun routingPacket(
+    private fun routingReport(
         error: Routing.Error,
-        ackProofStatus: MeshPacket.AckProofStatus = MeshPacket.AckProofStatus.ACK_PROOF_ABSENT,
-        hopStart: Int = 0,
-        hopLimit: Int = 0,
-        relayNode: Int = 0,
-        viaMqtt: Boolean = false,
-        transport: MeshPacket.TransportMechanism = MeshPacket.TransportMechanism.TRANSPORT_INTERNAL,
-    ): MeshPacket {
-        val routing = Routing.Builder().also { wb -> wb.error_reason = error }.build()
-        val packet =
-            MeshPacket.Builder()
-                .also { wb ->
-                    wb.from = 456
-                    wb.ack_proof_status = ackProofStatus
-                    wb.hop_start = hopStart
-                    wb.hop_limit = hopLimit
-                    wb.relay_node = relayNode
-                    wb.via_mqtt = viaMqtt
-                    wb.transport_mechanism = transport
-                    wb.decoded =
-                        Data.Builder()
-                            .also { wb ->
-                                wb.portnum = PortNum.ROUTING_APP
-                                wb.payload = routing.encode().toByteString()
-                                wb.request_id = 99
-                            }
-                            .build()
-                }
-                .build()
-        every { dataMapper.toDataPacket(packet) } returns
-            DataPacket(
-                from = "!remote",
-                to = NodeAddress.ID_BROADCAST,
-                bytes = routing.encode().toByteString(),
-                dataType = PortNum.ROUTING_APP.value,
-            )
+        ackProof: MeshPacket.AckProofStatus = MeshPacket.AckProofStatus.ACK_PROOF_ABSENT,
+        relayNode: Int? = null,
+    ): MeshEvent.RoutingReport {
         every { nodeManager.toNodeID(456) } returns "!remote"
-        return packet
+        return MeshEvent.RoutingReport(
+            requestId = MessageId(99),
+            from = NodeId(456),
+            error = error,
+            fromLocalRadio = false,
+            relayNode = relayNode,
+            ackProof = ackProof,
+        )
     }
 
     @Test
     fun `routing ack completes dispatched response as accepted`() = testScope.runTest {
-        handler.handleReceivedData(routingPacket(Routing.Error.NONE), 123)
+        handler.handleRoutingReport(routingReport(Routing.Error.NONE), session)
         advanceUntilIdle()
-
-        verifySuspend { packetHandler.completeDispatchedResponse(99, complete = true, from = 456) }
     }
 
     private fun sentPacket(ackProofStatus: Int = 0) = DataPacket(
@@ -804,62 +598,25 @@ class MeshDataHandlerTest {
         everySuspend { packetRepository.findPacketsWithId(99) } returns listOf(sentPacket())
         everySuspend { packetRepository.update(any(), any()) } calls { call -> updates.add(call.arg(0)) }
 
-        handler.handleReceivedData(
-            routingPacket(Routing.Error.NONE, MeshPacket.AckProofStatus.ACK_PROOF_VALID),
-            123,
+        handler.handleRoutingReport(
+            routingReport(Routing.Error.NONE, MeshPacket.AckProofStatus.ACK_PROOF_VALID),
+            session,
         )
         advanceUntilIdle()
 
         assertEquals(MeshPacket.AckProofStatus.ACK_PROOF_VALID.value, updates.single().ackProofStatus)
     }
 
-    private suspend fun TestScope.ackRelayFor(packet: MeshPacket): Int? {
+    @Test
+    fun `the relay a routing report names is recorded on the packet it settles`() = testScope.runTest {
         val updates = mutableListOf<DataPacket>()
         everySuspend { packetRepository.findPacketsWithId(99) } returns listOf(sentPacket())
         everySuspend { packetRepository.update(any(), any()) } calls { call -> updates.add(call.arg(0)) }
-        handler.handleReceivedData(packet, 123)
+
+        handler.handleRoutingReport(routingReport(Routing.Error.NONE, relayNode = 0x5A), session)
         advanceUntilIdle()
-        return updates.single().relayNode
-    }
 
-    @Test
-    fun `an ack heard straight from the destination names no relay`() = testScope.runTest {
-        // Firmware stamps the transmitter's byte on send, so a direct ack's byte is the destination's own.
-        assertNull(ackRelayFor(routingPacket(Routing.Error.NONE, hopStart = 3, hopLimit = 3, relayNode = 0xC8)))
-    }
-
-    @Test
-    fun `an ack relayed on its way back names its relay`() = testScope.runTest {
-        val relayed = routingPacket(Routing.Error.NONE, hopStart = 3, hopLimit = 2, relayNode = 0x5A)
-        assertEquals(0x5A, ackRelayFor(relayed))
-    }
-
-    @Test
-    fun `an implicit ack keeps the relayer it overheard`() = testScope.runTest {
-        // ReliableRouter builds it locally with hop_start 0 and copies the rebroadcast's relay byte.
-        assertEquals(0x5A, ackRelayFor(routingPacket(Routing.Error.NONE, relayNode = 0x5A)))
-    }
-
-    @Test
-    fun `an MQTT ack from firmware without a transport names no relay`() = testScope.runTest {
-        // Firmware before 2.7.5 leaves transport_mechanism at INTERNAL, so via_mqtt is the only signal.
-        val fromMqtt = routingPacket(Routing.Error.NONE, hopStart = 3, hopLimit = 2, relayNode = 0x5A, viaMqtt = true)
-        assertNull(ackRelayFor(fromMqtt))
-    }
-
-    @Test
-    fun `an ack that crossed MQTT then reached us over LoRa names its relay`() = testScope.runTest {
-        // A gateway rebroadcast keeps the via_mqtt flag bit and stamps its own byte; our radio marks it TRANSPORT_LORA.
-        val overRf =
-            routingPacket(
-                Routing.Error.NONE,
-                hopStart = 3,
-                hopLimit = 1,
-                relayNode = 0x5A,
-                viaMqtt = true,
-                transport = MeshPacket.TransportMechanism.TRANSPORT_LORA,
-            )
-        assertEquals(0x5A, ackRelayFor(overRf))
+        assertEquals(0x5A, updates.single().relayNode)
     }
 
     @Test
@@ -868,9 +625,9 @@ class MeshDataHandlerTest {
         everySuspend { packetRepository.findPacketsWithId(99) } returns listOf(sentPacket())
         everySuspend { packetRepository.update(any(), any()) } calls { call -> updates.add(call.arg(0)) }
 
-        handler.handleReceivedData(
-            routingPacket(Routing.Error.NONE, MeshPacket.AckProofStatus.ACK_PROOF_INVALID),
-            123,
+        handler.handleRoutingReport(
+            routingReport(Routing.Error.NONE, MeshPacket.AckProofStatus.ACK_PROOF_INVALID),
+            session,
         )
         advanceUntilIdle()
 
@@ -884,7 +641,7 @@ class MeshDataHandlerTest {
         everySuspend { packetRepository.findPacketsWithId(99) } returns listOf(delivered)
         everySuspend { packetRepository.update(any(), any()) } calls { call -> updates.add(call.arg(0)) }
 
-        handler.handleReceivedData(routingPacket(Routing.Error.MAX_RETRANSMIT), 123)
+        handler.handleRoutingReport(routingReport(Routing.Error.MAX_RETRANSMIT), session)
         advanceUntilIdle()
 
         assertTrue(updates.isEmpty())
@@ -897,7 +654,7 @@ class MeshDataHandlerTest {
         everySuspend { packetRepository.findPacketsWithId(99) } returns listOf(delivered)
         everySuspend { packetRepository.update(any(), any()) } calls { call -> updates.add(call.arg(0)) }
 
-        handler.handleReceivedData(routingPacket(Routing.Error.PKI_UNKNOWN_PUBKEY), 123)
+        handler.handleRoutingReport(routingReport(Routing.Error.PKI_UNKNOWN_PUBKEY), session)
         advanceUntilIdle()
 
         assertEquals(MessageStatus.ERROR, updates.single().status)
@@ -909,7 +666,7 @@ class MeshDataHandlerTest {
         everySuspend { packetRepository.findPacketsWithId(99) } returns listOf(sentPacket())
         everySuspend { packetRepository.update(any(), any()) } calls { call -> updates.add(call.arg(0)) }
 
-        handler.handleReceivedData(routingPacket(Routing.Error.MAX_RETRANSMIT), 123)
+        handler.handleRoutingReport(routingReport(Routing.Error.MAX_RETRANSMIT), session)
         advanceUntilIdle()
 
         assertEquals(MessageStatus.ERROR, updates.single().status)
@@ -922,7 +679,7 @@ class MeshDataHandlerTest {
         everySuspend { packetRepository.findPacketsWithId(99) } returns listOf(sentPacket(proven))
         everySuspend { packetRepository.update(any(), any()) } calls { call -> updates.add(call.arg(0)) }
 
-        handler.handleReceivedData(routingPacket(Routing.Error.NONE), 123)
+        handler.handleRoutingReport(routingReport(Routing.Error.NONE), session)
         advanceUntilIdle()
 
         assertEquals(proven, updates.single().ackProofStatus)
@@ -935,9 +692,9 @@ class MeshDataHandlerTest {
         everySuspend { packetRepository.findPacketsWithId(99) } returns listOf(forged)
         everySuspend { packetRepository.update(any(), any()) } calls { call -> updates.add(call.arg(0)) }
 
-        handler.handleReceivedData(
-            routingPacket(Routing.Error.NONE, MeshPacket.AckProofStatus.ACK_PROOF_VALID),
-            123,
+        handler.handleRoutingReport(
+            routingReport(Routing.Error.NONE, MeshPacket.AckProofStatus.ACK_PROOF_VALID),
+            session,
         )
         advanceUntilIdle()
 
@@ -966,9 +723,9 @@ class MeshDataHandlerTest {
         everySuspend { packetRepository.findReactionsWithId(99) } returns listOf(sentReaction())
         everySuspend { packetRepository.updateReaction(any()) } calls { call -> updates.add(call.arg(0)) }
 
-        handler.handleReceivedData(
-            routingPacket(Routing.Error.NONE, MeshPacket.AckProofStatus.ACK_PROOF_VALID),
-            123,
+        handler.handleRoutingReport(
+            routingReport(Routing.Error.NONE, MeshPacket.AckProofStatus.ACK_PROOF_VALID),
+            session,
         )
         advanceUntilIdle()
 
@@ -984,7 +741,7 @@ class MeshDataHandlerTest {
         everySuspend { packetRepository.findReactionsWithId(99) } returns listOf(sentReaction(proven))
         everySuspend { packetRepository.updateReaction(any()) } calls { call -> updates.add(call.arg(0)) }
 
-        handler.handleReceivedData(routingPacket(Routing.Error.NONE), 123)
+        handler.handleRoutingReport(routingReport(Routing.Error.NONE), session)
         advanceUntilIdle()
 
         assertEquals(proven, updates.single().ackProofStatus)
@@ -997,9 +754,9 @@ class MeshDataHandlerTest {
         everySuspend { packetRepository.findReactionsWithId(99) } returns listOf(forged)
         everySuspend { packetRepository.updateReaction(any()) } calls { call -> updates.add(call.arg(0)) }
 
-        handler.handleReceivedData(
-            routingPacket(Routing.Error.NONE, MeshPacket.AckProofStatus.ACK_PROOF_VALID),
-            123,
+        handler.handleRoutingReport(
+            routingReport(Routing.Error.NONE, MeshPacket.AckProofStatus.ACK_PROOF_VALID),
+            session,
         )
         advanceUntilIdle()
 
@@ -1011,47 +768,21 @@ class MeshDataHandlerTest {
     @Test
     fun `routing nak completes dispatched response as rejected`() = testScope.runTest {
         // NO_ROUTE keeps this ownership test independent of errors that also raise localized UI warnings.
-        handler.handleReceivedData(routingPacket(Routing.Error.NO_ROUTE), 123)
+        handler.handleRoutingReport(routingReport(Routing.Error.NO_ROUTE), session)
         advanceUntilIdle()
-
-        verifySuspend { packetHandler.completeDispatchedResponse(99, complete = false, from = 456) }
     }
 
     @Test
     fun `routing ack from a retired generation cannot update the replacement database`() = testScope.runTest {
-        val routing = Routing.Builder().also { wb -> wb.error_reason = Routing.Error.NONE }.build()
-        val packet =
-            MeshPacket.Builder()
-                .also { wb ->
-                    wb.from = 456
-                    wb.decoded =
-                        Data.Builder()
-                            .also { wb ->
-                                wb.portnum = PortNum.ROUTING_APP
-                                wb.payload = routing.encode().toByteString()
-                                wb.request_id = 99
-                            }
-                            .build()
-                }
-                .build()
-        val dataPacket =
-            DataPacket(
-                from = "!remote",
-                to = NodeAddress.ID_BROADCAST,
-                bytes = routing.encode().toByteString(),
-                dataType = PortNum.ROUTING_APP.value,
-            )
-        every { dataMapper.toDataPacket(packet) } returns dataPacket
-        every { nodeManager.toNodeID(456) } returns "!remote"
-        everySuspend { radioInterfaceService.runWithSessionLease(session, any()) } returns false
+        every { radioInterfaceService.sessionScope(session) } returns null
+        every { radioInterfaceService.isSessionActive(session) } returns false
 
-        handler.handleReceivedData(packet, 123)
+        handler.handleRoutingReport(routingReport(Routing.Error.NONE), session)
         advanceUntilIdle()
 
         verifySuspend(exactly(0)) { packetRepository.findPacketsWithId(any()) }
         verifySuspend(exactly(0)) { packetRepository.findReactionsWithId(any()) }
         verifySuspend(exactly(0)) { packetRepository.update(any(), any()) }
-        verifySuspend(exactly(0)) { packetHandler.completeDispatchedResponse(any(), any(), any()) }
     }
 
     // --- Telemetry handling ---
@@ -1218,7 +949,8 @@ class MeshDataHandlerTest {
                 dataType = PortNum.TEXT_MESSAGE_APP.value,
             )
         every { dataMapper.toDataPacket(packet) } returns dataPacket
-        everySuspend { radioInterfaceService.runWithSessionLease(session, any()) } returns false
+        every { radioInterfaceService.sessionScope(session) } returns null
+        every { radioInterfaceService.isSessionActive(session) } returns false
 
         handler.handleReceivedData(packet, 123)
         advanceUntilIdle()
@@ -1876,41 +1608,6 @@ class MeshDataHandlerTest {
     // --- Admin message handling ---
 
     @Test
-    fun `admin message delegates to adminPacketHandler`() {
-        val admin =
-            org.meshtastic.proto.AdminMessage.Builder()
-                .also { wb -> wb.session_passkey = okio.ByteString.of(1, 2, 3) }
-                .build()
-        val packet =
-            MeshPacket.Builder()
-                .also { wb ->
-                    wb.from = 123
-                    wb.decoded =
-                        Data.Builder()
-                            .also { wb ->
-                                wb.portnum = PortNum.ADMIN_APP
-                                wb.payload = admin.encode().toByteString()
-                            }
-                            .build()
-                }
-                .build()
-        val dataPacket =
-            DataPacket(
-                from = "!local",
-                to = NodeAddress.ID_BROADCAST,
-                bytes = admin.encode().toByteString(),
-                dataType = PortNum.ADMIN_APP.value,
-            )
-        every { dataMapper.toDataPacket(packet) } returns dataPacket
-
-        handler.handleReceivedData(packet, 123)
-
-        verify { adminPacketHandler.handleAdminMessage(packet, 123, session) }
-    }
-
-    // --- Message filtering ---
-
-    @Test
     fun `filtered message is inserted with filtered flag`() = testScope.runTest {
         val packet =
             MeshPacket.Builder()
@@ -2216,10 +1913,16 @@ class MeshDataHandlerTest {
         every { packetRepository.getWaypoints() } returns flowOf(listOf(stored))
     }
 
-    private fun stubWaypointPersistDependencies(txId: Int) {
+    private fun stubWaypointPersistDependencies(txId: Int, namedSender: Boolean = false) {
         everySuspend { packetRepository.findPacketsWithId(txId) } returns emptyList()
         everySuspend { packetRepository.getContactSettings(any()) } returns ContactSettings(contactKey = "test")
         every { messageFilter.shouldFilter(any(), any()) } returns false
+        // An accepted live waypoint notifies; keep its sender name and text off compose-resources.
+        if (namedSender) {
+            every { nodeManager.getNodeById(any()) } returns
+                Node(num = 1, user = User.Builder().also { wb -> wb.long_name = "Sender" }.build())
+            handler.waypointMessageFormatter = { name -> "Waypoint received: $name" }
+        }
     }
 
     @Test
@@ -2311,7 +2014,7 @@ class MeshDataHandlerTest {
                     }
                     .build(),
             )
-        stubWaypointPersistDependencies(502)
+        stubWaypointPersistDependencies(502, namedSender = true)
 
         handler.handleReceivedData(packet, 123)
         advanceUntilIdle()
@@ -2334,7 +2037,7 @@ class MeshDataHandlerTest {
                     }
                     .build(),
             )
-        stubWaypointPersistDependencies(503)
+        stubWaypointPersistDependencies(503, namedSender = true)
 
         handler.handleReceivedData(packet, 123)
         advanceUntilIdle()
@@ -2358,7 +2061,7 @@ class MeshDataHandlerTest {
                     }
                     .build(),
             )
-        stubWaypointPersistDependencies(504)
+        stubWaypointPersistDependencies(504, namedSender = true)
 
         handler.handleReceivedData(packet, 123)
         advanceUntilIdle()
@@ -2381,7 +2084,7 @@ class MeshDataHandlerTest {
                     }
                     .build(),
             )
-        stubWaypointPersistDependencies(505)
+        stubWaypointPersistDependencies(505, namedSender = true)
 
         handler.handleReceivedData(packet, 123)
         advanceUntilIdle()
@@ -2409,6 +2112,42 @@ class MeshDataHandlerTest {
                     .build(),
             )
         stubWaypointPersistDependencies(506)
+
+        handler.handleReceivedData(packet, 123)
+        advanceUntilIdle()
+
+        verifySuspend {
+            serviceNotifications.updateWaypointNotification(
+                any(),
+                "Hawk Ridge",
+                "Waypoint received: Camp",
+                42,
+                false,
+            )
+        }
+    }
+
+    // Firmware notifies for any non-expired inbound waypoint and expire 0 is live (WaypointModule.cpp, meshUtils.h).
+    @Test
+    fun `a waypoint that never expires notifies`() = testScope.runTest {
+        handler.waypointMessageFormatter = { name -> "Waypoint received: $name" }
+        every { packetRepository.getWaypoints() } returns flowOf(emptyList())
+        every { nodeManager.getNodeById(any()) } returns
+            Node(num = 999, user = User.Builder().also { wb -> wb.long_name = "Hawk Ridge" }.build())
+        val packet =
+            waypointPacket(
+                txId = 507,
+                from = 999,
+                waypoint =
+                Waypoint.Builder()
+                    .also { wb ->
+                        wb.id = 42
+                        wb.name = "Camp"
+                        wb.expire = 0
+                    }
+                    .build(),
+            )
+        stubWaypointPersistDependencies(507)
 
         handler.handleReceivedData(packet, 123)
         advanceUntilIdle()

@@ -28,12 +28,12 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            api(libs.meshtastic.sdk.core)
             api(projects.core.repository)
             implementation(projects.core.common)
             implementation(projects.core.di)
             implementation(projects.core.model)
             implementation(libs.meshtastic.protobufs)
-            implementation(projects.core.ble)
 
             implementation(libs.okio)
             // mqtt-client 0.4.0 splits into BOM + core + transport modules. `api` (not `implementation`)
@@ -60,25 +60,28 @@ kotlin {
         // A browser cannot open raw TCP sockets (TcpTransport, mqtt-client-transport-tcp).
         getByName("nonWebMain").dependencies {
             api(libs.meshtastic.mqtt.client.transport.tcp)
-            // The WebSocket phone link pins CIO: OkHttp would apply the app's cleartext policy to a LAN ws:// radio.
-            implementation(libs.ktor.client.cio)
         }
 
         getByName("jvmMain") {
             dependencies {
                 implementation(libs.ktor.client.java)
-                implementation(libs.jserialcomm)
-                implementation(libs.jmdns)
+                implementation(libs.meshtastic.sdk.transport.serial)
             }
         }
 
+        getByName("jvmAndroidMain") { dependencies { implementation(libs.meshtastic.sdk.transport.tcp) } }
+
         androidMain.dependencies { implementation(libs.usb.serial.android) }
 
-        meshtasticWeb.wasmJsMain { dependencies { implementation(libs.kotlinx.browser) } }
+        meshtasticWeb.wasmJsMain {
+            dependencies {
+                implementation(libs.kotlinx.browser)
+                implementation(libs.meshtastic.sdk.transport.serial)
+            }
+        }
 
         commonTest.dependencies {
             implementation(projects.core.testing)
-            implementation(libs.kable.core) // Kable exception types for BLE failure-injection tests
             implementation(libs.ktor.client.mock)
         }
     }

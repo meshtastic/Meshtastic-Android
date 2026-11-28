@@ -27,11 +27,11 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.meshtastic.core.common.util.MeasurementSystem
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.User
+import org.meshtastic.sdk.ConnectionState
 import kotlin.test.Test
 
 @OptIn(ExperimentalTestApi::class)

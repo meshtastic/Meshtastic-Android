@@ -235,15 +235,8 @@ class MeshToCotBroadcasterTest {
             hasGPS = false,
             model = null,
             firmwareVersion = "2.8.0",
-            couldUpdate = false,
-            shouldUpdate = false,
-            currentPacketId = 1L,
-            messageTimeoutMsec = 5000,
             minAppVersion = 1,
-            maxChannels = 8,
             hasWifi = false,
-            channelUtilization = 0f,
-            airUtilTx = 0f,
             deviceId = null,
         )
     }

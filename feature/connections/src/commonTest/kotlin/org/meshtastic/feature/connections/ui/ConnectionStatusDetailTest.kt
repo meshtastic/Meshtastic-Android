@@ -16,114 +16,115 @@
  */
 package org.meshtastic.feature.connections.ui
 
-import org.meshtastic.core.model.TransportFailure
-import org.meshtastic.core.model.TransportFailureKind
-import org.meshtastic.core.model.TransportPhase
-import org.meshtastic.core.model.TransportStatus
+import com.juul.kable.GattStatusException
+import org.meshtastic.core.ble.BluetoothUnsupportedException
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.connection_failed
 import org.meshtastic.core.resources.connection_failure_bluetooth_or_location_unavailable
 import org.meshtastic.core.resources.connection_failure_bluetooth_unavailable
 import org.meshtastic.core.resources.connection_failure_connect_failed
-import org.meshtastic.core.resources.connection_failure_connection_rejected
 import org.meshtastic.core.resources.connection_failure_out_of_range
-import org.meshtastic.core.resources.connection_failure_pairing_required
-import org.meshtastic.core.resources.connection_failure_unknown
+import org.meshtastic.core.resources.connection_phase_handshake_config
 import org.meshtastic.core.resources.connection_phase_handshake_nodes
-import org.meshtastic.core.resources.connection_phase_subscribing
+import org.meshtastic.core.resources.node_restarting
+import org.meshtastic.core.resources.reconnecting
 import org.meshtastic.feature.connections.ui.components.RetryCountdown
 import org.meshtastic.feature.connections.ui.components.toConnectionStatusDetail
+import org.meshtastic.sdk.ConfigPhase
+import org.meshtastic.sdk.ConnectionState
+import org.meshtastic.sdk.MeshtasticException
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
+import kotlin.time.Instant
 
 class ConnectionStatusDetailTest {
 
+    private val now = Instant.fromEpochMilliseconds(7_500L)
+
+    /** A Bluetooth link the radio dropped on a supervision timeout, GATT status 0x08. */
+    private val outOfRange = MeshtasticException.Transport("link", GattStatusException(message = "link", status = 8))
+
     @Test
-    fun `no status and a connected link add nothing`() {
-        assertNull(null.toConnectionStatusDetail(nowMillis = 0L))
-        assertNull(TransportStatus(TransportPhase.Connected).toConnectionStatusDetail(nowMillis = 0L))
+    fun `a reconnect waiting out its backoff counts whole seconds up to the attempt and names the failure`() {
+        val state =
+            ConnectionState.Reconnecting(outOfRange, attempt = 3, retryAt = Instant.fromEpochMilliseconds(20_000))
+
+        val detail = state.toConnectionStatusDetail(now, isBluetooth = true)
+
+        assertEquals(Res.string.reconnecting, detail.status)
+        assertEquals(RetryCountdown(seconds = 13, attempt = 3), detail.retry)
+        assertEquals(Res.string.connection_failure_out_of_range, detail.failure)
+        assertFalse(detail.canConnect)
+        val late = state.toConnectionStatusDetail(Instant.fromEpochMilliseconds(30_000), isBluetooth = true)
+        assertEquals(RetryCountdown(seconds = 0, attempt = 3), late.retry)
     }
 
     @Test
-    fun `a phase in progress names the phase and the last failure`() {
-        val detail =
-            TransportStatus(
-                phase = TransportPhase.Subscribing,
-                lastFailure = TransportFailure(TransportFailureKind.PairingRequired, "GATT Error Unknown."),
-            )
-                .toConnectionStatusDetail(nowMillis = 0L)
+    fun `an attempt in flight shows no countdown`() {
+        val state = ConnectionState.Reconnecting(outOfRange, attempt = 2, retryAt = null)
 
-        assertEquals(Res.string.connection_phase_subscribing, detail?.phase)
-        assertEquals(Res.string.connection_failure_pairing_required, detail?.failure)
-        assertNull(detail?.retry)
+        assertNull(state.toConnectionStatusDetail(now, isBluetooth = true).retry)
     }
 
     @Test
-    fun `waiting to retry counts whole seconds up to the next attempt`() {
-        val status =
-            TransportStatus(
-                phase = TransportPhase.WaitingToRetry,
-                lastFailure = TransportFailure(TransportFailureKind.OutOfRange),
-                nextAttempt = 3,
-                retryAtMillis = 20_000L,
-            )
+    fun `only a Bluetooth failure names its cause`() {
+        val state = ConnectionState.Reconnecting(outOfRange, attempt = 1)
 
-        val detail = status.toConnectionStatusDetail(nowMillis = 7_500L)
-        assertNull(detail?.phase)
-        assertEquals(RetryCountdown(seconds = 13, attempt = 3), detail?.retry)
-        assertEquals(Res.string.connection_failure_out_of_range, detail?.failure)
-
-        assertEquals(RetryCountdown(seconds = 0, attempt = 3), status.toConnectionStatusDetail(30_000L)?.retry)
-    }
-
-    @Test
-    fun `an unclassified failure reads as connection failed`() {
-        val detail =
-            TransportStatus(
-                phase = TransportPhase.WaitingToRetry,
-                lastFailure = TransportFailure(TransportFailureKind.Unknown, "Timed out waiting for FROMNUM"),
-                nextAttempt = 2,
-                retryAtMillis = 5_000L,
-            )
-                .toConnectionStatusDetail(nowMillis = 0L)
-
-        assertEquals(Res.string.connection_failure_unknown, detail?.failure)
+        assertEquals(
+            Res.string.connection_failure_connect_failed,
+            state.toConnectionStatusDetail(now, isBluetooth = false).failure,
+        )
     }
 
     @Test
     fun `Bluetooth unavailable names location services only where scanning needs them`() {
-        val status =
-            TransportStatus(TransportPhase.Connecting, TransportFailure(TransportFailureKind.BluetoothUnavailable))
+        val off =
+            ConnectionState.Reconnecting(
+                MeshtasticException.Transport("off", BluetoothUnsupportedException(IllegalStateException("off"))),
+                attempt = 1,
+            )
+
         assertEquals(
             Res.string.connection_failure_bluetooth_unavailable,
-            status.toConnectionStatusDetail(nowMillis = 0L)?.failure,
+            off.toConnectionStatusDetail(now, isBluetooth = true).failure,
         )
         assertEquals(
             Res.string.connection_failure_bluetooth_or_location_unavailable,
-            status.toConnectionStatusDetail(nowMillis = 0L, bluetoothNeedsLocation = true)?.failure,
+            off.toConnectionStatusDetail(now, isBluetooth = true, bluetoothNeedsLocation = true).failure,
         )
     }
 
     @Test
-    fun `a rejection the platform does not explain maps to may need pairing`() {
-        val detail =
-            TransportStatus(TransportPhase.Subscribing, TransportFailure(TransportFailureKind.ConnectionRejected))
-                .toConnectionStatusDetail(nowMillis = 0L)
-        assertEquals(Res.string.connection_failure_connection_rejected, detail?.failure)
+    fun `a drop during an expected restart reads as the restart with no failure`() {
+        val state = ConnectionState.Reconnecting(outOfRange, attempt = 1)
+
+        val detail = state.toConnectionStatusDetail(now, restartExpected = true, isBluetooth = true)
+
+        assertEquals(Res.string.node_restarting, detail.status)
+        assertNull(detail.failure)
     }
 
     @Test
-    fun `a handshake phase carries no transport failure`() {
-        val detail = TransportStatus(TransportPhase.HandshakeNodes).toConnectionStatusDetail(nowMillis = 0L)
-        assertEquals(Res.string.connection_phase_handshake_nodes, detail?.phase)
-        assertNull(detail?.failure)
+    fun `a client that stopped trying names the cause and offers to connect`() {
+        val detail = ConnectionState.Failed(outOfRange).toConnectionStatusDetail(now, isBluetooth = true)
+
+        assertEquals(Res.string.connection_failed, detail.status)
+        assertEquals(Res.string.connection_failure_out_of_range, detail.failure)
+        assertTrue(detail.canConnect)
     }
 
     @Test
-    fun `a connect failure maps to could not connect`() {
-        val detail =
-            TransportStatus(TransportPhase.Connecting, TransportFailure(TransportFailureKind.ConnectFailed))
-                .toConnectionStatusDetail(nowMillis = 0L)
-        assertEquals(Res.string.connection_failure_connect_failed, detail?.failure)
+    fun `the handshake names its stage`() {
+        assertEquals(
+            Res.string.connection_phase_handshake_config,
+            ConnectionState.Configuring(ConfigPhase.Stage1, 0.2f).toConnectionStatusDetail(now).status,
+        )
+        assertEquals(
+            Res.string.connection_phase_handshake_nodes,
+            ConnectionState.Configuring(ConfigPhase.Stage2, 0.6f).toConnectionStatusDetail(now).status,
+        )
     }
 }

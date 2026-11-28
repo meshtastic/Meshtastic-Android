@@ -129,7 +129,7 @@ class MeshToCotBroadcaster(
             if (!admit(node.num, cot)) continue
             takServerManager.broadcast(cot)
             sent++
-            delay(MESH_TO_COT_BROADCAST_SPACING_MS)
+            delay(MESH_TO_COT_BROADCAST_SPACING)
         }
         if (sent > 0) {
             Logger.i { "Mesh-to-CoT: sent $sent of ${eligible.size} eligible node(s) to TAK clients ($reason)" }

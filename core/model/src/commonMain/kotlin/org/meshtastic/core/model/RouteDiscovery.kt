@@ -41,7 +41,7 @@ val MeshPacket.fullRouteDiscovery: RouteDiscovery?
             // is used to detect versions where hopStart can be trusted to have been set.
             // Assuming default integer values of 0 for hop_start and snr_back_count if unset.
             val hopStartVal = hop_start
-            val hasBitfield = (d.bitfield ?: 0) != 0
+            val hasBitfield = d.bitfield != null
 
             return originalRd
                 .newBuilder()

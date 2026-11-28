@@ -26,7 +26,6 @@ import dev.mokkery.verify
 import kotlinx.coroutines.flow.MutableStateFlow
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.Data
@@ -36,14 +35,11 @@ import org.meshtastic.proto.NeighborInfo
 import org.meshtastic.proto.User
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class NeighborInfoHandlerImplTest {
 
-    private val nodeManager = mock<NodeManager>(MockMode.autofill)
     private val serviceRepository = mock<ServiceRepository>(MockMode.autofill)
     private val nodeRepository = mock<NodeRepository>(MockMode.autofill)
 
@@ -53,88 +49,8 @@ class NeighborInfoHandlerImplTest {
 
     @BeforeTest
     fun setUp() {
-        every { nodeManager.myNodeNum } returns MutableStateFlow<Int?>(myNodeNum)
         every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(emptyMap())
-        handler = NeighborInfoHandlerImpl(nodeManager, serviceRepository, nodeRepository)
-    }
-
-    @Test
-    fun `handleNeighborInfo stores lastNeighborInfo when from own node`() {
-        val ni =
-            NeighborInfo.Builder()
-                .also { wb ->
-                    wb.node_id = myNodeNum
-                    wb.neighbors =
-                        listOf(
-                            Neighbor.Builder()
-                                .also { wb ->
-                                    wb.node_id = 100
-                                    wb.snr = 5.0f
-                                }
-                                .build(),
-                        )
-                }
-                .build()
-        val packet = createPacketWithNeighborInfo(from = myNodeNum, ni = ni)
-
-        every { nodeRepository.getUser(100) } returns
-            User.Builder()
-                .also { wb ->
-                    wb.long_name = "Alice"
-                    wb.short_name = "AL"
-                }
-                .build()
-        every { nodeRepository.getUser(myNodeNum) } returns
-            User.Builder()
-                .also { wb ->
-                    wb.long_name = "Me"
-                    wb.short_name = "ME"
-                }
-                .build()
-
-        handler.handleNeighborInfo(packet)
-
-        assertEquals(ni, handler.lastNeighborInfo)
-    }
-
-    @Test
-    fun `handleNeighborInfo does not store lastNeighborInfo when from remote node`() {
-        val remoteNode = 99999
-        val ni =
-            NeighborInfo.Builder()
-                .also { wb ->
-                    wb.node_id = remoteNode
-                    wb.neighbors =
-                        listOf(
-                            Neighbor.Builder()
-                                .also { wb ->
-                                    wb.node_id = 200
-                                    wb.snr = 3.0f
-                                }
-                                .build(),
-                        )
-                }
-                .build()
-        val packet = createPacketWithNeighborInfo(from = remoteNode, ni = ni)
-
-        every { nodeRepository.getUser(200) } returns
-            User.Builder()
-                .also { wb ->
-                    wb.long_name = "Bob"
-                    wb.short_name = "BO"
-                }
-                .build()
-        every { nodeRepository.getUser(remoteNode) } returns
-            User.Builder()
-                .also { wb ->
-                    wb.long_name = "Remote"
-                    wb.short_name = "RM"
-                }
-                .build()
-
-        handler.handleNeighborInfo(packet)
-
-        assertNull(handler.lastNeighborInfo)
+        handler = NeighborInfoHandlerImpl(serviceRepository, nodeRepository)
     }
 
     @Test
@@ -220,7 +136,7 @@ class NeighborInfoHandlerImplTest {
     fun `handleNeighborInfo ignores packet with null decoded`() {
         val packet = MeshPacket.Builder().also { wb -> wb.from = myNodeNum }.build()
         handler.handleNeighborInfo(packet)
-        assertNull(handler.lastNeighborInfo)
+        verify(dev.mokkery.verify.VerifyMode.not) { serviceRepository.setNeighborInfoResponse(any()) }
     }
 
     @Test

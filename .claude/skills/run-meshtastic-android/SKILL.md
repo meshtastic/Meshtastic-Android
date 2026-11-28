@@ -77,8 +77,8 @@ radio button, then the device row for `127.0.0.1` under Recent Network Devices.
 The sim's `replay_status` flips to `connected:true` within seconds and the Nodes
 tab fills with the sim's mesh (`RPLY Replay Observer`, …).
 
-The connection card can sit on "Reconnecting…" while packets already flow — the
-label lags the config download. Trust `replay_status` and the Nodes list, not the
+The connection card can sit on a connecting or download step while packets
+already flow — the label lags the config download. Trust `replay_status` and the Nodes list, not the
 card text.
 
 **Screenshots capture the window's on-screen region**, so the window must be
@@ -208,12 +208,12 @@ faster even for humans.
   or worktree; `pgrep -fl MainKt`, kill, relaunch.
 - Trust dialog never tapped, app stuck on dialog → re-run `tap_text=Connect`;
   the driver prefers an exact text match over a substring.
-- UI card stuck "Reconnecting…" but sim says `connected:true` → not stuck; config
-  download in progress. Check the Nodes tab for the sim's nodes.
+- UI card stuck on a connecting step but sim says `connected:true` → not stuck;
+  config download in progress. Check the Nodes tab for the sim's nodes.
 - Connection flapping → `desktopApp/build/run/main/hotRun.stderr.txt` carries the
-  transport-level story ("Handshake stall detected at Stage 1 … requesting forced
-  transport restart" is the app self-recovering, not a crash). Also check that a
-  second app isn't fighting for the same sim (one client per simulated node).
+  transport-level story ("SDK PhoneAPI session failed: …" followed by a retry is
+  the app self-recovering, not a crash). Also check that a second app isn't
+  fighting for the same sim (one client per simulated node).
 - A bare `status` right after spawn can report `connected:false` while the app is
   fine — the server attach is asynchronous; `wait` (or any UI command, which
   auto-waits) is the truth.

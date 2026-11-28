@@ -16,16 +16,15 @@
  */
 package org.meshtastic.core.data.repository
 
+import app.cash.turbine.test
 import dev.mokkery.MockMode
 import dev.mokkery.mock
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.withContext
 import org.meshtastic.core.data.datasource.SwitchingChannelSetDataSource
 import org.meshtastic.core.datastore.LocalConfigDataSource
 import org.meshtastic.core.datastore.ModuleConfigDataSource
@@ -33,11 +32,23 @@ import org.meshtastic.core.datastore.di.CoreLocalConfigDataStore
 import org.meshtastic.core.datastore.di.CoreModuleConfigDataStore
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.testing.FakeDatabaseProvider
+import org.meshtastic.core.testing.FakeRadioInterfaceService
+import org.meshtastic.proto.DeviceUIConfig
 import org.meshtastic.proto.FileInfo
+import org.meshtastic.proto.FromRadio
+import org.meshtastic.proto.LoRaRegionPresetMap
+import org.meshtastic.sdk.InMemoryStorageProvider
+import org.meshtastic.sdk.RadioClient
+import org.meshtastic.sdk.TransportIdentity
+import org.meshtastic.sdk.testing.FakeRadioTransport
+import org.meshtastic.sdk.testing.toFrame
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
+import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class RadioConfigRepositoryImplTest {
@@ -46,7 +57,7 @@ class RadioConfigRepositoryImplTest {
 
     // These data sources are concrete wrappers -- construct them with test doubles. Channels are now stored per-device
     // via SwitchingChannelSetDataSource (DatabaseProvider), the others still wrap a DataStore<T>. None are touched by
-    // the addFileInfo/fileManifestFlow/clearFileManifest behavior under test here. The channel source needs a real
+    // the session-derived flows under test here. The channel source needs a real
     // provider rather than an autofill mock: it composes its DAO flow at construction, and a mock returns null for the
     // non-null Flow.
     private val dbProvider = FakeDatabaseProvider()
@@ -65,103 +76,83 @@ class RadioConfigRepositoryImplTest {
     private val localConfigDataSource = LocalConfigDataSource(mock<CoreLocalConfigDataStore>(MockMode.autofill))
     private val moduleConfigDataSource = ModuleConfigDataSource(mock<CoreModuleConfigDataStore>(MockMode.autofill))
 
-    private fun createRepository() =
-        RadioConfigRepositoryImpl(nodeDB, channelSetDataSource, localConfigDataSource, moduleConfigDataSource)
+    private fun createRepository(radio: RadioInterfaceService = FakeRadioInterfaceService()) =
+        RadioConfigRepositoryImpl(nodeDB, channelSetDataSource, localConfigDataSource, moduleConfigDataSource, radio)
 
-    // Regression guard for a real growth vector found via adversarial mesh-fuzz testing: a rogue/hostile
-    // peer can emit FileInfo packets in a tight loop for the entire lifetime of a session -- nothing but
-    // the *next* handshake's clearFileManifest() bounds this accumulator otherwise (addFileInfo used to be
-    // an unconditional `_fileManifestFlow.value += info`). A real device's manifest is bounded by its own
-    // flash storage, so this only bites under an adversarial/malformed stream, but a rogue node hitting it
-    // for the life of a long-running session is a real unbounded-memory-growth DoS.
-    @Test
-    fun `addFileInfo caps the manifest instead of growing without bound`() = runTest {
-        val repository = createRepository()
-        // Mirrors the private MAX_FILE_MANIFEST_ENTRIES cap in RadioConfigRepositoryImpl -- kept as a
-        // literal here rather than exposing the constant, since the cap value itself isn't the contract
-        // under test (that it caps at all, deterministically, is).
-        val cap = 4096
-
-        repeat(cap + 500) { i ->
-            repository.addFileInfo(
-                FileInfo.Builder()
-                    .also { wb ->
-                        wb.file_name = "file$i.bin"
-                        wb.size_bytes = i
-                    }
-                    .build(),
+    private suspend fun TestScope.radioWithSdkBundle(): FakeRadioInterfaceService {
+        val frames =
+            listOf(
+                FromRadio.Builder().also { it.deviceuiConfig = SENT_UI_CONFIG }.build().toFrame(),
+                FromRadio.Builder().also { it.region_presets = SENT_PRESETS }.build().toFrame(),
+                FromRadio.Builder().also { it.fileInfo = SENT_FILE }.build().toFrame(),
             )
+        val transport =
+            FakeRadioTransport(
+                identity = TransportIdentity("fake:cfg"),
+                frames = frames,
+                autoHandshake = true,
+                autoQueueStatus = true,
+                nodeNum = 1,
+            )
+        val client =
+            RadioClient.Builder()
+                .transport(transport)
+                .storage(InMemoryStorageProvider())
+                .autoSyncTimeOnConnect(false)
+                .coroutineContext(backgroundScope.coroutineContext)
+                .rpcTimeout(60.seconds)
+                .sendAckTimeout(60.seconds)
+                .build()
+        client.connect()
+        runCurrent()
+        return FakeRadioInterfaceService(backgroundScope).also { radio ->
+            radio.client = client
+            radio.setDeviceAddress("tselected")
+            radio.connect()
         }
-
-        val manifest = repository.fileManifestFlow.first()
-        assertEquals(cap, manifest.size)
-    }
-
-    // Regression guard for the read-then-write race in addFileInfo (flagged in review): handleFileInfo
-    // dispatches each packet on its own scope.handledLaunch, so addFileInfo runs concurrently. The old
-    // `val c = flow.value; flow.value = c + info` could drop updates (two callers read the same list,
-    // one append is lost) or bypass the cap. update{} makes it atomic. Firing many concurrent adds below
-    // the cap must land every one -- no lost updates. (Trivially true when single-threaded; actually
-    // exercises the race on multi-threaded targets like the JVM.)
-    @Test
-    fun `concurrent addFileInfo does not lose updates`() = runTest {
-        val repository = createRepository()
-        val n = 2000 // below the 4096 cap, so every add must be retained
-
-        withContext(Dispatchers.Default) {
-            coroutineScope {
-                (0 until n)
-                    .map { i ->
-                        async {
-                            repository.addFileInfo(
-                                FileInfo.Builder()
-                                    .also { wb ->
-                                        wb.file_name = "f$i.bin"
-                                        wb.size_bytes = i
-                                    }
-                                    .build(),
-                            )
-                        }
-                    }
-                    .awaitAll()
-            }
-        }
-
-        assertEquals(n, repository.fileManifestFlow.first().size)
     }
 
     @Test
-    fun `clearFileManifest empties the manifest so a new handshake can accumulate again`() = runTest {
-        val repository = createRepository()
-        repository.addFileInfo(
-            FileInfo.Builder()
-                .also { wb ->
-                    wb.file_name = "a.bin"
-                    wb.size_bytes = 1
-                }
-                .build(),
-        )
-        repository.addFileInfo(
-            FileInfo.Builder()
-                .also { wb ->
-                    wb.file_name = "b.bin"
-                    wb.size_bytes = 2
-                }
-                .build(),
-        )
-        assertEquals(2, repository.fileManifestFlow.first().size)
+    fun `device UI config and region presets come from the active session's SDK bundle`() = runTest {
+        val repository = createRepository(radioWithSdkBundle())
 
-        repository.clearFileManifest()
-        assertEquals(0, repository.fileManifestFlow.first().size)
+        assertEquals(SENT_UI_CONFIG, repository.deviceUIConfigFlow.first())
+        assertEquals(SENT_PRESETS, repository.loraRegionPresetMapFlow.first())
+    }
 
-        repository.addFileInfo(
+    @Test
+    fun `the flows are null again once the session ends`() = runTest {
+        val radio = radioWithSdkBundle()
+        val repository = createRepository(radio)
+
+        repository.deviceUIConfigFlow.test {
+            assertEquals(SENT_UI_CONFIG, awaitItem())
+            radio.disconnect()
+            assertNull(awaitItem())
+        }
+    }
+
+    @Test
+    fun `the file manifest follows the session and empties when it ends`() = runTest {
+        val radio = radioWithSdkBundle()
+        val repository = createRepository(radio)
+
+        repository.fileManifestFlow.test {
+            assertEquals(listOf(SENT_FILE), awaitItem())
+            radio.disconnect()
+            assertEquals(emptyList<FileInfo>(), awaitItem())
+        }
+    }
+
+    private companion object {
+        val SENT_UI_CONFIG: DeviceUIConfig = DeviceUIConfig.Builder().also { it.screen_brightness = 77 }.build()
+        val SENT_PRESETS: LoRaRegionPresetMap = LoRaRegionPresetMap.Builder().build()
+        val SENT_FILE: FileInfo =
             FileInfo.Builder()
-                .also { wb ->
-                    wb.file_name = "c.bin"
-                    wb.size_bytes = 3
+                .also {
+                    it.file_name = "a.uf2"
+                    it.size_bytes = 10
                 }
-                .build(),
-        )
-        assertEquals(1, repository.fileManifestFlow.first().size)
+                .build()
     }
 }

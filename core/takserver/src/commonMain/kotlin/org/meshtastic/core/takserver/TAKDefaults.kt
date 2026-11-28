@@ -19,6 +19,7 @@ package org.meshtastic.core.takserver
 import org.meshtastic.proto.MemberRole
 import org.meshtastic.proto.Team
 import org.meshtastic.proto.User
+import kotlin.time.Duration.Companion.milliseconds
 
 // Port 8089 is the standard TAK TLS port. Matches the iOS implementation.
 internal const val DEFAULT_TAK_PORT = 8089
@@ -49,7 +50,7 @@ internal const val TAK_XML_READ_BUFFER_SIZE = 4_096
 // sending t-x-c-t pings at 15 seconds (RX_STALE_SECONDS). Send keepalives
 // well under the 15-second threshold so ATAK never enters its stale phase.
 internal const val TAK_KEEPALIVE_INTERVAL_MS = 10_000L
-internal const val TAK_ACCEPT_LOOP_DELAY_MS = 100L
+internal val TAK_ACCEPT_LOOP_DELAY = 100.milliseconds
 internal const val TAK_COORDINATE_SCALE = 1e7
 internal const val TAK_UNKNOWN_POINT_VALUE = 9_999_999.0
 internal const val TAK_DIRECT_MESSAGE_PARTS_MIN = 3
@@ -57,7 +58,7 @@ internal const val TAK_DIRECT_MESSAGE_PARTS_MIN = 3
 /**
  * Hard cap on the size of a TAK v2 wire payload we will hand to the mesh layer.
  *
- * `CommandSenderImpl.sendData` checks `Data.ADAPTER.isWithinSizeLimit(data, Constants.DATA_PAYLOAD_LEN.value)` where
+ * `PacketHandlerImpl.sendData` checks `Data.ADAPTER.isWithinSizeLimit(data, Constants.DATA_PAYLOAD_LEN.value)` where
  * `DATA_PAYLOAD_LEN = 233`. That 233 applies to the ENTIRE encoded `Data` proto (portnum tag + payload length-delim +
  * reply_id + emoji), not just the `payload` bytes. The wrapper for a port-78 (`ATAK_PLUGIN_V2`) message costs roughly:
  * * portnum varint + tag: 2 bytes
@@ -110,7 +111,7 @@ internal const val MESH_NODE_STALE_MINUTES = 15
 internal const val MESH_TO_COT_REFRESH_INTERVAL_MS = 5L * 60L * 1_000L
 
 /** Spacing between consecutive node broadcasts so a full replay doesn't flood the TAK client. Matches Apple's 10ms. */
-internal const val MESH_TO_COT_BROADCAST_SPACING_MS = 10L
+internal val MESH_TO_COT_BROADCAST_SPACING = 10.milliseconds
 
 /**
  * Max characters of raw CoT XML we'll write to logcat when dropping an oversized packet. ATAK can emit events several

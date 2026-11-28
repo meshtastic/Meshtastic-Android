@@ -32,13 +32,13 @@ Guidelines on managing Kotlin Multiplatform (KMP) source-sets, expected abstract
   - `java.io.*` -> `Okio` (`BufferedSource`/`BufferedSink`).
 - **Networking:** Pure **Ktor** in shared code. The Android host's `HttpClient` runs on Ktor's OkHttp engine (the platform `HttpURLConnection` engine crashes on canceled gzip reads); desktop uses the Java engine. The one direct OkHttp use is the google flavor's map-tile client (`MapTileHttpClient`); add no others. Ktor `Logging` plugin for debugging.
 - **HTTP Configuration:** Every host's API `HttpClient` calls `installApiDefaults` from `core:network`, which installs the shared base URL (`API_BASE_URL`), JSON, timeouts and retry policy. A host passes its `Json`, a `userAgent` (null where the platform sets its own, as a browser does) and `logRequests`, which alone turns on request logging, and supplies its engine (`androidApp/.../di/NetworkModule.kt`, `desktopApp/.../di/DesktopRuntimeModule.kt`, `webApp/.../di/WebRuntimeModule.kt`). Feature API services use relative paths; `DefaultRequest` sets the base URL.
-- **BLE:** Route through `core:ble` using **Kable**.
+- **BLE:** The link runs in the SDK's BLE transport; discovery, bonding and permissions go through `core:ble` using **Kable**.
 - **Room KMP:** Use `factory = { MeshtasticDatabaseConstructor.initialize() }` in `Room.databaseBuilder`.
 
 ## 4. Hierarchy & Source-Set Conventions
 - **Hierarchy template first:** Prefer Kotlin's default hierarchy template and convention plugins over manual `dependsOn(...)` graphs. Manual source-set wiring should be reserved for cases the template cannot model.
 - **`expect`/`actual` restraint:** Prefer interfaces + DI for platform capabilities; use `expect`/`actual` for small unavoidable platform primitives. Avoid broad expect/actual class hierarchies when an interface-based boundary is sufficient.
-- **Shared helpers over duplicated lambdas:** When `androidMain` and `jvmMain` contain identical pure-Kotlin logic (formatting, action dispatch, validation), extract to `commonMain`. Examples: `formatLogsTo()`, `handleNodeAction()`, `findNodeByNameSuffix()`, `MeshtasticAppShell`, `BaseRadioTransportFactory`.
+- **Shared helpers over duplicated lambdas:** When `androidMain` and `jvmMain` contain identical pure-Kotlin logic (formatting, action dispatch, validation), extract to `commonMain`. Examples: `formatLogsTo()`, `handleNodeAction()`, `findNodeByNameSuffix()`, `MeshtasticAppShell`, `BaseRadioLinks`.
 
 ## 5. Dependency Catalog Aliases
 - **JetBrains fork aliases:** Version catalog aliases for JetBrains-forked AndroidX artifacts use the `jetbrains-*` prefix (e.g., `jetbrains-lifecycle-runtime-compose`, `jetbrains-navigation3-ui`). Plain `androidx-*` aliases are true Google AndroidX artifacts. Never mix them up in `commonMain`. `commonMain` takes an `androidx-*` alias only where AndroidX publishes the artifact as KMP itself: `androidx-navigation3-runtime`, DataStore, Room, SQLite bundled and Paging.

@@ -63,7 +63,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeListDensity
 import org.meshtastic.core.model.excludes
@@ -107,6 +106,7 @@ import org.meshtastic.feature.node.component.NodeFilterToggles
 import org.meshtastic.feature.node.component.NodeHopHistogramSheet
 import org.meshtastic.feature.node.component.NodeListHelp
 import org.meshtastic.proto.ExcludedModules
+import org.meshtastic.sdk.ConnectionState
 
 internal fun ownNodeMenuItems(node: Node, ourNode: Node?, connectionState: ConnectionState): OwnNodeMenuItems {
     val connected = node.num == ourNode?.num && connectionState == ConnectionState.Connected

@@ -73,7 +73,6 @@ class QuickSettingsTileControllerTest {
             radioInterfaceService = radioInterfaceService,
             serviceStateWriter = mock(MockMode.autofill),
             nodeManager = mock(MockMode.autofill),
-            messageProcessor = mock(MockMode.autofill),
             serviceNotifications = mock(MockMode.autofill),
             takServerIntegration = mock(MockMode.autofill),
             takPrefs = mock(MockMode.autofill),

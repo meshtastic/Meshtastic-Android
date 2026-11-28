@@ -9,11 +9,11 @@ The `:core:repository` module defines the **data and infrastructure contracts** 
 ## Key Responsibilities
 
 - Define the reactive data contracts between the long-running mesh service and all feature/UI layers
-- Declare the raw hardware I/O interface (`RadioTransport`)
+- Declare the radio-link contracts (`RadioLinks`, `RadioLink`): the platform's address-to-SDK-client factory, and the selected radio's client and session hand-off
 - Provide the mesh node database interface (`NodeRepository`)
-- Expose per-node remote-admin passkey management (`SessionManager`)
+- Expose the active radio session's SDK admin API and per-node admin session status (`RadioInterfaceService.adminForSession`, `adminSessionStatus`)
 - Declare the packet handler contracts (admin, telemetry, traceroute, store-and-forward, neighbor info, remote shell)
-- Declare the outbound message queue, MQTT proxy, and XModem file transfer contracts
+- Declare the outbound message queue and MQTT proxy contracts, and expose the active session's SDK client (`RadioInterfaceService.clientForSession`)
 - Declare the app preference interfaces (`AppPreferences.kt`) that `:core:prefs` implements
 - Provide the `AppWidgetUpdater` contract so the mesh service can trigger widget refreshes without depending on Android widget APIs directly
 
@@ -22,13 +22,12 @@ The `:core:repository` module defines the **data and infrastructure contracts** 
 ```text
 src/
 ├── commonMain/kotlin/org/meshtastic/core/repository/
-│   ├── RadioTransport.kt              ← interface: raw hardware I/O
+│   ├── RadioLinks.kt                  ← interfaces: RadioLinks (address → SDK client), RadioLink, RadioSessionHost
 │   ├── ServiceRepository.kt           ← interface: service ↔ UI bridge (extends all providers)
 │   ├── ConnectionStateProvider.kt     ← interface: read-only connection state
 │   ├── ResponseProviders.kt           ← interfaces: TracerouteResponseProvider, NeighborInfoResponseProvider
 │   ├── ServiceStateWriter.kt          ← interface: write-side for handlers
 │   ├── NodeRepository.kt              ← interface: mesh node database
-│   ├── SessionManager.kt              ← interface: per-node passkey store
 │   ├── MeshConnectionManager.kt       ← interface: connection lifecycle callbacks
 │   ├── AppWidgetUpdater.kt            ← interface: trigger widget refresh
 │   ├── LocationRepository.kt
@@ -40,30 +39,27 @@ src/
 │   ├── QueryController.kt             ← telemetry, traceroute, position, neighbor info queries
 │   ├── AppPreferences.kt              ← UiPrefs, MapPrefs, RadioPrefs, TakPrefs and the other prefs interfaces
 │   ├── *Repository.kt                 ← firmware, hardware, device links, discovery, mesh beacon, …
-│   ├── CommandSender.kt
-│   ├── AdminPacketHandler.kt
-│   ├── FromRadioPacketHandler.kt
 │   ├── MeshConfigFlowManager.kt
 │   ├── MeshConfigHandler.kt
 │   ├── MeshDataHandler.kt
 │   ├── MeshLocationManager.kt
 │   ├── MeshLogRepository.kt
-│   ├── MeshMessageProcessor.kt
 │   ├── MessageFilter.kt
 │   ├── MessageQueue.kt
 │   ├── MqttManager.kt
 │   ├── NeighborInfoHandler.kt
 │   ├── NodeManager.kt
+│   ├── NodeRequest.kt                 ← a sent node request and the routing error that failed it
 │   ├── Notification.kt / NotificationManager.kt
 │   ├── PacketHandler.kt / PacketRepository.kt
 │   ├── QuickChatActionRepository.kt
 │   ├── RadioConfigRepository.kt
 │   ├── RadioInterfaceService.kt
-│   ├── RadioTransportCallback.kt / RadioTransportFactory.kt
+│   ├── RadioSessionContext.kt
+│   ├── TransportDisconnectReason.kt   ← why a link failed, as the user reads it
 │   ├── StoreForwardPacketHandler.kt
 │   ├── TelemetryPacketHandler.kt
 │   ├── TracerouteHandler.kt / TracerouteSnapshotRepository.kt
-│   ├── XModemFile.kt / XModemManager.kt
 │   ├── usecase/
 │   │   └── SendMessageUseCase.kt
 │   └── di/
@@ -75,32 +71,27 @@ The module has no platform source sets. Platform implementations such as the And
 
 ## Core Interfaces
 
-### `RadioTransport`
+### `RadioLinks` and `RadioLink`
 
-Raw hardware I/O contract for all physical transports (BLE, USB, TCP, Mock).
+`RadioLinks` maps a saved device address (BLE, USB, TCP, WebSocket, demo) to the SDK client that serves it; each platform binds one in `:core:data`. `RadioLink` is the selected radio: its `RadioClient`, which owns connecting and reconnecting, and `run`, which feeds the client's sessions into the app through a `RadioSessionHost`.
 
 ```kotlin
-interface RadioTransport {
-    fun handleSendToRadio(p: ByteArray): Boolean
-    fun start() {}
-    fun keepAlive() {}
-    suspend fun close()
+interface RadioLinks {
+    val supportedDeviceTypes: List<DeviceType>
+    fun isAddressValid(address: String?): Boolean
+    fun open(address: String, scope: CoroutineScope): RadioLink?
+}
+
+interface RadioLink {
+    val client: RadioClient
+    suspend fun connect()
+    suspend fun disconnect()
+    fun retryNow(): Boolean
+    suspend fun run(host: RadioSessionHost)
 }
 ```
 
-`handleSendToRadio` reports synchronous admission only: `true` means the transport accepted the bytes for asynchronous
-handoff, not that the device received them. `false` means the transport is unavailable, closed, or unable to schedule
-the handoff; delivery confirmation is a separate protocol concern.
-
-`RadioTransportWriter` (`RadioInterfaceService.kt`) is the service-facing half of the same admission contract. `trySendToRadio` must likewise return
-promptly and reports only whether the active transport accepted the bytes for asynchronous delivery.
-
-```kotlin
-interface RadioTransportWriter {
-    fun sendToRadio(bytes: ByteArray)
-    fun trySendToRadio(bytes: ByteArray): Boolean
-}
-```
+`RadioInterfaceService` admits work to the active session under a per-session gate: `sendPaced`, `tryLockdown` and `deliverMqttProxy` run only while their session still owns the link.
 
 ### `ServiceRepository`
 
@@ -109,9 +100,7 @@ Decomposed into focused sub-interfaces via Interface Segregation Principle:
 
 ```kotlin
 interface ConnectionStateProvider {
-    val connectionLifecycle: StateFlow<ConnectionLifecycle>
     val connectionState: StateFlow<ConnectionState>
-    val connectionEpochs: StateFlow<ConnectionEpochs>
 }
 
 interface TracerouteResponseProvider {
@@ -129,7 +118,7 @@ interface ServiceStateWriter {
     suspend fun emitMeshPacket(packet: MeshPacket)
     fun setTracerouteResponse(value: TracerouteResponse?)
     fun setNeighborInfoResponse(value: String?)
-    // …setters/clearers for error, progress, notification
+    // …setters/clearers for error and notification
 }
 
 interface ServiceRepository :
@@ -139,7 +128,6 @@ interface ServiceRepository :
     ServiceStateWriter {
     val clientNotification: StateFlow<ClientNotification?>
     val errorMessage: StateFlow<String?>
-    val connectionProgress: StateFlow<String?>
     val meshPacketFlow: Flow<MeshPacket>
     // …plus lockdown state, lockdown token info and sessionAuthorized, with their setters
 }
@@ -172,20 +160,6 @@ interface NodeRepository {
     suspend fun deleteNode(num: Int)
     suspend fun insertMetadata(nodeNum: Int, metadata: DeviceMetadata)
     suspend fun installConfig(mi: MyNodeInfo, nodes: List<Node>): List<Int>
-}
-```
-
-### `SessionManager`
-
-Per-node remote-admin passkey store, consumed by `:core:domain`'s `EnsureRemoteAdminSessionUseCase`.
-
-```kotlin
-interface SessionManager {
-    fun recordSession(srcNodeNum: Int, passkey: ByteString)
-    fun getPasskey(destNum: Int): ByteString
-    fun clearAll()
-    val sessionRefreshFlow: Flow<Int>
-    fun observeSessionStatus(destNum: Int): Flow<SessionStatus>
 }
 ```
 

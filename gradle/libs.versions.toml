@@ -96,7 +96,6 @@ mcp-kotlin-sdk = "0.16.0"
 
 # Other
 aboutlibraries = "15.3.0"
-jserialcomm = "2.11.4"
 coil = "3.6.3"
 datadog-gradle = "1.32.0"
 dd-sdk-android = "3.16.0"
@@ -115,11 +114,11 @@ sceneview = "4.76.0"
 vico = "3.4.0-next.1"
 kable = "0.46.0"
 mqttastic = "0.9.1"
-jmdns = "3.6.5"
 # Desktop-only: speaks StatusNotifierItem over D-Bus so the Linux tray icon is clickable (MIT).
 dbus-java = "5.2.2"
 qrcode-kotlin = "4.5.0"
 takpacket-sdk = "0.10.0"
+meshtastic-sdk = "0.3.2-SNAPSHOT"
 meshtastic-protobufs = "2.8.3"
 
 # Gradle Plugins
@@ -280,7 +279,6 @@ kotlinx-serialization-protobuf = { module = "org.jetbrains.kotlinx:kotlinx-seria
 pmtiles-reader = { module = "ch.poole.geo.pmtiles-reader:Reader", version = "0.3.7" }
 
 # Networking
-ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-bom = { module = "io.ktor:ktor-bom", version.ref = "ktor" }
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
@@ -338,7 +336,6 @@ meshtastic-mqtt-client-core = { module = "org.meshtastic:mqtt-client-core" }
 meshtastic-mqtt-client-transport-tcp = { module = "org.meshtastic:mqtt-client-transport-tcp" }
 meshtastic-mqtt-client-transport-ws = { module = "org.meshtastic:mqtt-client-transport-ws" }
 
-jserialcomm = { module = "com.fazecast:jSerialComm", version.ref = "jserialcomm" }
 okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 okio-fakefilesystem = { module = "com.squareup.okio:okio-fakefilesystem", version.ref = "okio" }
 uri-kmp = { module = "com.eygraber:uri-kmp", version.ref = "uri-kmp" }
@@ -346,9 +343,7 @@ kermit = { module = "co.touchlab:kermit", version = "2.2.0" }
 # Runtime X.509 / PKCS#12 generation for the per-install TAK server PKI (jvmAndroidMain only).
 bouncycastle-bcprov = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bouncycastle" }
 bouncycastle-bcpkix = { module = "org.bouncycastle:bcpkix-jdk18on", version.ref = "bouncycastle" }
-# Debug-only leak/GC-thrash detector -- see feature/settings/.../debugging/DebugViewModel.kt and
-# core/data/.../manager/MeshMessageProcessorImpl.kt for the adversarial-mesh-fuzz bugs this class of
-# tooling is meant to catch going forward.
+# Debug-only leak/GC-thrash detector; it installs itself in debug builds.
 leakcanary-android = { module = "com.squareup.leakcanary:leakcanary-android", version = "3.0-alpha-10-SNAPSHOT" }
 
 usb-serial-android = { module = "com.github.mik3y:usb-serial-for-android", version = "3.12.0" }
@@ -384,7 +379,6 @@ ccud-gradlePlugin = { module = "com.gradle:common-custom-user-data-gradle-plugin
 develocity-gradlePlugin = { module = "com.gradle:develocity-gradle-plugin", version.ref = "develocity" }
 aboutlibraries-gradlePlugin = { module = "com.mikepenz.aboutlibraries.plugin:aboutlibraries-plugin", version.ref = "aboutlibraries" }
 
-jmdns = { module = "org.jmdns:jmdns", version.ref = "jmdns" }
 jna = { module = "net.java.dev.jna:jna", version = "5.19.1" }
 
 # D-Bus client for the desktop app's Linux system tray. Pure Java — the native-unixsocket transport
@@ -394,6 +388,12 @@ dbus-java-transport-native-unixsocket = { module = "com.github.hypfvieh:dbus-jav
 
 # TAK
 takpacket-sdk-kmp = { module = "org.meshtastic:takpacket-sdk", version.ref = "takpacket-sdk" }
+meshtastic-sdk-core = { module = "org.meshtastic:sdk-core", version.ref = "meshtastic-sdk" }
+meshtastic-sdk-testing = { module = "org.meshtastic:sdk-testing", version.ref = "meshtastic-sdk" }
+meshtastic-sdk-transport-ble = { module = "org.meshtastic:sdk-transport-ble", version.ref = "meshtastic-sdk" }
+meshtastic-sdk-transport-serial = { module = "org.meshtastic:sdk-transport-serial", version.ref = "meshtastic-sdk" }
+meshtastic-sdk-transport-tcp = { module = "org.meshtastic:sdk-transport-tcp", version.ref = "meshtastic-sdk" }
+meshtastic-sdk-transport-websocket = { module = "org.meshtastic:sdk-transport-websocket", version.ref = "meshtastic-sdk" }
 
 # Meshtastic Protobufs SDK (Wire-generated KMP models from meshtastic/protobufs)
 meshtastic-protobufs = { module = "org.meshtastic:protobufs", version.ref = "meshtastic-protobufs" }

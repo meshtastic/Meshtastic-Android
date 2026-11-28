@@ -28,7 +28,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.toByteString
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.isWithinSizeLimit
 import org.meshtastic.core.repository.NodeRepository
@@ -42,6 +41,7 @@ import org.meshtastic.proto.Constants
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.User
+import org.meshtastic.sdk.ConnectionState
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -298,7 +298,7 @@ class AiFunctionProviderImplTest {
 
     // --- sendMessage length boundary tests ---
     //
-    // The ceiling is UTF-8 *bytes*, not characters: CommandSenderImpl.sendData applies
+    // The ceiling is UTF-8 *bytes*, not characters: PacketHandlerImpl.sendData applies
     // Constants.DATA_PAYLOAD_LEN (233) to the whole encoded Data proto, leaving
     // AiFunctionProviderImpl.MAX_MESSAGE_LENGTH bytes for the text itself.
 
@@ -379,7 +379,7 @@ class AiFunctionProviderImplTest {
 
     @Test
     fun maxMessageLength_is_the_largest_text_the_send_path_will_encode() {
-        // Pins the constant to the predicate CommandSenderImpl.sendData actually applies, so a change to the
+        // Pins the constant to the predicate PacketHandlerImpl.sendData actually applies, so a change to the
         // Data proto's framing fails here instead of in the send queue.
         fun encodesWithinLimit(byteCount: Int): Boolean {
             val data =

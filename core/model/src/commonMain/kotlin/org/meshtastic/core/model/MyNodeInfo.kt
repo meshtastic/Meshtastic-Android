@@ -22,15 +22,8 @@ data class MyNodeInfo(
     val hasGPS: Boolean,
     val model: String?,
     val firmwareVersion: String?,
-    val couldUpdate: Boolean, // this application contains a software load we _could_ install if you want
-    val shouldUpdate: Boolean, // this device has old firmware
-    val currentPacketId: Long,
-    val messageTimeoutMsec: Int,
     val minAppVersion: Int,
-    val maxChannels: Int,
     val hasWifi: Boolean,
-    val channelUtilization: Float,
-    val airUtilTx: Float,
     val deviceId: String?,
     val pioEnv: String? = null,
 ) {

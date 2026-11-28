@@ -17,6 +17,7 @@
 package org.meshtastic.core.testing
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSet
@@ -60,8 +61,7 @@ class FakeRadioConfigRepository :
     private val deviceUIConfigBacking = mutableStateFlow<DeviceUIConfig?>(null)
     override val deviceUIConfigFlow: Flow<DeviceUIConfig?> = deviceUIConfigBacking
 
-    private val fileManifestBacking = mutableStateFlow<List<FileInfo>>(emptyList())
-    override val fileManifestFlow: Flow<List<FileInfo>> = fileManifestBacking
+    override val fileManifestFlow: Flow<List<FileInfo>> = flowOf(emptyList())
 
     private val loraRegionPresetMapBacking = mutableStateFlow<LoRaRegionPresetMap?>(null)
     override val loraRegionPresetMapFlow: Flow<LoRaRegionPresetMap?> = loraRegionPresetMapBacking
@@ -74,15 +74,6 @@ class FakeRadioConfigRepository :
 
     val currentModuleConfig: LocalModuleConfig
         get() = moduleConfigBacking.value
-
-    val currentDeviceUIConfig: DeviceUIConfig?
-        get() = deviceUIConfigBacking.value
-
-    val currentFileManifest: List<FileInfo>
-        get() = fileManifestBacking.value
-
-    val currentLoRaRegionPresetMap: LoRaRegionPresetMap?
-        get() = loraRegionPresetMapBacking.value
 
     /**
      * Last [Config] passed to [setLocalConfig] (null until called). Tests should use [setLocalConfigDirect] to drive
@@ -159,30 +150,6 @@ class FakeRadioConfigRepository :
         lastSetModuleConfig = config
     }
 
-    override suspend fun setDeviceUIConfig(config: DeviceUIConfig) {
-        deviceUIConfigBacking.value = config
-    }
-
-    override suspend fun clearDeviceUIConfig() {
-        deviceUIConfigBacking.value = null
-    }
-
-    override suspend fun addFileInfo(info: FileInfo) {
-        fileManifestBacking.value = fileManifestBacking.value + info
-    }
-
-    override suspend fun clearFileManifest() {
-        fileManifestBacking.value = emptyList()
-    }
-
-    override suspend fun setLoraRegionPresetMap(map: LoRaRegionPresetMap) {
-        loraRegionPresetMapBacking.value = map
-    }
-
-    override suspend fun clearLoraRegionPresetMap() {
-        loraRegionPresetMapBacking.value = null
-    }
-
     /** Directly sets the [LocalConfig] without merging (preferred for test setup). */
     fun setLocalConfigDirect(config: LocalConfig) {
         localConfigBacking.value = config
@@ -196,6 +163,16 @@ class FakeRadioConfigRepository :
     /** Directly sets the combined [DeviceProfile] emitted by [deviceProfileFlow]. */
     fun setDeviceProfile(profile: DeviceProfile) {
         deviceProfileBacking.value = profile
+    }
+
+    /** Directly sets the config emitted by [deviceUIConfigFlow]. */
+    fun setDeviceUIConfig(config: DeviceUIConfig?) {
+        deviceUIConfigBacking.value = config
+    }
+
+    /** Directly sets the map emitted by [loraRegionPresetMapFlow]. */
+    fun setLoraRegionPresetMap(map: LoRaRegionPresetMap?) {
+        loraRegionPresetMapBacking.value = map
     }
 
     /** Directly sets the [ChannelSet] (bypasses [updateChannelSettings]/[replaceAllSettings]). */

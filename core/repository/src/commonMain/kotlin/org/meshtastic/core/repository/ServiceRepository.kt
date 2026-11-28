@@ -19,12 +19,12 @@ package org.meshtastic.core.repository
 import co.touchlab.kermit.Severity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.service.LockdownState
 import org.meshtastic.core.model.service.LockdownTokenInfo
 import org.meshtastic.core.model.service.TracerouteResponse
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.MeshPacket
+import org.meshtastic.sdk.ConnectionState
 
 /**
  * Interface for managing background service state, connection status, and mesh events.
@@ -32,13 +32,9 @@ import org.meshtastic.proto.MeshPacket
  * This repository acts as the primary data bridge between the long-running mesh service and the UI/Feature layers. It
  * maintains reactive flows for connection status, error messages, and incoming mesh traffic.
  *
- * **Connection state contract:** [connectionState] is the **canonical, app-level** connection state that all UI,
- * feature modules, and ViewModels should observe. It incorporates handshake progress, light-sleep policy, and transport
- * reconciliation — unlike [RadioInterfaceService.connectionState], which only reflects the raw hardware link status.
- * The [MeshConnectionManager] is the sole writer of this state; it bridges [RadioInterfaceService.connectionState]
- * changes into app-level transitions via [setConnectionState].
- *
- * @see RadioInterfaceService.connectionState
+ * **Connection state contract:** [connectionState] is the selected radio's SDK [ConnectionState], which all UI, feature
+ * modules, and ViewModels observe. [RadioInterfaceService] derives it from the SDK client's state, showing
+ * [ConnectionState.Connected] only once the app holds the session's config and nodes.
  */
 @Suppress("TooManyFunctions")
 interface ServiceRepository :
@@ -47,30 +43,15 @@ interface ServiceRepository :
     NeighborInfoResponseProvider,
     ServiceStateWriter {
     /**
-     * Canonical app-level connection state.
-     *
-     * This is the **single source of truth** for connection status across the entire application. All UI components,
-     * feature modules, and ViewModels should observe this flow — never [RadioInterfaceService.connectionState].
-     *
-     * State transitions are managed exclusively by [MeshConnectionManager], which reconciles transport-level events
-     * with handshake progress and device sleep policy:
-     * - [ConnectionState.Disconnected] — no active connection to a radio
-     * - [ConnectionState.Connecting] — transport is up, mesh handshake (config + node-info) in progress
-     * - [ConnectionState.Connected] — handshake complete, radio fully operational
-     * - [ConnectionState.DeviceSleep] — radio entered light-sleep (transient disconnect)
-     *
-     * @see RadioInterfaceService.connectionState
+     * The selected radio's connection state, as its SDK client reports it: [ConnectionState.Connecting] and
+     * [ConnectionState.Configuring] while a session comes up, [ConnectionState.Connected] once the app has installed
+     * the session's snapshot, [ConnectionState.Reconnecting] and [ConnectionState.DeviceSleeping] while the client
+     * retries, [ConnectionState.Failed] once it stops, and [ConnectionState.Disconnecting] then
+     * [ConnectionState.Disconnected] when the user disconnects.
      */
     override val connectionState: StateFlow<ConnectionState>
 
-    /**
-     * Updates the canonical app-level connection state.
-     *
-     * **This should only be called by [MeshConnectionManager].** Direct mutation from other components would bypass the
-     * transport-to-app reconciliation logic and create state inconsistencies.
-     *
-     * @param connectionState The new [ConnectionState].
-     */
+    /** Publishes the connection state. Only the radio service writes it. */
     override fun setConnectionState(connectionState: ConnectionState)
 
     /**
@@ -107,20 +88,6 @@ interface ServiceRepository :
 
     /** Clears the current error message. */
     override fun clearErrorMessage()
-
-    /**
-     * Reactive flow of connection progress messages.
-     *
-     * Used during the handshake and config loading phase to provide status updates to the user.
-     */
-    val connectionProgress: StateFlow<String?>
-
-    /**
-     * Sets the connection progress message.
-     *
-     * @param text The progress description (e.g., "Downloading Node DB...").
-     */
-    override fun setConnectionProgress(text: String)
 
     /**
      * Flow of all raw [MeshPacket] objects received from the mesh.
@@ -165,19 +132,6 @@ interface ServiceRepository :
 
     /** Clears the current neighbor info response. */
     override fun clearNeighborInfoResponse()
-
-    companion object {
-        /**
-         * The cross-module contract for the WiFi/TCP handshake-watchdog recovery progress signal.
-         *
-         * [MeshConnectionManager] writes this exact literal to [connectionProgress] immediately before its recovery
-         * sibling transitions the transport to [ConnectionState.Disconnected], and `ConnectionsViewModel` (and its
-         * tests) compare incoming progress against it to surface `RECONNECTING` UI state instead of a final-feeling
-         * `NOT_CONNECTED`. The literal text and the U+2026 HORIZONTAL ELLIPSIS character MUST match exactly across both
-         * writers and readers — centralizing it here removes the prior cross-module string-contract hazard.
-         */
-        const val RECONNECTING_PROGRESS_TEXT = "Reconnecting\u2026"
-    }
 
     /** Reactive flow of the current lockdown authentication state. */
     val lockdownState: StateFlow<LockdownState>

@@ -13,11 +13,12 @@ The `:core:data` module holds the concrete implementations of the `:core:reposit
 - **`FirmwareReleaseRepositoryImpl`** / **`DeviceHardwareRepositoryImpl`**: Firmware releases and the hardware list, served by `staleWhileRevalidateFlow` from the local data sources and bundled assets in `datasource/`, refreshed from the `:core:network` remote data sources.
 
 ### 2. Manager implementations (`manager/`)
-- **`MeshConnectionManagerImpl`** / **`MeshConfigFlowManagerImpl`**: Connection lifecycle and the config handshake.
-- **`CommandSenderImpl`**: Sends data and admin packets through the outbound queue; `:core:service`'s `RadioControllerImpl` issues commands through it.
-- **`SessionManagerImpl`**: Per-node remote-admin passkey store.
-- **`PacketHandlerImpl`** / **`FromRadioPacketHandlerImpl`** / **`MeshMessageProcessorImpl`**: Inbound mesh packet handling and message processing, with per-port handlers (`AdminPacketHandlerImpl`, `TelemetryPacketHandlerImpl`, `TracerouteHandlerImpl`, and others).
-- **`NodeManagerImpl`**, **`MqttManagerImpl`**, **`XModemManagerImpl`**: The in-memory node database, the MQTT proxy, and XModem file transfer.
+- **`MeshConnectionManagerImpl`** / **`MeshConfigFlowManagerImpl`**: Connection lifecycle and installing the SDK handshake snapshot. Remote-admin session passkeys live in the SDK's admin session.
+- **`SdkRadioLink`** (`radio/`): One SDK `RadioClient` per selected radio, built over the transport `BaseRadioLinks` (with its `AndroidRadioLinks`, `DesktopRadioLinks` and `WebRadioLinks` subclasses) picks; its `run` feeds each SDK session into the app through a `RadioSessionHost`.
+- **`RadioSessionProjection`** / **`RadioSessionEventHandler`**: Project the SDK's typed session events into Room and the repositories: the Ready snapshot, packets, node, config and channel changes, and events such as client notifications and the MQTT proxy. Packets reach `MeshDataHandlerImpl` and its per-port handlers (`TelemetryPacketHandlerImpl`, `TracerouteHandlerImpl`, and others), and the SDK's `RoutingReport` settles the stored message or reaction an ACK or NAK names. Each packet on the client's `outboundPackets` becomes an outgoing MeshLog row under the local node.
+- **`PacketHandlerImpl`**: Data packets (messages, reactions, waypoints, alerts, TAK) and app-built requests through the SDK's paced send under their persisted IDs, with the Room delivery projection. Packet IDs come from the session client's `nextPacketId()`.
+- **`NodeManagerImpl`**, **`MqttManagerImpl`**: The in-memory node database and the MQTT proxy.
+- **`radio/sim`**: Demo Mode (`MockRadioTransport`, `MockScenario`), capture replay (`ReplayRadioTransport`) and their firmware-side framing (`VirtualRadioLink`, `TransportLifecycleGate`); `HandshakeConstants` holds the nonces they answer.
 
 ### 3. `ai/`
 `AiFunctionProvider` is the contract for operations a system assistant can invoke (on Android, through AppFunctions), with `FuzzyNameResolver` resolving node and channel names.

@@ -28,7 +28,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.ui.icon.Bluetooth
 import org.meshtastic.core.ui.icon.Device
@@ -42,6 +41,7 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
+import org.meshtastic.sdk.ConnectionState
 
 @Composable
 fun ConnectionsNavIcon(
@@ -77,22 +77,37 @@ fun ConnectionsNavIcon(
 @Composable
 @ReadOnlyComposable
 private fun getTint(connectionState: ConnectionState): Color = when (connectionState) {
-    ConnectionState.Connecting -> colorScheme.StatusOrange
-    ConnectionState.Disconnected -> colorScheme.StatusRed
-    ConnectionState.DeviceSleep -> colorScheme.StatusYellow
-    else -> colorScheme.StatusGreen
+    ConnectionState.Connected -> colorScheme.StatusGreen
+
+    is ConnectionState.Connecting,
+    is ConnectionState.Configuring,
+    is ConnectionState.Reconnecting,
+    ConnectionState.Disconnecting,
+    -> colorScheme.StatusOrange
+
+    is ConnectionState.DeviceSleeping -> colorScheme.StatusYellow
+
+    is ConnectionState.Failed,
+    ConnectionState.Disconnected,
+    -> colorScheme.StatusRed
 }
 
 @Composable
 fun getIconPair(connectionState: ConnectionState, deviceType: DeviceType? = null): Pair<ImageVector, ImageVector?> =
     when (connectionState) {
-        ConnectionState.Disconnected -> MeshtasticIcons.NoDevice to null
+        is ConnectionState.Failed,
+        ConnectionState.Disconnected,
+        -> MeshtasticIcons.NoDevice to null
 
-        ConnectionState.DeviceSleep -> MeshtasticIcons.Device to MeshtasticIcons.DeviceSleep
+        is ConnectionState.DeviceSleeping -> MeshtasticIcons.Device to MeshtasticIcons.DeviceSleep
 
-        ConnectionState.Connecting -> MeshtasticIcons.Device to MeshtasticIcons.Reconnecting
+        is ConnectionState.Connecting,
+        is ConnectionState.Configuring,
+        is ConnectionState.Reconnecting,
+        ConnectionState.Disconnecting,
+        -> MeshtasticIcons.Device to MeshtasticIcons.Reconnecting
 
-        else ->
+        ConnectionState.Connected ->
             MeshtasticIcons.Device to
                 when (deviceType) {
                     DeviceType.BLE -> MeshtasticIcons.Bluetooth

@@ -21,11 +21,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.repository.LocalNodeUnavailableException
+import org.meshtastic.core.repository.NodeRequest
 import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioController
@@ -38,6 +42,7 @@ import org.meshtastic.core.resources.request_device_metrics
 import org.meshtastic.core.resources.request_environment_metrics
 import org.meshtastic.core.resources.request_host_metrics
 import org.meshtastic.core.resources.request_local_stats
+import org.meshtastic.core.resources.request_metadata
 import org.meshtastic.core.resources.request_pax_metrics
 import org.meshtastic.core.resources.request_power_metrics
 import org.meshtastic.core.resources.requesting_from
@@ -53,7 +58,7 @@ constructor(
     private val radioController: RadioController,
     private val snackbarManager: SnackbarManager,
     private val analytics: PlatformAnalytics,
-    private val nakWatcher: RequestNakWatcher,
+    private val serviceScope: ServiceScope,
     private val resolveUiText: suspend (UiText) -> String = { it.resolve() },
 ) : NodeRequestActions {
 
@@ -68,6 +73,18 @@ constructor(
 
     private suspend fun showFeedback(text: UiText) {
         snackbarManager.showSnackbar(message = resolveUiText(text))
+    }
+
+    /** Reports a later NAK of [pending] from [serviceScope], which outlives the screen that asked. */
+    private fun watch(
+        pending: NodeRequest,
+        request: StringResource,
+        longName: String,
+        onNak: (routingError: Int) -> Unit = {},
+    ) {
+        serviceScope.launch {
+            showNodeRequestNak(pending, request, longName, snackbarManager, resolveUiText, onNak)
+        }
     }
 
     private suspend fun runRequest(block: suspend () -> Unit) {
@@ -87,21 +104,21 @@ constructor(
 
     override suspend fun requestUserInfo(destNum: Int, longName: String) = runRequest {
         Logger.i { "Requesting UserInfo for '$destNum'" }
-        nakWatcher.watch(Res.string.user_info, longName) { id -> radioController.requestUserInfo(destNum, id) }
+        watch(radioController.requestUserInfo(destNum), Res.string.user_info, longName)
         analytics.trackAction("user_info_request")
         showFeedback(UiText.Resource(Res.string.requesting_from, Res.string.user_info, longName))
     }
 
     override suspend fun requestNeighborInfo(destNum: Int, longName: String) = runRequest {
         Logger.i { "Requesting NeighborInfo for '$destNum'" }
-        nakWatcher.watch(Res.string.neighbor_info, longName) { id -> radioController.requestNeighborInfo(id, destNum) }
+        watch(radioController.requestNeighborInfo(destNum), Res.string.neighbor_info, longName)
         _lastRequestNeighborTimes.update { it + (destNum to nowMillis) }
         showFeedback(UiText.Resource(Res.string.requesting_neighbor_info_from, longName))
     }
 
     override suspend fun requestPosition(destNum: Int, longName: String, position: Position) = runRequest {
         Logger.i { "Requesting position for '$destNum'" }
-        nakWatcher.watch(Res.string.position, longName) { id -> radioController.requestPosition(destNum, position, id) }
+        watch(radioController.requestPosition(destNum, position), Res.string.position, longName)
         analytics.trackAction("position_request")
         showFeedback(UiText.Resource(Res.string.requesting_from, Res.string.position, longName))
     }
@@ -118,7 +135,7 @@ constructor(
                 TelemetryType.HOST -> Res.string.request_host_metrics
                 TelemetryType.PAX -> Res.string.request_pax_metrics
             }
-        nakWatcher.watch(typeRes, longName) { id -> radioController.requestTelemetry(id, destNum, type.ordinal) }
+        watch(radioController.requestTelemetry(destNum, type), typeRes, longName)
         analytics.trackAction("telemetry_request", mapOf("telemetry_type" to type.name))
 
         showFeedback(UiText.Resource(Res.string.requesting_from, typeRes, longName))
@@ -139,19 +156,20 @@ constructor(
         Logger.i { "Requesting traceroute for '$destNum'" }
         var sent = false
         try {
-            nakWatcher.watch(
-                Res.string.traceroute,
-                longName,
-                onNak = { id, error -> _tracerouteNaks.update { it + (id to error) } },
-            ) { id ->
-                radioController.requestTraceroute(id, destNum)
-            }
+            val pending = radioController.requestTraceroute(destNum)
             sent = true
+            watch(pending, Res.string.traceroute, longName) { error ->
+                pending.requestId?.let { id -> _tracerouteNaks.update { it + (id to error) } }
+            }
         } finally {
             // A failed or canceled send must not start the cooldown; only undo our own claim.
             if (!sent) _lastTracerouteTime.compareAndSet(claimed, previous)
         }
         analytics.trackAction("traceroute_request")
         showFeedback(UiText.Resource(Res.string.requesting_from, Res.string.traceroute, longName))
+    }
+
+    override suspend fun refreshMetadata(destNum: Int, longName: String) = runRequest {
+        watch(radioController.refreshMetadata(destNum), Res.string.request_metadata, longName)
     }
 }

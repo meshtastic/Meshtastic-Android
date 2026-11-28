@@ -43,7 +43,6 @@ import org.meshtastic.core.model.RegionPresetConstraint
 import org.meshtastic.core.model.constraintFor
 import org.meshtastic.core.model.isLegalInRegionWithoutMap
 import org.meshtastic.core.model.normalizeCodingRateOverride
-import org.meshtastic.core.model.numChannels
 import org.meshtastic.core.model.presetForRegionChange
 import org.meshtastic.core.model.schemaLabelRes
 import org.meshtastic.core.resources.Res
@@ -434,7 +433,7 @@ fun LoRaConfigScreen(
                     if (isFocusedSlot || formState.value.channel_num != 0) {
                         formState.value.channel_num
                     } else {
-                        primaryChannel.channelNum
+                        primaryChannel.frequencyPlan.slot ?: 0
                     },
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -450,7 +449,7 @@ fun LoRaConfigScreen(
                         null
                     },
                     onValueChanged = {
-                        if (it <= formState.value.numChannels) { // total num of LoRa channels
+                        if (it <= primaryChannel.frequencyPlan.numChannels) { // total num of LoRa channels
                             formState.value = formState.value.newBuilder().also { wb -> wb.channel_num = it }.build()
                         }
                     },
@@ -471,7 +470,7 @@ fun LoRaConfigScreen(
                 HorizontalDivider()
                 FrequencyOverridePreference(
                     overrideFrequency = formState.value.override_frequency,
-                    autoFrequency = primaryChannel.radioFreq,
+                    autoFrequency = primaryChannel.frequencyPlan.frequencyMHz ?: 0f,
                     enabled = state.connected,
                     focusManager = focusManager,
                     onValueChange = {

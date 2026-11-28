@@ -20,6 +20,7 @@ import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.repository.MirrorFormat
 import org.meshtastic.proto.DisplayFrame
 import org.meshtastic.proto.DisplayPalette
+import org.meshtastic.sdk.DisplayImage
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
@@ -29,157 +30,54 @@ class DisplayMirrorManagerImplTest {
 
     private val manager = DisplayMirrorManagerImpl()
 
-    // 128x64 MONO_VLSB frame = 1024 bytes; the firmware chunks at 384.
-    private fun chunk(
-        frameId: Int = 1,
-        offset: Int = 0,
-        data: ByteArray,
-        total: Int = FRAME_BYTES,
-        width: Int = WIDTH,
-        height: Int = HEIGHT,
-        format: DisplayFrame.Format = DisplayFrame.Format.MONO_VLSB,
-    ) = DisplayFrame.Builder()
-        .also { wb ->
-            wb.width = width
-            wb.height = height
-            wb.format = format
-            wb.frame_id = frameId
-            wb.offset = offset
-            wb.total_size = total
-            wb.data_ = data.toByteString()
-        }
-        .build()
-
-    private fun bytes(size: Int, fill: Int) = ByteArray(size) { fill.toByte() }
-
-    private fun palette(
-        signature: Int,
-        regionOffset: Int,
-        regionTotal: Int,
-        regions: List<DisplayPalette.ColorRegion>,
-    ) = DisplayPalette.Builder()
+    private fun palette(signature: Int, regions: List<DisplayPalette.ColorRegion>) = DisplayPalette.Builder()
         .also { wb ->
             wb.signature = signature
-            wb.region_offset = regionOffset
-            wb.region_total = regionTotal
+            wb.default_on_color = 0xFFFF
+            wb.region_total = regions.size
             wb.regions = regions
         }
         .build()
 
-    @Test
-    fun `reassembles a three-chunk frame in order`() {
-        manager.handleIncomingFrame(chunk(offset = 0, data = bytes(384, 1)))
-        manager.handleIncomingFrame(chunk(offset = 384, data = bytes(384, 2)))
-        assertNull(manager.frame.value)
+    private val region =
+        DisplayPalette.ColorRegion.Builder()
+            .also { wb ->
+                wb.width = 8
+                wb.height = 8
+            }
+            .build()
 
-        manager.handleIncomingFrame(chunk(offset = 768, data = bytes(256, 3)))
+    // Regression: the format mapping inverted, rendering RGB565 as 1-bit noise.
+    @Test
+    fun `maps a mono image to a mono frame with its palette signature`() {
+        val pixels = ByteArray(256) { 3 }
+        manager.handleImage(DisplayImage(64, 32, DisplayFrame.Format.MONO_VLSB, 6, 42, pixels.toByteString()))
 
         val frame = manager.frame.value!!
-        assertEquals(WIDTH, frame.width)
-        assertEquals(HEIGHT, frame.height)
-        assertEquals(1, frame.frameId)
-        assertContentEquals(bytes(384, 1) + bytes(384, 2) + bytes(256, 3), frame.pixels)
+        assertEquals(64, frame.width)
+        assertEquals(32, frame.height)
+        assertEquals(6, frame.frameId)
+        assertEquals(42, frame.paletteSignature)
+        assertEquals(MirrorFormat.MONO_VLSB, frame.format)
+        assertContentEquals(pixels, frame.pixels)
     }
 
     @Test
-    fun `single-chunk frame completes immediately`() {
-        // 64x32 = 256 bytes fits one chunk
-        manager.handleIncomingFrame(chunk(width = 64, height = 32, total = 256, data = bytes(256, 7)))
+    fun `maps an RGB565 image to an RGB565 frame`() {
+        val pixels = ByteArray(64) { 5 }
+        manager.handleImage(DisplayImage(8, 4, DisplayFrame.Format.RGB565, 3, 0, pixels.toByteString()))
 
-        assertEquals(256, manager.frame.value?.pixels?.size)
+        val frame = manager.frame.value!!
+        assertEquals(8, frame.width)
+        assertEquals(4, frame.height)
+        assertEquals(3, frame.frameId)
+        assertEquals(MirrorFormat.RGB565, frame.format)
+        assertContentEquals(pixels, frame.pixels)
     }
 
     @Test
-    fun `out-of-sequence chunk drops the partial frame`() {
-        manager.handleIncomingFrame(chunk(offset = 0, data = bytes(384, 1)))
-        manager.handleIncomingFrame(chunk(offset = 768, data = bytes(256, 3))) // gap: 384 missing
-
-        manager.handleIncomingFrame(chunk(offset = 384, data = bytes(384, 2))) // too late
-        assertNull(manager.frame.value)
-    }
-
-    @Test
-    fun `offset zero restarts mid-frame on device reboot or torn capture`() {
-        manager.handleIncomingFrame(chunk(frameId = 5, offset = 0, data = bytes(384, 1)))
-
-        // New frame id starting over at offset 0 wins
-        manager.handleIncomingFrame(chunk(frameId = 6, offset = 0, data = bytes(384, 4)))
-        manager.handleIncomingFrame(chunk(frameId = 6, offset = 384, data = bytes(384, 5)))
-        manager.handleIncomingFrame(chunk(frameId = 6, offset = 768, data = bytes(256, 6)))
-
-        assertEquals(6, manager.frame.value?.frameId)
-    }
-
-    @Test
-    fun `frame id change mid-frame without offset zero is dropped`() {
-        manager.handleIncomingFrame(chunk(frameId = 1, offset = 0, data = bytes(384, 1)))
-        manager.handleIncomingFrame(chunk(frameId = 2, offset = 384, data = bytes(384, 2)))
-
-        assertNull(manager.frame.value)
-    }
-
-    @Test
-    fun `rejects geometry that does not match total size`() {
-        manager.handleIncomingFrame(
-            chunk(width = 64, height = 64, total = 256, data = bytes(256, 1)),
-        ) // 64x64 needs 512
-        manager.handleIncomingFrame(chunk(width = 0, height = 64, total = 0, data = ByteArray(0)))
-        manager.handleIncomingFrame(chunk(width = 128, height = 0, total = 0, data = ByteArray(0)))
-
-        assertNull(manager.frame.value)
-    }
-
-    @Test
-    fun `rejects geometry whose byte count overflows`() {
-        manager.handleIncomingFrame(chunk(width = 65536, height = 524288, total = 0, data = ByteArray(0)))
-        assertNull(manager.frame.value)
-    }
-
-    @Test
-    fun `rejects unsupported format`() {
-        manager.handleIncomingFrame(
-            chunk(
-                width = 64,
-                height = 32,
-                total = 256,
-                data = bytes(256, 1),
-                format = DisplayFrame.Format.FORMAT_UNSPECIFIED,
-            ),
-        )
-
-        assertNull(manager.frame.value)
-    }
-
-    @Test
-    fun `reassembles a two-chunk palette and tags frames with its signature`() {
-        val region =
-            DisplayPalette.ColorRegion.Builder()
-                .also { wb ->
-                    wb.x = 0
-                    wb.y = 0
-                    wb.width = 128
-                    wb.height = 16
-                    wb.on_color = 0xF800
-                    wb.off_color = 0
-                }
-                .build()
-        manager.handleIncomingPalette(
-            DisplayPalette.Builder()
-                .also { wb ->
-                    wb.signature = 42
-                    wb.default_on_color = 0xFFFF
-                    wb.default_off_color = 0
-                    wb.region_offset = 0
-                    wb.region_total = 3
-                    wb.regions = listOf(region, region)
-                }
-                .build(),
-        )
-        assertNull(manager.palette.value)
-
-        manager.handleIncomingPalette(
-            palette(signature = 42, regionOffset = 2, regionTotal = 3, regions = listOf(region)),
-        )
+    fun `publishes a complete palette`() {
+        manager.handlePalette(palette(signature = 42, regions = listOf(region, region, region)))
 
         val palette = manager.palette.value!!
         assertEquals(42, palette.signature)
@@ -188,248 +86,22 @@ class DisplayMirrorManagerImplTest {
     }
 
     @Test
-    fun `out-of-sequence palette chunk is dropped until a restart`() {
-        val region =
-            DisplayPalette.ColorRegion.Builder()
-                .also { wb ->
-                    wb.x = 0
-                    wb.y = 0
-                    wb.width = 8
-                    wb.height = 8
-                }
-                .build()
-        manager.handleIncomingPalette(
-            palette(signature = 7, regionOffset = 0, regionTotal = 2, regions = listOf(region)),
-        )
-        manager.handleIncomingPalette(
-            palette(signature = 7, regionOffset = 5, regionTotal = 2, regions = listOf(region)),
-        )
-        assertNull(manager.palette.value)
-
-        // A fresh offset-0 chunk recovers
-        manager.handleIncomingPalette(
-            palette(signature = 8, regionOffset = 0, regionTotal = 1, regions = listOf(region)),
-        )
-        assertEquals(8, manager.palette.value?.signature)
-    }
-
-    @Test
-    fun `reset clears frames palettes and partial state`() {
-        manager.handleIncomingFrame(chunk(width = 64, height = 32, total = 256, data = bytes(256, 7)))
-        manager.handleIncomingPalette(palette(signature = 9, regionOffset = 0, regionTotal = 0, regions = emptyList()))
+    fun `reset clears the frame but keeps the palette the device sends once per connection`() {
+        val pixels = ByteArray(256) { 7 }.toByteString()
+        manager.handleImage(DisplayImage(64, 32, DisplayFrame.Format.MONO_VLSB, 1, 0, pixels))
+        manager.handlePalette(palette(signature = 42, regions = emptyList()))
 
         manager.reset()
 
         assertNull(manager.frame.value)
-        assertNull(manager.palette.value)
+        assertEquals(42, manager.palette.value?.signature)
     }
 
     @Test
-    fun `rejects palettes past the region cap`() {
-        val region =
-            DisplayPalette.ColorRegion.Builder()
-                .also { wb ->
-                    wb.x = 0
-                    wb.y = 0
-                    wb.width = 8
-                    wb.height = 8
-                }
-                .build()
-        manager.handleIncomingPalette(
-            palette(signature = 3, regionOffset = 0, regionTotal = 100_000, regions = listOf(region)),
-        )
-
-        assertNull(manager.palette.value)
-    }
-
-    @Test
-    fun `chunk that changes geometry mid-frame is dropped`() {
-        manager.handleIncomingFrame(chunk(offset = 0, data = bytes(384, 1)))
-        // Transposed geometry with the same total size must not complete the frame
-        manager.handleIncomingFrame(chunk(width = 64, height = 128, offset = 384, data = bytes(384, 2)))
-        manager.handleIncomingFrame(chunk(offset = 768, data = bytes(256, 3)))
-
-        assertNull(manager.frame.value)
-    }
-
-    // ── RGB565 dirty-rect path ──────────────────────────────────────────────
-
-    private fun rectChunk(
-        frameId: Int = 1,
-        offset: Int = 0,
-        data: ByteArray,
-        total: Int = 200,
-        width: Int = WIDTH,
-        height: Int = HEIGHT,
-        rectX: Int = 0,
-        rectY: Int = 0,
-        rectW: Int = 10,
-        rectH: Int = 10,
-    ) = DisplayFrame.Builder()
-        .also { wb ->
-            wb.width = width
-            wb.height = height
-            wb.format = DisplayFrame.Format.RGB565
-            wb.frame_id = frameId
-            wb.offset = offset
-            wb.total_size = total
-            wb.rect_x = rectX
-            wb.rect_y = rectY
-            wb.rect_width = rectW
-            wb.rect_height = rectH
-            wb.data_ = data.toByteString()
-        }
-        .build()
-
-    @Test
-    fun `composites a completed rect into an RGB565 frame`() {
-        manager.handleIncomingFrame(rectChunk(data = bytes(200, 0x11)))
-
-        val frame = manager.frame.value!!
-        assertEquals(MirrorFormat.RGB565, frame.format)
-        assertEquals(WIDTH * HEIGHT * 2, frame.pixels.size)
-    }
-
-    @Test
-    fun `rejects a rect whose total size does not match its geometry`() {
-        manager.handleIncomingFrame(rectChunk(total = 999, data = bytes(200, 1)))
-
-        assertNull(manager.frame.value)
-    }
-
-    @Test
-    fun `rejects a rect that would overflow the panel`() {
-        manager.handleIncomingFrame(rectChunk(rectX = WIDTH - 2, data = bytes(200, 1)))
-        manager.handleIncomingFrame(rectChunk(rectY = Int.MAX_VALUE, data = bytes(200, 1)))
-
-        assertNull(manager.frame.value)
-    }
-
-    @Test
-    fun `rejects an oversized rect without allocating`() {
-        manager.handleIncomingFrame(
-            rectChunk(
-                width = 4000,
-                height = 4000,
-                rectW = 4000,
-                rectH = 4000,
-                total = Int.MAX_VALUE,
-                data = bytes(8, 1),
-            ),
-        )
-
-        assertNull(manager.frame.value)
-    }
-
-    @Test
-    fun `continuation chunk cannot grow the rect buffer`() {
-        manager.handleIncomingFrame(rectChunk(offset = 0, total = 200, data = bytes(100, 1)))
-        // Same geometry claim, larger total: must not write past the allocation.
-        manager.handleIncomingFrame(rectChunk(offset = 100, total = 800, rectW = 20, rectH = 20, data = bytes(100, 2)))
-
-        assertNull(manager.frame.value)
-    }
-
-    @Test
-    fun `continuation chunk cannot change the panel the rect was checked against`() {
-        manager.handleIncomingFrame(rectChunk(offset = 0, total = 200, data = bytes(100, 1)))
-        // A smaller panel on the final chunk would blit the 10x10 rect past the end of the canvas.
-        manager.handleIncomingFrame(rectChunk(offset = 100, total = 200, width = 10, height = 10, data = bytes(100, 2)))
-
-        assertNull(manager.frame.value)
-    }
-
-    @Test
-    fun `a surplus chunk after a completed palette does not extend it`() {
-        val region =
-            DisplayPalette.ColorRegion.Builder()
-                .also { wb ->
-                    wb.width = 8
-                    wb.height = 8
-                }
-                .build()
-        manager.handleIncomingPalette(
-            palette(signature = 5, regionOffset = 0, regionTotal = 1, regions = listOf(region)),
-        )
-        manager.handleIncomingPalette(
-            palette(signature = 5, regionOffset = 1, regionTotal = 1, regions = listOf(region)),
-        )
-
-        assertEquals(1, manager.palette.value?.regions?.size)
-    }
-
-    @Test
-    fun `an over-cap restart leaves the published palette intact`() {
-        val region =
-            DisplayPalette.ColorRegion.Builder()
-                .also { wb ->
-                    wb.width = 8
-                    wb.height = 8
-                }
-                .build()
-        manager.handleIncomingPalette(
-            palette(signature = 5, regionOffset = 0, regionTotal = 1, regions = listOf(region)),
-        )
-        manager.handleIncomingPalette(
-            palette(signature = 6, regionOffset = 0, regionTotal = 100_000, regions = listOf(region)),
-        )
+    fun `an over-cap palette leaves the published palette intact`() {
+        manager.handlePalette(palette(signature = 5, regions = listOf(region)))
+        manager.handlePalette(palette(signature = 6, regions = List(513) { region }))
 
         assertEquals(5, manager.palette.value?.signature)
-    }
-
-    @Test
-    fun `continuation that lowers region total does not complete the palette`() {
-        val region =
-            DisplayPalette.ColorRegion.Builder()
-                .also { wb ->
-                    wb.width = 8
-                    wb.height = 8
-                }
-                .build()
-        manager.handleIncomingPalette(
-            palette(signature = 5, regionOffset = 0, regionTotal = 3, regions = listOf(region)),
-        )
-        manager.handleIncomingPalette(palette(signature = 5, regionOffset = 1, regionTotal = 1, regions = emptyList()))
-        assertNull(manager.palette.value)
-
-        // Poisoned until an offset-0 chunk restarts; the honest remainder no longer completes it either.
-        manager.handleIncomingPalette(
-            palette(signature = 5, regionOffset = 1, regionTotal = 3, regions = listOf(region, region)),
-        )
-        assertNull(manager.palette.value)
-
-        manager.handleIncomingPalette(
-            palette(signature = 6, regionOffset = 0, regionTotal = 1, regions = listOf(region)),
-        )
-        assertEquals(6, manager.palette.value?.signature)
-    }
-
-    @Test
-    fun `chunk that overshoots the declared region total is rejected`() {
-        val region =
-            DisplayPalette.ColorRegion.Builder()
-                .also { wb ->
-                    wb.width = 8
-                    wb.height = 8
-                }
-                .build()
-        manager.handleIncomingPalette(
-            palette(signature = 5, regionOffset = 0, regionTotal = 1, regions = listOf(region, region)),
-        )
-        assertNull(manager.palette.value)
-
-        manager.handleIncomingPalette(
-            palette(signature = 5, regionOffset = 0, regionTotal = 2, regions = listOf(region)),
-        )
-        manager.handleIncomingPalette(
-            palette(signature = 5, regionOffset = 1, regionTotal = 2, regions = listOf(region, region)),
-        )
-        assertNull(manager.palette.value)
-    }
-
-    private companion object {
-        const val WIDTH = 128
-        const val HEIGHT = 64
-        const val FRAME_BYTES = 1024
     }
 }

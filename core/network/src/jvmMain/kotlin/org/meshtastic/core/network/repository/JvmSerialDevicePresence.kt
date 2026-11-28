@@ -20,15 +20,35 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.koin.core.annotation.Single
+import org.meshtastic.core.network.availableSerialPorts
+import java.io.File
 
 /**
  * JVM/Desktop implementation of [SerialDevicePresence].
  *
- * The desktop serial transport (`SerialTransport` backed by jSerialComm) does not currently publish a hot-plug device
- * set, so this implementation reports a perpetually-empty set. Transport recovery on replug is therefore a no-op on JVM
- * until/unless jSerialComm enumeration is exposed as a flow.
+ * Desktop serial publishes no hot-plug device set, so [deviceKeys] stays empty. [portExists] takes the port a desktop
+ * selection stores and answers through [serialPortExists].
  */
 @Single
 class JvmSerialDevicePresence : SerialDevicePresence {
     override val deviceKeys: StateFlow<Set<String>> = MutableStateFlow<Set<String>>(emptySet()).asStateFlow()
+
+    override fun portExists(key: String): Boolean = serialPortExists(key) { availableSerialPorts().map { it.name } }
+}
+
+/**
+ * Whether the port a stored serial address names exists. A path (a Linux `/dev/serial/by-id` link) exists while it
+ * resolves, and a system port name (`ttyUSB0`, `cu.usbmodem1101`, `tty.usbmodem1101`) while its node in [devDir] does,
+ * which is where serial open looks for it whether or not the port listing shows it. A Windows `COMn` name is not a
+ * file, so it exists while [listedNames] has it.
+ */
+internal fun serialPortExists(
+    key: String,
+    isWindows: Boolean = System.getProperty("os.name", "").lowercase().startsWith("windows"),
+    devDir: File = File("/dev"),
+    listedNames: () -> List<String>,
+): Boolean = when {
+    key.startsWith("/") -> File(key).exists()
+    isWindows -> key in listedNames()
+    else -> File(devDir, key).exists()
 }

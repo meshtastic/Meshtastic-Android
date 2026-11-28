@@ -22,6 +22,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import com.hoho.android.usbserial.driver.ProbeTable
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
 import kotlinx.coroutines.CoroutineDispatcher
@@ -68,6 +69,9 @@ class KoinVerificationTest {
                     BleLogFormat::class,
                     okio.Path::class,
                     okio.FileSystem::class,
+                    // UsbSerialProber comes from the SDK's AndroidUsbSerialPorts.prober; Koin Verify still
+                    // introspects its constructor.
+                    ProbeTable::class,
                 ),
                 injections =
                 injectedParameters(

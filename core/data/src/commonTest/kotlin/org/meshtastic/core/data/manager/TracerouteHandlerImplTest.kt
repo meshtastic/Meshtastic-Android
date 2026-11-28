@@ -49,7 +49,10 @@ class TracerouteHandlerImplTest {
 
     private val job = SupervisorJob()
     private val scope = CoroutineScope(Dispatchers.Default + job)
-    private val radio = FakeRadioInterfaceService(scope)
+
+    // Its own job: the radio's open session scope never completes, and handleAndSettle joins the handler's children.
+    private val radioJob = SupervisorJob()
+    private val radio = FakeRadioInterfaceService(CoroutineScope(Dispatchers.Default + radioJob))
     private val serviceRepository = FakeServiceRepository()
     private val meshLogRepository = FakeMeshLogRepository()
     private val snapshotRepository = FakeTracerouteSnapshotRepository()
@@ -64,6 +67,7 @@ class TracerouteHandlerImplTest {
     @AfterTest
     fun tearDown() {
         scope.cancel()
+        radioJob.cancel()
     }
 
     private fun newHandler() = TracerouteHandlerImpl(

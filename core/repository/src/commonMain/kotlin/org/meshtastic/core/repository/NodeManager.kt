@@ -24,8 +24,8 @@ import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.FirmwareEdition
 import org.meshtastic.proto.Paxcount
 import org.meshtastic.proto.StatusMessage
-import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.User
+import org.meshtastic.sdk.NodeField
 import org.meshtastic.proto.NodeInfo as ProtoNodeInfo
 import org.meshtastic.proto.Position as ProtoPosition
 
@@ -159,17 +159,11 @@ interface NodeManager : NodeIdLookup {
         session: RadioSessionContext? = null,
     )
 
-    /** Processes a received telemetry packet. */
-    fun handleReceivedTelemetry(fromNum: Int, telemetry: Telemetry)
-
     /** Processes a received paxcounter packet. */
     fun handleReceivedPaxcounter(fromNum: Int, p: Paxcount, session: RadioSessionContext? = null)
 
     /** Processes a received node status message. */
     fun handleReceivedNodeStatus(fromNum: Int, s: StatusMessage, session: RadioSessionContext? = null)
-
-    /** Updates the status string for a node. */
-    fun updateNodeStatus(nodeNum: Int, status: String?)
 
     /** Updates node status and awaits any required persistence. */
     suspend fun updateNodeStatusAndPersist(nodeNum: Int, status: String?)
@@ -186,6 +180,9 @@ interface NodeManager : NodeIdLookup {
     /** Removes a node from the in-memory database by its number. */
     fun removeByNodenum(nodeNum: Int)
 
+    /** Ends a removal the radio did not apply, so the node's next packet brings it back. */
+    fun cancelPendingRemoval(nodeNum: Int) = Unit
+
     /**
      * Applies node-number removals returned by the trusted configuration install. Removed numbers stay retired for the
      * current device/database session so delayed field packets cannot recreate migrated identities.
@@ -193,13 +190,20 @@ interface NodeManager : NodeIdLookup {
     fun applyTrustedIdentityMigrations(removedNums: Collection<Int>)
 
     /**
-     * Installs node information in memory. Callers that require an immediate standalone write use
-     * [installNodeInfoAndPersist]; configuration handshakes batch the resulting snapshot through the repository.
+     * Installs a node from an SDK handshake or NodeDB refresh snapshot in memory. The caller persists the whole
+     * snapshot through [NodeRepository.installConfig].
      */
     fun installNodeInfo(info: ProtoNodeInfo)
 
-    /** Installs node information and awaits any required persistence. */
-    suspend fun installNodeInfoAndPersist(info: ProtoNodeInfo)
+    /**
+     * Applies a node the SDK session added ([changed] null) or updated after Ready. A user change routes through
+     * [handleReceivedUser] so identity correlation, retirement and the new-node notification apply; other fields merge
+     * only as far as [changed] names them, and never touch the app-owned link metrics.
+     */
+    fun applySessionNode(info: ProtoNodeInfo, changed: Set<NodeField>?, session: RadioSessionContext)
+
+    /** Removes a node the SDK dropped after an acknowledged removeNode, ending any local removal waiting for it. */
+    fun applySessionNodeRemoved(nodeNum: Int)
 
     /** Inserts hardware metadata for a node. */
     fun insertMetadata(nodeNum: Int, metadata: DeviceMetadata, session: RadioSessionContext? = null)

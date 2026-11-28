@@ -55,7 +55,6 @@ import org.meshtastic.core.repository.MagneticFieldProvider
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PhoneLocationProvider
 import org.meshtastic.core.repository.PhoneLocationState
-import org.meshtastic.core.repository.QueryController
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.compass_title
@@ -182,13 +181,11 @@ class NodeDetailCompassLifecycleTest {
             savedStateHandle = SavedStateHandle(),
             nodeManagementActions = mock<NodeManagementActions>(),
             nodeRequestActions = mock<NodeRequestActions>(),
-            queryController = mock<QueryController>(),
             getNodeDetailsUseCase = getNodeDetailsUseCase,
             packetRepository = packetRepository,
             ensureRemoteAdminSession = mock<EnsureRemoteAdminSessionUseCase>(),
             observeRemoteAdminSessionStatus = observeSessionStatus,
             snackbarManager = SnackbarManager(),
-            nakWatcher = testNakWatcher(),
         )
     }
 

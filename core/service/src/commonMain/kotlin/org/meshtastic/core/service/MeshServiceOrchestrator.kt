@@ -36,7 +36,6 @@ import org.meshtastic.core.common.util.safeCatchingAll
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceAddress
 import org.meshtastic.core.repository.MeshConnectionManager
-import org.meshtastic.core.repository.MeshMessageProcessor
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.RadioInterfaceService
@@ -67,7 +66,6 @@ class MeshServiceOrchestrator(
     private val radioInterfaceService: RadioInterfaceService,
     private val serviceStateWriter: ServiceStateWriter,
     private val nodeManager: NodeManager,
-    private val messageProcessor: MeshMessageProcessor,
     private val serviceNotifications: MeshNotificationManager,
     private val takServerIntegration: TakServerIntegration,
     private val takPrefs: TakPrefs,
@@ -133,8 +131,8 @@ class MeshServiceOrchestrator(
     /**
      * Starts the mesh service components and wires up data flows.
      *
-     * This is the KMP equivalent of `MeshService.onCreate()`. It connects to the radio and wires incoming radio data to
-     * the message processor.
+     * This is the KMP equivalent of `MeshService.onCreate()`. It connects to the radio once the selected device's
+     * database is active; each radio session projects its own receive stream.
      */
     fun start() {
         val newScope = CoroutineScope(SupervisorJob() + dispatchers.default)
@@ -154,11 +152,6 @@ class MeshServiceOrchestrator(
         }
 
         Logger.i { "Starting mesh service orchestrator" }
-
-        // Drop any bytes that piled up in the service's receivedData channel since the last stop(). The channel
-        // outlives the orchestrator's per-start scope, so without this drain a stop/start cycle would replay stale
-        // packets ahead of the fresh session's firmware handshake.
-        radioInterfaceService.resetReceivedBuffer()
 
         serviceNotifications.initChannels()
         connectionManager.updateStatusNotification()
@@ -195,20 +188,6 @@ class MeshServiceOrchestrator(
             .onEach { addr ->
                 safeCatching { databaseManager.switchActiveDatabase(addr) }
                     .onFailure { err -> Logger.e(err) { "Failed to switch active database on address update" } }
-            }
-            .launchIn(newScope)
-
-        radioInterfaceService.receivedData
-            // This loop is the single lifeline for every inbound packet. handleFromRadio is already total, but guard
-            // here too so nothing — now or later — can cancel the collection and leave the radio permanently deaf.
-            .onEach { frame ->
-                val session = frame.session
-                if (!radioInterfaceService.isSessionActive(session)) {
-                    Logger.d { "Dropping queued frame from stale transport session gen=${session.generation}" }
-                    return@onEach
-                }
-                safeCatching { messageProcessor.handleFromRadio(frame, nodeManager.myNodeNum.value) }
-                    .onFailure { Logger.e(it) { "Dropped inbound frame after a receive-loop error" } }
             }
             .launchIn(newScope)
 

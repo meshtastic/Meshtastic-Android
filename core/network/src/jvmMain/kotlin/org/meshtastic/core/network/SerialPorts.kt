@@ -16,7 +16,7 @@
  */
 package org.meshtastic.core.network
 
-import com.fazecast.jSerialComm.SerialPort
+import org.meshtastic.sdk.transport.serial.JvmSerialPorts
 import java.io.File
 
 private val SERIAL_BY_ID_DIR = File("/dev/serial/by-id")
@@ -27,11 +27,11 @@ private val SERIAL_BY_ID_DIR = File("/dev/serial/by-id")
  * the link at the new one. Other ports, and other hosts, whose names already follow the device, use the system name.
  */
 fun availableSerialPorts(): List<SerialPortEntry> {
-    val ports = SerialPort.getCommPorts()
+    val ports = JvmSerialPorts.list()
     return serialPortEntries(
-        ports.map { it.systemPortName },
+        ports.map { it.name },
         serialByIdLinks(SERIAL_BY_ID_DIR),
-        ports.associate { it.systemPortName to it.serialNumber },
+        ports.associate { it.name to it.usbSerialNumber },
     )
 }
 

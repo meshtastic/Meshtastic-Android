@@ -32,7 +32,6 @@ import kotlinx.coroutines.test.setMain
 import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
 import okio.ByteString.Companion.toByteString
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
@@ -44,6 +43,7 @@ import org.meshtastic.core.ui.util.SnackbarManager
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.User
+import org.meshtastic.sdk.ConnectionState
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -169,15 +169,8 @@ class ContactsViewModelTest {
                 hasGPS = false,
                 model = null,
                 firmwareVersion = null,
-                couldUpdate = false,
-                shouldUpdate = false,
-                currentPacketId = 0L,
-                messageTimeoutMsec = 0,
                 minAppVersion = 0,
-                maxChannels = 8,
                 hasWifi = false,
-                channelUtilization = 0f,
-                airUtilTx = 0f,
                 deviceId = null,
             ),
         )
@@ -213,15 +206,8 @@ class ContactsViewModelTest {
         hasGPS = false,
         model = null,
         firmwareVersion = null,
-        couldUpdate = false,
-        shouldUpdate = false,
-        currentPacketId = 0L,
-        messageTimeoutMsec = 0,
         minAppVersion = 0,
-        maxChannels = 8,
         hasWifi = false,
-        channelUtilization = 0f,
-        airUtilTx = 0f,
         deviceId = null,
     )
 

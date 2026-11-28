@@ -70,7 +70,7 @@ The **Connect** tab icon in the navigation bar shows the connection state by col
 | 🟢 | Connected | Active link to the node. The badge shows the transport in use: Bluetooth, Wi-Fi, or USB |
 | 🟠 | Connecting | Handshake in progress |
 | 🔴 | Disconnected | No active connection. The app retries automatically, with a growing delay between attempts |
-| 🟡 | Device sleeping | The node is in light sleep. The app is waiting for it to wake and reconnect, not failing |
+| 🟡 | Device sleeping | A power-saving node dropped its Bluetooth link to sleep. The app is waiting for it to wake and reconnect, not failing |
 
 These are the four states the app models. "Device sleeping" is normal on power-saving configurations and needs no action.
 

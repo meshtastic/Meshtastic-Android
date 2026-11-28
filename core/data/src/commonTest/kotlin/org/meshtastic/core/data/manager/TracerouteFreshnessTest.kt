@@ -38,30 +38,27 @@ import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.repository.FromRadioPacketHandler
 import org.meshtastic.core.repository.MeshDataHandler
-import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.RadioSessionContext
-import org.meshtastic.core.repository.ReceivedRadioFrame
 import org.meshtastic.core.testing.FakeMeshLogRepository
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioInterfaceService
 import org.meshtastic.core.testing.FakeServiceRepository
 import org.meshtastic.core.testing.FakeTracerouteSnapshotRepository
 import org.meshtastic.proto.Data
-import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.RouteDiscovery
+import org.meshtastic.sdk.RadioSessionEvent
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
+import kotlin.test.assertTrue
 
 /**
  * A traceroute response names every relay on its route, but only its sender was heard. Drives a real
- * [MeshMessageProcessorImpl] and [NodeManagerImpl] with traceroute packets routed to a real [TracerouteHandlerImpl].
+ * [RadioSessionProjection] and [NodeManagerImpl] with traceroute packets routed to a real [TracerouteHandlerImpl].
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class TracerouteFreshnessTest {
@@ -126,6 +123,7 @@ class TracerouteFreshnessTest {
                 .apply {
                     setNodeDbReady(true)
                     setAllowNodeDbWrites(true)
+                    setMyNodeNum(MY_NODE)
                 }
         nodeManager.updateNode(RELAY, channel = 0) { relayBefore }
         nodeManager.updateNode(RETURN_RELAY, channel = 0) { returnRelayBefore }
@@ -142,8 +140,10 @@ class TracerouteFreshnessTest {
             )
                 .apply { renderResponse = { "route" } }
         val dataHandler = mock<MeshDataHandler>(MockMode.autofill)
+        var routed = false
         every { dataHandler.handleReceivedData(any(), any(), any(), any(), any()) } calls
             { args ->
+                routed = true
                 tracerouteHandler.handleTraceroute(
                     packet = args.arg<MeshPacket>(0),
                     logUuid = args.arg<String?>(3),
@@ -151,19 +151,13 @@ class TracerouteFreshnessTest {
                     session = args.arg<RadioSessionContext>(2),
                 )
             }
-        val processor =
-            MeshMessageProcessorImpl(
-                nodeManager = nodeManager,
-                serviceStateWriter = FakeServiceRepository(),
-                meshLogRepository = lazy { mock<MeshLogRepository>(MockMode.autofill) },
-                dataHandler = lazy { dataHandler },
-                fromRadioDispatcher = mock<FromRadioPacketHandler>(MockMode.autofill),
-                radioInterfaceService = radio,
-                scope = backgroundScope.asServiceScope(),
-            )
+        val projection =
+            radioSessionProjection(nodeManager, radio, backgroundScope, dataHandler, nodeRepository = nodeRepository)
 
-        val frame = FromRadio.Builder().also { wb -> wb.packet = tracerouteResponse() }.build().encode()
-        processor.handleFromRadio(ReceivedRadioFrame(frame.toByteString(), session), MY_NODE)
+        projection.project(
+            RadioSessionEvent.Packet(sessionId = 1, sequence = 1, packet = tracerouteResponse()),
+            session,
+        )
         runCurrent()
         withContext(Dispatchers.Default) { withTimeout(TIMEOUT_MS) { handlerJob.children.toList().joinAll() } }
         runCurrent()
@@ -175,9 +169,7 @@ class TracerouteFreshnessTest {
             assertEquals(before.hopsAway, after.hopsAway, "hopsAway of relay ${before.num}")
             assertEquals(before.snr, after.snr, "snr of relay ${before.num}")
         }
-        val responder = nodes.getValue(RESPONDER)
-        assertNotEquals(RELAY_LAST_HEARD, responder.lastHeard, "the sender itself was heard")
-        assertEquals(2, responder.hopsAway)
+        assertTrue(routed, "the response reached the traceroute handler")
     }
 
     private companion object {

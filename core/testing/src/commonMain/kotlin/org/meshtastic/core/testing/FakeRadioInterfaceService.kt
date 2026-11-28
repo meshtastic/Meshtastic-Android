@@ -16,53 +16,41 @@
  */
 package org.meshtastic.core.testing
 
-import co.touchlab.kermit.Logger
 import kotlinx.atomicfu.atomic
-import kotlinx.atomicfu.locks.SynchronizedObject
-import kotlinx.atomicfu.locks.synchronized
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.job
 import kotlinx.coroutines.withContext
-import okio.ByteString.Companion.toByteString
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.MeshActivity
-import org.meshtastic.core.model.TransportStatus
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
-import org.meshtastic.core.repository.RadioSessionLease
-import org.meshtastic.core.repository.ReceivedRadioFrame
-import org.meshtastic.core.repository.TransportDisconnectReason
+import org.meshtastic.proto.LockdownAuth
+import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.MqttClientProxyMessage
+import org.meshtastic.sdk.PacedMessageHandle
+import org.meshtastic.sdk.RadioClient
+import kotlin.concurrent.Volatile
 
 /**
- * A test double for [RadioInterfaceService] that provides an in-memory implementation.
- *
- * The [connectionState] here mirrors the transport-level semantics of the real implementation. In production, only
- * [MeshConnectionManager][org.meshtastic.core.repository.MeshConnectionManager] observes this flow; tests should verify
- * that bridging behavior rather than consuming it directly from UI/feature test code (use
- * [FakeServiceRepository.connectionState] instead). Address selection remains separate from transport admission:
- * [connect] and an in-flight [restartTransport] publish a fresh monotonically increasing session generation.
+ * A test double for [RadioInterfaceService] that provides an in-memory implementation. Address selection remains
+ * separate from session admission: [connect] publishes a fresh monotonically increasing session generation. Tests that
+ * need a connection state use [FakeServiceRepository.connectionState], which the real service publishes to.
  */
 @Suppress("TooManyFunctions")
-class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = MainScope()) : RadioInterfaceService {
+class FakeRadioInterfaceService(val serviceScope: CoroutineScope = MainScope()) : RadioInterfaceService {
 
     override val supportedDeviceTypes: List<DeviceType> = emptyList()
-
-    /** Transport-level connection state (raw hardware link status). */
-    private val _connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
-    override val connectionState: StateFlow<ConnectionState> = _connectionState
 
     private val _currentDeviceAddressFlow = MutableStateFlow<String?>(null)
     override val currentDeviceAddressFlow: StateFlow<String?> = _currentDeviceAddressFlow
@@ -73,59 +61,17 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
     private val _activeSession = MutableStateFlow<RadioSessionContext?>(null)
     override val activeSession: StateFlow<RadioSessionContext?> = _activeSession
 
-    private val sessionAdmissionLock = SynchronizedObject()
-    private var sessionAdmissionOpen = false
-    private var admittedSessionOperations = 0
-    private var sessionDrainWaiter: CompletableDeferred<Unit>? = null
-    private val sessionOperationMutex = Mutex()
+    private class OpenFakeSession(val context: RadioSessionContext, val scope: CoroutineScope)
 
-    /** Number of lease-release invariant violations observed by this fake. Finally paths record rather than throw. */
-    private var sessionLeaseInvariantViolationsState: Int = 0
-    val sessionLeaseInvariantViolations: Int
-        get() = synchronized(sessionAdmissionLock) { sessionLeaseInvariantViolationsState }
+    @Volatile private var open: OpenFakeSession? = null
 
-    override fun isSessionActive(session: RadioSessionContext): Boolean =
-        synchronized(sessionAdmissionLock) { sessionAdmissionOpen && _activeSession.value == session }
-
-    override fun runIfSessionActive(session: RadioSessionContext, block: () -> Unit): Boolean =
-        synchronized(sessionAdmissionLock) {
-            if (!sessionAdmissionOpen || _activeSession.value != session) return@synchronized false
-            block()
-            true
-        }
-
-    override suspend fun runWithSessionLease(
-        session: RadioSessionContext,
-        block: suspend (RadioSessionLease) -> Unit,
-    ): Boolean {
-        val admittedSession = admitSessionOperation(session) ?: return false
-
-        val lease =
-            object : RadioSessionLease {
-                override val session: RadioSessionContext = session
-
-                override fun isCurrent(): Boolean =
-                    synchronized(sessionAdmissionLock) { _activeSession.value == admittedSession }
-            }
-
-        try {
-            block(lease)
-            return true
-        } finally {
-            releaseSessionOperation(admittedSession)
-        }
+    private fun openFor(session: RadioSessionContext): OpenFakeSession? = open?.takeIf {
+        it.context == session && it.scope.isActive
     }
 
-    override suspend fun runWhileSessionActive(
-        session: RadioSessionContext,
-        label: String,
-        block: suspend () -> Unit,
-    ): Boolean = sessionOperationMutex.withLock { runWithSessionLease(session) { block() } }
+    override fun isSessionActive(session: RadioSessionContext): Boolean = openFor(session) != null
 
-    // Use an unbounded Channel to mirror SharedRadioInterfaceService semantics. A MutableSharedFlow would
-    // hide the stop/start backlog bug that motivated the resetReceivedBuffer() API.
-    private val _receivedData = Channel<ReceivedRadioFrame>(Channel.UNLIMITED)
-    override val receivedData: Flow<ReceivedRadioFrame> = _receivedData.receiveAsFlow()
+    override fun sessionScope(session: RadioSessionContext): CoroutineScope? = openFor(session)?.scope
 
     private val _meshActivity = MutableSharedFlow<MeshActivity>()
     override val meshActivity: Flow<MeshActivity> = _meshActivity.asFlow()
@@ -133,44 +79,12 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
     private val _connectionError = MutableSharedFlow<String>()
     override val connectionError: Flow<String> = _connectionError.asFlow()
 
-    private val _transportStatus = MutableStateFlow<TransportStatus?>(null)
-    override val transportStatus: StateFlow<TransportStatus?> = _transportStatus
-
-    /** Every status reported through [onStatus], in order. */
-    val reportedStatuses = mutableListOf<TransportStatus>()
-
-    private val _sentToRadio = mutableListOf<ByteArray>()
-
-    /** Thread-safe lifetime history of writes accepted across all admitted fake transport sessions. */
-    val sentToRadio: List<ByteArray>
-        get() = synchronized(sessionAdmissionLock) { _sentToRadio.map { it.copyOf() } }
-
-    /** Set to true to simulate an admitted transport rejecting the byte handoff. */
-    var rejectAdmittedSends: Boolean = false
-
     var connectCalled = false
-    var restartTransportCalled: Boolean = false
-        private set
 
     override val mockTransportEnabled: MutableStateFlow<Boolean> = MutableStateFlow(true)
 
     /** No capture asset in tests; flip per-test when exercising replay-gated behaviour. */
     override var isReplayTransportAvailable: Boolean = false
-
-    /**
-     * Records [bytes] only while a transport session is admitted. Tests must select a non-null device address and call
-     * [connect] before sending; attempts outside that lifecycle return false and leave [sentToRadio] unchanged.
-     */
-    override fun trySendToRadio(bytes: ByteArray): Boolean {
-        val admittedSession = admitSessionOperation() ?: return false
-        return try {
-            val accepted = !rejectAdmittedSends
-            if (accepted) synchronized(sessionAdmissionLock) { _sentToRadio.add(bytes.copyOf()) }
-            accepted
-        } finally {
-            releaseSessionOperation(admittedSession)
-        }
-    }
 
     override fun connect() {
         connectCalled = true
@@ -182,14 +96,6 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
         revokeActiveSession()
     }
 
-    override suspend fun restartTransport() {
-        restartTransportCalled = true
-        if (connectCalled && _activeSession.value != null) {
-            revokeActiveSession()
-            admitSelectedSession()
-        }
-    }
-
     override fun getDeviceAddress(): String? = _currentDeviceAddressFlow.value
 
     override fun setDeviceAddress(deviceAddr: String?): Boolean {
@@ -197,123 +103,77 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
         return true
     }
 
-    private fun admitSessionOperation(expectedSession: RadioSessionContext? = null): RadioSessionContext? =
-        synchronized(sessionAdmissionLock) {
-            val active = _activeSession.value
-            val matchesExpectedSession = expectedSession == null || active == expectedSession
-            if (!sessionAdmissionOpen || active == null || !matchesExpectedSession) {
-                null
-            } else {
-                admittedSessionOperations++
-                active
-            }
-        }
-
-    private fun releaseSessionOperation(admittedSession: RadioSessionContext) {
-        val waiter =
-            synchronized(sessionAdmissionLock) {
-                if (_activeSession.value != admittedSession) {
-                    sessionLeaseInvariantViolationsState++
-                    Logger.e { "Fake session changed before an admitted operation released its lease" }
-                    return@synchronized null
-                }
-                if (admittedSessionOperations <= 0) {
-                    sessionLeaseInvariantViolationsState++
-                    Logger.e { "Fake session operation count underflow" }
-                    sessionDrainWaiter.also { sessionDrainWaiter = null }
-                } else {
-                    admittedSessionOperations--
-                    if (admittedSessionOperations == 0) {
-                        sessionDrainWaiter.also { sessionDrainWaiter = null }
-                    } else {
-                        null
-                    }
-                }
-            }
-        waiter?.complete(Unit)
-    }
-
     private fun admitSelectedSession() {
-        val address = _currentDeviceAddressFlow.value
-        synchronized(sessionAdmissionLock) {
-            check(_activeSession.value == null && admittedSessionOperations == 0) {
-                "Cannot admit a fake transport while the previous session is still draining"
-            }
-            if (address == null) {
-                sessionAdmissionOpen = false
-                return
-            }
-            val generation = _sessionGeneration.value + 1
-            _sessionGeneration.value = generation
-            _activeSession.value = RadioSessionContext(generation, address)
-            sessionAdmissionOpen = true
-        }
+        val address = _currentDeviceAddressFlow.value ?: return
+        check(open == null) { "Cannot admit a fake transport while the previous session is still draining" }
+        val generation = _sessionGeneration.value + 1
+        _sessionGeneration.value = generation
+        val context = RadioSessionContext(generation, address)
+        open =
+            OpenFakeSession(
+                context,
+                CoroutineScope(serviceScope.coroutineContext + SupervisorJob(serviceScope.coroutineContext.job)),
+            )
+        _activeSession.value = context
     }
 
     private suspend fun revokeActiveSession() {
-        val session = synchronized(sessionAdmissionLock) { _activeSession.value } ?: return
+        val current = open ?: return
         withContext(NonCancellable) {
-            val waiter =
-                synchronized(sessionAdmissionLock) {
-                    if (_activeSession.value != session) return@synchronized null
-                    sessionAdmissionOpen = false
-                    if (admittedSessionOperations == 0) {
-                        null
-                    } else {
-                        sessionDrainWaiter ?: CompletableDeferred<Unit>().also { sessionDrainWaiter = it }
-                    }
-                }
-            waiter?.await()
-            synchronized(sessionAdmissionLock) {
-                if (_activeSession.value == session) {
-                    check(admittedSessionOperations == 0) { "Fake session revoked before admitted operations drained" }
-                    _activeSession.value = null
-                    sessionDrainWaiter = null
-                }
+            current.scope.coroutineContext.job.cancelAndJoin()
+            if (open === current) {
+                open = null
+                _activeSession.value = null
             }
         }
     }
 
     override fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String = "$interfaceId:$rest"
 
-    override fun onConnect() {
-        _connectionState.value = ConnectionState.Connected
+    /** The SDK client [clientForSession] hands out while a session is admitted. */
+    var client: RadioClient? = null
+
+    override fun clientForSession(session: RadioSessionContext): RadioClient? =
+        if (isSessionActive(session)) client else null
+
+    override fun sendPaced(session: RadioSessionContext, packet: MeshPacket): PacedMessageHandle? =
+        clientForSession(session)?.sendPaced(packet)
+
+    /** Lockdown commands [tryLockdown] accepted, in order. */
+    val lockdownCommands = mutableListOf<LockdownAuth>()
+
+    /** Set to false to simulate the link refusing a lockdown command. */
+    var acceptLockdown: Boolean = true
+
+    override fun tryLockdown(session: RadioSessionContext, auth: LockdownAuth): Boolean {
+        if (!isSessionActive(session) || !acceptLockdown) return false
+        lockdownCommands += auth
+        return true
     }
 
-    override fun onDisconnect(isPermanent: Boolean, errorMessage: String?, reason: TransportDisconnectReason?) {
-        _connectionState.value = ConnectionState.Disconnected
+    /** How many received frames were reported through [reportReceiveActivity]. */
+    var receiveActivityReports = 0
+        private set
+
+    override fun reportReceiveActivity() {
+        receiveActivityReports++
     }
 
-    override fun onStatus(status: TransportStatus) {
-        synchronized(sessionAdmissionLock) { reportedStatuses += status }
-        _transportStatus.value = status
+    /** Broker messages handed to [deliverMqttProxy], in order. */
+    val deliveredMqttProxyMessages = mutableListOf<MqttClientProxyMessage>()
+
+    override suspend fun deliverMqttProxy(message: MqttClientProxyMessage): Boolean {
+        deliveredMqttProxyMessages += message
+        return true
     }
 
-    override fun handleFromRadio(bytes: ByteArray) {
-        val session = _activeSession.value ?: return
-        runIfSessionActive(session) { emitFromRadio(bytes, session) }
-    }
+    private val gattCacheInvalidationRequestedState = atomic(false)
 
-    override fun resetReceivedBuffer() {
-        @Suppress("EmptyWhileBlock", "ControlFlowWithEmptyBody")
-        while (_receivedData.tryReceive().isSuccess) {}
-    }
-
-    // --- Helper methods for testing ---
-
-    fun emitFromRadio(bytes: ByteArray, session: RadioSessionContext) {
-        _receivedData.trySend(ReceivedRadioFrame(bytes.toByteString(), session))
-    }
-
-    fun setConnectionState(state: ConnectionState) {
-        _connectionState.value = state
-    }
-
-    private val gattCacheInvalidationRequested = atomic(false)
+    /** Whether [requestGattCacheInvalidationOnNextConnect] was called. */
+    val gattCacheInvalidationRequested: Boolean
+        get() = gattCacheInvalidationRequestedState.value
 
     override fun requestGattCacheInvalidationOnNextConnect() {
-        gattCacheInvalidationRequested.value = true
+        gattCacheInvalidationRequestedState.value = true
     }
-
-    override fun consumeGattCacheInvalidationRequest(): Boolean = gattCacheInvalidationRequested.getAndSet(false)
 }

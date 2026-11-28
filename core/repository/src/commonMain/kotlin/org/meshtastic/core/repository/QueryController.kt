@@ -17,32 +17,35 @@
 package org.meshtastic.core.repository
 
 import org.meshtastic.core.model.Position
+import org.meshtastic.core.model.TelemetryType
 
 /**
  * Mesh query operations — position, traceroute, telemetry, user info, and metadata.
  *
- * These are "pull" operations that request data from remote nodes. When the SDK is adopted, implementations delegate to
- * `RadioClient.telemetry` and `RadioClient.routing` sub-APIs.
+ * These are "pull" operations that request data from remote nodes through the session's SDK client. Each returns once
+ * the radio admitted the request; its [NodeRequest] reports whether the mesh then failed it. The reply itself reaches
+ * Room through the session's receive projection.
  *
- * @see RadioController which extends this interface for backward compatibility
+ * @throws PacketQueueRejectedException from each request when no radio session can take it.
+ * @see RadioController
  */
 interface QueryController {
 
-    /** Requests device metadata from a remote node. A [requestId] of 0 lets the sender assign one. */
-    suspend fun refreshMetadata(destNum: Int, requestId: Int = 0)
+    /** Requests device metadata from a node. */
+    suspend fun refreshMetadata(destNum: Int): NodeRequest
 
-    /** Requests the current GPS position from a remote node. A [requestId] of 0 lets the sender assign one. */
-    suspend fun requestPosition(destNum: Int, currentPosition: Position, requestId: Int = 0)
+    /** Requests the current position of a remote node, sharing ours when the user allows it. */
+    suspend fun requestPosition(destNum: Int, currentPosition: Position): NodeRequest
 
-    /** Requests detailed user info from a remote node. A [requestId] of 0 lets the sender assign one. */
-    suspend fun requestUserInfo(destNum: Int, requestId: Int = 0)
+    /** Requests user info from a remote node, carrying ours. */
+    suspend fun requestUserInfo(destNum: Int): NodeRequest
 
     /** Initiates a traceroute request to a remote node. */
-    suspend fun requestTraceroute(requestId: Int, destNum: Int)
+    suspend fun requestTraceroute(destNum: Int): NodeRequest
 
-    /** Requests telemetry data from a remote node. */
-    suspend fun requestTelemetry(requestId: Int, destNum: Int, typeValue: Int)
+    /** Requests one kind of telemetry from a node. */
+    suspend fun requestTelemetry(destNum: Int, type: TelemetryType): NodeRequest
 
-    /** Requests neighbor information (detected nodes) from a remote node. */
-    suspend fun requestNeighborInfo(requestId: Int, destNum: Int)
+    /** Requests neighbor information (detected nodes) from a node. */
+    suspend fun requestNeighborInfo(destNum: Int): NodeRequest
 }

@@ -16,9 +16,10 @@
  */
 package org.meshtastic.core.model.util
 
-import org.meshtastic.core.common.util.latLongToMeter
 import org.meshtastic.core.model.Position
+import org.meshtastic.sdk.PositionUtils
 
 /** @return distance in meters along the surface of the earth (ish) */
 @Suppress("MagicNumber")
-fun positionToMeter(a: Position, b: Position): Double = latLongToMeter(a.latitude, a.longitude, b.latitude, b.longitude)
+fun positionToMeter(a: Position, b: Position): Double =
+    PositionUtils.distance(a.latitude, a.longitude, b.latitude, b.longitude)

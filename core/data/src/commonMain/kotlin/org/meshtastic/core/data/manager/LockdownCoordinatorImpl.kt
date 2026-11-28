@@ -17,71 +17,77 @@
 package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
+import kotlinx.atomicfu.locks.SynchronizedObject
+import kotlinx.atomicfu.locks.synchronized
+import okio.ByteString.Companion.toByteString
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.service.LockdownState
 import org.meshtastic.core.model.service.LockdownTokenInfo
-import org.meshtastic.core.repository.CommandSender
+import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.repository.LockdownCoordinator
 import org.meshtastic.core.repository.LockdownPassphraseStore
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.proto.LockdownAuth
 import org.meshtastic.proto.LockdownStatus
-import kotlin.concurrent.Volatile
 
 /**
  * Lockdown authentication state machine. Processes `LockdownStatus` messages from the firmware, drives the
  * `LockdownState` exposed to the UI, and manages auto-replay of cached passphrases.
  *
- * **Threading**: All public methods are called from the BLE/radio dispatcher (single-threaded). `@Volatile` fields
- * ensure visibility if a coroutine resumes on a different thread, but compound read-modify sequences assume no
- * concurrent callers.
+ * The UI and the session receiver serialize commands and replies so a fast firmware reply cannot arrive before the
+ * command's pending state is installed.
  */
 @Single(binds = [LockdownCoordinator::class])
 @Suppress("TooManyFunctions")
 class LockdownCoordinatorImpl(
     private val serviceRepository: ServiceRepository,
-    private val commandSender: CommandSender,
     private val passphraseStore: LockdownPassphraseStore,
     private val radioInterfaceService: RadioInterfaceService,
     private val connectionManager: Lazy<MeshConnectionManager>,
 ) : LockdownCoordinator {
-    @Volatile private var wasAutoAttempt = false
+    private val lock = SynchronizedObject()
 
-    @Volatile private var wasLockNow = false
+    private var wasAutoAttempt = false
 
-    @Volatile private var pendingPassphrase: String? = null
+    private var wasLockNow = false
 
-    @Volatile private var pendingBoots: Int = LockdownPassphraseStore.DEFAULT_BOOTS
+    private var pendingPassphrase: String? = null
 
-    @Volatile private var pendingHours: Int = 0
+    private var pendingBoots: Int = LockdownPassphraseStore.DEFAULT_BOOTS
 
-    @Volatile private var pendingMaxSessionSeconds: Int = 0
+    private var pendingHours: Int = 0
 
-    override fun onConnect() {
+    private var pendingMaxSessionSeconds: Int = 0
+
+    override fun onConnect() = synchronized(lock) {
         serviceRepository.setSessionAuthorized(false)
         resetTransientState()
     }
 
-    override fun onDisconnect() {
+    override fun onDisconnect() = synchronized(lock) {
         serviceRepository.setSessionAuthorized(false)
         serviceRepository.setLockdownTokenInfo(null)
         serviceRepository.setLockdownState(LockdownState.None)
         resetTransientState()
     }
 
-    override fun onConfigComplete() {
-        // No-op once authorized; retained for lifecycle symmetry.
-    }
-
-    override fun handleLockdownStatus(status: LockdownStatus) {
+    override fun handleLockdownStatus(status: LockdownStatus) = synchronized(lock) {
         when (status.state) {
             LockdownStatus.State.NEEDS_PROVISION -> handleNeedsProvision()
+
             LockdownStatus.State.LOCKED -> handleLocked(status.lock_reason)
+
             LockdownStatus.State.UNLOCKED -> handleUnlocked(status)
+
             LockdownStatus.State.UNLOCK_FAILED -> handleUnlockFailed(status.backoff_seconds)
+
             LockdownStatus.State.DISABLED -> handleDisabled()
-            LockdownStatus.State.STATE_UNSPECIFIED -> Logger.w { "Lockdown: Received STATE_UNSPECIFIED from firmware" }
+
+            LockdownStatus.State.STATE_UNSPECIFIED ->
+                Logger.w { "Lockdown: Received STATE_UNSPECIFIED from firmware" }
         }
     }
 
@@ -131,7 +137,7 @@ class LockdownCoordinatorImpl(
                 // handling for the new attempt.
                 wasAutoAttempt = false
                 val dispatched =
-                    commandSender.sendLockdownPassphrase(
+                    sendPassphrase(
                         stored.passphrase,
                         stored.boots,
                         stored.hours,
@@ -180,7 +186,6 @@ class LockdownCoordinatorImpl(
         )
         serviceRepository.setLockdownState(LockdownState.Unlocked)
         serviceRepository.setSessionAuthorized(true)
-        connectionManager.value.startConfigOnly()
     }
 
     @Suppress("TooGenericExceptionCaught")
@@ -220,10 +225,10 @@ class LockdownCoordinatorImpl(
         hours: Int,
         maxSessionSeconds: Int,
         disable: Boolean,
-    ): Boolean {
-        if (!commandSender.sendLockdownPassphrase(passphrase, boots, hours, maxSessionSeconds, disable)) {
+    ): Boolean = synchronized(lock) {
+        if (!sendPassphrase(passphrase, boots, hours, maxSessionSeconds, disable)) {
             Logger.w { "Lockdown: Passphrase command was not accepted by the active transport" }
-            return false
+            return@synchronized false
         }
 
         wasAutoAttempt = false
@@ -250,17 +255,48 @@ class LockdownCoordinatorImpl(
             pendingMaxSessionSeconds = maxSessionSeconds
         }
         serviceRepository.setLockdownState(LockdownState.AwaitingResponse)
-        return true
+        true
     }
 
-    override fun lockNow(): Boolean {
-        val dispatched = commandSender.sendLockNow()
+    override fun lockNow(): Boolean = synchronized(lock) {
+        val dispatched = sendLockdown(LockdownAuth.Builder().also { it.lock_now = true }.build())
         if (dispatched) {
             wasLockNow = true
         } else {
             Logger.w { "Lockdown: Lock Now command was not accepted by the active transport" }
         }
-        return dispatched
+        dispatched
+    }
+
+    private fun sendPassphrase(
+        passphrase: String,
+        boots: Int,
+        hours: Int,
+        maxSessionSeconds: Int,
+        disable: Boolean = false,
+    ): Boolean {
+        val validUntilEpoch =
+            if (hours > 0) {
+                (nowMillis / TimeConstants.MS_PER_SEC + hours.toLong() * TimeConstants.SECONDS_PER_HOUR).toInt()
+            } else {
+                0
+            }
+        val auth =
+            LockdownAuth.Builder()
+                .also { wb ->
+                    wb.passphrase = passphrase.encodeToByteArray().toByteString()
+                    wb.boots_remaining = boots.coerceAtLeast(0)
+                    wb.valid_until_epoch = validUntilEpoch
+                    wb.max_session_seconds = maxSessionSeconds.coerceAtLeast(0)
+                    wb.disable = disable
+                }
+                .build()
+        return sendLockdown(auth)
+    }
+
+    private fun sendLockdown(auth: LockdownAuth): Boolean {
+        val session = radioInterfaceService.activeSession.value ?: return false
+        return radioInterfaceService.tryLockdown(session, auth)
     }
 
     private fun resetTransientState() {

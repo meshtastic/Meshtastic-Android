@@ -46,7 +46,6 @@ import kotlinx.coroutines.withContext
 import org.meshtastic.core.common.state.HiddenFeaturesUnlock
 import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.datastore.model.PendingFirmwareRecovery
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.FirmwareRelease
 import org.meshtastic.core.model.FirmwareReleaseType
@@ -76,6 +75,7 @@ import org.meshtastic.core.testing.TestDataFactory
 import org.meshtastic.feature.firmware.ota.dfu.DfuException
 import org.meshtastic.feature.firmware.ota.dfu.toErrorState
 import org.meshtastic.proto.DeviceMetadata
+import org.meshtastic.sdk.ConnectionState
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test

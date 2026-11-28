@@ -52,7 +52,6 @@ import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.core.model.util.subscribeList
 import org.meshtastic.core.network.mqtt.MqttRootTopic
-import org.meshtastic.core.network.transport.StreamFrameCodec
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.mqtt.ConnectionState
@@ -69,6 +68,8 @@ import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.MqttClientProxyMessage
 import org.meshtastic.proto.ServiceEnvelope
 import org.meshtastic.proto.ToRadio
+import org.meshtastic.sdk.WireFraming
+import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.Uuid
 
 @Single(binds = [MQTTRepository::class])
@@ -99,8 +100,8 @@ class MQTTRepositoryImpl(
         private const val DEFAULT_TOPIC_LEVEL = "/2/e/"
         private const val JSON_TOPIC_LEVEL = "/2/json/"
         private const val DEFAULT_SERVER_ADDRESS = "mqtt.meshtastic.org"
-        private const val INITIAL_RECONNECT_DELAY_MS = 1000L
-        private const val MAX_RECONNECT_DELAY_MS = 30_000L
+        private val INITIAL_RECONNECT_DELAY = 1.seconds
+        private val MAX_RECONNECT_DELAY = 30.seconds
         private const val RECONNECT_BACKOFF_MULTIPLIER = 2
     }
 
@@ -183,7 +184,7 @@ class MQTTRepositoryImpl(
         // autoReconnect handles subsequent drops and re-subscribes internally.
         val connectJob =
             launch(start = CoroutineStart.LAZY) {
-                var reconnectDelay = INITIAL_RECONNECT_DELAY_MS
+                var reconnectDelay = INITIAL_RECONNECT_DELAY
                 while (isActiveSession(session)) {
                     val result = safeCatching {
                         if (!isActiveSession(session)) return@launch
@@ -226,15 +227,15 @@ class MQTTRepositoryImpl(
                             // Anything else landing here is unexpected — a fault in our own connect/subscribe setup
                             // rather than the peer's — so it keeps reporting.
                             if (failure.isExpectedMqttRetryFailure()) {
-                                Logger.w(failure) { "MQTT connect failed, retrying in ${reconnectDelay}ms" }
+                                Logger.w(failure) { "MQTT connect failed, retrying in $reconnectDelay" }
                             } else {
                                 Logger.e(failure) {
-                                    "MQTT connect failed unexpectedly, retrying in ${reconnectDelay}ms"
+                                    "MQTT connect failed unexpectedly, retrying in $reconnectDelay"
                                 }
                             }
                             delay(reconnectDelay)
                             reconnectDelay =
-                                (reconnectDelay * RECONNECT_BACKOFF_MULTIPLIER).coerceAtMost(MAX_RECONNECT_DELAY_MS)
+                                (reconnectDelay * RECONNECT_BACKOFF_MULTIPLIER).coerceAtMost(MAX_RECONNECT_DELAY)
                         }
                     }
                 }
@@ -438,7 +439,7 @@ class MQTTRepositoryImpl(
     private fun ProducerScope<MqttClientProxyMessage>.forwardIfFits(message: MqttClientProxyMessage) {
         val toRadio = ToRadio.Builder().also { wb -> wb.mqttClientProxyMessage = message }.build()
         val encodedSize = ToRadio.ADAPTER.encodedSize(toRadio)
-        if (encodedSize > StreamFrameCodec.MAX_TO_FROM_RADIO_SIZE) {
+        if (encodedSize > WireFraming.MAX_PAYLOAD_SIZE) {
             Logger.w { "MQTT downlink dropped: $encodedSize-byte ToRadio over the phone API frame limit" }
         } else {
             trySend(message)

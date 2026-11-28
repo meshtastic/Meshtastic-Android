@@ -22,7 +22,6 @@ import org.meshtastic.proto.LockdownStatus
 class FakeLockdownCoordinator : LockdownCoordinator {
     var connectCalled = false
     var disconnectCalled = false
-    var configCompleteCalled = false
     var lastStatus: LockdownStatus? = null
     var lastPassphrase: String? = null
     var lastBoots: Int? = null
@@ -39,10 +38,6 @@ class FakeLockdownCoordinator : LockdownCoordinator {
 
     override fun onDisconnect() {
         disconnectCalled = true
-    }
-
-    override fun onConfigComplete() {
-        configCompleteCalled = true
     }
 
     override fun handleLockdownStatus(status: LockdownStatus) {

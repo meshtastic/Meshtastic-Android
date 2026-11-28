@@ -17,15 +17,25 @@
 package org.meshtastic.core.domain.usecase.session
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import org.koin.core.annotation.Single
 import org.meshtastic.core.model.SessionStatus
-import org.meshtastic.core.repository.SessionManager
+import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.sdk.AdminSessionStatus
+import org.meshtastic.sdk.NodeId
 
-/**
- * Thin wrapper that exposes the durable per-node [SessionStatus] flow to UI consumers without leaking the
- * [SessionManager] into ViewModels.
- */
+/** Projects the selected SDK client's session status into the UI model. */
 @Single
-open class ObserveRemoteAdminSessionStatusUseCase(private val sessionManager: SessionManager) {
-    open operator fun invoke(destNum: Int): Flow<SessionStatus> = sessionManager.observeSessionStatus(destNum)
+open class ObserveRemoteAdminSessionStatusUseCase(private val radio: RadioInterfaceService) {
+    open operator fun invoke(destNum: Int): Flow<SessionStatus> = radio
+        .adminSessionStatus(NodeId(destNum))
+        .map { status ->
+            when (status) {
+                AdminSessionStatus.NoSession -> SessionStatus.NoSession
+                is AdminSessionStatus.Active -> SessionStatus.Active(status.refreshedAt)
+                is AdminSessionStatus.Stale -> SessionStatus.Stale(status.refreshedAt)
+            }
+        }
+        .distinctUntilChanged()
 }

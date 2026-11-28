@@ -31,7 +31,6 @@ import androidx.glance.testing.unit.hasContentDescriptionEqualTo
 import androidx.glance.testing.unit.hasText
 import androidx.test.core.app.ApplicationProvider
 import org.junit.runner.RunWith
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.battery
 import org.meshtastic.core.resources.disconnected
@@ -47,6 +46,7 @@ import org.meshtastic.core.resources.widget_packets_received
 import org.meshtastic.core.resources.widget_packets_sent
 import org.meshtastic.core.resources.widget_relays
 import org.meshtastic.core.resources.widget_relays_canceled
+import org.meshtastic.sdk.ConnectionState
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import kotlin.test.Test

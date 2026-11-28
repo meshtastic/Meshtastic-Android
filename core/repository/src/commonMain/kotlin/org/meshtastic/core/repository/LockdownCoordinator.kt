@@ -31,14 +31,6 @@ interface LockdownCoordinator {
     /** Called when a BLE connection is lost. */
     fun onDisconnect()
 
-    /**
-     * Lifecycle hook called on every config_complete_id from the device.
-     *
-     * Currently a no-op; retained so implementations can react to config-complete in the future without changing the
-     * public contract.
-     */
-    fun onConfigComplete()
-
     /** Routes an incoming typed [LockdownStatus] from FromRadio. */
     fun handleLockdownStatus(status: LockdownStatus)
 

@@ -1,0 +1,270 @@
+/*
+ * Copyright (c) 2026 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+package org.meshtastic.core.data.radio.sim
+
+import co.touchlab.kermit.Logger
+import kotlinx.atomicfu.atomic
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
+import okio.Buffer
+import okio.ByteString.Companion.toByteString
+import okio.EOFException
+import org.meshtastic.core.common.util.handledLaunch
+import org.meshtastic.core.model.NodeAddress
+import org.meshtastic.proto.AdminMessage
+import org.meshtastic.proto.Data
+import org.meshtastic.proto.FromRadio
+import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.PortNum
+import org.meshtastic.proto.ToRadio
+import org.meshtastic.proto.User
+import org.meshtastic.sdk.TransportIdentity
+
+/**
+ * A [VirtualRadioLink] that replays a pre-captured stream of `FromRadio` frames entirely on-device — no network and no
+ * paired radio. It is the deterministic, self-contained traffic source behind the "Demo Mode (Replay)" connection
+ * entry, used to drive realistic ~200-node mesh traffic into the app for Macrobenchmark / Baseline Profile journeys and
+ * populated-UI (node list / map / message) tests.
+ *
+ * ### What it exercises
+ * Frames are handed verbatim to the SDK session as a PhoneAPI link — the *same* ingestion entry a live BLE/TCP/Serial
+ * radio uses — so everything downstream (protobuf decode, the want_config state machine, node-DB and packet handling,
+ * the UI) runs exactly as in production. The only things it skips are the physical link and the stream framing layer:
+ * it deals in already-deframed `FromRadio` payloads.
+ *
+ * ### Asset format (`*.fromradio`)
+ * A flat, three-section container. **Every integer is a big-endian (network-order) unsigned 32-bit value:**
+ *
+ * ```
+ *   ┌─ Stage-1: config section ────────────────────────────────────────────┐
+ *   │  u32  C                          number of config frames              │
+ *   │  C ×  ( u32 len, len bytes )     each blob = one serialized FromRadio │
+ *   ├─ Stage-2: node section ──────────────────────────────────────────────┤
+ *   │  u32  N                          number of node_info frames           │
+ *   │  N ×  ( u32 len, len bytes )     each blob = one serialized FromRadio │
+ *   ├─ packet section ─────────────────────────────────────────────────────┤
+ *   │       ( u32 len, len bytes ) *   repeated until end-of-buffer         │
+ *   └──────────────────────────────────────────────────────────────────────┘
+ * ```
+ *
+ * Each `len`-prefixed blob is a single `FromRadio` message as produced by Wire's `encode()`. By section:
+ * - **config** — `my_info`, `metadata`, `config.*`, `moduleConfig.*`, and `channel` frames: everything the app needs to
+ *   come up, but **no** `node_info` (the app ignores NodeInfo during Stage 1).
+ * - **node** — the connected node first, then the captured node DB (one `node_info` per frame).
+ * - **packet** — the captured `MeshPacket` traffic, in capture order; the section has no count and runs to EOF.
+ *
+ * `config_complete_id` is deliberately **omitted** from the file — this transport injects it per phase (below) with the
+ * app's own nonce, exactly as real firmware echoes the request.
+ *
+ * The file is produced by the burningmesh-replay tool (`replay_server.py --export PATH`, which also sanitizes capture
+ * PII). **This class is the authoritative reader of the format; keep the exporter and [ReplayRadioTransportTest]'s
+ * `asset()` encoder in sync with the layout above.**
+ *
+ * ### Handshake & runtime behaviour
+ * Driven by the SDK's two-phase want_config handshake ([HandshakeConstants]):
+ * - **Stage 1** ([HandshakeConstants.CONFIG_NONCE]) → emit the config section, then `config_complete_id`.
+ * - **Stage 2** ([HandshakeConstants.NODE_INFO_NONCE]) → emit the node section, then `config_complete_id`, then start
+ *   streaming the packet section **once** (a re-issued Stage-2 request does not restart it).
+ *
+ * The packet stream is paced at [packetDelayMs] and does not loop; it stops when [scope] or this transport is closed.
+ * Outbound [ToRadio] traffic other than handshake requests (heartbeats, app packets) is ignored — the replay is
+ * strictly read-only. [disconnect] is terminal: it rejects later handshakes and cancels transport-owned replay work.
+ *
+ * ### Robustness
+ * The asset is parsed up front and every length is validated against the bytes actually remaining, so a truncated or
+ * corrupt file fails fast with [IllegalArgumentException] rather than a cryptic buffer underflow or an out-of-memory
+ * allocation. [send] likewise tolerates any inbound bytes (undecodable [ToRadio] is ignored, not thrown). The bundled
+ * asset is trusted, but this same reader is a convenient injection point for malformed-input / fuzz testing of the
+ * ingestion path — see `ReplayFuzz` in the test sources.
+ */
+class ReplayRadioTransport(
+    private val scope: CoroutineScope,
+    val address: String,
+    frames: ByteArray,
+    private val packetDelayMs: Long = DEFAULT_PACKET_DELAY_MS,
+) : VirtualRadioLink() {
+    override val identity = TransportIdentity("replay:$address")
+
+    private val configFrames: List<ByteArray>
+    private val nodeFrames: List<ByteArray>
+    private val packetFrames: List<ByteArray>
+
+    init {
+        val buffer = Buffer().write(frames)
+        configFrames = buffer.readSection(counted = true, label = "config")
+        nodeFrames = buffer.readSection(counted = true, label = "node")
+        packetFrames = buffer.readSection(counted = false, label = "packet")
+    }
+
+    private val packetsStarted = atomic(false)
+    private val lifecycle = TransportLifecycleGate("Replay")
+    private val transportJob = SupervisorJob(scope.coroutineContext[Job])
+    private val transportScope = CoroutineScope(scope.coroutineContext + transportJob)
+    private val handshakeQueue = Channel<Int>(capacity = Channel.UNLIMITED)
+    private val started = atomic(false)
+
+    override suspend fun connect() {
+        lifecycle.runIfOpen {
+            if (!started.compareAndSet(expect = false, update = true)) return@runIfOpen
+            // Once start is published, the channel can safely buffer a racing nonce until this worker begins.
+            transportScope.handledLaunch { for (nonce in handshakeQueue) replayHandshake(nonce) }
+            Logger.i {
+                "Starting replay transport: ${configFrames.size} config, ${nodeFrames.size} node, " +
+                    "${packetFrames.size} packet frames"
+            }
+            connected()
+        }
+    }
+
+    override fun respond(request: ToRadio) {
+        lifecycle.runIfOpen<Unit> {
+            when (val nonce = request.want_config_id) {
+                HandshakeConstants.CONFIG_NONCE,
+                HandshakeConstants.NODE_INFO_NONCE,
+                -> handshakeQueue.trySend(nonce)
+
+                else -> request.packet?.let(::answerOwnerRequest)
+            }
+        }
+    }
+
+    @Suppress("ReturnCount")
+    private fun answerOwnerRequest(packet: MeshPacket) {
+        val data = packet.decoded ?: return
+        if (data.portnum != PortNum.ADMIN_APP) return
+        val admin = runCatching { AdminMessage.ADAPTER.decode(data.payload) }.getOrNull()
+        if (admin?.get_owner_request != true) return
+
+        val owner =
+            nodeFrames
+                .asSequence()
+                .mapNotNull { runCatching { FromRadio.ADAPTER.decode(it).node_info }.getOrNull() }
+                .firstOrNull { it.num == packet.to }
+                ?.user ?: User.Builder().also { it.id = NodeAddress.numToDefaultId(packet.to) }.build()
+        val response = AdminMessage.Builder().also { it.get_owner_response = owner }.build()
+        val reply =
+            MeshPacket.Builder()
+                .also {
+                    it.from = packet.to
+                    it.to = packet.from
+                    it.decoded =
+                        Data.Builder()
+                            .also { data ->
+                                data.portnum = PortNum.ADMIN_APP
+                                data.request_id = packet.id
+                                data.payload = response.encode().toByteString()
+                            }
+                            .build()
+                }
+                .build()
+        publish(FromRadio.Builder().also { it.packet = reply }.build().encode())
+    }
+
+    private suspend fun replayHandshake(nonce: Int) {
+        when (nonce) {
+            HandshakeConstants.CONFIG_NONCE -> {
+                emit(configFrames)
+                complete(HandshakeConstants.CONFIG_NONCE)
+            }
+
+            HandshakeConstants.NODE_INFO_NONCE -> {
+                emit(nodeFrames)
+                complete(HandshakeConstants.NODE_INFO_NONCE)
+                if (packetsStarted.compareAndSet(expect = false, update = true)) {
+                    transportScope.handledLaunch { streamPackets() }
+                }
+            }
+        }
+    }
+
+    private suspend fun emit(frames: List<ByteArray>) {
+        frames.forEach { emitFrame(it) }
+    }
+
+    private suspend fun complete(nonce: Int) =
+        emitFrame(FromRadio.Builder().also { wb -> wb.config_complete_id = nonce }.build().encode())
+
+    private suspend fun streamPackets() {
+        Logger.d { "Replay streaming ${packetFrames.size} packets at ${packetDelayMs}ms spacing" }
+        for (frame in packetFrames) {
+            emitFrame(frame)
+            if (packetDelayMs > 0) delay(packetDelayMs)
+        }
+        Logger.i { "Replay finished (${packetFrames.size} packets)" }
+    }
+
+    override suspend fun disconnect() {
+        val completed =
+            lifecycle.close(
+                beforeDrain = {
+                    handshakeQueue.close()
+                    transportJob.cancelAndJoin()
+                },
+                teardown = ::disconnected,
+            )
+        if (!completed) Logger.w { "Replay transport teardown did not complete within its lifecycle bounds" }
+    }
+
+    /**
+     * Reads one section of the asset. A [counted] section is prefixed with a `u32` frame count; the final (packet)
+     * section is uncounted and runs to end-of-buffer. Every frame length is checked against the bytes still available,
+     * so a malformed/truncated asset throws [IllegalArgumentException] up front instead of underflowing the buffer or
+     * allocating a multi-gigabyte array from a bogus length.
+     */
+    private fun Buffer.readSection(counted: Boolean, label: String): List<ByteArray> {
+        val expected = if (counted) readUInt32("$label frame count") else Int.MAX_VALUE
+        val frames = ArrayList<ByteArray>(if (counted) expected.coerceAtMost(MAX_PREALLOC) else 0)
+        while (frames.size < expected && !exhausted()) {
+            val len = readUInt32("$label[${frames.size}] length")
+            require(len.toLong() <= size) {
+                "Malformed replay asset: $label frame ${frames.size} declares $len bytes, only $size remain"
+            }
+            frames += readByteArray(len.toLong())
+        }
+        require(!counted || frames.size == expected) {
+            "Malformed replay asset: $label section truncated — read ${frames.size} of $expected frames"
+        }
+        return frames
+    }
+
+    /** Reads a big-endian `u32` as a non-negative [Int], rejecting truncation and the >2 GiB high-bit range. */
+    private fun Buffer.readUInt32(label: String): Int {
+        require(size >= INT_BYTES) { "Malformed replay asset: truncated $label" }
+        val value =
+            try {
+                readInt()
+            } catch (e: EOFException) {
+                throw IllegalArgumentException("Malformed replay asset: truncated $label", e)
+            }
+        require(value >= 0) { "Malformed replay asset: implausible $label ($value)" }
+        return value
+    }
+
+    companion object {
+        /** ~10 packets/sec, matching the burningmesh-replay steady-rate rig used for ingestion perf work. */
+        const val DEFAULT_PACKET_DELAY_MS = 100L
+
+        private const val INT_BYTES = 4
+
+        /** Cap the up-front list capacity from a (validated but still attacker-influenced) count to avoid OOM. */
+        private const val MAX_PREALLOC = 4096
+    }
+}

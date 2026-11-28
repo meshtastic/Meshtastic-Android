@@ -50,7 +50,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.add_network_device_manually
@@ -83,6 +82,7 @@ import org.meshtastic.core.ui.icon.Search
 import org.meshtastic.core.ui.icon.Usb
 import org.meshtastic.core.ui.icon.Wifi
 import org.meshtastic.feature.connections.model.DeviceListEntry
+import org.meshtastic.sdk.ConnectionState
 
 // The add-device sheet opens full height and has no partial stop.
 @OptIn(ExperimentalMaterial3Api::class)

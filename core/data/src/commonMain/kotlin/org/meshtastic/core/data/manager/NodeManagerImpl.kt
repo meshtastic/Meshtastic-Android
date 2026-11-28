@@ -18,6 +18,7 @@ package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
 import kotlinx.atomicfu.atomic
+import kotlinx.atomicfu.getAndUpdate
 import kotlinx.atomicfu.update
 import kotlinx.collections.immutable.PersistentMap
 import kotlinx.collections.immutable.PersistentSet
@@ -50,38 +51,21 @@ import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.resources.new_node_seen
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.FirmwareEdition
-import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.Paxcount
 import org.meshtastic.proto.StatusMessage
-import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.User
+import org.meshtastic.sdk.NodeField
 import kotlinx.coroutines.flow.update as updateStateFlow
 import org.meshtastic.proto.NodeInfo as ProtoNodeInfo
 import org.meshtastic.proto.Position as ProtoPosition
-
-/**
- * Resolves a validated public-key correlation hint from a raw [ByteString]. Returns null unless the key is exactly
- * [Node.PUBLIC_KEY_SIZE] bytes and is not [Node.ERROR_BYTE_STRING]. The hint is used only for in-memory correlation; it
- * is not a trusted hardware identity and never authorizes durable node migration or deletion.
- */
-private fun resolveValidatedPublicKeyHint(key: ByteString?): ByteString? {
-    if (key == null || key.size != Node.PUBLIC_KEY_SIZE || key == Node.ERROR_BYTE_STRING) return null
-    return key
-}
-
-/** Single source of truth for stored-node key precedence: the primary field wins over the embedded [User] field. */
-private fun nodePublicKeyHint(node: Node): ByteString? =
-    resolveValidatedPublicKeyHint(node.publicKey) ?: resolveValidatedPublicKeyHint(node.user.public_key)
 
 /** Short one-way diagnostic value that cannot disclose a raw public-key prefix. */
 private const val KEY_FINGERPRINT_HEX_LENGTH = 8
 
 internal fun publicKeyLogFingerprint(key: ByteString): String = key.sha256().hex().take(KEY_FINGERPRINT_HEX_LENGTH)
 
-private val DEFAULT_NODE_NAME_REGEX = Regex("^Meshtastic [0-9a-fA-F]{4}$")
-
 /** Implementation of [NodeManager] that maintains an in-memory database of the mesh. */
-@Suppress("LongParameterList", "TooManyFunctions", "CyclomaticComplexMethod", "LargeClass")
+@Suppress("LongParameterList", "TooManyFunctions")
 @Single(binds = [NodeManager::class, NodeIdLookup::class])
 class NodeManagerImpl(
     private val nodeRepository: NodeRepository,
@@ -98,7 +82,7 @@ class NodeManagerImpl(
         nodePersistenceLanes[(nodeNum.toLong() and Int.MAX_VALUE.toLong()).toInt() % nodePersistenceLanes.size]
 
     // A persist not yet in its lane writes the latest node once it gets there, so one per node and session is enough.
-    // Each holds a session lease that teardown drains, so a slow database must not collect one per packet.
+    // Each is session work that teardown joins, so a slow database must not collect one per packet.
     private val pendingPersists = atomic(emptyMap<Pair<Int, RadioSessionContext?>, Any>())
 
     private fun schedulePersistence(nodeNum: Int, session: RadioSessionContext?) {
@@ -122,165 +106,6 @@ class NodeManagerImpl(
      */
     internal fun resolveNodePublicKeyHint(node: Node): ByteString? = nodePublicKeyHint(node)
 
-    // byNum is the canonical in-memory store. Candidate-number reverse sets make normal put/remove and keyed packet
-    // handling proportional to the affected ID/key candidates rather than the entire mesh. byId stores the selected
-    // deterministic representative for O(1) user-ID lookup.
-    internal data class NodeIndex(
-        val byNum: PersistentMap<Int, Node> = persistentMapOf(),
-        val byId: PersistentMap<String, Node> = persistentMapOf(),
-        val candidateNumsById: PersistentMap<String, PersistentSet<Int>> = persistentMapOf(),
-        val candidateNumsByPublicKey: PersistentMap<ByteString, PersistentSet<Int>> = persistentMapOf(),
-    ) {
-        fun put(num: Int, node: Node, preferredNum: Int? = null): NodeIndex {
-            val previous = byNum[num]
-            val nextByNum = byNum.putting(num, node)
-            var nextCandidatesById = candidateNumsById
-            var nextCandidatesByPublicKey = candidateNumsByPublicKey
-
-            previous
-                ?.user
-                ?.id
-                ?.takeIf { it.isNotEmpty() }
-                ?.let { id -> nextCandidatesById = nextCandidatesById.removingCandidate(id, num) }
-            previous
-                ?.let { nodePublicKeyHint(it) }
-                ?.let { key -> nextCandidatesByPublicKey = nextCandidatesByPublicKey.removingCandidate(key, num) }
-            node.user.id
-                .takeIf { it.isNotEmpty() }
-                ?.let { id -> nextCandidatesById = nextCandidatesById.addingCandidate(id, num) }
-            nodePublicKeyHint(node)?.let { key ->
-                nextCandidatesByPublicKey = nextCandidatesByPublicKey.addingCandidate(key, num)
-            }
-
-            var nextById = byId
-            val affectedIds = setOfNotNull(previous?.user?.id, node.user.id).filter { it.isNotEmpty() }
-            for (id in affectedIds) {
-                val representative = chooseRepresentativeNum(nextCandidatesById[id].orEmpty(), nextByNum, preferredNum)
-                nextById =
-                    if (representative == null) {
-                        nextById.removing(id)
-                    } else {
-                        nextById.putting(id, checkNotNull(nextByNum[representative]))
-                    }
-            }
-            return NodeIndex(nextByNum, nextById, nextCandidatesById, nextCandidatesByPublicKey)
-        }
-
-        /**
-         * Once the index exceeds [maxNodes] entries, shrinks it to [lowWater] entries, never removing anything in
-         * [keep]. At or under [maxNodes] it returns the receiver unchanged.
-         *
-         * `packet.from` is untrusted and unthrottled, so without this every novel value allocates a permanent [Node]
-         * and the index grows until the process dies. Only `core:data` reads this index — for correlation,
-         * notifications, channel lookup and staging DB writes — and every one of those readers already tolerates a
-         * miss, so dropping a cold entry degrades correlation rather than losing user-visible data. The node list and
-         * map read Room, not this index, so eviction is not visible in the UI.
-         *
-         * Eviction order is least-valuable-first: bare-packet placeholders before nodes that have sent a real NodeInfo,
-         * and within each group the least recently heard. Nodes the user has marked (favourite, ignored, verified) are
-         * never evicted, since that is user data rather than observed mesh state.
-         *
-         * The cap is therefore best-effort rather than absolute: if protected entries alone exceed [maxNodes] the index
-         * stays above it. That is deliberate — these marks are set only by the local user, so no remote party can
-         * inflate them, and silently discarding user data to satisfy a memory bound would be the worse trade.
-         *
-         * Evicting down to [lowWater] rather than to [maxNodes] amortizes the sort: under a flood of novel numbers it
-         * runs once per `maxNodes - lowWater` inserts instead of on every one. Protected entries above [lowWater]
-         * shrink that batch, and once they fill [maxNodes] every insert past it pays for the filter and sort again.
-         */
-        fun evictedToFit(maxNodes: Int, lowWater: Int, keep: Set<Int>): NodeIndex {
-            require(lowWater < maxNodes) { "lowWater $lowWater must be below maxNodes $maxNodes" }
-            if (byNum.size <= maxNodes) return this
-            val evictable =
-                byNum.values
-                    .filterNot { it.num in keep || it.isFavorite || it.isIgnored || it.manuallyVerified }
-                    // Placeholders first, then oldest-heard, then node num so the outcome is deterministic.
-                    .sortedWith(
-                        compareByDescending<Node> { isDefaultIdentityPlaceholder(it) }
-                            .thenBy { it.lastHeard }
-                            .thenBy { it.num },
-                    )
-            val toDrop = evictable.take(byNum.size - lowWater)
-            return toDrop.fold(this) { index, node -> index.remove(node.num) }
-        }
-
-        /**
-         * Removes [num] from both indices. When the removed node's user ID was the [byId] representative and another
-         * surviving node shares that ID, [preferredNum] wins when present; otherwise deterministic ordering selects the
-         * replacement.
-         */
-        fun remove(num: Int, preferredNum: Int? = null): NodeIndex {
-            val previous = byNum[num] ?: return this
-            val newByNum = byNum.removing(num)
-            var newCandidatesById = candidateNumsById
-            var newCandidatesByPublicKey = candidateNumsByPublicKey
-            previous.user.id
-                .takeIf { it.isNotEmpty() }
-                ?.let { id -> newCandidatesById = newCandidatesById.removingCandidate(id, num) }
-            nodePublicKeyHint(previous)?.let { key ->
-                newCandidatesByPublicKey = newCandidatesByPublicKey.removingCandidate(key, num)
-            }
-            var newById = byId
-            if (previous.user.id.isNotEmpty()) {
-                val survivor =
-                    chooseRepresentativeNum(newCandidatesById[previous.user.id].orEmpty(), newByNum, preferredNum)
-                newById =
-                    if (survivor != null) {
-                        newById.putting(previous.user.id, checkNotNull(newByNum[survivor]))
-                    } else {
-                        newById.removing(previous.user.id)
-                    }
-            }
-            return NodeIndex(newByNum, newById, newCandidatesById, newCandidatesByPublicKey)
-        }
-
-        companion object {
-            internal fun isDefaultIdentityPlaceholder(node: Node): Boolean = nodePublicKeyHint(node) == null &&
-                node.user.hw_model == HardwareModel.UNSET &&
-                node.user.id == NodeAddress.numToDefaultId(node.num) &&
-                node.user.long_name.matches(DEFAULT_NODE_NAME_REGEX)
-
-            /**
-             * Selects a deterministic representative number from [candidates] sharing one user ID. If [preferredNum] is
-             * present it wins; otherwise an established key/hardware identity wins, then the lower node number.
-             */
-            internal fun chooseRepresentativeNum(
-                candidates: Set<Int>,
-                nodes: Map<Int, Node>,
-                preferredNum: Int?,
-            ): Int? {
-                if (preferredNum != null && preferredNum in candidates) return preferredNum
-                return candidates.minWithOrNull(
-                    compareByDescending<Int> { num ->
-                        nodes[num]?.let { node ->
-                            nodePublicKeyHint(node) != null || node.user.hw_model != HardwareModel.UNSET
-                        } == true
-                    }
-                        .thenBy { it },
-                )
-            }
-
-            fun fromByNum(nodes: Map<Int, Node>): NodeIndex {
-                var result = NodeIndex()
-                nodes.forEach { (num, node) -> result = result.put(num, node) }
-                return result
-            }
-
-            private fun <K> PersistentMap<K, PersistentSet<Int>>.addingCandidate(
-                key: K,
-                num: Int,
-            ): PersistentMap<K, PersistentSet<Int>> = putting(key, (this[key] ?: persistentSetOf()).adding(num))
-
-            private fun <K> PersistentMap<K, PersistentSet<Int>>.removingCandidate(
-                key: K,
-                num: Int,
-            ): PersistentMap<K, PersistentSet<Int>> {
-                val remaining = this[key]?.removing(num) ?: return this
-                return if (remaining.isEmpty()) removing(key) else putting(key, remaining)
-            }
-        }
-    }
-
     private data class NodeState(
         val index: NodeIndex = NodeIndex(),
         val localNodeNum: Int? = null,
@@ -296,11 +121,18 @@ class NodeManagerImpl(
          * of overwriting them.
          */
         val revision: Long = 0L,
+        /** Numbers the user removed locally; the radio still holds them until the removeNode ack. */
+        val pendingRemovals: PersistentSet<Int> = persistentSetOf(),
     ) {
         fun isRetiredAbsent(nodeNum: Int): Boolean = nodeNum in retiredNodeNums && nodeNum !in index.byNum
+
+        fun isSuppressed(nodeNum: Int): Boolean = isRetiredAbsent(nodeNum) || nodeNum in pendingRemovals
     }
 
     private val nodeState = atomic(NodeState())
+
+    /** The favorite, ignored and muted flags the SDK last reported per node in this session. */
+    private val reportedFlags = atomic(persistentMapOf<Int, ReportedFlags>())
 
     /**
      * Session generation, bumped by [clear]. Captured by [loadCachedNodeDB] before its suspending snapshot read so a
@@ -371,7 +203,7 @@ class NodeManagerImpl(
         reportsHeardOnCurrentLora.value = supported
         // Normalize in the database, not just in nodeState: the node list renders from the repository flows, which
         // read rows directly and would otherwise still see a false written by a radio whose firmware could report it.
-        // Bound to the originating session lease: a delayed write from a superseded session would otherwise resolve
+        // Bound to the originating session's scope: a delayed write from a superseded session would otherwise resolve
         // the next session's database and clear flags that session had legitimately set.
         if (!supported) {
             radioInterfaceService.launchSessionWork(scope, session) { nodeRepository.markAllHeardOnCurrentLora() }
@@ -380,7 +212,7 @@ class NodeManagerImpl(
 
     companion object {
         private const val NODE_PERSISTENCE_LANE_COUNT = 64
-        private const val GENERATED_NODE_NAME_SUFFIX_LENGTH = 4
+        private const val MQTT_NAME_SUFFIX = " (MQTT)"
 
         /** `precision_bits` value used by firmware for an un-degraded (full 32-bit) coordinate. */
         private const val FULL_POSITION_PRECISION_BITS = 32
@@ -525,6 +357,7 @@ class NodeManagerImpl(
         // index.
         sessionGeneration.incrementAndGet()
         nodeState.value = NodeState()
+        reportedFlags.value = persistentMapOf()
         isNodeDbReady.value = false
         allowNodeDbWrites.value = false
         myNodeNum.value = null
@@ -542,15 +375,8 @@ class NodeManagerImpl(
             hasGPS = (myNode?.position?.latitude_i ?: 0) != 0,
             model = mi.model ?: myNode?.user?.hw_model?.name,
             firmwareVersion = mi.firmwareVersion,
-            couldUpdate = mi.couldUpdate,
-            shouldUpdate = mi.shouldUpdate,
-            currentPacketId = mi.currentPacketId,
-            messageTimeoutMsec = mi.messageTimeoutMsec,
             minAppVersion = mi.minAppVersion,
-            maxChannels = mi.maxChannels,
             hasWifi = mi.hasWifi,
-            channelUtilization = 0f,
-            airUtilTx = 0f,
             deviceId = mi.deviceId ?: myNode?.user?.id,
         )
     }
@@ -561,7 +387,13 @@ class NodeManagerImpl(
     }
 
     override fun removeByNodenum(nodeNum: Int) {
-        nodeState.update { state -> state.copy(index = state.index.remove(nodeNum), revision = state.revision + 1) }
+        nodeState.update { state ->
+            state.copy(
+                index = state.index.remove(nodeNum),
+                pendingRemovals = state.pendingRemovals.adding(nodeNum),
+                revision = state.revision + 1,
+            )
+        }
         serviceNotifications.cancelLowBatteryNotification(nodeNum)
     }
 
@@ -633,7 +465,7 @@ class NodeManagerImpl(
         var change: NodeStateChange? = null
         nodeState.update { state ->
             change = null
-            if (state.isRetiredAbsent(nodeNum)) return@update state
+            if (state.isSuppressed(nodeNum)) return@update state
             val current = state.index.byNum[nodeNum] ?: createDefaultNode(nodeNum, channel)
             val next = transform(current)
             change = NodeStateChange(previous = current, next = next)
@@ -696,6 +528,10 @@ class NodeManagerImpl(
         val arrivalSessionGeneration = sessionGeneration.value
         while (sessionGeneration.value == arrivalSessionGeneration) {
             val before = nodeState.value
+            if (fromNum in before.pendingRemovals) {
+                Logger.d { "[NodeIdentity] user from=$fromNum discarded while its removal awaits the radio" }
+                return
+            }
             val transition =
                 reduceReceivedUser(
                     before.index,
@@ -779,20 +615,6 @@ class NodeManagerImpl(
         }
     }
 
-    override fun handleReceivedTelemetry(fromNum: Int, telemetry: Telemetry) {
-        updateNode(fromNum) { node ->
-            var nextNode = node
-            telemetry.device_metrics?.let { nextNode = nextNode.copy(deviceMetrics = it) }
-            telemetry.environment_metrics?.let { nextNode = nextNode.copy(environmentMetrics = it) }
-            telemetry.power_metrics?.let { nextNode = nextNode.copy(powerMetrics = it) }
-            telemetry.air_quality_metrics?.let { nextNode = nextNode.copy(airQualityMetrics = it) }
-            telemetry.soil_water_metrics?.let { nextNode = nextNode.copy(soilWaterMetrics = it) }
-            val telemetryTime = if (telemetry.time != 0) telemetry.time else node.lastHeard
-            val newLastHeard = clampTimestampToNow(maxOf(node.lastHeard, telemetryTime))
-            nextNode.copy(lastHeard = newLastHeard)
-        }
-    }
-
     override fun handleReceivedPaxcounter(fromNum: Int, p: Paxcount, session: RadioSessionContext?) {
         updateNodeAndSchedulePersistence(fromNum, channel = 0, session = session) { it.copy(paxcounter = p) }
     }
@@ -801,10 +623,6 @@ class NodeManagerImpl(
         updateNodeAndSchedulePersistence(fromNum, channel = 0, session = session) { node ->
             applyNodeStatus(node, s.status)
         }
-    }
-
-    override fun updateNodeStatus(nodeNum: Int, status: String?) {
-        updateNode(nodeNum) { node -> applyNodeStatus(node, status) }
     }
 
     override suspend fun updateNodeStatusAndPersist(nodeNum: Int, status: String?) {
@@ -817,15 +635,140 @@ class NodeManagerImpl(
     override fun installNodeInfo(info: ProtoNodeInfo) {
         val reportsHeard = reportsHeardOnCurrentLora.value
         cancelLowBatteryIfUnfavorited(info)
+        recordReportedFlags(info)
+        // The handshake snapshot is firmware's word on the node, so it ends a removal still waiting for its ack.
+        nodeState.update { state ->
+            if (info.num in state.pendingRemovals) {
+                state.copy(pendingRemovals = state.pendingRemovals.removing(info.num))
+            } else {
+                state
+            }
+        }
         // Stage-2 configuration installation persists the complete node snapshot through installConfig.
         updateNodeState(info.num, channel = 0) { node -> applyNodeInfo(node, info, reportsHeard) }
     }
 
-    override suspend fun installNodeInfoAndPersist(info: ProtoNodeInfo) {
+    override fun applySessionNode(info: ProtoNodeInfo, changed: Set<NodeField>?, session: RadioSessionContext) {
+        // The SDK still holds a node the user removed until the ack, so only a later add brings it back.
+        if (changed != null && info.num in nodeState.value.pendingRemovals) return
+        if (changed == null) nodeState.update { it.copy(pendingRemovals = it.pendingRemovals.removing(info.num)) }
+        val user = info.user
+        val held = nodeState.value.index.byNum[info.num]
+        val heldUnknown = held?.isUnknownUser != false
+        // The SDK builds a node it first hears in a packet with default flags, channel 0 and no signing bit, as
+        // firmware does after evicting it; only firmware's NodeDB sets those, so a node the app holds keeps its own.
+        val keepLocalState = changed == null && held != null && !info.carriesFirmwareFlags()
+        val userChanged = changed == null || NodeField.User in changed || NodeField.Name in changed
+        if (user != null && (userChanged || heldUnknown)) {
+            handleReceivedUser(info.num, sanitizeReceivedUser(user, info.via_mqtt), info.channel, session = session)
+        }
+        val flags = reportedFlagChanges(info, changed).takeUnless { keepLocalState } ?: ReportedFlagChanges()
+        if (flags.favorite == false) cancelLowBatteryIfUnfavorited(info)
         val reportsHeard = reportsHeardOnCurrentLora.value
-        cancelLowBatteryIfUnfavorited(info)
-        updateNodeAndPersist(info.num) { node -> applyNodeInfo(node, info, reportsHeard) }
+        updateNodeAndSchedulePersistence(info.num, info.channel, session) { node ->
+            applySessionNodeFields(node, info, changed, flags, reportsHeard, keepLocalState)
+        }
     }
+
+    private fun ProtoNodeInfo.carriesFirmwareFlags(): Boolean =
+        is_favorite || is_ignored || is_muted || is_key_manually_verified || has_xeddsa_signed
+
+    override fun applySessionNodeRemoved(nodeNum: Int) {
+        nodeState.update { state ->
+            state.copy(
+                index = state.index.remove(nodeNum),
+                pendingRemovals = state.pendingRemovals.removing(nodeNum),
+                revision = state.revision + 1,
+            )
+        }
+        reportedFlags.update { it.removing(nodeNum) }
+        serviceNotifications.cancelLowBatteryNotification(nodeNum)
+    }
+
+    override fun cancelPendingRemoval(nodeNum: Int) {
+        nodeState.update { state -> state.copy(pendingRemovals = state.pendingRemovals.removing(nodeNum)) }
+    }
+
+    /**
+     * Each live update carries the SDK's flags, which trail a local optimistic write until its admin ack. A flag is
+     * applied only when an [NodeField.Other] change moved it from the value the SDK last reported, or when the node is
+     * new to the session.
+     */
+    private fun reportedFlagChanges(info: ProtoNodeInfo, changed: Set<NodeField>?): ReportedFlagChanges {
+        val reported = ReportedFlags(info.is_favorite, info.is_ignored, info.is_muted)
+        val previous = recordReportedFlags(info)
+        return when {
+            changed == null || previous == null ->
+                ReportedFlagChanges(reported.favorite, reported.ignored, reported.muted)
+
+            NodeField.Other !in changed -> ReportedFlagChanges()
+
+            else ->
+                ReportedFlagChanges(
+                    favorite = reported.favorite.takeIf { it != previous.favorite },
+                    ignored = reported.ignored.takeIf { it != previous.ignored },
+                    muted = reported.muted.takeIf { it != previous.muted },
+                )
+        }
+    }
+
+    /** Stores what the SDK now reports for [info] and returns what it reported before. */
+    private fun recordReportedFlags(info: ProtoNodeInfo): ReportedFlags? {
+        val reported = ReportedFlags(info.is_favorite, info.is_ignored, info.is_muted)
+        return reportedFlags.getAndUpdate { it.putting(info.num, reported) }[info.num]
+    }
+
+    /**
+     * The packet projection owns the link metrics and hop count, which the SDK computes differently or not at all, and
+     * a live update never clears a heard-on-current-LoRa flag the packets set. Position and channel move only when the
+     * change says they did, so a stale SDK copy cannot overwrite a fixed position the app just wrote.
+     */
+    private fun applySessionNodeFields(
+        node: Node,
+        info: ProtoNodeInfo,
+        changed: Set<NodeField>?,
+        flags: ReportedFlagChanges,
+        reportsHeard: Boolean,
+        keepLocalState: Boolean,
+    ): Node {
+        val position =
+            info.position
+                ?.takeIf { changed == null || NodeField.Position in changed }
+                ?.let { incoming ->
+                    // An untimed fix takes the packet's receive time, which the SDK put in last_heard.
+                    val time = incoming.time.takeIf { it != 0 } ?: info.last_heard
+                    val timed = incoming.newBuilder().also { wb -> wb.time = clampTimestampToNow(time) }.build()
+                    preservingKnownPrecision(timed, node.position)
+                } ?: node.position
+        return node.copy(
+            position = position,
+            channel =
+            if (!keepLocalState && (changed == null || NodeField.Other in changed)) info.channel else node.channel,
+            heardOnCurrentLora = node.heardOnCurrentLora || !reportsHeard || info.heard_on_current_lora,
+            lastHeard = maxOf(node.lastHeard, clampTimestampToNow(info.last_heard)),
+            deviceMetrics = info.device_metrics ?: node.deviceMetrics,
+            viaMqtt = info.via_mqtt,
+            isFavorite = flags.favorite ?: node.isFavorite,
+            isIgnored = flags.ignored ?: node.isIgnored,
+            isMuted = flags.muted ?: node.isMuted,
+            // A live merge never learns the signing bit, so only an add carrying firmware's word may clear it.
+            signsPackets =
+            if (changed == null && !keepLocalState) {
+                info.has_xeddsa_signed
+            } else {
+                node.signsPackets || info.has_xeddsa_signed
+            },
+            manuallyVerified = node.manuallyVerified || info.is_key_manually_verified,
+        )
+    }
+
+    private data class ReportedFlags(val favorite: Boolean, val ignored: Boolean, val muted: Boolean)
+
+    private data class ReportedFlagChanges(
+        val favorite: Boolean? = null,
+        val ignored: Boolean? = null,
+        val muted: Boolean? = null,
+    )
 
     /** Only favorites are warned about, and one unfavorited from another client arrives here, not via setFavorite. */
     private fun cancelLowBatteryIfUnfavorited(info: ProtoNodeInfo) {
@@ -838,16 +781,7 @@ class NodeManagerImpl(
         var next = node
         val user = info.user
         if (user != null && !shouldPreserveExistingUser(node.user, user)) {
-            var newUser = user.let {
-                if (it.is_licensed == true) {
-                    it.newBuilder().also { wb -> wb.public_key = ByteString.EMPTY }.build()
-                } else {
-                    it
-                }
-            }
-            if (info.via_mqtt && !newUser.long_name.endsWith(" (MQTT)")) {
-                newUser = newUser.newBuilder().also { wb -> wb.long_name = "${newUser.long_name} (MQTT)" }.build()
-            }
+            val newUser = sanitizeReceivedUser(user, info.via_mqtt)
             next = next.copy(user = newUser, publicKey = newUser.public_key)
         }
         info.position?.let { position ->
@@ -874,342 +808,28 @@ class NodeManagerImpl(
         )
     }
 
+    /** A licensed (ham) operator may not encrypt, so its key is dropped; an MQTT-heard name is marked as such. */
+    private fun sanitizeReceivedUser(user: User, viaMqtt: Boolean): User {
+        val unlicensedKey =
+            if (user.is_licensed == true) {
+                user.newBuilder().also { wb -> wb.public_key = ByteString.EMPTY }.build()
+            } else {
+                user
+            }
+        return if (viaMqtt && !unlicensedKey.long_name.endsWith(MQTT_NAME_SUFFIX)) {
+            unlicensedKey
+                .newBuilder()
+                .also { wb -> wb.long_name = "${unlicensedKey.long_name}$MQTT_NAME_SUFFIX" }
+                .build()
+        } else {
+            unlicensedKey
+        }
+    }
+
     override fun insertMetadata(nodeNum: Int, metadata: DeviceMetadata, session: RadioSessionContext?) {
         if (nodeState.value.isRetiredAbsent(nodeNum)) return
         radioInterfaceService.launchSessionWork(scope, session) {
             if (!nodeState.value.isRetiredAbsent(nodeNum)) nodeRepository.insertMetadata(nodeNum, metadata)
-        }
-    }
-
-    private fun shouldPreserveExistingUser(existing: User, incoming: User): Boolean {
-        val isDefaultName = incoming.long_name.matches(DEFAULT_NODE_NAME_REGEX)
-        val isDefaultHwModel = incoming.hw_model == HardwareModel.UNSET
-        val hasCustomIdentity =
-            existing.id != incoming.id ||
-                existing.long_name != incoming.long_name ||
-                existing.short_name != incoming.short_name
-        val hasExistingUser =
-            existing.id.isNotEmpty() && (existing.hw_model != HardwareModel.UNSET || hasCustomIdentity)
-        return hasExistingUser && isDefaultName && isDefaultHwModel
-    }
-
-    /**
-     * Classification of one received-user reduction. Returned by [reduceReceivedUser] so callers can emit a single
-     * identity-routing log line per committed transition.
-     */
-    private enum class ReceivedUserDecision {
-        LOCAL_UPDATE,
-        KNOWN_SAME_NUMBER,
-        GENUINE_NEW_NODE,
-        RETIRED_NO_KEY_SUPPRESSED,
-        RETIRED_WITHOUT_HINT_SUPPRESSED,
-        RETIRED_SAME_KEY_SUPPRESSED,
-        RETIRED_KEY_ALREADY_REPRESENTED,
-        RETIRED_DIFFERENT_KEY_REACTIVATED,
-        CANONICAL_DUPLICATE_RECONCILED,
-        STALE_PRESENTATION_REMOVED,
-        AMBIGUOUS_DUPLICATE_UPDATED,
-        IDENTITY_CONFLICT_IGNORED,
-    }
-
-    /**
-     * Result of classifying one [User] packet against an in-memory [NodeIndex] snapshot. The reducer is pure: it only
-     * reads [before] and the packet fields, and produces the next index plus the side effects to apply once the CAS
-     * commits. Safe to re-evaluate on every retry.
-     */
-    private data class ReceivedUserTransition(
-        val after: NodeIndex,
-        /** Ordinary same-number upsert to apply after CAS; duplicate correlation never supplies this value. */
-        val upsertNode: Node?,
-        /** Node to fire a "new node seen" notification for (null if not a genuine new node). */
-        val notifyNode: Node?,
-        /** Retired number to reactivate after a validated, genuinely new identity claims the vacant slot. */
-        val unretireNodeNum: Int? = null,
-        val decision: ReceivedUserDecision,
-    )
-
-    /**
-     * Pure reducer that classifies an incoming [User] packet against the [before] snapshot and returns the next index
-     * plus queued side effects. No logging, no DB calls, no coroutine launches — deterministic and safe to re-run on
-     * CAS retry.
-     *
-     * A validated public key is only an in-memory correlation hint. It can choose/suppress duplicate presentations but
-     * cannot authorize repository deletion, metadata removal, DM remapping, or durable node-number migration. Those
-     * operations remain exclusively in the trusted config-install DAO path.
-     */
-    @Suppress("CyclomaticComplexMethod", "ReturnCount", "LongMethod")
-    private fun reduceReceivedUser(
-        before: NodeIndex,
-        fromNum: Int,
-        p: User,
-        channel: Int,
-        manuallyVerified: Boolean,
-        myNum: Int?,
-        retiredAbsent: Boolean,
-        allowNotificationAtArrival: Boolean,
-        retiredKeyHint: ByteString? = null,
-    ): ReceivedUserTransition {
-        val resolvedKey = resolveValidatedPublicKeyHint(p.public_key)
-        val existing = before.byNum[fromNum]
-
-        if (retiredAbsent) {
-            // Suppress same-key replay even when canonical representative hasn't yet appeared in
-            // the in-memory index. The retiredKeyHint was captured from the node as it was retired.
-            if (resolvedKey != null && retiredKeyHint != null && resolvedKey == retiredKeyHint) {
-                return ReceivedUserTransition(
-                    after = before,
-                    upsertNode = null,
-                    notifyNode = null,
-                    decision = ReceivedUserDecision.RETIRED_SAME_KEY_SUPPRESSED,
-                )
-            }
-            // A packet with no valid key is suppressed for a retired number.
-            if (resolvedKey == null) {
-                return ReceivedUserTransition(
-                    after = before,
-                    upsertNode = null,
-                    notifyNode = null,
-                    decision = ReceivedUserDecision.RETIRED_NO_KEY_SUPPRESSED,
-                )
-            }
-            // A retired slot without a trusted old-key hint has no evidence that a different-looking packet is a
-            // legitimate reuse rather than the stale identity. Keep it retired for this process session.
-            if (retiredKeyHint == null) {
-                return ReceivedUserTransition(
-                    after = before,
-                    upsertNode = null,
-                    notifyNode = null,
-                    decision = ReceivedUserDecision.RETIRED_WITHOUT_HINT_SUPPRESSED,
-                )
-            }
-            // Key is already represented elsewhere — stale replay, suppress.
-            val keyAlreadyRepresented = resolvedKey.let { key ->
-                before.candidateNumsByPublicKey[key].orEmpty().isNotEmpty()
-            }
-            if (keyAlreadyRepresented) {
-                return ReceivedUserTransition(
-                    after = before,
-                    upsertNode = null,
-                    notifyNode = null,
-                    decision = ReceivedUserDecision.RETIRED_KEY_ALREADY_REPRESENTED,
-                )
-            }
-            // Different valid, unrepresented key — legitimate number reuse.
-            return sameNumberUserTransition(
-                before = before,
-                fromNum = fromNum,
-                existing = createDefaultNode(fromNum, channel),
-                incoming = p,
-                channel = channel,
-                manuallyVerified = manuallyVerified,
-                persist = true,
-                allowNotification = allowNotificationAtArrival,
-                unretireNodeNum = fromNum,
-            )
-                .copy(decision = ReceivedUserDecision.RETIRED_DIFFERENT_KEY_REACTIVATED)
-        }
-
-        if (fromNum == myNum) {
-            // Local-link data may persist an ordinary update at its current number. Duplicate cleanup is still
-            // in-memory only; trusted installConfig migration owns durable renumbering and app-local state transfer.
-            val otherSameKeyNums =
-                resolvedKey
-                    ?.let { key -> before.candidateNumsByPublicKey[key].orEmpty().filter { it != fromNum } }
-                    .orEmpty()
-            val afterRemovals = otherSameKeyNums.fold(before) { idx, num -> idx.remove(num) }
-            val localNode = afterRemovals.byNum[fromNum] ?: createDefaultNode(fromNum, channel)
-            val transformed = transformUserNode(localNode, p, channel, manuallyVerified)
-            return ReceivedUserTransition(
-                after = afterRemovals.put(fromNum, transformed, preferredNum = fromNum),
-                upsertNode = transformed,
-                notifyNode = null,
-                decision = ReceivedUserDecision.LOCAL_UPDATE,
-            )
-        }
-
-        if (resolvedKey != null) {
-            val canonicalNum = resolvedKey.crc32().toInt()
-            val existingKey = existing?.let(::resolveNodePublicKeyHint)
-            val otherSameKeyNums = before.candidateNumsByPublicKey[resolvedKey].orEmpty().filter { it != fromNum }
-
-            // Fast path: a known same-number presentation needs no candidate reconciliation when it is already at the
-            // canonical number or has no duplicate. A canonical duplicate remains in-memory-only because an ordinary
-            // DAO upsert could remap the row through same-key verification.
-            if (existingKey == resolvedKey && (fromNum == canonicalNum || otherSameKeyNums.isEmpty())) {
-                return sameNumberUserTransition(
-                    before,
-                    fromNum,
-                    checkNotNull(existing),
-                    p,
-                    channel,
-                    manuallyVerified,
-                    persist = otherSameKeyNums.isEmpty(),
-                    allowNotification = false,
-                )
-            }
-
-            if (fromNum == canonicalNum && otherSameKeyNums.isNotEmpty()) {
-                val slotAcceptsCanonical =
-                    existing == null || existingKey == resolvedKey || NodeIndex.isDefaultIdentityPlaceholder(existing)
-                if (!slotAcceptsCanonical) {
-                    return ReceivedUserTransition(
-                        after = before,
-                        upsertNode = null,
-                        notifyNode = null,
-                        decision = ReceivedUserDecision.IDENTITY_CONFLICT_IGNORED,
-                    )
-                }
-
-                // Canonical presentation may replace its own default placeholder while preserving all non-user fields.
-                // Same-key noncanonical representatives are removed from memory only.
-                val afterRemovals = otherSameKeyNums.fold(before) { index, num -> index.remove(num) }
-                val baseNode = afterRemovals.byNum[fromNum] ?: createDefaultNode(fromNum, channel)
-                val transformed =
-                    transformUserNode(baseNode, p, channel, manuallyVerified).let { updated ->
-                        if (existing != null && NodeIndex.isDefaultIdentityPlaceholder(existing)) {
-                            updated.copy(channel = existing.channel)
-                        } else {
-                            updated
-                        }
-                    }
-                return ReceivedUserTransition(
-                    after = afterRemovals.put(fromNum, transformed, preferredNum = fromNum),
-                    upsertNode = null,
-                    notifyNode = null,
-                    decision = ReceivedUserDecision.CANONICAL_DUPLICATE_RECONCILED,
-                )
-            }
-
-            if (canonicalNum in otherSameKeyNums) {
-                // A stale remote presentation yields only when its own slot already carries the same validated hint.
-                // An absent slot, no-key telemetry/position placeholder, or different identity is preserved.
-                val after =
-                    if (existingKey == resolvedKey) before.remove(fromNum, preferredNum = canonicalNum) else before
-                return ReceivedUserTransition(
-                    after = after,
-                    upsertNode = null,
-                    notifyNode = null,
-                    decision = ReceivedUserDecision.STALE_PRESENTATION_REMOVED,
-                )
-            }
-
-            if (otherSameKeyNums.isNotEmpty()) {
-                // Direction is ambiguous among noncanonical presentations. Accept an empty/default fromNum slot so a
-                // legitimate pre-2.8 or fixed-number peer can move between noncanonical numbers without becoming
-                // locked out behind a telemetry/position placeholder. Preserve established different-key identities.
-                val slotAcceptsAmbiguous =
-                    existing == null || existingKey == resolvedKey || NodeIndex.isDefaultIdentityPlaceholder(existing)
-                if (!slotAcceptsAmbiguous) {
-                    return ReceivedUserTransition(
-                        after = before,
-                        upsertNode = null,
-                        notifyNode = null,
-                        decision = ReceivedUserDecision.IDENTITY_CONFLICT_IGNORED,
-                    )
-                }
-
-                // Public keys are broadcast, unauthenticated correlation hints. Installing the presentation here is
-                // deliberately in-memory-only: it must never authorize persistence, migration, or deletion. Trusted
-                // config installation remains the sole authority for durable identity changes.
-                val baseNode = existing ?: createDefaultNode(fromNum, channel)
-                val transformed = transformUserNode(baseNode, p, channel, manuallyVerified)
-                return ReceivedUserTransition(
-                    after = before.put(fromNum, transformed, preferredNum = fromNum),
-                    upsertNode = null,
-                    notifyNode = null,
-                    decision = ReceivedUserDecision.AMBIGUOUS_DUPLICATE_UPDATED,
-                )
-            }
-        }
-
-        return sameNumberUserTransition(
-            before,
-            fromNum,
-            existing ?: createDefaultNode(fromNum, channel),
-            p,
-            channel,
-            manuallyVerified,
-            persist = true,
-            allowNotification = allowNotificationAtArrival,
-        )
-    }
-
-    private fun sameNumberUserTransition(
-        before: NodeIndex,
-        fromNum: Int,
-        existing: Node,
-        incoming: User,
-        channel: Int,
-        manuallyVerified: Boolean,
-        persist: Boolean,
-        allowNotification: Boolean,
-        unretireNodeNum: Int? = null,
-    ): ReceivedUserTransition {
-        val isNewNode = existing.isUnknownUser && incoming.hw_model != HardwareModel.UNSET
-        val shouldPreserve = shouldPreserveExistingUser(existing.user, incoming)
-        val transformed = transformUserNode(existing, incoming, channel, manuallyVerified)
-        val notify = if (allowNotification && isNewNode && !shouldPreserve) transformed else null
-        val decision =
-            when {
-                allowNotification && isNewNode && !shouldPreserve -> ReceivedUserDecision.GENUINE_NEW_NODE
-                else -> ReceivedUserDecision.KNOWN_SAME_NUMBER
-            }
-        return ReceivedUserTransition(
-            after = before.put(fromNum, transformed),
-            upsertNode = transformed.takeIf { persist },
-            notifyNode = notify,
-            unretireNodeNum = unretireNodeNum,
-            decision = decision,
-        )
-    }
-
-    /** Pure factory for a placeholder [Node] at [num]. Kept side-effect-free so the reducer can call it safely. */
-    private fun createDefaultNode(num: Int, channel: Int): Node {
-        val userId = NodeAddress.numToDefaultId(num)
-        return Node(
-            num = num,
-            user =
-            User.Builder()
-                .also { wb ->
-                    wb.id = userId
-                    wb.long_name = "Meshtastic ${userId.takeLast(GENERATED_NODE_NAME_SUFFIX_LENGTH)}"
-                    wb.short_name = userId.takeLast(GENERATED_NODE_NAME_SUFFIX_LENGTH)
-                    wb.hw_model = HardwareModel.UNSET
-                }
-                .build(),
-            channel = channel,
-        )
-    }
-
-    /**
-     * Pure transform of an existing [node] under an incoming [User] packet (extracted from the legacy updateNode path).
-     */
-    private fun transformUserNode(node: Node, p: User, channel: Int, manuallyVerified: Boolean): Node {
-        val shouldPreserve = shouldPreserveExistingUser(node.user, p)
-        // A mesh NodeInfo carries no verification, so it never clears one an import set.
-        val verified = node.manuallyVerified || manuallyVerified
-        return if (shouldPreserve) {
-            node.copy(channel = channel, manuallyVerified = verified)
-        } else {
-            val incomingKey = resolveValidatedPublicKeyHint(p.public_key)
-            // Prefer node.publicKey when valid (the authoritative stored key); fall back to node.user.public_key.
-            val existingKey = resolveNodePublicKeyHint(node)
-            // Only two valid, different keys are a mismatch. A packet with no usable key says nothing about the one
-            // on file, so it neither flags nor clears anything, and the stored key stays.
-            val keyMismatch = existingKey != null && incomingKey != null && existingKey != incomingKey
-            // First-wins, matching the DAO and the firmware: a different key for a node we already hold one for is
-            // refused and recorded, never applied. Clearing the stored key here would break PKC direct messages to
-            // that contact on the word of whoever sent the substitute.
-            val keptKey = if (incomingKey == null || keyMismatch) existingKey else incomingKey
-            val newUser = p.newBuilder().also { wb -> wb.public_key = keptKey ?: ByteString.EMPTY }.build()
-            node.copy(
-                user = newUser,
-                publicKey = newUser.public_key,
-                keyMatch = node.keyMatch && !keyMismatch,
-                newPublicKey = if (keyMismatch) incomingKey else node.newPublicKey,
-                channel = channel,
-                manuallyVerified = verified,
-            )
         }
     }
 

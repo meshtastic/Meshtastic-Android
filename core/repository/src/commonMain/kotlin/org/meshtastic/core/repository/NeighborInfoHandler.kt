@@ -17,15 +17,11 @@
 package org.meshtastic.core.repository
 
 import org.meshtastic.proto.MeshPacket
-import org.meshtastic.proto.NeighborInfo
 
 /** Interface for handling neighbor info responses from the mesh. */
 interface NeighborInfoHandler {
     /** Records the start time for a neighbor info request. */
     fun recordStartTime(requestId: Int)
-
-    /** The latest neighbor info received from the connected radio. */
-    var lastNeighborInfo: NeighborInfo?
 
     /**
      * Processes a neighbor info packet.

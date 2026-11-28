@@ -16,44 +16,13 @@
  */
 package org.meshtastic.core.repository
 
-import org.meshtastic.proto.DeviceMetadata
-import org.meshtastic.proto.FileInfo
-import org.meshtastic.proto.MyNodeInfo
-import org.meshtastic.proto.NodeInfo
-
 /** Interface for managing the configuration flow, including local node info and metadata. */
 interface MeshConfigFlowManager {
-    /** Handles local node information admitted by [session]. */
-    fun handleMyInfo(myInfo: MyNodeInfo, session: RadioSessionContext)
-
-    /** Handles received local device metadata admitted by [session]. */
-    fun handleLocalMetadata(metadata: DeviceMetadata, session: RadioSessionContext): Boolean
-
-    /** Handles received node information admitted by [session]. */
-    fun handleNodeInfo(info: NodeInfo, session: RadioSessionContext): Boolean
-
-    /**
-     * Handles a [FileInfo] packet received during STATE_SEND_FILEMANIFEST.
-     *
-     * Each packet describes one file available on the device. Accumulated into [RadioConfigRepository.fileManifestFlow]
-     * and cleared at the start of each new handshake.
-     */
-    fun handleFileInfo(info: FileInfo, session: RadioSessionContext): Boolean
-
-    /** Returns the number of nodes received in the current stage. */
-    val newNodeCount: Int
-
-    /** Handles the completion of a configuration stage admitted by [session]. */
-    fun handleConfigComplete(configCompleteId: Int, session: RadioSessionContext): Boolean
-
-    /** Triggers a request for the full device configuration when [session] still owns admission. */
-    fun triggerWantConfig(session: RadioSessionContext): Boolean
-
     /**
      * Re-requests the node database on the live transport after a config change the firmware applied without a reboot,
      * so per-node flags it only reports during the handshake are re-delivered. Leaves config, channels and the
      * connection state untouched. A request during a node database download runs again once it completes. Returns false
-     * when no handshake past its config stage owns the active session.
+     * when the current SDK session cannot admit the refresh.
      */
     fun refreshNodeInfo(): Boolean
 }

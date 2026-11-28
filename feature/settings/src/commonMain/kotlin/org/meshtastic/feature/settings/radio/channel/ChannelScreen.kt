@@ -62,7 +62,6 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.model.Channel
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.resources.Res
@@ -102,6 +101,7 @@ import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.feature.settings.radio.component.PacketResponseStateDialog
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Config
+import org.meshtastic.sdk.ConnectionState
 
 /**
  * Composable screen for managing and sharing Meshtastic channels. Allows users to view, edit, and share channel

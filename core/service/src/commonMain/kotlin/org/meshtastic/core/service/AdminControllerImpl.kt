@@ -19,171 +19,175 @@ package org.meshtastic.core.service
 import co.touchlab.kermit.Logger
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeoutOrNull
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
-import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
-import org.meshtastic.core.common.util.nowSeconds
-import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.model.HamName
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.repository.AdminController
 import org.meshtastic.core.repository.AdminEditScope
-import org.meshtastic.core.repository.AwaitedSendStatus
-import org.meshtastic.core.repository.CommandSender
-import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.EditSettingsTransactionException
-import org.meshtastic.core.repository.LocalNodeConnection
 import org.meshtastic.core.repository.LocalNodeUnavailableException
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.PacketQueueRejectedException
-import org.meshtastic.core.repository.RadioConfigRepository
-import org.meshtastic.core.repository.toFixedPositionAdminMessage
+import org.meshtastic.core.repository.REMOTE_READ_TIMEOUT
+import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioSessionContext
+import org.meshtastic.core.repository.runInSession
 import org.meshtastic.core.repository.toFixedPositionProto
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.Config
+import org.meshtastic.proto.DeviceConnectionStatus
+import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.HamParameters
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.OTAMode
+import org.meshtastic.proto.Routing
 import org.meshtastic.proto.SharedContact
 import org.meshtastic.proto.User
+import org.meshtastic.sdk.AdminApi
+import org.meshtastic.sdk.AdminEdit
+import org.meshtastic.sdk.AdminResult
+import org.meshtastic.sdk.ChannelIndex
+import org.meshtastic.sdk.MeshtasticException
+import org.meshtastic.sdk.NodeId
+import org.meshtastic.sdk.enableHamMode
+import org.meshtastic.sdk.onSuccess
 import kotlin.time.Duration.Companion.seconds
 
-/**
- * Additional window for observing local transport departure after a dispatched commit loses its response. The
- * surrounding NonCancellable finalization can take longer because [CommandSender.sendAdminAwaitResult] first waits
- * behind older FIFO entries and then owns its radio-response window.
- */
-internal val COMMIT_DEPARTURE_TIMEOUT = 5.seconds
-
-internal fun editSettingsBoundaryFailureMessage(boundary: String): String =
-    "Device rejected or timed out while sending edit-settings $boundary"
-
-internal fun editSettingsCommitFailureMessage(status: AwaitedSendStatus, dispatched: Boolean): String =
-    "Device rejected or timed out while sending edit-settings commit (status=$status, dispatched=$dispatched)"
+internal fun editSettingsFailureMessage(result: AdminResult<*>): String =
+    "Device rejected or did not answer the edit-settings transaction ($result)"
 
 /**
  * [AdminController] implementation: local/remote configuration, channels, owner, device lifecycle, and the
  * [editSettings] transaction.
  *
- * Focused collaborator of [RadioControllerImpl]. Builds [AdminMessage] protos directly and delegates to [CommandSender]
- * for transport, mirroring the SDK's `AdminApiImpl` pattern. Standalone writes may update local caches optimistically;
- * transactional writes stage their local projections until commit acceptance so failed edits cannot publish settings
- * the device did not commit. The device remains the source of truth and re-sends its full config on every connection.
+ * Focused collaborator of [RadioControllerImpl]. Every command runs on the active session's SDK admin API. An
+ * acknowledged write to the local node reaches the app's caches through the SDK session events (`ConfigChanged`,
+ * `ChannelsChanged`, `NodeChanged`), so this class projects only what the SDK does not report: a remote node's owner,
+ * ham mode, and fixed positions. The [editSettings] transaction stages those projections until the SDK reports the
+ * commit applied, so a failed edit cannot publish settings the device did not commit.
  */
 @Suppress("TooManyFunctions")
 internal class AdminControllerImpl(
-    private val commandSender: CommandSender,
     private val nodeManager: NodeManager,
-    private val radioConfigRepository: RadioConfigRepository,
-    private val connectionStateProvider: ConnectionStateProvider,
+    private val radio: RadioInterfaceService,
+    private val sessionAdmin: SessionAdmin,
     private val heardOnCurrentLoraRefresher: HeardOnCurrentLoraRefresher,
-    private val scope: CoroutineScope,
 ) : AdminController {
 
-    private val myNodeNum: Int
-        get() = nodeManager.myNodeNum.value ?: 0
+    private fun isLocal(destNum: Int): Boolean = destNum == nodeManager.myNodeNum.value
+
+    /** The session API for [destNum]: the root API for the connected node, `forNode` for any other. */
+    private fun AdminApi.at(destNum: Int): AdminApi = if (isLocal(destNum)) this else forNode(NodeId(destNum))
+
+    /** Runs [command] on [destNum] through the session's SDK admin API; a remote read waits [REMOTE_READ_TIMEOUT]. */
+    private suspend fun <T> onNode(
+        destNum: Int,
+        read: Boolean = false,
+        command: suspend AdminApi.() -> AdminResult<T>,
+    ): AdminResult<T> {
+        val local = isLocal(destNum)
+        val remoteRead = read && !local
+        return sessionAdmin.run {
+            val target = if (local) this else forNode(NodeId(destNum))
+            (if (remoteRead) target.withRpcTimeout(REMOTE_READ_TIMEOUT) else target).command()
+        }
+    }
+
+    /** Starts [command] on [destNum] without waiting for its answer; see [SessionAdmin.launch]. */
+    private fun launchOnNode(operation: String, destNum: Int, command: suspend AdminApi.() -> AdminResult<*>) {
+        sessionAdmin.launch(operation) { at(destNum).command() }
+    }
 
     // ── Owner ───────────────────────────────────────────────────────────────
 
-    override suspend fun setOwner(destNum: Int, user: User, packetId: Int) {
-        commandSender.sendAdmin(destNum, packetId) { AdminMessage.Builder().also { wb -> wb.set_owner = user }.build() }
-        nodeManager.handleReceivedUser(destNum, user)
+    override suspend fun setOwner(destNum: Int, user: User): AdminResult<Unit> {
+        val local = isLocal(destNum)
+        return onNode(destNum) { setOwner(user) }
+            .onSuccess { if (!local) nodeManager.handleReceivedUser(destNum, user) }
     }
 
-    override suspend fun getOwner(destNum: Int, packetId: Int) {
-        commandSender.sendAdmin(destNum, packetId, wantResponse = true) {
-            AdminMessage.Builder().also { wb -> wb.get_owner_request = true }.build()
-        }
-    }
+    override suspend fun getOwner(destNum: Int): AdminResult<User> = onNode(destNum, read = true) { getOwner() }
 
-    override suspend fun setHamMode(destNum: Int, hamParameters: HamParameters, packetId: Int) {
-        if (destNum != nodeManager.myNodeNum.value) {
+    override suspend fun setHamMode(destNum: Int, hamParameters: HamParameters): AdminResult<Unit> {
+        if (!isLocal(destNum)) {
             Logger.w { "Ignoring setHamMode for node $destNum — ham onboarding targets the local node only" }
-            return
+            return AdminResult.Failed(Routing.Error.BAD_REQUEST)
         }
-        // Firmware applies tx_power/frequency to the LoRa config verbatim, so echo the node's current
-        // values to keep a re-send (e.g. a callsign edit while already licensed) from wiping overrides.
-        val lora = radioConfigRepository.localConfigFlow.firstOrNull()?.lora ?: Config.LoRaConfig.Builder().build()
-        val params =
-            hamParameters
-                .newBuilder()
-                .also { wb ->
-                    wb.tx_power = lora.tx_power
-                    wb.frequency = lora.override_frequency
-                }
-                .build()
-        commandSender.sendAdmin(destNum, packetId) {
-            AdminMessage.Builder().also { wb -> wb.set_ham_mode = params }.build()
+        return sendHamMode(hamParameters).onSuccess {
+            val currentUser = nodeManager.nodeDBbyNodeNum[destNum]?.user ?: User.Builder().build()
+            nodeManager.handleReceivedUser(
+                destNum,
+                currentUser
+                    .newBuilder()
+                    .also { wb ->
+                        wb.long_name = HamName.compose(hamParameters.call_sign, hamParameters.long_name)
+                        wb.short_name = hamParameters.short_name
+                        wb.is_licensed = true
+                    }
+                    .build(),
+            )
         }
-        val currentUser = nodeManager.nodeDBbyNodeNum[destNum]?.user ?: User.Builder().build()
-        nodeManager.handleReceivedUser(
-            destNum,
-            currentUser
-                .newBuilder()
-                .also { wb ->
-                    wb.long_name = HamName.compose(hamParameters.call_sign, hamParameters.long_name)
-                    wb.short_name = hamParameters.short_name
-                    wb.is_licensed = true
-                }
-                .build(),
-        )
+    }
+
+    private suspend fun sendHamMode(hamParameters: HamParameters): AdminResult<Unit> {
+        val client = sessionAdmin.activeClient() ?: return AdminResult.NodeUnreachable
+        // The SDK echoes tx_power and frequency from its live LoRa config, or fails without sending when it has none.
+        return try {
+            client.enableHamMode(hamParameters.call_sign, hamParameters.short_name, hamParameters.long_name)
+        } catch (e: MeshtasticException) {
+            Logger.w(e) { "Ham mode ended with the radio session" }
+            AdminResult.NodeUnreachable
+        }
     }
 
     // ── Configuration ─────────────────────────────────────────────────────────
 
     override suspend fun setLocalConfig(config: Config) {
-        val packetId = commandSender.generatePacketId()
-        heardOnCurrentLoraRefresher.beforeLocalWrite(config, packetId)
-        commandSender.sendAdmin(myNodeNum, packetId) {
-            AdminMessage.Builder().also { wb -> wb.set_config = config }.build()
-        }
-        scope.handledLaunch { radioConfigRepository.setLocalConfig(config) }
-    }
-
-    override suspend fun sendLocalConfig(config: Config, expectedNodeNum: Int, expectedConnectionVersion: Long) {
-        sendLocalConfigOn(
-            config,
-            commandSender.generatePacketId(),
-            LocalNodeConnection(expectedNodeNum, expectedConnectionVersion),
-        )
-    }
-
-    override suspend fun setLocalConfigForConnection(config: Config, packetId: Int, connection: LocalNodeConnection) {
-        sendLocalConfigOn(config, packetId, connection)
-        scope.handledLaunch { radioConfigRepository.setLocalConfig(config) }
-    }
-
-    private suspend fun sendLocalConfigOn(config: Config, packetId: Int, connection: LocalNodeConnection) {
-        if (
-            nodeManager.myNodeNum.value != connection.nodeNum ||
-            connectionStateProvider.connectionLifecycle.value.version != connection.connectionVersion
+        val movesSlot = heardOnCurrentLoraRefresher.movesSlot(config)
+        sessionAdmin.launch(
+            "Set config",
+            onResult = { result ->
+                if (movesSlot && result is AdminResult.Success) heardOnCurrentLoraRefresher.afterAcknowledgedWrite()
+            },
         ) {
-            throw PacketQueueRejectedException("Local config for another connection")
+            setConfig(config)
         }
-        heardOnCurrentLoraRefresher.beforeLocalWrite(config, packetId)
-        commandSender.sendAdminForConnection(connection.nodeNum, connection.connectionVersion, packetId) {
-            AdminMessage.Builder().also { wb -> wb.set_config = config }.build()
-        }
+    }
+
+    override suspend fun setLocalConfigOn(session: RadioSessionContext, config: Config): AdminResult<Unit> {
+        val movesSlot = heardOnCurrentLoraRefresher.movesSlot(config)
+        // Read after the last suspension: the SDK queues the write on this session's link or refuses it.
+        val admin = radio.adminForSession(session) ?: return AdminResult.NodeUnreachable
+        val result =
+            try {
+                admin.setConfig(config)
+            } catch (e: MeshtasticException) {
+                Logger.w(e) { "Local config write ended with the radio session" }
+                AdminResult.NodeUnreachable
+            }
+        return result.onSuccess { if (movesSlot) heardOnCurrentLoraRefresher.afterAcknowledgedWrite() }
     }
 
     override fun setDisplayMirror(enabled: Boolean) {
-        commandSender.sendAdminImmediate(myNodeNum) {
-            AdminMessage.Builder().also { wb -> wb.set_display_mirror = enabled }.build()
-        }
+        launchLocal("Display mirror") { setDisplayMirror(enabled) }
     }
 
     override fun requestDisplayFrame() {
-        commandSender.sendAdminImmediate(myNodeNum) {
-            AdminMessage.Builder().also { wb -> wb.get_display_frame_request = true }.build()
+        launchLocal("Display frame") { requestDisplayFrame() }
+    }
+
+    /** Starts a local-only [command]; with no radio session there is no display to drive, so it is dropped. */
+    private fun launchLocal(operation: String, command: suspend AdminApi.() -> AdminResult<*>) {
+        try {
+            sessionAdmin.launch(operation, command = command)
+        } catch (e: PacketQueueRejectedException) {
+            Logger.d(e) { "$operation dropped without a radio session" }
         }
     }
 
@@ -197,112 +201,78 @@ internal class AdminControllerImpl(
                     wb.touch_y = touchY
                 }
                 .build()
-        commandSender.sendAdminImmediate(myNodeNum) {
-            AdminMessage.Builder().also { wb -> wb.send_input_event = inputEvent }.build()
+        try {
+            sessionAdmin.launch("Input event") { sendInputEvent(inputEvent) }
+        } catch (e: PacketQueueRejectedException) {
+            Logger.d(e) { "Input event dropped without a radio session" }
         }
     }
 
-    override suspend fun setConfig(destNum: Int, config: Config, packetId: Int) {
-        val isLocal = destNum == nodeManager.myNodeNum.value
-        if (isLocal) heardOnCurrentLoraRefresher.beforeLocalWrite(config, packetId)
-        commandSender.sendAdmin(destNum, packetId) {
-            AdminMessage.Builder().also { wb -> wb.set_config = config }.build()
-        }
-        if (isLocal) {
-            scope.handledLaunch { radioConfigRepository.setLocalConfig(config) }
-        }
+    override suspend fun setConfig(destNum: Int, config: Config): AdminResult<Unit> {
+        if (!isLocal(destNum)) return onNode(destNum) { setConfig(config) }
+        val movesSlot = heardOnCurrentLoraRefresher.movesSlot(config)
+        return onNode(destNum) { setConfig(config) }
+            .onSuccess { if (movesSlot) heardOnCurrentLoraRefresher.afterAcknowledgedWrite() }
     }
 
-    override suspend fun getConfig(destNum: Int, configType: Int, packetId: Int) {
-        commandSender.sendAdmin(destNum, packetId, wantResponse = true) {
-            if (configType == AdminMessage.ConfigType.SESSIONKEY_CONFIG.value) {
-                AdminMessage.Builder().also { wb -> wb.get_device_metadata_request = true }.build()
-            } else {
-                AdminMessage.Builder()
-                    .also { wb -> wb.get_config_request = AdminMessage.ConfigType.fromValue(configType) }
-                    .build()
-            }
-        }
+    override suspend fun getConfig(destNum: Int, configType: Int): AdminResult<Config> {
+        val type = AdminMessage.ConfigType.fromValue(configType) ?: return AdminResult.Failed(Routing.Error.BAD_REQUEST)
+        return onNode(destNum, read = true) { getConfig(type) }
     }
 
-    override suspend fun setModuleConfig(destNum: Int, config: ModuleConfig, packetId: Int) {
-        commandSender.sendAdmin(destNum, packetId) {
-            AdminMessage.Builder().also { wb -> wb.set_module_config = config }.build()
-        }
-        if (destNum == nodeManager.myNodeNum.value) {
-            config.statusmessage?.let { sm -> nodeManager.updateNodeStatus(destNum, sm.node_status) }
-            scope.handledLaunch { radioConfigRepository.setLocalModuleConfig(config) }
-        }
-    }
+    override suspend fun setModuleConfig(destNum: Int, config: ModuleConfig): AdminResult<Unit> =
+        onNode(destNum) { setModuleConfig(config) }
 
-    override suspend fun getModuleConfig(destNum: Int, moduleConfigType: Int, packetId: Int) {
-        commandSender.sendAdmin(destNum, packetId, wantResponse = true) {
-            AdminMessage.Builder()
-                .also { wb -> wb.get_module_config_request = AdminMessage.ModuleConfigType.fromValue(moduleConfigType) }
-                .build()
-        }
+    override suspend fun getModuleConfig(destNum: Int, moduleConfigType: Int): AdminResult<ModuleConfig> {
+        val type =
+            AdminMessage.ModuleConfigType.fromValue(moduleConfigType)
+                ?: return AdminResult.Failed(Routing.Error.BAD_REQUEST)
+        return onNode(destNum, read = true) { getModuleConfig(type) }
     }
 
     // ── Channels ────────────────────────────────────────────────────────────
 
     override suspend fun setLocalChannel(channel: Channel) {
-        val packetId = commandSender.generatePacketId()
-        heardOnCurrentLoraRefresher.beforeLocalWrite(channel, packetId)
-        commandSender.sendAdmin(myNodeNum, packetId) {
-            AdminMessage.Builder().also { wb -> wb.set_channel = channel }.build()
-        }
-        scope.handledLaunch { radioConfigRepository.updateChannelSettings(channel) }
-    }
-
-    override suspend fun setRemoteChannel(destNum: Int, channel: Channel, packetId: Int) {
-        val isLocal = destNum == nodeManager.myNodeNum.value
-        if (isLocal) heardOnCurrentLoraRefresher.beforeLocalWrite(channel, packetId)
-        commandSender.sendAdmin(destNum, packetId) {
-            AdminMessage.Builder().also { wb -> wb.set_channel = channel }.build()
-        }
-        if (isLocal) {
-            scope.handledLaunch { radioConfigRepository.updateChannelSettings(channel) }
+        val movesSlot = heardOnCurrentLoraRefresher.movesSlot(channel)
+        sessionAdmin.launch(
+            "Set channel",
+            onResult = { result ->
+                if (movesSlot && result is AdminResult.Success) heardOnCurrentLoraRefresher.afterAcknowledgedWrite()
+            },
+        ) {
+            setChannel(channel)
         }
     }
 
-    override suspend fun getChannel(destNum: Int, index: Int, packetId: Int) {
-        commandSender.sendAdmin(destNum, packetId, wantResponse = true) {
-            AdminMessage.Builder().also { wb -> wb.get_channel_request = index + 1 }.build()
-        }
+    override suspend fun setRemoteChannel(destNum: Int, channel: Channel): AdminResult<Unit> {
+        if (!isLocal(destNum)) return onNode(destNum) { setChannel(channel) }
+        val movesSlot = heardOnCurrentLoraRefresher.movesSlot(channel)
+        return onNode(destNum) { setChannel(channel) }
+            .onSuccess { if (movesSlot) heardOnCurrentLoraRefresher.afterAcknowledgedWrite() }
     }
+
+    override suspend fun getChannel(destNum: Int, index: Int): AdminResult<Channel> =
+        onNode(destNum, read = true) { getChannel(ChannelIndex(index)) }
 
     // ── Ringtone & Canned Messages ─────────────────────────────────────────
 
     override suspend fun setRingtone(destNum: Int, ringtone: String) {
-        commandSender.sendAdmin(destNum) {
-            AdminMessage.Builder().also { wb -> wb.set_ringtone_message = ringtone }.build()
-        }
+        launchOnNode("Set ringtone", destNum) { setRingtone(ringtone) }
     }
 
     override suspend fun playRingtone(destNum: Int) {
-        commandSender.sendAdmin(destNum) {
-            AdminMessage.Builder().also { wb -> wb.play_ringtone_request = true }.build()
-        }
+        launchOnNode("Play ringtone", destNum) { playRingtone() }
     }
 
-    override suspend fun getRingtone(destNum: Int, packetId: Int) {
-        commandSender.sendAdmin(destNum, packetId, wantResponse = true) {
-            AdminMessage.Builder().also { wb -> wb.get_ringtone_request = true }.build()
-        }
-    }
+    override suspend fun getRingtone(destNum: Int): AdminResult<String> = onNode(destNum, read = true) { getRingtone() }
 
     override suspend fun setCannedMessages(destNum: Int, messages: String) {
-        commandSender.sendAdmin(destNum) {
-            AdminMessage.Builder().also { wb -> wb.set_canned_message_module_messages = messages }.build()
-        }
+        launchOnNode("Set canned messages", destNum) { setCannedMessages(messages) }
     }
 
-    override suspend fun setTime(destNum: Int, packetId: Int) {
+    override suspend fun setTime(destNum: Int): AdminResult<Unit> {
         Logger.i { "Set time requested for node $destNum" }
-        // Resolve the timestamp at send time so the value is as fresh as possible when it leaves the phone.
-        commandSender.sendAdmin(destNum, packetId) {
-            AdminMessage.Builder().also { wb -> wb.set_time_only = nowSeconds.toInt() }.build()
-        }
+        return onNode(destNum) { setTime() }
     }
 
     // ── Remote node DB ─────────────────────────────────────────────────────
@@ -311,75 +281,50 @@ internal class AdminControllerImpl(
         // An empty or all-zero key overwrites the one the remote node holds and breaks its DMs with that node.
         val key = contact.user?.public_key
         if (contact.node_num == 0 || key == null || key.size == 0 || key == Node.ERROR_BYTE_STRING) return false
-        return safeCatching {
-            commandSender.sendAdminAwait(destNum) {
-                AdminMessage.Builder().also { wb -> wb.add_contact = contact }.build()
-            }
-        }
-            .getOrDefault(false)
+        return onNode(destNum) { addContact(contact) } is AdminResult.Success
     }
 
-    override suspend fun setRemoteFavorite(destNum: Int, nodeNum: Int, favorite: Boolean): Boolean = safeCatching {
-        commandSender.sendAdminAwait(destNum) {
-            AdminMessage.Builder()
-                .also { wb ->
-                    if (favorite) wb.set_favorite_node = nodeNum else wb.remove_favorite_node = nodeNum
-                }
-                .build()
-        }
-    }
-        .getOrDefault(false)
+    override suspend fun setRemoteFavorite(destNum: Int, nodeNum: Int, favorite: Boolean): Boolean =
+        onNode(destNum) { setFavorite(NodeId(nodeNum), favorite) } is AdminResult.Success
 
-    override suspend fun setRemoteIgnored(destNum: Int, nodeNum: Int, ignored: Boolean): Boolean = safeCatching {
-        commandSender.sendAdminAwait(destNum) {
-            AdminMessage.Builder()
-                .also { wb -> if (ignored) wb.set_ignored_node = nodeNum else wb.remove_ignored_node = nodeNum }
-                .build()
-        }
-    }
-        .getOrDefault(false)
+    override suspend fun setRemoteIgnored(destNum: Int, nodeNum: Int, ignored: Boolean): Boolean =
+        onNode(destNum) { setIgnored(NodeId(nodeNum), ignored) } is AdminResult.Success
 
-    override suspend fun removeRemoteNode(destNum: Int, nodeNum: Int): Boolean = safeCatching {
-        commandSender.sendAdminAwait(destNum) {
-            AdminMessage.Builder().also { wb -> wb.remove_by_nodenum = nodeNum }.build()
-        }
-    }
-        .getOrDefault(false)
+    override suspend fun removeRemoteNode(destNum: Int, nodeNum: Int): Boolean =
+        onNode(destNum) { removeNode(NodeId(nodeNum)) } is AdminResult.Success
 
-    override suspend fun getCannedMessages(destNum: Int, packetId: Int) {
-        commandSender.sendAdmin(destNum, packetId, wantResponse = true) {
-            AdminMessage.Builder().also { wb -> wb.get_canned_message_module_messages_request = true }.build()
-        }
-    }
+    override suspend fun getCannedMessages(destNum: Int): AdminResult<String> =
+        onNode(destNum, read = true) { getCannedMessages() }
 
     // ── Position ────────────────────────────────────────────────────────────
 
     override suspend fun setFixedPosition(destNum: Int, position: Position) {
-        commandSender.setFixedPosition(destNum, position)
+        if (position.isFixedPositionRemoval()) {
+            launchOnNode("Remove fixed position", destNum) { removeFixedPosition() }
+            return
+        }
+        val myNum = nodeManager.myNodeNum.value ?: throw LocalNodeUnavailableException("Fixed position")
+        val protoPosition = position.toFixedPositionProto()
+        launchOnNode("Set fixed position", destNum) { setFixedPosition(protoPosition) }
+        nodeManager.handleReceivedPosition(destNum, myNum, protoPosition, nowMillis)
     }
 
     // ── Device Status & Lifecycle ───────────────────────────────────────────
 
-    override suspend fun getDeviceConnectionStatus(destNum: Int, packetId: Int) {
-        commandSender.sendAdmin(destNum, packetId, wantResponse = true) {
-            AdminMessage.Builder().also { wb -> wb.get_device_connection_status_request = true }.build()
-        }
-    }
+    override suspend fun getDeviceMetadata(destNum: Int): AdminResult<DeviceMetadata> =
+        onNode(destNum, read = true) { getDeviceMetadata() }
 
-    override suspend fun reboot(destNum: Int, packetId: Int) {
+    override suspend fun getDeviceConnectionStatus(destNum: Int): AdminResult<DeviceConnectionStatus> =
+        onNode(destNum, read = true) { getDeviceConnectionStatus() }
+
+    override suspend fun reboot(destNum: Int): AdminResult<Unit> {
         Logger.i { "Reboot requested for node $destNum" }
-        commandSender.sendAdmin(destNum, packetId) {
-            AdminMessage.Builder().also { wb -> wb.reboot_seconds = DEFAULT_DELAY_SECONDS }.build()
-        }
+        return onNode(destNum) { reboot(DEFAULT_DELAY_SECONDS.seconds) }
     }
 
-    override suspend fun rebootToDfu(nodeNum: Int, packetId: Int) {
-        commandSender.sendAdmin(nodeNum, packetId) {
-            AdminMessage.Builder().also { wb -> wb.enter_dfu_mode_request = true }.build()
-        }
-    }
+    override suspend fun rebootToDfu(nodeNum: Int): AdminResult<Unit> = onNode(nodeNum) { enterDfuMode() }
 
-    override suspend fun requestRebootOta(requestId: Int, destNum: Int, mode: Int, hash: ByteArray?) {
+    override suspend fun requestRebootOta(destNum: Int, mode: Int, hash: ByteArray?) {
         val otaMode = OTAMode.fromValue(mode) ?: OTAMode.NO_REBOOT_OTA
         val otaEvent =
             AdminMessage.OTAEvent.Builder()
@@ -388,78 +333,48 @@ internal class AdminControllerImpl(
                     wb.ota_hash = hash?.toByteString() ?: ByteString.EMPTY
                 }
                 .build()
-        commandSender.sendAdmin(destNum, requestId) {
-            AdminMessage.Builder().also { wb -> wb.ota_request = otaEvent }.build()
-        }
+        launchOnNode("OTA request", destNum) { otaRequest(otaEvent) }
     }
 
-    override suspend fun shutdown(destNum: Int, packetId: Int) {
-        commandSender.sendAdmin(destNum, packetId) {
-            AdminMessage.Builder().also { wb -> wb.shutdown_seconds = DEFAULT_DELAY_SECONDS }.build()
-        }
-    }
+    override suspend fun shutdown(destNum: Int): AdminResult<Unit> =
+        onNode(destNum) { shutdown(DEFAULT_DELAY_SECONDS.seconds) }
 
-    override suspend fun factoryReset(destNum: Int, packetId: Int) {
+    override suspend fun factoryReset(destNum: Int): AdminResult<Unit> {
         Logger.i { "Factory reset requested for node $destNum" }
-        commandSender.sendAdmin(destNum, packetId) {
-            AdminMessage.Builder().also { wb -> wb.factory_reset_device = 1 }.build()
-        }
+        return onNode(destNum) { factoryReset(preserveBleBonds = false) }
     }
 
-    override suspend fun nodedbReset(destNum: Int, packetId: Int, preserveFavorites: Boolean) {
-        commandSender.sendAdmin(destNum, packetId) {
-            AdminMessage.Builder().also { wb -> wb.nodedb_reset = preserveFavorites }.build()
-        }
-    }
+    override suspend fun nodedbReset(destNum: Int, preserveFavorites: Boolean): AdminResult<Unit> =
+        onNode(destNum) { nodeDbReset(preserveFavorites) }
 
     // ── Edit Settings (transactional) ───────────────────────────────────────
 
-    @Suppress("SuspendFunSwallowedCancellation") // a block's cancellation is held only until the commit, then rethrown
+    /**
+     * Runs [block] in the active session's SDK `editSettings`, addressed with `forNode` unless [destNum] is the local
+     * node. The SDK owns begin, commit and the commit-on-cancellation rule, and reports a local commit's config and
+     * owner as session events. The projections the SDK does not report are applied only once it reports the commit
+     * applied, and only while the same session still owns the database; a local BLE commit drops the link, and the next
+     * session's config download carries the committed values instead.
+     */
     override suspend fun editSettings(destNum: Int, block: suspend AdminEditScope.() -> Unit) {
         val isLocalDestination = destNum == nodeManager.myNodeNum.value
-        // One transport session owns the whole transaction: begin, every write and the commit carry the version
-        // captured here, so a radio switch mid-transaction rejects the rest instead of splitting it across radios.
-        val connectionVersion = connectionStateProvider.connectionLifecycle.value.version
-        requireBeginBoundaryAccepted(destNum, connectionVersion)
+        val session = radio.activeSession.value
+        val sessionAdmin =
+            session?.let(radio::adminForSession)
+                ?: throw EditSettingsTransactionException(editSettingsFailureMessage(AdminResult.NodeUnreachable))
+        val admin = sessionAdmin.at(destNum)
 
-        // Firmware has no abort boundary. Preserve any block failure, including cancellation, only long enough to
-        // attempt the commit that closes the accepted session; the original failure is restored below. Local cache
-        // projections are staged by the session and become visible only after both the block and commit succeed.
-        val session = EditSettingsSession(destNum, isLocalDestination, connectionVersion)
-        val blockResult = runCatching { session.block() }
-        val commitResult = runCatching {
-            withContext(NonCancellable) {
-                requireCommitBoundaryAccepted(destNum, isLocalDestination, connectionVersion)
+        val projections = StagedProjections()
+        val result =
+            try {
+                admin.editSettings { EditSettingsScope(this, destNum, isLocalDestination, projections).block() }
+            } catch (e: MeshtasticException) {
+                // The SDK rethrows a commit the link could not carry; callers know one failure type for the boundary.
+                Logger.w(e) { "Edit-settings transaction ended with the radio session" }
+                AdminResult.NodeUnreachable
             }
-        }
-
-        blockResult.exceptionOrNull()?.let { blockFailure ->
-            // Coroutine stack-trace recovery may rebuild the same exception across the NonCancellable boundary.
-            commitResult
-                .exceptionOrNull()
-                ?.takeUnless { it.containsCauseIdentity(blockFailure) }
-                ?.let(blockFailure::addSuppressed)
-            throw blockFailure
-        }
-        commitResult.getOrThrow()
-        session.applyStagedProjections()
-    }
-
-    private fun Throwable.containsCauseIdentity(expected: Throwable): Boolean {
-        val visited = mutableListOf<Throwable>()
-        var current: Throwable? = this
-        var found = false
-        while (current != null) {
-            val candidate = current
-            if (visited.any { it === candidate }) {
-                current = null
-            } else {
-                found = candidate === expected
-                visited += candidate
-                current = candidate.cause.takeUnless { found }
-            }
-        }
-        return found
+        if (result !is AdminResult.Success) throw EditSettingsTransactionException(editSettingsFailureMessage(result))
+        radio.runInSession(session) { withContext(NonCancellable) { projections.apply() } }
     }
 
     override suspend fun editLocalSettings(block: suspend AdminEditScope.() -> Unit) {
@@ -467,79 +382,54 @@ internal class AdminControllerImpl(
         editSettings(localNodeNum, block)
     }
 
-    /** Binds [AdminEditScope] writes to one destination and stages optimistic projections until commit acceptance. */
-    private inner class EditSettingsSession(
+    /** Forwards [AdminEditScope] writes to the SDK transaction and stages the projections the SDK does not report. */
+    private inner class EditSettingsScope(
+        private val edit: AdminEdit,
         private val destNum: Int,
         private val isLocalDestination: Boolean,
-        private val connectionVersion: Long,
+        private val projections: StagedProjections,
     ) : AdminEditScope {
-        private val projectionLock = SynchronizedObject()
-        private val stagedProjections = mutableListOf<suspend () -> Unit>()
-
         override suspend fun setOwner(user: User) {
-            commandSender.sendAdminForConnection(destNum, connectionVersion) {
-                AdminMessage.Builder().also { wb -> wb.set_owner = user }.build()
-            }
-            stageProjection { nodeManager.handleReceivedUser(destNum, user) }
+            edit.setOwner(user)
+            if (!isLocalDestination) projections.stage { nodeManager.handleReceivedUser(destNum, user) }
         }
 
-        override suspend fun setConfig(config: Config) {
-            commandSender.sendAdminForConnection(destNum, connectionVersion) {
-                AdminMessage.Builder().also { wb -> wb.set_config = config }.build()
-            }
-            if (isLocalDestination) stageProjection { radioConfigRepository.setLocalConfig(config) }
-        }
+        override suspend fun setConfig(config: Config) = edit.setConfig(config)
 
-        override suspend fun setModuleConfig(config: ModuleConfig) {
-            commandSender.sendAdminForConnection(destNum, connectionVersion) {
-                AdminMessage.Builder().also { wb -> wb.set_module_config = config }.build()
-            }
-            if (isLocalDestination) {
-                stageProjection {
-                    config.statusmessage?.let { status -> nodeManager.updateNodeStatus(destNum, status.node_status) }
-                    radioConfigRepository.setLocalModuleConfig(config)
-                }
-            }
-        }
+        override suspend fun setModuleConfig(config: ModuleConfig) = edit.setModuleConfig(config)
 
         // Unlike one-shot writes, a transaction can replace several slots. This scope cannot infer the complete target
         // set, so the operation adding channel writes must reconcile that set after the transaction; mirroring slots
         // here could expose a partial cache if a later write or commit fails.
-        override suspend fun setChannel(channel: Channel) =
-            commandSender.sendAdminForConnection(destNum, connectionVersion) {
-                AdminMessage.Builder().also { wb -> wb.set_channel = channel }.build()
-            }
+        override suspend fun setChannel(channel: Channel) = edit.setChannel(channel)
 
         override suspend fun setFixedPosition(position: Position) {
-            val removesFixedPosition = position.isFixedPositionRemoval()
-            val projectionNodeNum =
-                if (removesFixedPosition) {
-                    null
-                } else {
-                    nodeManager.myNodeNum.value ?: throw LocalNodeUnavailableException("Fixed position")
-                }
-            commandSender.sendAdminForConnection(destNum, connectionVersion) {
-                position.toFixedPositionAdminMessage()
+            if (position.isFixedPositionRemoval()) {
+                edit.removeFixedPosition()
+                return
             }
-            if (projectionNodeNum != null) {
-                val protoPosition = position.toFixedPositionProto()
-                stageProjection {
-                    nodeManager.handleReceivedPosition(destNum, projectionNodeNum, protoPosition, nowMillis)
-                }
+            val projectionNodeNum = nodeManager.myNodeNum.value ?: throw LocalNodeUnavailableException("Fixed position")
+            val protoPosition = position.toFixedPositionProto()
+            edit.setFixedPosition(protoPosition)
+            projections.stage {
+                nodeManager.handleReceivedPosition(destNum, projectionNodeNum, protoPosition, nowMillis)
             }
         }
+    }
 
-        private fun stageProjection(block: suspend () -> Unit) {
-            synchronized(projectionLock) { stagedProjections += block }
+    private class StagedProjections {
+        private val lock = SynchronizedObject()
+        private val staged = mutableListOf<suspend () -> Unit>()
+
+        fun stage(projection: suspend () -> Unit) {
+            synchronized(lock) { staged += projection }
         }
 
-        suspend fun applyStagedProjections() = withContext(NonCancellable) {
-            val projections =
-                synchronized(projectionLock) { stagedProjections.toList().also { stagedProjections.clear() } }
-            projections.forEach { projection -> applyProjection(projection) }
+        suspend fun apply() = withContext(NonCancellable) {
+            synchronized(lock) { staged.toList().also { staged.clear() } }.forEach { applyProjection(it) }
         }
 
-        // Only called under applyStagedProjections' NonCancellable, so no cancellation of its own reaches the catch.
+        // Only called under apply's NonCancellable, so no cancellation of its own reaches the catch.
         @Suppress("TooGenericExceptionCaught", "SuspendFunSwallowedCancellation")
         private suspend fun applyProjection(projection: suspend () -> Unit) {
             try {
@@ -547,58 +437,6 @@ internal class AdminControllerImpl(
             } catch (e: Exception) {
                 Logger.w(e) { "Local edit-settings projection failed after device commit" }
             }
-        }
-    }
-
-    /** Requires the begin boundary to be admitted before any transactional settings writes are issued. */
-    private suspend fun requireBeginBoundaryAccepted(destNum: Int, connectionVersion: Long) {
-        if (
-            !commandSender.sendAdminAwaitForConnection(destNum, connectionVersion) {
-                AdminMessage.Builder().also { wb -> wb.begin_edit_settings = true }.build()
-            }
-        ) {
-            throw EditSettingsTransactionException(editSettingsBoundaryFailureMessage("begin"))
-        }
-    }
-
-    /**
-     * Applies commit back-pressure. Ordinary writes are already queued FIFO by [CommandSender], so waiting for the
-     * commit's queue acceptance keeps the caller suspended until the sender has processed every preceding write. This
-     * prevents a rebooting transport write from overtaking an uncommitted settings transaction.
-     */
-    private suspend fun requireCommitBoundaryAccepted(
-        destNum: Int,
-        isLocalDestination: Boolean,
-        connectionVersion: Long,
-    ) {
-        val result =
-            commandSender.sendAdminAwaitResultForConnection(destNum, connectionVersion) {
-                AdminMessage.Builder().also { wb -> wb.commit_edit_settings = true }.build()
-            }
-        val uncertainAfterDispatch =
-            isLocalDestination &&
-                result.dispatched &&
-                result.departureEpochAtDispatch != null &&
-                (result.status == AwaitedSendStatus.TRANSPORT_STOPPED || result.status == AwaitedSendStatus.TIMED_OUT)
-        val departedLifecycle =
-            if (uncertainAfterDispatch) {
-                withTimeoutOrNull(COMMIT_DEPARTURE_TIMEOUT) {
-                    connectionStateProvider.connectionLifecycle.first {
-                        it.epochs.departures > checkNotNull(result.departureEpochAtDispatch)
-                    }
-                }
-            } else {
-                null
-            }
-        // A dispatched local commit is durable once a post-dispatch departure is observed. Firmware may move the
-        // connection through Disconnected, Connecting, or DeviceSleep while rebooting.
-        val committedBeforeLocalDeparture = uncertainAfterDispatch && departedLifecycle != null
-
-        if (!result.accepted && !committedBeforeLocalDeparture) {
-            throw EditSettingsTransactionException(editSettingsCommitFailureMessage(result.status, result.dispatched))
-        }
-        if (committedBeforeLocalDeparture) {
-            Logger.i { "Edit-settings commit dispatched before expected local transport departure" }
         }
     }
 

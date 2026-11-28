@@ -18,7 +18,8 @@ package org.meshtastic.core.service
 
 import android.service.quicksettings.Tile
 import org.junit.Test
-import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.sdk.ConnectionState
+import org.meshtastic.sdk.MeshtasticException
 import kotlin.test.assertEquals
 
 class QuickSettingsTileStateTest {
@@ -60,7 +61,31 @@ class QuickSettingsTileStateTest {
                 QuickSettingsTileSubtitle.Connecting,
                 QuickSettingsTileAction.Disconnect,
             ),
-            tile(ConnectionState.Connecting),
+            tile(ConnectionState.Connecting(attempt = 1)),
+        )
+    }
+
+    @Test
+    fun `a radio the client is retrying stays active and a tap cancels the retries`() {
+        assertEquals(
+            QuickSettingsTileState(
+                Tile.STATE_ACTIVE,
+                QuickSettingsTileSubtitle.Reconnecting,
+                QuickSettingsTileAction.Disconnect,
+            ),
+            tile(ConnectionState.Reconnecting(MeshtasticException.Transport("lost"), attempt = 2)),
+        )
+    }
+
+    @Test
+    fun `a radio the client stopped trying is inactive and a tap connects`() {
+        assertEquals(
+            QuickSettingsTileState(
+                Tile.STATE_INACTIVE,
+                QuickSettingsTileSubtitle.Failed,
+                QuickSettingsTileAction.Connect,
+            ),
+            tile(ConnectionState.Failed(MeshtasticException.Transport("refused"))),
         )
     }
 
@@ -72,7 +97,9 @@ class QuickSettingsTileStateTest {
                 QuickSettingsTileSubtitle.DeviceSleeping,
                 QuickSettingsTileAction.Connect,
             ),
-            tile(ConnectionState.DeviceSleep),
+            tile(
+                ConnectionState.DeviceSleeping(kotlin.time.Instant.fromEpochMilliseconds(0), expectedWakeSeconds = 300),
+            ),
         )
     }
 
@@ -92,8 +119,8 @@ class QuickSettingsTileStateTest {
     fun `with no radio selected every state opens the connect tab`() {
         listOf(
             ConnectionState.Connected,
-            ConnectionState.Connecting,
-            ConnectionState.DeviceSleep,
+            ConnectionState.Connecting(attempt = 1),
+            ConnectionState.DeviceSleeping(kotlin.time.Instant.fromEpochMilliseconds(0), expectedWakeSeconds = 300),
             ConnectionState.Disconnected,
         )
             .forEach { state ->

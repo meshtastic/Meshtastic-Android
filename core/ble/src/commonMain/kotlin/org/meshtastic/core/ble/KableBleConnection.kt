@@ -132,8 +132,8 @@ private fun platformPeripheral(device: MeshtasticBleDevice, builder: PeripheralB
  *
  * Connection attempts follow Kable's recommended pattern from the SensorTag sample: use a direct connect when a fresh
  * advertisement is available, then fall back to `autoConnect = true` on failure. Advertisement-less devices start on
- * the `autoConnect` path. At most two attempts are made per [connect] call — the caller ([BleRadioTransport]) owns the
- * macro-level retry/backoff loop.
+ * the `autoConnect` path. At most two attempts are made per [connect] call — the caller owns the macro-level
+ * retry/backoff loop.
  */
 class KableBleConnection
 internal constructor(
@@ -234,7 +234,6 @@ internal constructor(
 
         // Bounded to at most two attempts: direct connect, then autoConnect fallback when a fresh
         // advertisement was available. Advertisement-less devices start on the autoConnect path.
-        // The outer reconnect loop (BleRadioTransport) owns the macro retry budget — see class kdoc.
         repeat(2) {
             if (p.state.value is State.Connected) return@repeat
             autoConnect =
@@ -253,7 +252,7 @@ internal constructor(
                     connectFailure = e
                     if (autoConnect) {
                         // Already on the autoConnect path and still failing: surface a clear Disconnected
-                        // and let the outer reconnect loop (BleRadioTransport) own the macro retry budget.
+                        // and let the caller own the macro retry budget.
                         Logger.w {
                             "[${device.address.anonymize()}] autoConnect also failed; deferring to outer reconnect loop"
                         }

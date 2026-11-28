@@ -34,8 +34,20 @@ data class SendMessageResponse(
 /** Response containing the current status of the Meshtastic mesh network. */
 @AppFunctionSerializable(isDescribedByKDoc = true)
 data class MeshStatusResponse(
-    /** The current radio connection state (e.g., CONNECTED, DISCONNECTED). */
-    @property:AppFunctionStringValueConstraint(enumValues = ["CONNECTED", "DISCONNECTED", "DEVICE_SLEEP"])
+    /** The current radio connection state (e.g., CONNECTED, RECONNECTING, DISCONNECTED). */
+    @property:AppFunctionStringValueConstraint(
+        enumValues =
+        [
+            "CONNECTED",
+            "CONNECTING",
+            "CONFIGURING",
+            "RECONNECTING",
+            "DEVICE_SLEEP",
+            "DISCONNECTING",
+            "FAILED",
+            "DISCONNECTED",
+        ],
+    )
     val connectionState: String,
     /** The number of nodes currently online (heard within the last 2 hours). */
     val onlineNodeCount: Int,

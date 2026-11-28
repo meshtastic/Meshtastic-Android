@@ -21,17 +21,13 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
-import org.meshtastic.core.model.ConnectionEpochs
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.FirmwareRelease
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.QuickChatAction
 import org.meshtastic.core.repository.EditSettingsTransactionException
-import org.meshtastic.core.repository.LocalNodeUnavailableException
 import org.meshtastic.core.repository.PacketQueueRejectedException
-import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config
@@ -39,8 +35,8 @@ import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.User
+import org.meshtastic.sdk.ConnectionState
 import kotlin.test.Test
-import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
@@ -158,39 +154,6 @@ class RepositoryFakesTest {
     }
 
     @Test
-    fun `service repository fake preserves connection epoch semantics`() {
-        val repository = FakeServiceRepository()
-
-        repository.setConnectionState(ConnectionState.Connected)
-        assertEquals(ConnectionEpochs(completedHandshakes = 1), repository.connectionEpochs.value)
-
-        repository.setConnectionState(ConnectionState.Connected)
-        assertEquals(ConnectionEpochs(completedHandshakes = 1), repository.connectionEpochs.value)
-
-        repository.setConnectionState(ConnectionState.Connecting)
-        assertEquals(
-            ConnectionEpochs(
-                departures = 1,
-                completedHandshakes = 1,
-                handshakesAtLastDeparture = 1,
-                lastDepartureState = ConnectionState.Connecting,
-            ),
-            repository.connectionEpochs.value,
-        )
-
-        repository.setConnectionState(ConnectionState.Connected)
-        assertEquals(
-            ConnectionEpochs(
-                departures = 1,
-                completedHandshakes = 2,
-                handshakesAtLastDeparture = 1,
-                lastDepartureState = ConnectionState.Connecting,
-            ),
-            repository.connectionEpochs.value,
-        )
-    }
-
-    @Test
     fun `FakeRadioController preserves configuration and fixed-position evidence until reset`() = runTest {
         val controller = FakeRadioController()
         val local = Config.Builder().also { wb -> wb.device = Config.DeviceConfig.Builder().build() }.build()
@@ -205,8 +168,8 @@ class RepositoryFakesTest {
         val position = ModelPosition(latitude = 1.0, longitude = 2.0, altitude = 3)
 
         controller.setLocalConfig(local)
-        controller.setConfig(destNum = 7, config = admin, packetId = 8)
-        controller.setModuleConfig(destNum = 7, config = module, packetId = 9)
+        controller.setConfig(destNum = 7, config = admin)
+        controller.setModuleConfig(destNum = 7, config = module)
         controller.setFixedPosition(destNum = 7, position = position)
         controller.setConnectionState(ConnectionState.Connected)
 
@@ -227,7 +190,6 @@ class RepositoryFakesTest {
         assertEquals(listOf(7), controller.moduleConfigDestinations)
         assertEquals(listOf(position), controller.fixedPositions)
         assertEquals(ConnectionState.Connected, controller.connectionState.value)
-        assertEquals(ConnectionEpochs(completedHandshakes = 1), controller.connectionEpochs.value)
 
         controller.reset()
 
@@ -238,15 +200,6 @@ class RepositoryFakesTest {
         assertTrue(controller.moduleConfigDestinations.isEmpty())
         assertTrue(controller.fixedPositions.isEmpty())
         assertEquals(ConnectionState.Disconnected, controller.connectionState.value)
-        assertEquals(
-            ConnectionEpochs(
-                departures = 1,
-                completedHandshakes = 1,
-                handshakesAtLastDeparture = 1,
-                lastDepartureState = ConnectionState.Disconnected,
-            ),
-            controller.connectionEpochs.value,
-        )
     }
 
     @Test
@@ -258,8 +211,8 @@ class RepositoryFakesTest {
                 .also { wb -> wb.serial = ModuleConfig.SerialConfig.Builder().also { wb -> wb.enabled = true }.build() }
                 .build()
 
-        controller.setConfig(destNum = 0, config = config, packetId = 1)
-        controller.setModuleConfig(destNum = 0, config = moduleConfig, packetId = 2)
+        controller.setConfig(destNum = 0, config = config)
+        controller.setModuleConfig(destNum = 0, config = moduleConfig)
         controller.editLocalSettings {
             setConfig(config)
             setModuleConfig(moduleConfig)
@@ -278,8 +231,8 @@ class RepositoryFakesTest {
     }
 
     @Test
-    fun `FakeCommandSender mirrors queued status after successful admission`() = runTest {
-        val sender = FakeCommandSender()
+    fun `FakePacketHandler mirrors queued status after successful admission`() = runTest {
+        val sender = FakePacketHandler()
         val packet =
             DataPacket(bytes = null, dataType = PortNum.TEXT_MESSAGE_APP.value).apply { errorMessage = "original" }
 
@@ -303,20 +256,18 @@ class RepositoryFakesTest {
     }
 
     @Test
-    fun `FakeCommandSender rejects data packets without a port number before assigning an id`() = runTest {
-        val sender = FakeCommandSender()
+    fun `FakePacketHandler rejects data packets without a port number before assigning an id`() = runTest {
+        val sender = FakePacketHandler()
         val packet = DataPacket(bytes = null, dataType = 0)
-        val nextPacketId = sender.getCurrentPacketId()
-
         assertFailsWith<IllegalArgumentException> { sender.sendData(packet) }
         assertEquals(0, packet.id)
-        assertEquals(nextPacketId, sender.getCurrentPacketId())
+        assertEquals(1, sender.generatePacketId())
         assertTrue(sender.sentPackets.isEmpty())
     }
 
     @Test
-    fun `FakeCommandSender mirrors rejected data admission`() = runTest {
-        val sender = FakeCommandSender()
+    fun `FakePacketHandler mirrors rejected data admission`() = runTest {
+        val sender = FakePacketHandler()
         val rejection = PacketQueueRejectedException("Test packet")
         val packet = DataPacket(bytes = null, dataType = PortNum.TEXT_MESSAGE_APP.value, time = 123L)
         sender.sendDataFailure = rejection
@@ -327,102 +278,6 @@ class RepositoryFakesTest {
         assertEquals(MessageStatus.ERROR, packet.status)
         assertEquals(123L, packet.time)
         assertTrue(sender.sentPackets.isEmpty())
-    }
-
-    @Test
-    fun `FakeCommandSender records retryable admin and telemetry requests and clears them on reset`() = runTest {
-        val sender = FakeCommandSender()
-        val adminMessage = AdminMessage.Builder().also { wb -> wb.get_device_metadata_request = true }.build()
-
-        sender.sendAdmin(destNum = 123, requestId = 7, wantResponse = true) { adminMessage }
-        sender.requestTelemetry(requestId = 8, destNum = 456, typeValue = 2)
-
-        assertEquals(
-            listOf(FakeCommandSender.AdminRequest(123, 7, wantResponse = true, adminMessage)),
-            sender.adminRequests,
-        )
-        assertEquals(listOf(FakeCommandSender.TelemetryRequest(8, 456, 2)), sender.telemetryRequests)
-
-        sender.reset()
-
-        assertTrue(sender.adminRequests.isEmpty())
-        assertTrue(sender.telemetryRequests.isEmpty())
-    }
-
-    @Test
-    fun `FakeCommandSender accepts local-node failures on command paths`() = runTest {
-        val sender = FakeCommandSender()
-        sender.commandFailure = LocalNodeUnavailableException("Test command")
-
-        assertFailsWith<LocalNodeUnavailableException> { sender.requestUserInfo(123) }
-    }
-
-    @Test
-    fun `FakeCommandSender applies command failure before data mutation`() = runTest {
-        val failure = LocalNodeUnavailableException("Test command")
-        val sender = FakeCommandSender().apply { commandFailure = failure }
-        val packet = DataPacket(bytes = null, dataType = PortNum.TEXT_MESSAGE_APP.value)
-
-        assertSame(failure, assertFailsWith<LocalNodeUnavailableException> { sender.sendData(packet) })
-        assertEquals(0, packet.id)
-        assertTrue(sender.sentPackets.isEmpty())
-    }
-
-    @Test
-    fun `FakeCommandSender applies command failure before immediate command mutation`() {
-        val failure = PacketQueueRejectedException("queue closed")
-        val sender = FakeCommandSender().apply { commandFailure = failure }
-        val message = AdminMessage.Builder().also { wb -> wb.set_time_only = 123 }.build()
-
-        assertSame(failure, assertFailsWith<PacketQueueRejectedException> { sender.sendAdminImmediate(7) { message } })
-        assertSame(
-            failure,
-            assertFailsWith<PacketQueueRejectedException> {
-                sender.sendLockdownPassphrase("secret", boots = 1, hours = 2, maxSessionSeconds = 3, disable = false)
-            },
-        )
-        assertSame(failure, assertFailsWith<PacketQueueRejectedException> { sender.sendLockNow() })
-
-        assertTrue(sender.adminRequests.isEmpty())
-        assertNull(sender.lastPassphrase)
-        assertFalse(sender.lockNowCalled)
-    }
-
-    @Test
-    fun `FakeCommandSender records connection ownership on post-handshake requests`() = runTest {
-        val sender = FakeCommandSender()
-
-        sender.sendAdminForConnection(destNum = 123, expectedConnectionVersion = 41, requestId = 7) {
-            AdminMessage.Builder().build()
-        }
-        sender.requestTelemetryForConnection(
-            requestId = 8,
-            destNum = 123,
-            typeValue = 2,
-            expectedConnectionVersion = 41,
-        )
-
-        assertEquals(41L, sender.adminRequests.single().expectedConnectionVersion)
-        assertEquals(41L, sender.telemetryRequests.single().expectedConnectionVersion)
-    }
-
-    @Test
-    fun `FakeRadioTransport is terminal after close`() = runTest {
-        val transport = FakeRadioTransport()
-        val outbound = byteArrayOf(1, 2, 3)
-
-        assertTrue(transport.handleSendToRadio(outbound))
-        outbound[0] = 9
-        val recorded = transport.sentData.single()
-        recorded[1] = 9
-        transport.close()
-        transport.clearKeepAlive()
-
-        assertFalse(transport.handleSendToRadio(byteArrayOf(4, 5, 6)))
-        transport.keepAlive()
-        assertFalse(transport.keepAliveCalled)
-        assertEquals(1, transport.sentData.size)
-        assertContentEquals(byteArrayOf(1, 2, 3), transport.sentData.single())
     }
 
     @Test
@@ -453,7 +308,6 @@ class RepositoryFakesTest {
         controller.setConfig(
             destNum = 8,
             config = Config.Builder().also { wb -> wb.power = Config.PowerConfig.Builder().build() }.build(),
-            packetId = 1,
         )
         controller.setModuleConfig(
             destNum = 8,
@@ -461,7 +315,6 @@ class RepositoryFakesTest {
             ModuleConfig.Builder()
                 .also { wb -> wb.mqtt = ModuleConfig.MQTTConfig.Builder().also { wb -> wb.enabled = true }.build() }
                 .build(),
-            packetId = 2,
         )
         finishTransaction.complete(Unit)
         transaction.await()
@@ -527,8 +380,8 @@ class RepositoryFakesTest {
                 }
                 .build()
 
-        controller.setOwner(destNum = 0, user = localOwner, packetId = 1)
-        controller.setOwner(destNum = 7, user = remoteOwner, packetId = 2)
+        controller.setOwner(destNum = 0, user = localOwner)
+        controller.setOwner(destNum = 7, user = remoteOwner)
 
         assertEquals(
             listOf(

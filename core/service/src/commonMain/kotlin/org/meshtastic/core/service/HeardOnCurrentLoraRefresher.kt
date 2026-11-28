@@ -25,19 +25,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.meshtastic.core.common.state.RadioOperation
 import org.meshtastic.core.common.state.RadioOperationLock
-import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.Config
-import org.meshtastic.proto.MeshPacket
-import org.meshtastic.proto.PortNum
-import org.meshtastic.proto.Routing
+import org.meshtastic.sdk.ConnectionState
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -60,27 +55,24 @@ internal class HeardOnCurrentLoraRefresher(
 ) {
     private val latestAppliedChange = atomic(0L)
 
-    /** Call before sending [packetId], so its routing ACK cannot arrive ahead of the subscription. */
-    suspend fun beforeLocalWrite(config: Config, packetId: Int) {
-        val lora = config.lora ?: return
+    /** True when [config], written to the local node, moves the LoRa slot; read before the write. */
+    suspend fun movesSlot(config: Config): Boolean {
+        val lora = config.lora ?: return false
         val current = radioConfigRepository.localConfigFlow.firstOrNull()?.lora
-        if (current == null || lora.slot != current.slot) refreshAfterAck(packetId)
+        return refreshes() && (current == null || lora.slot != current.slot)
     }
 
-    /** Call before sending [packetId], so its routing ACK cannot arrive ahead of the subscription. */
-    suspend fun beforeLocalWrite(channel: Channel, packetId: Int) {
-        if (channel.role != Channel.Role.PRIMARY) return
+    /** True when [channel], written to the local node, renames the primary channel; read before the write. */
+    suspend fun movesSlot(channel: Channel): Boolean {
+        if (channel.role != Channel.Role.PRIMARY) return false
         val current = radioConfigRepository.channelSetFlow.firstOrNull()?.settings?.firstOrNull()?.name
-        if (current == null || channel.settings?.name != current) refreshAfterAck(packetId)
+        return refreshes() && (current == null || channel.settings?.name != current)
     }
 
-    private fun refreshAfterAck(packetId: Int) {
-        if (!nodeManager.reportsHeardOnCurrentLora.value) return
-        if (RadioOperation.DiscoveryScan in radioOperationLock.activeOperations) return
+    /** Requests the node DB once a slot-moving write is acknowledged, unless the node reboots or a newer one lands. */
+    fun afterAcknowledgedWrite() {
+        val change = latestAppliedChange.incrementAndGet()
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
-            withTimeoutOrNull(ACK_TIMEOUT) { serviceRepository.meshPacketFlow.first { it.isRoutingAckFor(packetId) } }
-                ?: return@launch
-            val change = latestAppliedChange.incrementAndGet()
             val dropped =
                 withTimeoutOrNull(REBOOT_WINDOW) {
                     serviceRepository.connectionState.first { it != ConnectionState.Connected }
@@ -89,16 +81,10 @@ internal class HeardOnCurrentLoraRefresher(
         }
     }
 
-    private fun MeshPacket.isRoutingAckFor(packetId: Int): Boolean {
-        val data = decoded ?: return false
-        return data.portnum == PortNum.ROUTING_APP &&
-            data.request_id == packetId &&
-            from == nodeManager.myNodeNum.value &&
-            Routing.ADAPTER.decodeOrNull(data.payload)?.error_reason == Routing.Error.NONE
-    }
+    private fun refreshes(): Boolean = nodeManager.reportsHeardOnCurrentLora.value &&
+        RadioOperation.DiscoveryScan !in radioOperationLock.activeOperations
 
     private companion object {
-        val ACK_TIMEOUT: Duration = 1.minutes
         val REBOOT_WINDOW: Duration = 8.seconds
     }
 }

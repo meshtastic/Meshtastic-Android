@@ -19,7 +19,7 @@ package org.meshtastic.core.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.StateFlow
 import org.koin.core.annotation.KoinViewModel
-import org.meshtastic.core.repository.LocalNodeConnection
+import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.TransparentModeController
 import org.meshtastic.core.repository.TransparentModeState
 
@@ -30,12 +30,14 @@ class TransparentModeViewModel(private val controller: TransparentModeController
     val state: StateFlow<TransparentModeState> =
         controller.state.stateInWhileSubscribed(initialValue = TransparentModeState())
 
-    fun turnOff(savedOn: LocalNodeConnection? = null) = controller.turnOff(savedOn)
+    fun connectedSession(): RadioSessionContext? = controller.connectedSession()
+
+    fun turnOff(savedOn: RadioSessionContext? = null) = controller.turnOff(savedOn)
 
     fun closeNotice() = controller.closeNotice()
 
     fun reopenNotice() = controller.reopenNotice()
 
-    suspend fun confirmTurnedOnByUser(savedOn: LocalNodeConnection): Boolean? =
+    suspend fun confirmTurnedOnByUser(savedOn: RadioSessionContext): Boolean? =
         controller.confirmTurnedOnByUser(savedOn)
 }

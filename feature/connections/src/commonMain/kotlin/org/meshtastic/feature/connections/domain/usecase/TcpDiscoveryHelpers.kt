@@ -110,8 +110,8 @@ internal fun buildRecentTcpEntries(
  * diverge on visibility policy.
  *
  * [showReplay] is nested inside [showMock]: replay is an extra entry *within* Demo Mode, never a device on its own. It
- * additionally requires the build to carry the capture asset (`RadioTransportFactory.isReplayTransportAvailable`) —
- * without it the replay transport falls back to the plain mock, so the entry would advertise something it cannot do.
+ * additionally requires the build to carry the capture asset (`RadioLinks.isReplayTransportAvailable`) — without it the
+ * replay transport falls back to the plain mock, so the entry would advertise something it cannot do.
  */
 internal suspend fun virtualDeviceEntries(showMock: Boolean, showReplay: Boolean): List<DeviceListEntry> {
     if (!showMock) return emptyList()

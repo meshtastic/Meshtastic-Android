@@ -31,7 +31,6 @@ import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.BuildConfig
 import org.meshtastic.appshell.MeshtasticMainScreen
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.navigation.rememberMultiBackstack
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.resources.Res
@@ -39,6 +38,7 @@ import org.meshtastic.core.resources.app_too_old
 import org.meshtastic.core.resources.must_update
 import org.meshtastic.core.ui.navigation.startDestination
 import org.meshtastic.core.ui.viewmodel.UIViewModel
+import org.meshtastic.sdk.ConnectionState
 
 @Composable
 fun MainScreen() {

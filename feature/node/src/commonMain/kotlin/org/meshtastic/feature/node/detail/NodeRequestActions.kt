@@ -39,6 +39,9 @@ interface NodeRequestActions {
     suspend fun requestTelemetry(destNum: Int, longName: String, type: TelemetryType)
 
     suspend fun requestTraceroute(destNum: Int, longName: String)
+
+    /** Re-fetches [destNum]'s device metadata, which also refreshes its admin session passkey. */
+    suspend fun refreshMetadata(destNum: Int, longName: String)
 }
 
 private val NO_NAKS: StateFlow<Map<Int, Int>> = MutableStateFlow(emptyMap())

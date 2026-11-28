@@ -44,6 +44,7 @@ import org.meshtastic.feature.docs.model.AIDocAssistantResult
 import org.meshtastic.feature.docs.model.DocPage
 import org.meshtastic.feature.docs.model.DocsAiError
 import org.meshtastic.feature.docs.model.ModelReadiness
+import kotlin.math.roundToInt
 
 /**
  * Gemini on-device AI assistant for the Google flavor.
@@ -472,6 +473,13 @@ class GeminiNanoDocAssistant(
         val ourNode = nodeRepository.ourNodeInfo.value
         val nodeDb = nodeRepository.nodeDBbyNum.value
 
+        // roundToInt throws on NaN.
+        val channelUtilStr =
+            ourNode?.deviceMetrics?.channel_utilization?.takeUnless { it.isNaN() }?.let { "${it.roundToInt()}%" }
+                ?: "Unknown"
+        val airUtilStr =
+            ourNode?.deviceMetrics?.air_util_tx?.takeUnless { it.isNaN() }?.let { "${it.roundToInt()}%" } ?: "Unknown"
+
         val hardwareInfo =
             if (myNode != null) {
                 """
@@ -479,8 +487,8 @@ class GeminiNanoDocAssistant(
             |- Local Node Number: ${myNode.myNodeNum}
             |- GPS Capabilities: ${if (myNode.hasGPS) "Equipped/Active" else "No GPS"}
             |- WiFi Enabled: ${if (myNode.hasWifi) "Yes" else "No"}
-            |- Channel Utilization: ${myNode.channelUtilization}%
-            |- Airtime Tx: ${myNode.airUtilTx}%
+            |- Channel Utilization: $channelUtilStr
+            |- Airtime Tx: $airUtilStr
             """
                     .trimIndent()
             } else {

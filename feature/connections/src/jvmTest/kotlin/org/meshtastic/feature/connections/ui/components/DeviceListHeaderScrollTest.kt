@@ -34,9 +34,9 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.feature.connections.model.DeviceListEntry
+import org.meshtastic.sdk.ConnectionState
 import kotlin.test.Test
 
 /**

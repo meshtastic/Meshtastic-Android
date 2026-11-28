@@ -18,7 +18,6 @@ package org.meshtastic.feature.settings.radio.component
 
 import okio.ByteString.Companion.encodeUtf8
 import org.meshtastic.core.model.Channel
-import org.meshtastic.core.model.numChannels
 import org.meshtastic.feature.settings.util.FixedUpdateIntervals
 import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.proto.ChannelSettings
@@ -657,8 +656,9 @@ class MeshBeaconConfigPolicyTest {
 
     @Test
     fun stampBeaconConfigForSave_pinnedRadio_advertisesTheSlotItActuallySitsOn() {
-        assertTrue(presetRadio.numChannels > 1, "a one-slot region makes this vacuous")
-        val derived = Channel(primaryChannel, presetRadio).channelNum
+        val plan = Channel(primaryChannel, presetRadio).frequencyPlan
+        assertTrue(plan.numChannels > 1, "a one-slot region makes this vacuous")
+        val derived = plan.slot!!
         val pin = if (derived == 1) 2 else 1
         val radioLora = presetRadio.newBuilder().also { wb -> wb.channel_num = pin }.build()
 
@@ -697,12 +697,14 @@ class MeshBeaconConfigPolicyTest {
         assertEquals(48, stamped.broadcast_offer_frequency_slot)
     }
 
+    // Firmware: US is 902-928 MHz and LONG_FAST is 250 kHz wide.
+    private val usLongFastSlots = 104
     private val longFastSlots = beaconTargetSlotCount(RegionCode.US, ModemPreset.LONG_FAST)
     private val shortTurboSlots = beaconTargetSlotCount(RegionCode.US, ModemPreset.SHORT_TURBO)
 
     @Test
     fun beaconTargetSlotCount_followsThePresetBandwidth() {
-        assertEquals(presetRadio.numChannels, longFastSlots)
+        assertEquals(usLongFastSlots, longFastSlots)
         assertTrue(shortTurboSlots in 1 until longFastSlots, "a wider preset holds fewer slots")
     }
 
@@ -797,7 +799,7 @@ class MeshBeaconConfigPolicyTest {
             beaconTargetSlotCount(RegionCode.EU_868, ModemPreset.LONG_FAST),
             beaconTargetSlotCount(RegionCode.EU_N_868, ModemPreset.LONG_FAST),
         )
-        assertEquals(presetRadio.numChannels, beaconTargetSlotCount(RegionCode.US, ModemPreset.LONG_FAST))
+        assertEquals(usLongFastSlots, beaconTargetSlotCount(RegionCode.US, ModemPreset.LONG_FAST))
     }
 
     @Test

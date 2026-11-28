@@ -51,15 +51,13 @@ import co.touchlab.kermit.Logger
 import org.jetbrains.compose.resources.stringResource
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.connecting
-import org.meshtastic.core.resources.device_sleeping
-import org.meshtastic.core.resources.disconnected
 import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.meshtastic_app_name
 import org.meshtastic.core.resources.refresh
 import org.meshtastic.core.resources.unknown_error
+import org.meshtastic.core.ui.util.label
+import org.meshtastic.sdk.ConnectionState
 
 class LocalStatsWidget :
     GlanceAppWidget(),
@@ -183,12 +181,8 @@ class LocalStatsWidget :
     }
 
     @Composable
-    private fun statusText(state: LocalStatsWidgetUiState): String = when (state.connectionState) {
-        is ConnectionState.Disconnected -> stringResource(Res.string.disconnected)
-        is ConnectionState.Connecting -> stringResource(Res.string.connecting)
-        is ConnectionState.DeviceSleep -> stringResource(Res.string.device_sleeping)
-        is ConnectionState.Connected -> ""
-    }
+    private fun statusText(state: LocalStatsWidgetUiState): String =
+        if (state.connectionState == ConnectionState.Connected) "" else stringResource(state.connectionState.label)
 }
 
 internal fun createMockWidgetState() = LocalStatsWidgetUiState(

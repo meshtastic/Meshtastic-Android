@@ -16,88 +16,26 @@
  */
 package org.meshtastic.core.repository
 
-import org.meshtastic.proto.MeshPacket
-import org.meshtastic.proto.QueueStatus
-import org.meshtastic.proto.ToRadio
+import org.meshtastic.core.model.DataPacket
 
-/** Interface for handling the transmission of packets to the radio and managing the packet queue. */
+/**
+ * Sends packets through the session's SDK paced queue and projects each send's delivery status onto its durable Room
+ * row.
+ */
 interface PacketHandler {
-    /** Sends a command/packet directly to the radio, logging when no active transport accepts it. */
-    fun sendToRadio(p: ToRadio)
+    /**
+     * A fresh non-zero packet ID from the active session's SDK client, which numbers its own sends and RPCs from the
+     * same counter, so a durable row and its wire packet share one identity.
+     */
+    fun generatePacketId(): Int
 
     /**
-     * Attempts a direct command/packet dispatch to the active transport.
-     *
-     * @return `true` when the transport accepted the bytes for asynchronous handoff, or `false` when no active
-     *   transport accepted them. This is admission only; it does not confirm firmware processing.
+     * Sends a data packet under its persisted ID, assigning one when it has none. If the radio session refuses
+     * admission, the packet is marked [org.meshtastic.core.model.MessageStatus.ERROR] and
+     * [PacketQueueRejectedException] is thrown so the persistence owner can requeue or fail its durable record instead
+     * of treating a normal return as successful admission.
      */
-    fun trySendToRadio(p: ToRadio): Boolean
-
-    /**
-     * Adds a mesh packet to the queue for sending.
-     *
-     * A completed packet ID may be reused by a later retry. A duplicate is rejected only while that ID is still queued
-     * or in flight, preserving single ownership of its response.
-     *
-     * @return `true` when the packet's non-zero ID was reserved and queued, or `false` when the packet was invalid, its
-     *   ID was already reserved, the radio is not connected, or the owning service scope has shut down.
-     */
-    suspend fun sendToRadio(packet: MeshPacket): Boolean
-
-    /**
-     * Adds [packet] only while [expectedConnectionVersion] still owns the connected lifecycle generation.
-     *
-     * This is the admission path for work captured by a specific connection and closes the check-then-send race across
-     * disconnect/reconnect.
-     *
-     * @return `true` when the expected generation is still current and the packet is admitted, or `false` when the
-     *   generation is stale or admission fails for any reason documented by [sendToRadio].
-     */
-    suspend fun sendToRadioForConnection(packet: MeshPacket, expectedConnectionVersion: Long): Boolean
-
-    /**
-     * Adds a mesh packet to the queue and suspends until its routing acknowledgement arrives.
-     *
-     * A successful [QueueStatus] only means that firmware accepted the packet into its transport queue; it does not
-     * prove that a self-addressed admin command has been processed. This stricter acknowledgement is required when a
-     * later packet depends on that command, such as installing a shared contact before sending the first DM.
-     *
-     * Time spent behind packets already in the FIFO is not part of the response timeout. The timeout begins after an
-     * active transport admits this packet and ends on its routing ACK/NAK or synchronous local-loopback result.
-     *
-     * @return `true` on a routing ACK or synchronous local-loopback delivery (`ERRNO_SHOULD_RELEASE`); `false` when
-     *   disconnected, transport sending fails, a routing NAK or queue rejection arrives, or the operation times out.
-     */
-    suspend fun sendToRadioAndAwait(packet: MeshPacket): Boolean = sendToRadioAndAwaitResult(packet).accepted
-
-    /** Detailed form of [sendToRadioAndAwait], including whether an active transport admitted the packet. */
-    suspend fun sendToRadioAndAwaitResult(packet: MeshPacket): AwaitedSendResult
-
-    /**
-     * [sendToRadioAndAwaitResult] admitted only while [expectedConnectionVersion] still owns the connected lifecycle
-     * generation, as [sendToRadioForConnection] does for queued sends. A stale generation is reported as
-     * [AwaitedSendStatus.TRANSPORT_STOPPED] with `dispatched == false`.
-     */
-    suspend fun sendToRadioAndAwaitResultForConnection(
-        packet: MeshPacket,
-        expectedConnectionVersion: Long,
-    ): AwaitedSendResult
-
-    /** Processes queue status updates from the radio. */
-    fun handleQueueStatus(queueStatus: QueueStatus)
-
-    /**
-     * Completes the strict routing response for [dataRequestId] when an active transport already dispatched that
-     * packet. Replies that arrive before dispatch are stale and ignored. The packet ID remains reserved until both the
-     * firmware queue stage and this routing stage are terminal.
-     *
-     * An ACK [from] a node other than the packet's destination is a relay's implicit ACK and leaves the wait open; a
-     * NAK from any node ends it. A null [from] is treated as the destination.
-     */
-    suspend fun completeDispatchedResponse(dataRequestId: Int, complete: Boolean, from: Int? = null)
-
-    /** Stops the packet queue. */
-    fun stopPacketQueue()
+    suspend fun sendData(p: DataPacket)
 
     /**
      * Re-arms the send-ACK timeout for every persisted packet still awaiting its routing ACK/NAK, so sends orphaned by

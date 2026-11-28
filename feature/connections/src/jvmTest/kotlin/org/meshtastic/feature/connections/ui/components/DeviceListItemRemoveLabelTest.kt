@@ -21,8 +21,8 @@ import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.v2.runComposeUiTest
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.feature.connections.model.DeviceListEntry
+import org.meshtastic.sdk.ConnectionState
 import kotlin.test.Test
 
 /** A recent address is removed by long-press only, so TalkBack has to announce what that action does. */

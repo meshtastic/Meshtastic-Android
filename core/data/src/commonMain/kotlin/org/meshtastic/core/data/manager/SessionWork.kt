@@ -16,28 +16,67 @@
  */
 package org.meshtastic.core.data.manager
 
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
+import kotlin.time.Duration.Companion.minutes
 
 /**
- * Launches deferred [block] without a lease for explicitly trusted work, or acquires a nested lifecycle lease before
- * the caller can release its packet lease. The undispatched leased path prevents teardown from racing the coroutine's
- * first dispatcher turn. [onRejected] runs only when a non-null [session] can no longer admit work.
+ * Ceiling on one inbound session handler. A handler that suspends forever holds up teardown's drain, so it never
+ * completes and the SDK's bounded session buffer fills; two minutes is far above any real handler.
+ */
+internal val SESSION_HANDLER_TIMEOUT = 2.minutes
+
+/** Runs [block], cancelling it after [SESSION_HANDLER_TIMEOUT] and logging [label] instead of failing the pipeline. */
+internal suspend fun withHandlerTimeout(label: String, block: suspend () -> Unit) {
+    try {
+        withTimeout(SESSION_HANDLER_TIMEOUT) { block() }
+    } catch (timeout: TimeoutCancellationException) {
+        currentCoroutineContext().ensureActive()
+        Logger.e(timeout) {
+            "Session handler exceeded ${SESSION_HANDLER_TIMEOUT.inWholeMilliseconds}ms and was cancelled; " +
+                "dropping its packet to keep the receive pipeline alive (handler=$label)"
+        }
+    }
+}
+
+/**
+ * Runs [block] to completion as a child of [session]'s scope, so teardown joins it; [onRejected] runs instead when the
+ * session is closed or closes before [block] starts.
  */
 internal fun RadioInterfaceService.launchSessionWork(
     scope: CoroutineScope,
     session: RadioSessionContext?,
     onRejected: () -> Unit = {},
     block: suspend () -> Unit,
-): Job = if (session == null) {
-    scope.handledLaunch { block() }
-} else {
-    scope.handledLaunch(start = CoroutineStart.UNDISPATCHED) {
-        val admitted = runWithSessionLease(session) { block() }
-        if (!admitted) onRejected()
+): Job {
+    val admitted = session?.let { sessionScope(it) }
+    return when {
+        session == null -> scope.handledLaunch { block() }
+
+        admitted == null -> {
+            onRejected()
+            Job().apply { complete() }
+        }
+
+        else ->
+            admitted.handledLaunch(start = CoroutineStart.UNDISPATCHED) {
+                if (!isActive) {
+                    onRejected()
+                    return@handledLaunch
+                }
+                withContext(NonCancellable) { block() }
+            }
     }
 }

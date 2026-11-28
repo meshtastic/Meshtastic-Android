@@ -16,12 +16,12 @@
  */
 package org.meshtastic.core.network.mqtt
 
-import org.meshtastic.core.common.util.latLongToMeter
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.proto.MapReport
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.ServiceEnvelope
+import org.meshtastic.sdk.PositionUtils
 
 data class LatLon(val latitude: Double, val longitude: Double)
 
@@ -118,7 +118,7 @@ object MqttTopicDiscovery {
 
         fun nearestDistanceMeters(from: LatLon?): Double? = from?.let { origin ->
             positions.values.minOfOrNull {
-                latLongToMeter(origin.latitude, origin.longitude, it.latitude, it.longitude)
+                PositionUtils.distance(origin.latitude, origin.longitude, it.latitude, it.longitude)
             }
         }
 

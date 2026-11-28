@@ -26,7 +26,6 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import co.touchlab.kermit.Logger
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.model.FirmwareCheckStatus
 import org.meshtastic.core.model.FirmwareGate
@@ -40,6 +39,7 @@ import org.meshtastic.core.resources.firmware_old
 import org.meshtastic.core.resources.firmware_too_old
 import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.ui.viewmodel.UIViewModel
+import org.meshtastic.sdk.ConnectionState
 
 /**
  * Checks the connected device's firmware version against the app's minimum. Below [DeviceVersion.ABS_MIN_FW_VERSION] a

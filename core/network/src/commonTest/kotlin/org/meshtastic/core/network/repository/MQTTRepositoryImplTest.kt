@@ -40,7 +40,6 @@ import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.MqttJsonPayload
-import org.meshtastic.core.network.transport.StreamFrameCodec
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioConfigRepository
 import org.meshtastic.mqtt.ConnectionState
@@ -61,6 +60,7 @@ import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.MqttClientProxyMessage
 import org.meshtastic.proto.ServiceEnvelope
 import org.meshtastic.proto.ToRadio
+import org.meshtastic.sdk.WireFraming
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
@@ -1055,7 +1055,7 @@ class MQTTRepositoryImplTest {
                             .build()
                 }
                 .build()
-        ToRadio.ADAPTER.encodedSize(toRadio) <= StreamFrameCodec.MAX_TO_FROM_RADIO_SIZE
+        ToRadio.ADAPTER.encodedSize(toRadio) <= WireFraming.MAX_PAYLOAD_SIZE
     }
 
     @Test
@@ -1075,7 +1075,7 @@ class MQTTRepositoryImplTest {
                 },
             )
         fun json(text: String) = """{"type":"text","from":1,"to":2,"payload":"$text","hop_limit":3,"id":4,"time":5}"""
-        val oversize = json("x".repeat(StreamFrameCodec.MAX_TO_FROM_RADIO_SIZE))
+        val oversize = json("x".repeat(WireFraming.MAX_PAYLOAD_SIZE))
         val small = json("hello")
 
         val next = backgroundScope.async { harness.repository.proxyMessageFlow.first() }

@@ -31,7 +31,7 @@ on:
     branches: [ main ]
     paths:
       - 'store-screenshots/**'
-      - 'core/network/src/commonMain/kotlin/org/meshtastic/core/network/radio/MockScenario.kt'
+      - 'core/data/src/commonMain/kotlin/org/meshtastic/core/data/radio/sim/MockScenario.kt'
       - '.github/workflows/store-screenshots.yml'
 
 permissions:

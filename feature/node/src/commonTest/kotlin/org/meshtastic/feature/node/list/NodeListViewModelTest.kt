@@ -32,7 +32,6 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.common.util.TemperatureUnit
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeSortOption
 import org.meshtastic.core.repository.ConnectionStateProvider
@@ -49,6 +48,7 @@ import org.meshtastic.core.testing.TestDataFactory
 import org.meshtastic.feature.node.detail.NodeManagementActions
 import org.meshtastic.feature.node.detail.NodeRequestActions
 import org.meshtastic.feature.node.domain.usecase.GetFilteredNodesUseCase
+import org.meshtastic.sdk.ConnectionState
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test

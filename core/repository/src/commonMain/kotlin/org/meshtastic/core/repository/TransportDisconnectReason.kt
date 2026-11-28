@@ -18,9 +18,6 @@ package org.meshtastic.core.repository
 
 /** Machine-readable transport disconnect causes that need service/UI-specific handling. */
 enum class TransportDisconnectReason {
-    /** Android denied USB device access for the current connection attempt. */
-    UsbPermissionDenied,
-
     /** The radio gave its one WebSocket client slot to another client, WebSocket close code 4001. */
     ReplacedByAnotherClient,
 
@@ -41,4 +38,19 @@ enum class TransportDisconnectReason {
 
     /** The WebSocket kept dropping right after opening without a close frame, the sign of two clients taking turns. */
     WebSocketSlotContested,
+
+    /**
+     * The SDK failed the session with a handshake timeout or a protocol error, so the radio waits for the user to
+     * connect.
+     */
+    HandshakeRecoveryExhausted,
+
+    /** The radio's firmware is older than the SDK supports, so the session was refused until the radio is updated. */
+    FirmwareTooOld,
+
+    /** The user declined Android's USB permission prompt, so the radio stays unreachable until it is re-attached. */
+    UsbPermissionDenied,
+
+    /** Linux refused to open the serial port's device node for this user, who lacks the group that owns it. */
+    SerialPermissionDenied,
 }

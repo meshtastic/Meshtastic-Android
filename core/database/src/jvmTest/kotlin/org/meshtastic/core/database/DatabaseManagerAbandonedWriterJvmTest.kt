@@ -265,12 +265,7 @@ class DatabaseManagerAbandonedWriterJvmTest {
         myNodeNum = 1,
         model = null,
         firmwareVersion = firmwareVersion,
-        couldUpdate = false,
-        shouldUpdate = false,
-        currentPacketId = 0L,
-        messageTimeoutMsec = 0,
         minAppVersion = 0,
-        maxChannels = 0,
         hasWifi = false,
     )
 

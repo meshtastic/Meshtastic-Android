@@ -24,11 +24,12 @@ import kotlinx.atomicfu.locks.synchronized
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
@@ -38,12 +39,12 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.InjectedParam
 import org.koin.core.annotation.KoinViewModel
@@ -55,11 +56,7 @@ import org.meshtastic.core.domain.usecase.settings.ExportProfileUseCase
 import org.meshtastic.core.domain.usecase.settings.ImportProfileUseCase
 import org.meshtastic.core.domain.usecase.settings.ImportSecurityConfigUseCase
 import org.meshtastic.core.domain.usecase.settings.InstallProfileUseCase
-import org.meshtastic.core.domain.usecase.settings.ProcessRadioResponseUseCase
-import org.meshtastic.core.domain.usecase.settings.RadioConfigUseCase
-import org.meshtastic.core.domain.usecase.settings.RadioResponseResult
 import org.meshtastic.core.model.Capabilities
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.HamName
 import org.meshtastic.core.model.MqttConnectionState
 import org.meshtastic.core.model.MqttProbeStatus
@@ -67,25 +64,27 @@ import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.excludes
+import org.meshtastic.core.model.getStringResFrom
 import org.meshtastic.core.model.util.MalformedMeshtasticUrlException
+import org.meshtastic.core.repository.AdminController
 import org.meshtastic.core.repository.AnalyticsPrefs
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.HomoglyphPrefs
-import org.meshtastic.core.repository.LocalNodeConnection
 import org.meshtastic.core.repository.LocationRepository
 import org.meshtastic.core.repository.LocationService
 import org.meshtastic.core.repository.LockdownCoordinator
 import org.meshtastic.core.repository.LockdownPassphraseStore
 import org.meshtastic.core.repository.MapConsentPrefs
-import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NodeRestartTracker
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.SecurityKeyBackupStore
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.routingErrorOrNull
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.cant_shutdown
@@ -95,6 +94,7 @@ import org.meshtastic.core.resources.key_backup_not_found
 import org.meshtastic.core.resources.key_backup_restore_failed
 import org.meshtastic.core.resources.key_backup_restored
 import org.meshtastic.core.resources.key_backup_saved
+import org.meshtastic.core.resources.not_connected
 import org.meshtastic.core.resources.timeout
 import org.meshtastic.core.resources.unknown_error
 import org.meshtastic.core.ui.util.SnackbarManager
@@ -117,17 +117,16 @@ import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.LoRaRegionPresetMap
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
-import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.ModuleConfig
-import org.meshtastic.proto.Routing
 import org.meshtastic.proto.User
 import org.meshtastic.proto.metadata
+import org.meshtastic.sdk.AdminResult
+import org.meshtastic.sdk.ConnectionState
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
 internal val MANUAL_CHANNEL_WRITE_DELAY: Duration = 1.seconds
-private val REMOTE_READ_LATE_RESPONSE_GRACE: Duration = 2.minutes
+private val REQUEST_TIMEOUT: Duration = 30.seconds
 
 /** One stored key backup offered for restore; [longName] is null when the node DB no longer knows [nodeNum]. */
 data class SecurityKeyBackupOption(
@@ -183,9 +182,8 @@ open class RadioConfigViewModel(
     protected val exportProfileUseCase: ExportProfileUseCase,
     protected val importSecurityConfigUseCase: ImportSecurityConfigUseCase,
     private val installProfileUseCase: InstallProfileUseCase,
-    private val radioConfigUseCase: RadioConfigUseCase,
+    private val adminController: AdminController,
     private val adminActionsUseCase: AdminActionsUseCase,
-    private val processRadioResponseUseCase: ProcessRadioResponseUseCase,
     private val locationService: LocationService,
     private val fileService: FileService,
     private val mqttManager: MqttManager,
@@ -193,7 +191,6 @@ open class RadioConfigViewModel(
     private val securityKeyBackupStore: SecurityKeyBackupStore,
     private val snackbarManager: SnackbarManager,
     private val nodeRestartTracker: NodeRestartTracker,
-    private val connectionManager: MeshConnectionManager,
     private val analytics: PlatformAnalytics,
 ) : ViewModel() {
 
@@ -271,8 +268,6 @@ open class RadioConfigViewModel(
     private val manualChannelBatchJobsLock = SynchronizedObject()
     private val manualChannelBatchJobs = mutableSetOf<Job>()
     private var manualChannelBatchEnqueueing = false
-    private val manualChannelBatchRequestIds = mutableSetOf<Int>()
-    private val dfuRequestIds = mutableSetOf<Int>()
 
     /**
      * Run a one-shot reachability/credentials probe against an MQTT broker. Cancels any in-flight probe before starting
@@ -303,32 +298,33 @@ open class RadioConfigViewModel(
     val destNode: StateFlow<Node?>
         get() = _destNode
 
-    private val requestIds = MutableStateFlow(hashSetOf<Int>())
+    private enum class RequestKind {
+        READ,
+        WRITE,
+        ACTION,
+        BATCH_WRITE,
+        DFU,
+    }
 
-    /** Index of the legacy `admin` channel, which carries remote admin to nodes without a PKI key. */
-    private val adminChannelIndex: StateFlow<Int?> =
-        radioConfigRepository.channelSetFlow
-            .map { cs -> cs.settings.indexOfFirst { it.name.equals(ADMIN_CHANNEL_NAME, ignoreCase = true) } }
-            .map { it.takeIf { index -> index >= 0 } }
-            .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+    /** One radio request the visible flow waits on. [route] is the route a read was issued for; writes carry none. */
+    private class PendingRequest(val tag: String, val kind: RequestKind, val route: String) {
+        var job: Job? = null
+
+        /** The 30 s deadline passed on a single-response remote read whose call is still waiting for its answer. */
+        var late = false
+    }
+
+    // Main-dispatcher confined, like the rest of the request state.
+    private val pending = mutableListOf<PendingRequest>()
+
+    /** Requests whose deadline has not passed; a late read no longer holds the visible flow. */
+    private val active: List<PendingRequest>
+        get() = pending.filterNot { it.late }
 
     // USER reads one config on firmware without the status message module and two with it, so whether a
     // load fanned out is a property of that load, not of the route. Null falls back to the route's flag.
     private var loadFanOut: Pair<String, Boolean>? = null
 
-    // Main-dispatcher confined with the other ViewModel request state below. Keep every access on viewModelScope unless
-    // these collections are moved behind explicit synchronization.
-    private val requestTimeoutJobs = mutableMapOf<Int, Job>()
-
-    // Only getter registrations enter this map; writes and destructive actions therefore cannot inherit late-read
-    // recovery merely because the user saved from a screen whose route name is still selected.
-    private val readRequestRoutes = mutableMapOf<Int, String>()
-    private val deferredRemoteReadErrors = mutableMapOf<Int, UiText>()
-
-    // The admin channel index each tracked request was sent under; its response is judged against that index, not
-    // the channel set at reply time.
-    private val requestAdminChannelIndexes = mutableMapOf<Int, Int?>()
-    private val lateRemoteReads = mutableMapOf<Int, LateRemoteRead>()
     private val _radioConfigState = MutableStateFlow(RadioConfigState())
     val radioConfigState: StateFlow<RadioConfigState> = _radioConfigState
 
@@ -379,6 +375,18 @@ open class RadioConfigViewModel(
 
         radioConfigRepository.deviceProfileFlow.onEach { _currentDeviceProfile.value = it }.launchIn(viewModelScope)
 
+        // A session opened on the connected node by number follows it through a renumber: the same device under a
+        // new number. Another radio's number is left alone, since that node may still be reachable as a remote.
+        var connectedNode: MyNodeInfo? = null
+        nodeRepository.myNodeInfo
+            .onEach { info ->
+                val previous = connectedNode
+                if (info != null) connectedNode = info
+                val renumbered = previous != null && info != null && previous.isRenumberedTo(info)
+                if (renumbered && activeDestNum.value == previous.myNodeNum) activeDestNum.value = null
+            }
+            .launchIn(viewModelScope)
+
         // Derive isLocal from the immutable destNum and the (possibly changing) myNodeInfo.
         // flatMapLatest cancels the previous inner flow on every change, so there is
         // no window where stale local config can leak through.
@@ -406,7 +414,7 @@ open class RadioConfigViewModel(
                     }
                 } else {
                     // Remote admin: clear local config once, then stay idle.
-                    // Remote responses arrive via processPacketResponse.
+                    // Remote responses arrive through each read's apply function.
                     flowOf(Unit).onEach {
                         _radioConfigState.update {
                             it.copy(
@@ -433,8 +441,6 @@ open class RadioConfigViewModel(
         radioConfigRepository.loraRegionPresetMapFlow
             .onEach { map -> _radioConfigState.update { it.copy(loraRegionPresetMap = map) } }
             .launchIn(viewModelScope)
-
-        serviceRepository.meshPacketFlow.onEach(::processPacketResponse).launchIn(viewModelScope)
 
         combine(serviceRepository.connectionState, radioConfigState) { connState, _ ->
             _radioConfigState.update { it.copy(connected = connState == ConnectionState.Connected) }
@@ -473,8 +479,8 @@ open class RadioConfigViewModel(
         if (dest == myNodeNum) nodeRestartTracker.expectRestart()
     }
 
-    val maxChannels
-        get() = myNodeInfo.value?.maxChannels ?: 8
+    /** Channel slots on the radio: firmware's `ChannelFile.channels` holds 8. */
+    val maxChannels = 8
 
     val hasPaFan: Boolean
         get() =
@@ -512,17 +518,15 @@ open class RadioConfigViewModel(
             // composition from the two HamParameters fields, so send the halves rather than the whole.
             val (callSign, longName) = HamName.split(user.long_name)
             expectRestartIfLocal(RebootBehavior.ALWAYS)
-            radioConfigUseCase.setHamMode(
-                destNum,
+            val hamParameters =
                 HamParameters.Builder()
                     .also { wb ->
                         wb.call_sign = callSign
                         wb.short_name = user.short_name
                         wb.long_name = longName
                     }
-                    .build(),
-                onRequestId = ::registerWriteRequestId,
-            )
+                    .build()
+            launchWrite("setHamMode") { adminController.setHamMode(destNum, hamParameters) }
         }
     }
 
@@ -534,7 +538,7 @@ open class RadioConfigViewModel(
         val destNum = destNum ?: destNode.value?.num ?: return
         safeLaunch(tag = "setOwner") {
             _radioConfigState.update { it.copy(userConfig = user) }
-            radioConfigUseCase.setOwner(destNum, user, onRequestId = ::registerWriteRequestId)
+            launchWrite("setOwner") { adminController.setOwner(destNum, user) }
         }
     }
 
@@ -554,20 +558,20 @@ open class RadioConfigViewModel(
                     val updatePlan = getManualChannelUpdatePlan(new, current)
                     if (updatePlan.isEmpty()) return@withLock
                     if (!beginManualChannelBatch(updatePlan.size)) return@withLock
-                    val batchRequestIds = mutableSetOf<Int>()
+                    val batch = mutableListOf<PendingRequest>()
 
                     try {
                         applyManualChannelUpdatePlan(
                             updatePlan = updatePlan,
                             currentSettings = current,
-                            finalSettings = new,
-                            writeChannel = { channel, onRequestId ->
+                            writeChannel = { channel ->
                                 currentCoroutineContext().ensureActive()
-                                radioConfigUseCase.setRemoteChannel(destNum, channel, onRequestId)
-                            },
-                            registerRequestId = { packetId ->
-                                batchRequestIds.add(packetId)
-                                registerManualChannelBatchRequestId(packetId)
+                                batch +=
+                                    launchRequest(
+                                        "setRemoteChannel",
+                                        RequestKind.BATCH_WRITE,
+                                        { adminController.setRemoteChannel(destNum, channel) },
+                                    )
                             },
                             onInterrupted = { result ->
                                 reconcileInterruptedManualChannelUpdate(
@@ -580,14 +584,14 @@ open class RadioConfigViewModel(
                         commitManualChannelSettings(destNum = destNum, newSettings = new)
                         finishManualChannelBatch()
                     } catch (e: CancellationException) {
-                        abortManualChannelBatch(batchRequestIds)
+                        abortManualChannelBatch(batch)
                         throw e
                     } catch (e: Exception) {
-                        abortManualChannelBatch(batchRequestIds)
+                        abortManualChannelBatch(batch)
                         Logger.w(e) { "Manual channel update failed after enqueue" }
                         e.message?.let(::sendError) ?: sendError(Res.string.unknown_error)
                     } catch (e: Throwable) {
-                        abortManualChannelBatch(batchRequestIds)
+                        abortManualChannelBatch(batch)
                         throw e
                     }
                 }
@@ -624,20 +628,22 @@ open class RadioConfigViewModel(
     fun setConfig(config: Config) {
         val destNum = destNum ?: destNode.value?.num ?: return
         launchConfigSave(config) {
-            radioConfigUseCase.setConfig(destNum, config, onRequestId = ::registerWriteRequestId)
+            launchWrite("setConfig") { adminController.setConfig(destNum, config) }
         }
     }
 
     /**
-     * Saves [config] to the local node over the connection current at this call; if that connection has moved on by the
-     * time the write is queued, nothing is sent. [onSent] runs with that connection once the write has been handed to
-     * the radio, for a follow-up that must not overtake it or reach another connection.
+     * Saves [config] to the connected node on [session] only, as [setConfig] does. [onWritten] runs once the node has
+     * answered the write, before that answer settles the save, and not when [session] refused it: a follow-up there
+     * cannot overtake the write or reach another session, and it owns the save's result.
      */
-    fun setLocalConfig(config: Config, onSent: suspend (LocalNodeConnection) -> Unit) {
-        val connection = LocalNodeConnection(myNodeNum ?: return, serviceRepository.connectionLifecycle.value.version)
+    fun setLocalConfig(config: Config, session: RadioSessionContext, onWritten: suspend () -> Unit) {
         launchConfigSave(config) {
-            radioConfigUseCase.setLocalConfigForConnection(connection, config, onRequestId = ::registerWriteRequestId)
-            onSent(connection)
+            launchWrite("setConfig") {
+                adminController.setLocalConfigOn(session, config).also { result ->
+                    if (result != AdminResult.NodeUnreachable) onWritten()
+                }
+            }
         }
     }
 
@@ -675,7 +681,7 @@ open class RadioConfigViewModel(
         safeLaunch(tag = "setModuleConfig") {
             _radioConfigState.update { state -> state.copy(moduleConfig = state.moduleConfig.mergedWith(config)) }
             expectRestartIfLocal(config.saveRebootBehavior())
-            radioConfigUseCase.setModuleConfig(destNum, config, onRequestId = ::registerWriteRequestId)
+            launchWrite("setModuleConfig") { adminController.setModuleConfig(destNum, config) }
         }
     }
 
@@ -683,19 +689,19 @@ open class RadioConfigViewModel(
         val destNum = destNum ?: destNode.value?.num ?: return
         retireReadRequestsForRoute(radioConfigState.value.route)
         _radioConfigState.update { it.copy(ringtone = ringtone) }
-        safeLaunch(tag = "setRingtone") { radioConfigUseCase.setRingtone(destNum, ringtone) }
+        safeLaunch(tag = "setRingtone") { adminController.setRingtone(destNum, ringtone) }
     }
 
     fun playRingtone() {
         val destNum = destNum ?: destNode.value?.num ?: return
-        safeLaunch(tag = "playRingtone") { radioConfigUseCase.playRingtone(destNum) }
+        safeLaunch(tag = "playRingtone") { adminController.playRingtone(destNum) }
     }
 
     fun setCannedMessages(messages: String) {
         val destNum = destNum ?: destNode.value?.num ?: return
         retireReadRequestsForRoute(radioConfigState.value.route)
         _radioConfigState.update { it.copy(cannedMessageMessages = messages) }
-        safeLaunch(tag = "setCannedMessages") { radioConfigUseCase.setCannedMessages(destNum, messages) }
+        safeLaunch(tag = "setCannedMessages") { adminController.setCannedMessages(destNum, messages) }
     }
 
     private fun sendAdminRequest(destNum: Int) {
@@ -712,24 +718,21 @@ open class RadioConfigViewModel(
         when (route) {
             AdminRoute.SET_TIME.name ->
                 safeLaunch(tag = "setTime") {
-                    adminActionsUseCase.setTime(destNum, onRequestId = ::registerRequestId)
+                    launchAction("setTime") { adminActionsUseCase.setTime(destNum) }
                     trackAdminAction()
                 }
 
             AdminRoute.REBOOT.name ->
                 safeLaunch(tag = "reboot") {
                     expectRestartIfLocal(RebootBehavior.ALWAYS)
-                    adminActionsUseCase.reboot(destNum, onRequestId = ::registerRequestId)
+                    launchAction("reboot") { adminActionsUseCase.reboot(destNum) }
                     trackAdminAction()
                 }
 
             AdminRoute.REBOOT_DFU.name ->
                 safeLaunch(tag = "rebootToDfu") {
                     if (isLocal) nodeRestartTracker.expectRestart()
-                    adminActionsUseCase.rebootToDfu(destNum) { packetId ->
-                        registerRequestId(packetId)
-                        dfuRequestIds.add(packetId)
-                    }
+                    launchRequest("rebootToDfu", RequestKind.DFU, { adminActionsUseCase.rebootToDfu(destNum) })
                     trackAdminAction()
                 }
 
@@ -739,7 +742,7 @@ open class RadioConfigViewModel(
                         sendError(Res.string.cant_shutdown)
                     } else {
                         safeLaunch(tag = "shutdown") {
-                            adminActionsUseCase.shutdown(destNum, onRequestId = ::registerRequestId)
+                            launchAction("shutdown") { adminActionsUseCase.shutdown(destNum) }
                             trackAdminAction()
                         }
                     }
@@ -749,7 +752,7 @@ open class RadioConfigViewModel(
                 safeLaunch(tag = "factoryReset") {
                     val isLocal = (destNum == myNodeNum)
                     if (isLocal) nodeRestartTracker.expectRestart()
-                    adminActionsUseCase.factoryReset(destNum, isLocal, onRequestId = ::registerRequestId)
+                    launchAction("factoryReset") { adminActionsUseCase.factoryReset(destNum, isLocal) }
                     trackAdminAction()
                 }
 
@@ -759,7 +762,7 @@ open class RadioConfigViewModel(
                     // Firmware reboots after a nodedb reset, so a local reset drops the transport just like a
                     // factory reset — mark it expected so the UI shows "restarting" instead of a surprise disconnect.
                     if (isLocal) nodeRestartTracker.expectRestart()
-                    adminActionsUseCase.nodedbReset(destNum, preserveFavorites, isLocal, ::registerRequestId)
+                    launchAction("nodedbReset") { adminActionsUseCase.nodedbReset(destNum, preserveFavorites, isLocal) }
                     trackAdminAction()
                 }
         }
@@ -767,12 +770,12 @@ open class RadioConfigViewModel(
 
     fun setFixedPosition(position: Position) {
         val destNum = destNum ?: destNode.value?.num ?: return
-        safeLaunch(tag = "setFixedPosition") { radioConfigUseCase.setFixedPosition(destNum, position) }
+        safeLaunch(tag = "setFixedPosition") { adminController.setFixedPosition(destNum, position) }
     }
 
     fun removeFixedPosition() {
         val destNum = destNum ?: destNode.value?.num ?: return
-        safeLaunch(tag = "removeFixedPosition") { radioConfigUseCase.removeFixedPosition(destNum) }
+        safeLaunch(tag = "removeFixedPosition") { adminController.setFixedPosition(destNum, Position(0.0, 0.0, 0)) }
     }
 
     fun importProfile(uri: CommonUri, onResult: (DeviceProfile) -> Unit) {
@@ -890,7 +893,7 @@ open class RadioConfigViewModel(
     }
 
     fun clearPacketResponse() {
-        clearRequestIds()
+        clearRequests()
         _radioConfigState.update { it.copy(responseState = ResponseState.Empty) }
     }
 
@@ -899,7 +902,7 @@ open class RadioConfigViewModel(
      * then success when it returns null, or the error it returns.
      */
     suspend fun settleSave(check: suspend () -> StringResource?) {
-        clearRequestIds()
+        clearRequests()
         _radioConfigState.update { it.copy(route = "", responseState = ResponseState.Loading()) }
         val error = check()
         if (error == null) {
@@ -946,9 +949,7 @@ open class RadioConfigViewModel(
 
         when (route) {
             ConfigRoute.USER -> {
-                safeLaunch(tag = "getOwner") {
-                    radioConfigUseCase.getOwner(destNum, onRequestId = ::registerReadRequestId)
-                }
+                launchRead("getOwner", { adminController.getOwner(destNum) }, ::applyOwner)
                 // The status message is edited on the user screen, so it is read with the owner. Gated like the
                 // editor: firmware without the module never answers the get, leaving the overlay waiting.
                 val metadata = radioConfigState.value.metadata
@@ -957,39 +958,40 @@ open class RadioConfigViewModel(
                         !metadata.excludes(ExcludedModules.STATUSMESSAGE_CONFIG)
                 loadFanOut = ConfigRoute.USER.name to readsStatusMessage
                 if (readsStatusMessage) {
-                    safeLaunch(tag = "getStatusMessageConfig") {
-                        radioConfigUseCase.getModuleConfig(
-                            destNum,
-                            AdminMessage.ModuleConfigType.STATUSMESSAGE_CONFIG.value,
-                            onRequestId = ::registerReadRequestId,
-                        )
-                    }
+                    launchRead(
+                        "getStatusMessageConfig",
+                        {
+                            adminController.getModuleConfig(
+                                destNum,
+                                AdminMessage.ModuleConfigType.STATUSMESSAGE_CONFIG.value,
+                            )
+                        },
+                        ::applyModuleConfig,
+                    )
                 }
             }
 
             ConfigRoute.CHANNELS -> {
-                safeLaunch(tag = "getChannel0") {
-                    radioConfigUseCase.getChannel(destNum, 0, onRequestId = ::registerReadRequestId)
-                }
-                safeLaunch(tag = "getLoraConfig") {
-                    radioConfigUseCase.getConfig(
-                        destNum,
-                        AdminMessage.ConfigType.LORA_CONFIG.value,
-                        onRequestId = ::registerReadRequestId,
-                    )
-                }
-                // channel editor is synchronous, so we don't use requestIds as total
+                launchRead(
+                    "getChannel0",
+                    { adminController.getChannel(destNum, 0) },
+                    ::applyChannel,
+                )
+                launchRead(
+                    "getLoraConfig",
+                    { adminController.getConfig(destNum, AdminMessage.ConfigType.LORA_CONFIG.value) },
+                    ::applyConfig,
+                )
+                // channel editor is synchronous, so we don't use the pending request count as total
                 setResponseStateTotal(maxChannels + 1)
             }
 
             is AdminRoute -> {
-                safeLaunch(tag = "getSessionKeyConfig") {
-                    radioConfigUseCase.getConfig(
-                        destNum,
-                        AdminMessage.ConfigType.SESSIONKEY_CONFIG.value,
-                        onRequestId = ::registerReadRequestId,
-                    )
-                }
+                launchRead(
+                    "getDeviceMetadata",
+                    { adminController.getDeviceMetadata(destNum) },
+                    ::applyMetadata,
+                )
                 setResponseStateTotal(2)
             }
 
@@ -1001,49 +1003,57 @@ open class RadioConfigViewModel(
 
     private fun loadConfigRoute(destNum: Int, route: ConfigRoute) {
         if (route == ConfigRoute.LORA) {
-            safeLaunch(tag = "getChannel0ForLora") {
-                radioConfigUseCase.getChannel(destNum, 0, onRequestId = ::registerReadRequestId)
-            }
+            launchRead(
+                "getChannel0ForLora",
+                { adminController.getChannel(destNum, 0) },
+                ::applyChannel,
+            )
         }
         if (route == ConfigRoute.NETWORK) {
-            safeLaunch(tag = "getConnectionStatus") {
-                radioConfigUseCase.getDeviceConnectionStatus(destNum, onRequestId = ::registerReadRequestId)
-            }
+            launchRead(
+                "getConnectionStatus",
+                { adminController.getDeviceConnectionStatus(destNum) },
+                ::applyConnectionStatus,
+            )
         }
-        safeLaunch(tag = "getConfig") {
-            radioConfigUseCase.getConfig(destNum, route.type, onRequestId = ::registerReadRequestId)
-        }
+        launchRead(
+            "getConfig",
+            { adminController.getConfig(destNum, route.type) },
+            ::applyConfig,
+        )
     }
 
     private fun loadModuleRoute(destNum: Int, route: ModuleRoute) {
         if (route == ModuleRoute.CANNED_MESSAGE) {
-            safeLaunch(tag = "getCannedMessages") {
-                radioConfigUseCase.getCannedMessages(destNum, onRequestId = ::registerReadRequestId)
-            }
+            launchRead(
+                "getCannedMessages",
+                { adminController.getCannedMessages(destNum) },
+                ::applyCannedMessages,
+            )
         }
         if (route == ModuleRoute.EXT_NOTIFICATION) {
-            safeLaunch(tag = "getRingtone") {
-                radioConfigUseCase.getRingtone(destNum, onRequestId = ::registerReadRequestId)
-            }
+            launchRead("getRingtone", { adminController.getRingtone(destNum) }, ::applyRingtone)
         }
         if (route == ModuleRoute.MESH_BEACON) {
             // The beacon editor gates on the radio's LoRa region and offers its channels, neither of which a remote
             // session has until read. Firmware without the module never answers the module get, so skip it there.
-            safeLaunch(tag = "getChannel0ForMeshBeacon") {
-                radioConfigUseCase.getChannel(destNum, 0, onRequestId = ::registerReadRequestId)
-            }
-            safeLaunch(tag = "getLoraConfigForMeshBeacon") {
-                radioConfigUseCase.getConfig(
-                    destNum,
-                    AdminMessage.ConfigType.LORA_CONFIG.value,
-                    onRequestId = ::registerReadRequestId,
-                )
-            }
+            launchRead(
+                "getChannel0ForMeshBeacon",
+                { adminController.getChannel(destNum, 0) },
+                ::applyChannel,
+            )
+            launchRead(
+                "getLoraConfigForMeshBeacon",
+                { adminController.getConfig(destNum, AdminMessage.ConfigType.LORA_CONFIG.value) },
+                ::applyConfig,
+            )
             if (!Capabilities(radioConfigState.value.metadata?.firmware_version).supportsMeshBeacon) return
         }
-        safeLaunch(tag = "getModuleConfig") {
-            radioConfigUseCase.getModuleConfig(destNum, route.type, onRequestId = ::registerReadRequestId)
-        }
+        launchRead(
+            "getModuleConfig",
+            { adminController.getModuleConfig(destNum, route.type) },
+            ::applyModuleConfig,
+        )
     }
 
     fun shouldReportLocation(nodeNum: Int?) = mapConsentPrefs.shouldReportLocation(nodeNum)
@@ -1076,14 +1086,14 @@ open class RadioConfigViewModel(
 
     private fun finishManualChannelBatch() {
         manualChannelBatchEnqueueing = false
-        if (requestIds.value.isEmpty()) {
+        if (active.isEmpty()) {
             setResponseStateSuccess()
         }
     }
 
-    private fun abortManualChannelBatch(batchRequestIds: Set<Int>) {
+    private fun abortManualChannelBatch(batch: List<PendingRequest>) {
         manualChannelBatchEnqueueing = false
-        removeRequestIds(batchRequestIds)
+        batch.forEach { pending.remove(it) }
     }
 
     private fun invalidateManualChannelBatch() {
@@ -1093,13 +1103,12 @@ open class RadioConfigViewModel(
     }
 
     /**
-     * True while a manual channel batch is in flight — from enqueue through the ack-wait that outlives
+     * True while a manual channel batch is in flight, from enqueue through the ack-wait that outlives
      * [finishManualChannelBatch]. [manualChannelBatchEnqueueing] alone only covers the enqueue phase, so pending batch
-     * request ids are the authoritative signal that a batch (not a reboot-applying save) owns the current Loading
-     * state.
+     * writes are the authoritative signal that a batch (not a reboot-applying save) owns the current Loading state.
      */
     private fun manualChannelBatchInFlight(): Boolean =
-        manualChannelBatchEnqueueing || manualChannelBatchRequestIds.isNotEmpty()
+        manualChannelBatchEnqueueing || active.any { it.kind == RequestKind.BATCH_WRITE }
 
     private fun completeSetRequestOrProgressBatch() {
         if (manualChannelBatchEnqueueing) {
@@ -1113,17 +1122,17 @@ open class RadioConfigViewModel(
      * Resolves a pending SAVE response to success ("node is restarting") when a restart is expected. Called on the
      * transport-drop edge (the reboot) and as the request-timeout backstop. Scoped to saves (route is empty; gets keep
      * their route set) and gated on [NodeRestartTracker.restartExpected] so a genuine unexpected disconnect still
-     * surfaces normally. Clears request ids first so the pending 30s timeout can't later flip success back to error.
+     * surfaces normally. Clears pending requests first so a request deadline can't later flip success back to error.
      */
     private fun completeRestartingSaveIfPending() {
         if (!nodeRestartTracker.restartExpected.value) return
         // A manual channel batch shares the save shape (empty route + Loading) but never reboots the node; a stale
         // restart window must not flip an in-flight batch to success. The batch stays in flight through its ack-wait,
-        // past finishManualChannelBatch, so key off its pending request ids — not just the enqueue flag.
+        // past finishManualChannelBatch, so key off its pending batch writes, not just the enqueue flag.
         if (manualChannelBatchInFlight()) return
         val state = radioConfigState.value
         if (state.responseState is ResponseState.Loading && state.route.isEmpty()) {
-            clearRequestIds()
+            clearRequests()
             setResponseStateSuccess()
         }
     }
@@ -1159,16 +1168,14 @@ open class RadioConfigViewModel(
         }
     }
 
-    private fun registerRequestId(packetId: Int) {
-        requestTimeoutJobs.remove(packetId)?.cancel()
-        removeLateRemoteRead(packetId)
-        readRequestRoutes.remove(packetId)
-        deferredRemoteReadErrors.remove(packetId)
-        requestAdminChannelIndexes[packetId] = adminChannelIndex.value
-        requestIds.update { it.withPacketId(packetId) }
+    private fun register(tag: String, kind: RequestKind): PendingRequest {
+        // A read belongs to the route on screen when it is issued; the state update below may clear that route.
+        val route = if (kind == RequestKind.READ) radioConfigState.value.route else ""
+        val request = PendingRequest(tag, kind, route)
+        pending += request
         _radioConfigState.update { state ->
             if (state.responseState is ResponseState.Loading) {
-                val total = maxOf(requestIds.value.size, state.responseState.total)
+                val total = maxOf(active.size, state.responseState.total)
                 state.copy(responseState = state.responseState.copy(total = total))
             } else {
                 state.copy(
@@ -1177,114 +1184,127 @@ open class RadioConfigViewModel(
                 )
             }
         }
+        // A write owns the visible request flow even if a timed-out read retry is still tracked in the background.
+        if (kind == RequestKind.WRITE) {
+            _radioConfigState.update { it.copy(route = "", responseState = ResponseState.Loading()) }
+        }
+        return request
+    }
 
-        val requestTimeout = 30.seconds
-        requestTimeoutJobs[packetId] =
-            safeLaunch(tag = "requestTimeout") {
-                delay(requestTimeout)
-                if (requestIds.value.contains(packetId)) {
-                    // Capture batch membership before removeRequestId drops the last id and empties the batch set.
-                    val timedOutBatchRequest = packetId in manualChannelBatchRequestIds
-                    val timedOutDfuRequest = packetId in dfuRequestIds
-                    val requestRoute = readRequestRoutes[packetId].orEmpty()
-                    val deferredRemoteReadError = deferredRemoteReadErrors[packetId]
-                    val sentAdminChannelIndex = requestAdminChannelIndexes[packetId]
-                    removeRequestId(packetId)
-                    if (isSingleResponseRemoteReadRoute(requestRoute)) {
-                        retainLateRemoteRead(packetId, requestRoute, sentAdminChannelIndex)
+    /**
+     * Stops tracking [request]; a read's call is cancelled too, a write runs to its end so its local projection lands.
+     */
+    private fun retire(request: PendingRequest) {
+        pending.remove(request)
+        if (request.kind == RequestKind.READ) request.job?.cancel()
+    }
+
+    private fun clearRequests() {
+        pending.toList().forEach(::retire)
+    }
+
+    private fun settleAtDeadline(request: PendingRequest) {
+        if (request !in pending || request.late) return
+        val timedOutBatchRequest = request.kind == RequestKind.BATCH_WRITE
+        val timedOutDfuRequest = request.kind == RequestKind.DFU
+        if (request.kind == RequestKind.READ && isSingleResponseRemoteReadRoute(request.route)) {
+            request.late = true
+        } else {
+            pending.remove(request)
+        }
+        if (!hasPendingRequestsForRoute(request.route) && radioConfigState.value.route == request.route) {
+            // A save that reboots the node races the reboot against its ACK; a timeout here during an
+            // expected restart means the reboot won - treat it as the restarting-success, not an error.
+            // A manual channel batch never reboots, so exclude it even inside a stale restart window.
+            // nRF52 firmware jumps to its bootloader without acking, so a DFU request only fails loudly.
+            val restartWon =
+                nodeRestartTracker.restartExpected.value && !timedOutBatchRequest && !manualChannelBatchInFlight()
+            if ((restartWon || timedOutDfuRequest) && radioConfigState.value.route.isEmpty()) {
+                setResponseStateSuccess()
+            } else {
+                sendError(Res.string.timeout)
+            }
+        }
+    }
+
+    /**
+     * Registers a request, runs [call] and hands a value to [apply]. A refusal, a lost link outside an expected restart
+     * and a thrown failure end the flow at once; a timeout is left to the request's own deadline.
+     */
+    private fun <T> launchRequest(
+        tag: String,
+        kind: RequestKind,
+        call: suspend () -> AdminResult<T>,
+        apply: (T, late: Boolean) -> Unit = { _, _ -> },
+    ): PendingRequest {
+        val request = register(tag, kind)
+        request.job =
+            safeLaunch(tag = tag) {
+                val outcome = async { safeCatching { call() } }
+                val settled =
+                    withTimeoutOrNull(REQUEST_TIMEOUT) {
+                        // join, not await: a call cancelled from outside must not end the request before its deadline.
+                        outcome.join()
+                        if (!outcome.isCancelled) finish(request, outcome.await(), apply, late = false)
+                        // An answer that settled nothing (a timeout, a lost link while a restart is expected, an ack
+                        // the flow ignored) leaves the request to its deadline.
+                        if (request in pending) awaitCancellation()
                     }
-                    if (!hasPendingRequestsForRoute(requestRoute) && radioConfigState.value.route == requestRoute) {
-                        // A save that reboots the node races the reboot against its ACK; a timeout here during an
-                        // expected restart means the reboot won — treat it as the restarting-success, not an error.
-                        // A manual channel batch never reboots, so exclude it even inside a stale restart window.
-                        // nRF52 firmware jumps to its bootloader without acking, so a DFU request only fails loudly.
-                        val restartWon =
-                            nodeRestartTracker.restartExpected.value &&
-                                !timedOutBatchRequest &&
-                                !manualChannelBatchInFlight()
-                        if ((restartWon || timedOutDfuRequest) && radioConfigState.value.route.isEmpty()) {
-                            setResponseStateSuccess()
-                        } else {
-                            deferredRemoteReadError?.let(::sendError) ?: sendError(Res.string.timeout)
-                        }
-                    }
+                if (settled != null) return@safeLaunch
+                settleAtDeadline(request)
+                // Only a retained remote read waits on. Any other read's answer would be dropped, so its call stops;
+                // a write runs out in the background so its local projection lands.
+                if (!request.late) {
+                    if (request.kind == RequestKind.READ) outcome.cancel()
+                    return@safeLaunch
+                }
+                outcome.join()
+                if (outcome.isCancelled) {
+                    pending.remove(request)
+                } else {
+                    finish(request, outcome.await(), apply, late = true)
                 }
             }
+        return request
     }
 
-    private fun registerReadRequestId(packetId: Int) {
-        val route = radioConfigState.value.route
-        registerRequestId(packetId)
-        readRequestRoutes[packetId] = route
+    /**
+     * The text for a refusal the radio reported; null for a timeout or a lost link, which the request's own deadline
+     * settles.
+     */
+    private fun AdminResult<*>.refusalText(): UiText? =
+        routingErrorOrNull()?.let { UiText.Resource(getStringResFrom(it)) }
+
+    private fun answerDestNum(): Int? = destNum ?: destNode.value?.num
+
+    private fun <T> launchRead(tag: String, call: suspend () -> AdminResult<T>, apply: (T, late: Boolean) -> Unit) {
+        launchRequest(tag, RequestKind.READ, call, apply)
     }
 
-    private fun registerWriteRequestId(packetId: Int) {
-        val writtenRoute = radioConfigState.value.route
-        retireReadRequestsForRoute(writtenRoute)
-        registerRequestId(packetId)
-        // A write owns the visible request flow even if a timed-out read retry is still tracked in the background.
-        _radioConfigState.update { it.copy(route = "", responseState = ResponseState.Loading()) }
+    private fun launchWrite(tag: String, call: suspend () -> AdminResult<Unit>) {
+        retireReadRequestsForRoute(radioConfigState.value.route)
+        launchRequest(tag, RequestKind.WRITE, call)
     }
 
-    private fun registerManualChannelBatchRequestId(packetId: Int) {
-        manualChannelBatchRequestIds.add(packetId)
-        registerRequestId(packetId)
+    private fun launchAction(tag: String, call: suspend () -> AdminResult<Unit>) {
+        launchRequest(tag, RequestKind.ACTION, call)
     }
 
-    private fun hasUnrelatedPendingRequest(): Boolean = requestIds.value.any { it !in manualChannelBatchRequestIds }
+    private fun hasUnrelatedPendingRequest(): Boolean = active.any { it.kind != RequestKind.BATCH_WRITE }
 
     private fun hasPendingRequestsForRoute(route: String): Boolean = if (route.isEmpty()) {
-        requestIds.value.any { it !in readRequestRoutes }
+        active.any { it.kind != RequestKind.READ }
     } else {
-        readRequestRoutes.any { (packetId, requestRoute) -> packetId in requestIds.value && requestRoute == route }
+        active.any { it.kind == RequestKind.READ && it.route == route }
     }
 
-    private fun hasPendingRequestRegistration(): Boolean = requestIds.value.isEmpty() &&
-        manualChannelBatchRequestIds.isEmpty() &&
-        radioConfigState.value.responseState is ResponseState.Loading
-
-    private fun clearRequestIds() {
-        requestTimeoutJobs.values.forEach { it.cancel() }
-        requestTimeoutJobs.clear()
-        readRequestRoutes.clear()
-        requestAdminChannelIndexes.clear()
-        deferredRemoteReadErrors.clear()
-        lateRemoteReads.values.forEach { it.expiryJob.cancel() }
-        lateRemoteReads.clear()
-        manualChannelBatchRequestIds.clear()
-        requestIds.value = hashSetOf()
-    }
-
-    private fun removeRequestId(packetId: Int) {
-        requestTimeoutJobs.remove(packetId)?.cancel()
-        readRequestRoutes.remove(packetId)
-        requestAdminChannelIndexes.remove(packetId)
-        deferredRemoteReadErrors.remove(packetId)
-        manualChannelBatchRequestIds.remove(packetId)
-        dfuRequestIds.remove(packetId)
-        requestIds.update { it.withoutPacketId(packetId) }
-    }
-
-    private fun removeRequestIds(packetIds: Set<Int>) {
-        packetIds.forEach { requestTimeoutJobs.remove(it)?.cancel() }
-        packetIds.forEach {
-            readRequestRoutes.remove(it)
-            requestAdminChannelIndexes.remove(it)
-            deferredRemoteReadErrors.remove(it)
-            removeLateRemoteRead(it)
-        }
-        manualChannelBatchRequestIds.removeAll(packetIds)
-        dfuRequestIds.removeAll(packetIds)
-        requestIds.update { ids -> ids.withoutPacketIds(packetIds) }
-    }
+    private fun hasPendingRequestRegistration(): Boolean =
+        active.isEmpty() && radioConfigState.value.responseState is ResponseState.Loading
 
     private fun retireReadRequestsForRoute(route: String) {
         if (route.isEmpty()) return
-        val redundantReadIds = readRequestRoutes.filterValues { it == route }.keys.toSet()
-        val retainedReadIds = lateRemoteReads.filterValues { it.route == route }.keys.toList()
-        removeRequestIds(redundantReadIds)
-        retainedReadIds.forEach(::removeLateRemoteRead)
-        if (requestIds.value.isEmpty()) {
+        pending.filter { it.kind == RequestKind.READ && it.route == route }.forEach(::retire)
+        if (active.isEmpty()) {
             _radioConfigState.update { state ->
                 val resolvedLateRead =
                     state.responseState is ResponseState.Loading || state.responseState is ResponseState.Error
@@ -1297,217 +1317,157 @@ open class RadioConfigViewModel(
         }
     }
 
-    private fun processPacketResponse(packet: MeshPacket) {
-        val destNum = destNum ?: destNode.value?.num ?: return
-        val requestId = packet.decoded?.request_id
-        val lateRemoteReadRoute = requestId?.let { lateRemoteReads[it]?.route }
-        val pendingRequestIds = requestIds.value + lateRemoteReads.keys
-        val sentAdminChannelIndex = requestId?.let {
-            requestAdminChannelIndexes[it] ?: lateRemoteReads[it]?.adminChannelIndex
-        }
-        val result =
-            processRadioResponseUseCase(packet, destNum, pendingRequestIds, myNodeNum, sentAdminChannelIndex) ?: return
-        val route = radioConfigState.value.route
-        val isLateRemoteRead = requestId != null && lateRemoteReadRoute != null
-
-        if (isLateRemoteRead) {
-            when (result) {
-                is RadioResponseResult.Error -> {
-                    if (result.routingError != Routing.Error.MAX_RETRANSMIT) {
-                        removeLateRemoteRead(checkNotNull(requestId))
-                    }
-                    return
+    private fun <T> finish(
+        request: PendingRequest,
+        outcome: Result<AdminResult<T>>,
+        apply: (T, late: Boolean) -> Unit,
+        late: Boolean,
+    ) {
+        val destNum = answerDestNum()
+        if (destNum != null && request in pending) {
+            val failure = outcome.exceptionOrNull()
+            val reply = outcome.getOrNull()
+            when {
+                failure != null -> {
+                    Logger.w(failure) { "Radio request ${request.tag} failed" }
+                    val message = failure.message?.let(UiText::DynamicString)
+                    refuse(request, message ?: UiText.Resource(Res.string.unknown_error), late)
                 }
 
-                // A routing ACK confirms delivery but does not contain the requested settings. Keep the retained read
-                // isolated from any newer save and continue waiting for its ADMIN_APP response.
-                is RadioResponseResult.Success -> return
+                reply is AdminResult.Success -> accept(request, reply.value, apply, late, destNum)
 
-                else -> Unit
+                reply == AdminResult.NodeUnreachable && !nodeRestartTracker.restartExpected.value ->
+                    refuse(request, UiText.Resource(Res.string.not_connected), late)
+
+                else -> reply?.refusalText()?.let { refuse(request, it, late) }
             }
         }
+        // A late read's SDK call has ended, so whatever it returned closes the request.
+        if (late) pending.remove(request)
+    }
 
-        when (result) {
-            is RadioResponseResult.Error -> {
-                if (
-                    requestId != null &&
-                    result.routingError == Routing.Error.MAX_RETRANSMIT &&
-                    isRemoteReadRoute(readRequestRoutes[requestId].orEmpty())
-                ) {
-                    // A remote reply can arrive after the connected radio exhausts reliable-send ACK tracking. Keep
-                    // this read alive until its existing UX deadline; a matching ADMIN_APP response can still satisfy
-                    // it, while the deferred routing error remains the most specific failure if no response arrives.
-                    deferredRemoteReadErrors[requestId] = result.message
-                    return
-                }
-                val responseReadRoute = requestId?.let(readRequestRoutes::get)
-                if (responseReadRoute != null && responseReadRoute != route) {
-                    removeRequestId(checkNotNull(requestId))
-                    return
-                }
-                // A routing/admin error is terminal for the current request flow. Drop every outstanding request ID
-                // and cancel its timeout so a late timeout cannot overwrite the specific failure or block the next
-                // retry.
-                invalidateManualChannelBatch()
-                clearRequestIds()
-                sendError(result.message)
-                // Abort the AdminRoute flow — do not fire the destructive action
-                // (reboot/shutdown/factory_reset) if the metadata preflight failed.
-                return
-            }
-
-            is RadioResponseResult.Success -> {
-                if (requestId != null && !isLateRemoteRead && route.isEmpty() && requestId !in readRequestRoutes) {
-                    removeRequestId(requestId)
-                    if (!hasPendingRequestsForRoute(route)) {
-                        completeSetRequestOrProgressBatch()
-                    } else {
-                        incrementCompleted()
-                    }
-                }
-            }
-
-            is RadioResponseResult.UnexpectedAckSender -> {
-                // The connected radio ACKed our local write from a node number other than the one we addressed:
-                // firmware 2.8 renumbers itself (num = crc32(public_key)) when it mints the PKI key on the first
-                // region set, live and without a reboot, so our cached number is now stale and every further admin
-                // write would NAK PKI_SEND_FAIL_PUBLIC_KEY until we re-learn it. Re-run the config handshake to pick
-                // up the new my_node_num, and treat this ACK as the save's confirmation. Scoped to a local save
-                // (route empty, isLocal): a remote admin target legitimately answers from a different node.
-                if (requestId != null && !isLateRemoteRead && route.isEmpty() && radioConfigState.value.isLocal) {
-                    clearRequestIds()
-                    // A session opened on the connected node by number would otherwise keep addressing the old
-                    // number (and stop counting as local) once the handshake reports the new one.
-                    activeDestNum.value = null
-                    connectionManager.startConfigOnly()
-                    setResponseStateSuccess()
-                }
-                // Otherwise an unaddressed node's ack says nothing about our request: leave it pending, exactly as
-                // when the use case returned null for it. Falling through would let the generic completion below
-                // retire the request and resolve a remote save on a foreign ack.
-                return
-            }
-
-            is RadioResponseResult.Metadata -> {
-                _radioConfigState.update { it.copy(metadata = result.metadata) }
-                if (!isLateRemoteRead) incrementCompleted()
-            }
-
-            is RadioResponseResult.ChannelResponse -> {
-                val response = result.channel
-                // Stop once we get to the first disabled entry
-                if (response.role != Channel.Role.DISABLED) {
-                    _radioConfigState.update { state ->
-                        state.copy(
-                            channelList =
-                            state.channelList.toMutableList().apply {
-                                val index = response.index
-                                val settings = response.settings ?: ChannelSettings.Builder().build()
-                                // Make sure list is large enough
-                                while (size <= index) add(ChannelSettings.Builder().build())
-                                set(index, settings)
-                            },
-                        )
-                    }
-                    if (!isLateRemoteRead) incrementCompleted()
-                    val index = response.index
-                    if (!isLateRemoteRead && index + 1 < maxChannels && route == ConfigRoute.CHANNELS.name) {
-                        // Not done yet, request next channel
-                        safeLaunch(tag = "getNextChannel") {
-                            radioConfigUseCase.getChannel(destNum, index + 1, onRequestId = ::registerReadRequestId)
-                        }
-                    }
-                } else if (!isLateRemoteRead) {
-                    // Received last channel, update total and start channel editor
-                    setResponseStateTotal(response.index + 1)
-                }
-            }
-
-            is RadioResponseResult.Owner -> {
-                _radioConfigState.update { it.copy(userConfig = result.user) }
-                if (!isLateRemoteRead) incrementCompleted()
-            }
-
-            is RadioResponseResult.ConfigResponse -> {
-                val response = result.config
-                _radioConfigState.update { state ->
-                    state.copy(
-                        radioConfig =
-                        state.radioConfig
-                            .newBuilder()
-                            .also { wb ->
-                                wb.device = response.device ?: state.radioConfig.device
-                                wb.position = response.position ?: state.radioConfig.position
-                                wb.power = response.power ?: state.radioConfig.power
-                                wb.network = response.network ?: state.radioConfig.network
-                                wb.display = response.display ?: state.radioConfig.display
-                                wb.lora = response.lora ?: state.radioConfig.lora
-                                wb.bluetooth = response.bluetooth ?: state.radioConfig.bluetooth
-                                wb.security = response.security ?: state.radioConfig.security
-                            }
-                            .build(),
-                    )
-                }
-                if (!isLateRemoteRead) incrementCompleted()
-            }
-
-            is RadioResponseResult.ModuleConfigResponse -> {
-                _radioConfigState.update { state ->
-                    state.copy(moduleConfig = state.moduleConfig.mergedWith(result.config))
-                }
-                if (!isLateRemoteRead) incrementCompleted()
-            }
-
-            is RadioResponseResult.CannedMessages -> {
-                _radioConfigState.update { it.copy(cannedMessageMessages = result.messages) }
-                if (!isLateRemoteRead) incrementCompleted()
-            }
-
-            is RadioResponseResult.Ringtone -> {
-                _radioConfigState.update { it.copy(ringtone = result.ringtone) }
-                if (!isLateRemoteRead) incrementCompleted()
-            }
-
-            is RadioResponseResult.ConnectionStatus -> {
-                _radioConfigState.update { it.copy(deviceConnectionStatus = result.status) }
-                if (!isLateRemoteRead) incrementCompleted()
-            }
-        }
-
-        if (isLateRemoteRead) {
-            removeLateRemoteRead(checkNotNull(requestId))
-            // A late response satisfies its single-response route, including any retry of that route. Retire only
-            // redundant reads with the same route; a concurrently registered save owns no read route and is retained.
-            retireReadRequestsForRoute(checkNotNull(lateRemoteReadRoute))
+    /** A refusal, a lost link outside a restart, or a thrown failure: terminal for the visible flow. */
+    private fun refuse(request: PendingRequest, message: UiText, late: Boolean) {
+        if (late) return
+        if (request.kind == RequestKind.READ && request.route != radioConfigState.value.route) {
+            pending.remove(request) // a read for a route the user has left
             return
         }
+        // Drop every outstanding request so a late deadline cannot overwrite the specific failure or block a retry.
+        invalidateManualChannelBatch()
+        pending.remove(request) // not retire: this request's own coroutine is the caller
+        clearRequests()
+        sendError(message)
+    }
 
-        // Routing ACKs (Success) share the same request_id as the upcoming ADMIN_APP response.
-        // Removing the id here would cause the actual admin response to be silently dropped,
-        // because processRadioResponseUseCase checks `request_id in requestIds`.
-        // The Success branch already handles its own id removal when route is empty (set flow).
-        if (result is RadioResponseResult.Success) return
-
-        if (AdminRoute.entries.any { it.name == route }) {
-            sendAdminRequest(destNum)
+    private fun <T> accept(
+        request: PendingRequest,
+        value: T,
+        apply: (T, late: Boolean) -> Unit,
+        late: Boolean,
+        destNum: Int,
+    ) {
+        val route = radioConfigState.value.route
+        apply(value, late)
+        if (late) {
+            // A late answer satisfies its single-response route, including any retry of that route.
+            retireReadRequestsForRoute(request.route)
+            return
         }
-
-        if (requestId == null) return
-        // Defer the removal so a chain continuation launched above (e.g. the next getChannel of a
-        // sequential channel fetch) registers its request id first — launches run FIFO on the main
-        // dispatcher, and registration is the continuation's first act before its send. Removing inline
-        // would observe a momentarily-empty request set in the gap between chained requests and tear the
-        // whole flow down (clearPacketResponse), stranding the rest of the chain.
-        safeLaunch(tag = "completePacketResponse") {
-            removeRequestId(requestId)
-
-            if (requestIds.value.isEmpty()) {
-                if (route.isNotEmpty() && !AdminRoute.entries.any { it.name == route }) {
-                    clearPacketResponse()
-                } else if (route.isEmpty()) {
-                    completeSetRequestOrProgressBatch()
-                }
+        if (request.kind != RequestKind.READ) {
+            if (route.isEmpty()) {
+                pending.remove(request)
+                if (!hasPendingRequestsForRoute(route)) completeSetRequestOrProgressBatch() else incrementCompleted()
             }
+            return
+        }
+        pending.remove(request)
+        if (AdminRoute.entries.any { it.name == route }) {
+            // The metadata preflight: the action it launches settles the flow.
+            sendAdminRequest(destNum)
+        } else if (active.isEmpty()) {
+            if (route.isNotEmpty()) clearPacketResponse() else completeSetRequestOrProgressBatch()
+        }
+    }
+
+    private fun applyMetadata(metadata: DeviceMetadata, late: Boolean) {
+        _radioConfigState.update { it.copy(metadata = metadata) }
+        if (!late) incrementCompleted()
+    }
+
+    private fun applyOwner(user: User, late: Boolean) {
+        _radioConfigState.update { it.copy(userConfig = user) }
+        if (!late) incrementCompleted()
+    }
+
+    private fun applyCannedMessages(messages: String, late: Boolean) {
+        _radioConfigState.update { it.copy(cannedMessageMessages = messages) }
+        if (!late) incrementCompleted()
+    }
+
+    private fun applyRingtone(ringtone: String, late: Boolean) {
+        _radioConfigState.update { it.copy(ringtone = ringtone) }
+        if (!late) incrementCompleted()
+    }
+
+    private fun applyConnectionStatus(status: DeviceConnectionStatus, late: Boolean) {
+        _radioConfigState.update { it.copy(deviceConnectionStatus = status) }
+        if (!late) incrementCompleted()
+    }
+
+    private fun applyModuleConfig(config: ModuleConfig, late: Boolean) {
+        _radioConfigState.update { state -> state.copy(moduleConfig = state.moduleConfig.mergedWith(config)) }
+        if (!late) incrementCompleted()
+    }
+
+    private fun applyConfig(response: Config, late: Boolean) {
+        _radioConfigState.update { state ->
+            state.copy(
+                radioConfig =
+                state.radioConfig
+                    .newBuilder()
+                    .also { wb ->
+                        wb.device = response.device ?: state.radioConfig.device
+                        wb.position = response.position ?: state.radioConfig.position
+                        wb.power = response.power ?: state.radioConfig.power
+                        wb.network = response.network ?: state.radioConfig.network
+                        wb.display = response.display ?: state.radioConfig.display
+                        wb.lora = response.lora ?: state.radioConfig.lora
+                        wb.bluetooth = response.bluetooth ?: state.radioConfig.bluetooth
+                        wb.security = response.security ?: state.radioConfig.security
+                    }
+                    .build(),
+            )
+        }
+        if (!late) incrementCompleted()
+    }
+
+    private fun applyChannel(response: Channel, late: Boolean) {
+        val route = radioConfigState.value.route
+        // Stop once we get to the first disabled entry
+        if (response.role != Channel.Role.DISABLED) {
+            _radioConfigState.update { state ->
+                state.copy(
+                    channelList =
+                    state.channelList.toMutableList().apply {
+                        val index = response.index
+                        val settings = response.settings ?: ChannelSettings.Builder().build()
+                        // Make sure list is large enough
+                        while (size <= index) add(ChannelSettings.Builder().build())
+                        set(index, settings)
+                    },
+                )
+            }
+            if (!late) incrementCompleted()
+            val index = response.index
+            val destNum = answerDestNum() ?: return
+            if (!late && index + 1 < maxChannels && route == ConfigRoute.CHANNELS.name) {
+                // Not done yet, request next channel
+                launchRead("getNextChannel", { adminController.getChannel(destNum, index + 1) }, ::applyChannel)
+            }
+        } else if (!late) {
+            // Received last channel, update total and start channel editor
+            setResponseStateTotal(response.index + 1)
         }
     }
 
@@ -1524,25 +1484,11 @@ open class RadioConfigViewModel(
         // Unknown routes are never retained.
         return hasReadFanOut == false
     }
-
-    private fun retainLateRemoteRead(packetId: Int, route: String, adminChannelIndex: Int?) {
-        removeLateRemoteRead(packetId)
-        val expiryJob =
-            safeLaunch(tag = "expireLateRemoteRead") {
-                delay(REMOTE_READ_LATE_RESPONSE_GRACE)
-                lateRemoteReads.remove(packetId)
-            }
-        lateRemoteReads[packetId] = LateRemoteRead(route, expiryJob, adminChannelIndex)
-    }
-
-    private fun removeLateRemoteRead(packetId: Int) {
-        lateRemoteReads.remove(packetId)?.expiryJob?.cancel()
-    }
 }
 
-private data class LateRemoteRead(val route: String, val expiryJob: Job, val adminChannelIndex: Int?)
-
-internal data class ManualChannelUpdateResult(val packetIds: List<Int>, val finalSettings: List<ChannelSettings>)
+/** The same device under a new node number, as firmware 2.8 leaves it once it mints its key. */
+private fun MyNodeInfo.isRenumberedTo(other: MyNodeInfo): Boolean =
+    myNodeNum != other.myNodeNum && deviceId != null && deviceId == other.deviceId
 
 internal data class InterruptedManualChannelUpdate(
     val appliedSettings: List<ChannelSettings>,
@@ -1552,25 +1498,17 @@ internal data class InterruptedManualChannelUpdate(
 internal suspend fun applyManualChannelUpdatePlan(
     updatePlan: List<Channel>,
     currentSettings: List<ChannelSettings>,
-    finalSettings: List<ChannelSettings>,
-    writeChannel: suspend (Channel, onRequestId: (Int) -> Unit) -> Int,
-    registerRequestId: (Int) -> Unit,
+    writeChannel: suspend (Channel) -> Unit,
     onInterrupted: suspend (InterruptedManualChannelUpdate) -> Unit = {},
     writeDelay: Duration = MANUAL_CHANNEL_WRITE_DELAY,
     delayFn: suspend (Duration) -> Unit = { delay(it) },
-): ManualChannelUpdateResult {
-    val packetIds = mutableListOf<Int>()
+) {
     val appliedSettings = currentSettings.toMutableList()
     var appliedWriteCount = 0
     var updateComplete = false
     try {
         for ((index, channel) in updatePlan.withIndex()) {
-            // Register before the write is issued: the local loopback response/ACK can arrive
-            // before the suspending send returns, so post-hoc registration would drop it.
-            writeChannel(channel) { packetId ->
-                packetIds.add(packetId)
-                registerRequestId(packetId)
-            }
+            writeChannel(channel)
             appliedSettings.applyManualChannelWrite(channel)
             appliedWriteCount++
             if (index < updatePlan.lastIndex) {
@@ -1588,7 +1526,6 @@ internal suspend fun applyManualChannelUpdatePlan(
             )
         }
     }
-    return ManualChannelUpdateResult(packetIds = packetIds, finalSettings = finalSettings)
 }
 
 private fun MutableList<ChannelSettings>.applyManualChannelWrite(channel: Channel) {
@@ -1602,13 +1539,6 @@ private fun MutableList<ChannelSettings>.applyManualChannelWrite(channel: Channe
             channel.settings ?: ChannelSettings.Builder().build()
         }
 }
-
-private fun HashSet<Int>.withPacketId(packetId: Int): HashSet<Int> = HashSet(this).apply { add(packetId) }
-
-private fun HashSet<Int>.withoutPacketId(packetId: Int): HashSet<Int> = HashSet(this).apply { remove(packetId) }
-
-private fun HashSet<Int>.withoutPacketIds(packetIds: Set<Int>): HashSet<Int> =
-    HashSet(this).apply { removeAll(packetIds) }
 
 /**
  * Coarse mirror of firmware `AdminModule::handleSetConfig`'s reboot decision for the section being saved. Sections with
@@ -1624,5 +1554,3 @@ internal fun Config.saveRebootBehavior(): RebootBehavior = when {
  */
 internal fun ModuleConfig.saveRebootBehavior(): RebootBehavior =
     if (statusmessage != null || mesh_beacon != null) RebootBehavior.NEVER else RebootBehavior.ALWAYS
-
-private const val ADMIN_CHANNEL_NAME = "admin"

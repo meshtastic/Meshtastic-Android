@@ -16,8 +16,8 @@
  */
 package org.meshtastic.core.network.mqtt
 
-import org.meshtastic.core.common.util.latLongToMeter
 import org.meshtastic.core.model.MqttRootsResponse
+import org.meshtastic.sdk.PositionUtils
 
 /**
  * A community root whose name says nothing about where it is ("msh/US/DMV", "msh/US/MeshSTL"), with the area it serves.
@@ -54,7 +54,8 @@ data class MqttRootDirectory(
             at != null &&
                 center != null &&
                 radiusKm != null &&
-                latLongToMeter(at.latitude, at.longitude, center.latitude, center.longitude) <= radiusKm * METERS_PER_KM
+                PositionUtils.distance(at.latitude, at.longitude, center.latitude, center.longitude) <=
+                radiusKm * METERS_PER_KM
         bySubdivision || byRadius
     }
 

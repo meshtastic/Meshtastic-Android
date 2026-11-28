@@ -49,7 +49,6 @@ import org.meshtastic.core.domain.usecase.settings.ExportDataUseCase
 import org.meshtastic.core.domain.usecase.settings.ExportNodeDatabaseUseCase
 import org.meshtastic.core.domain.usecase.settings.IsOtaCapableUseCase
 import org.meshtastic.core.domain.usecase.settings.SetMeshLogSettingsUseCase
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.RadioConfigRepository
@@ -66,6 +65,7 @@ import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
+import org.meshtastic.sdk.ConnectionState
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test

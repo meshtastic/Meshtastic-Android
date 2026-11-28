@@ -322,7 +322,7 @@ class Esp32OtaUpdateHandler(
         val myInfo = nodeRepository.myNodeInfo.value ?: return
         val myNodeNum = myInfo.myNodeNum
         Logger.i { "ESP32 OTA: Triggering reboot OTA mode $mode with hash" }
-        radioController.requestRebootOta(radioController.generatePacketId(), myNodeNum, mode, hash)
+        radioController.requestRebootOta(myNodeNum, mode, hash)
     }
 
     /**

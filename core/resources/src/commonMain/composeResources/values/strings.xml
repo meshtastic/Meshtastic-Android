@@ -370,6 +370,7 @@
     <string name="connected_sleeping">Connected to radio, but it is sleeping</string>
     <string name="connecting">Connecting</string>
     <!-- CONNECTION -->
+    <string name="connection_failed">Connection failed</string>
     <string name="connection_failure_bluetooth_or_location_unavailable">Bluetooth or location services are off.</string>
     <string name="connection_failure_bluetooth_unavailable">Bluetooth is off.</string>
     <string name="connection_failure_connect_failed">Could not connect. The radio may be in use by another app or device, too far away, or holding an old pairing.</string>
@@ -392,6 +393,7 @@
     </plurals>
     <string name="connection_retry_now">Retrying now (attempt %1$d)</string>
     <string name="connection_status">Current connections:</string>
+    <string name="connection_stopped_retrying">Stopped retrying. Tap Connect to try again.</string>
     <string name="connections">Connection</string>
     <string name="contact_draft_prefix">Draft: %1$s</string>
     <string name="contact_muted_snackbar">Muted %1$s</string>
@@ -528,6 +530,7 @@
     <string name="discard_changes">Discard</string>
     <string name="disconnect">Disconnect</string>
     <string name="disconnected">Disconnected</string>
+    <string name="disconnecting">Disconnecting…</string>
     <string name="discovered_network_devices">Discovered Network Devices</string>
     <!-- DISCOVERY -->
     <string name="discovery_analysing_results">Analyzing results</string>
@@ -2184,6 +2187,7 @@
     <!-- SERIAL -->
     <string name="serial">Serial</string>
     <string name="serial_config">Serial Config</string>
+    <string name="serial_permission_denied">Permission denied for the serial port. Add your account to the group that owns it, usually dialout (uucp on Arch), then log out and back in.</string>
     <string name="serial_port_chip">%1$s USB serial</string>
     <string name="serial_port_unknown">Serial device</string>
     <string name="serial_port_usb_ids">USB serial device %1$s</string>

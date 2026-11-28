@@ -43,7 +43,6 @@ import org.junit.runner.RunWith
 import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
@@ -58,6 +57,7 @@ import org.meshtastic.core.testing.runUntilSettled
 import org.meshtastic.core.testing.runWithRenderScope
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.User
+import org.meshtastic.sdk.ConnectionState
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import kotlin.test.assertEquals

@@ -105,7 +105,7 @@ open class BaseMapViewModel(
 
     val isConnected =
         radioController.connectionState
-            .map { it is org.meshtastic.core.model.ConnectionState.Connected }
+            .map { it is org.meshtastic.sdk.ConnectionState.Connected }
             .stateInWhileSubscribed(initialValue = false)
 
     val nodes: StateFlow<List<Node>> =

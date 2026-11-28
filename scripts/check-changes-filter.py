@@ -42,6 +42,8 @@ def paths_filter(workflow: str, name: str) -> str:
 
 def main() -> None:
     settings = (REPO_ROOT / 'settings.gradle.kts').read_text()
+    # Only include(...) calls name modules; other quoted paths (the optional SDK substitution) are not ours.
+    settings = '\n'.join(re.findall(r'include\((.*?)\)', settings, re.S))
     workflow = (REPO_ROOT / '.github/workflows/pull-request.yml').read_text()
 
     module_roots = {

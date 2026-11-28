@@ -17,54 +17,26 @@
 package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
-import okio.ByteString.Companion.toByteString
 import org.koin.core.annotation.Single
 import org.meshtastic.core.model.util.anonymize
-import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.HistoryManager
 import org.meshtastic.core.repository.LocalNodeUnavailableException
 import org.meshtastic.core.repository.MeshPrefs
-import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketQueueRejectedException
-import org.meshtastic.proto.Data
-import org.meshtastic.proto.MeshPacket
+import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.proto.ModuleConfig
-import org.meshtastic.proto.PortNum
-import org.meshtastic.proto.StoreAndForward
+import org.meshtastic.sdk.MeshtasticException
 
 @Single
-class HistoryManagerImpl(
-    private val meshPrefs: MeshPrefs,
-    private val packetHandler: PacketHandler,
-    private val commandSender: CommandSender,
-) : HistoryManager {
+class HistoryManagerImpl(private val meshPrefs: MeshPrefs, private val radioInterfaceService: RadioInterfaceService) :
+    HistoryManager {
 
     companion object {
         private const val HISTORY_TAG = "HistoryReplay"
         private const val DEFAULT_HISTORY_RETURN_WINDOW_MINUTES = 60 * 24
         private const val DEFAULT_HISTORY_RETURN_MAX_MESSAGES = 100
         private const val NO_DEVICE_SELECTED = "No device selected"
-
-        fun buildStoreForwardHistoryRequest(
-            lastRequest: Int,
-            historyReturnWindow: Int,
-            historyReturnMax: Int,
-        ): StoreAndForward {
-            val history =
-                StoreAndForward.History.Builder()
-                    .also { wb ->
-                        wb.last_request = lastRequest.coerceAtLeast(0)
-                        wb.window = historyReturnWindow.coerceAtLeast(0)
-                        wb.history_messages = historyReturnMax.coerceAtLeast(0)
-                    }
-                    .build()
-            return StoreAndForward.Builder()
-                .also { wb ->
-                    wb.rr = StoreAndForward.RequestResponse.CLIENT_HISTORY
-                    wb.history = history
-                }
-                .build()
-        }
 
         fun resolveHistoryRequestParameters(window: Int, max: Int): Pair<Int, Int> {
             val resolvedWindow = if (window > 0) window else DEFAULT_HISTORY_RETURN_WINDOW_MINUTES
@@ -85,11 +57,10 @@ class HistoryManagerImpl(
         myNodeNum: Int?,
         storeForwardConfig: ModuleConfig.StoreForwardConfig?,
         transport: String,
-        expectedConnectionVersion: Long,
+        session: RadioSessionContext,
     ) {
         val address = activeDeviceAddress()
-        val nodeNum = myNodeNum
-        if (address == null || nodeNum == null) throw LocalNodeUnavailableException("History replay")
+        if (address == null || myNodeNum == null) throw LocalNodeUnavailableException("History replay")
 
         val lastRequest = meshPrefs.getStoreForwardLastRequest(address).value
         val (window, max) =
@@ -98,33 +69,23 @@ class HistoryManagerImpl(
                 storeForwardConfig?.history_return_max ?: 0,
             )
 
-        val request = buildStoreForwardHistoryRequest(lastRequest, window, max)
-
         historyLog(
             "requestHistory trigger=$trigger transport=$transport addr=${address.anonymize} " +
                 "lastRequest=$lastRequest window=$window max=$max",
         )
 
-        val accepted =
-            packetHandler.sendToRadioForConnection(
-                MeshPacket.Builder()
-                    .also { wb ->
-                        wb.from = nodeNum
-                        wb.to = nodeNum
-                        wb.id = commandSender.generatePacketId()
-                        wb.decoded =
-                            Data.Builder()
-                                .also { wb ->
-                                    wb.portnum = PortNum.STORE_FORWARD_APP
-                                    wb.payload = request.encode().toByteString()
-                                }
-                                .build()
-                        wb.priority = MeshPacket.Priority.BACKGROUND
-                    }
-                    .build(),
-                expectedConnectionVersion,
-            )
-        if (!accepted) throw PacketQueueRejectedException("History replay")
+        sendHistoryRequest(session, lastRequest, window, max)
+    }
+
+    /** Asks our own node for its history, only while [session] is still active. */
+    private fun sendHistoryRequest(session: RadioSessionContext, lastRequest: Int, window: Int, max: Int) {
+        val client =
+            radioInterfaceService.clientForSession(session) ?: throw PacketQueueRejectedException("History replay")
+        try {
+            client.storeForward.requestLocalHistory(lastRequest, window, max)
+        } catch (e: MeshtasticException) {
+            throw PacketQueueRejectedException("History replay").apply { addSuppressed(e) }
+        }
     }
 
     override fun updateStoreForwardLastRequest(source: String, lastRequest: Int, transport: String) {

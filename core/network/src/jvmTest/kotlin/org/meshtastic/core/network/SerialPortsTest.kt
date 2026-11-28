@@ -104,16 +104,4 @@ class SerialPortsTest {
 
         assertEquals(listOf(false, false), entries.map { it.namesRadio })
     }
-
-    // A by-id address is a symlink: the permission hint must name the device node's group, not the link's.
-    @Test
-    fun `the group hint for a link names its target's group`() {
-        if (!System.getProperty("os.name").lowercase().contains("linux")) return // GNU stat only
-        val target = "/dev/null"
-        val targetGroup =
-            ProcessBuilder("stat", "-c", "%G", target).start().inputStream.bufferedReader().readText().trim()
-        val link = byId.resolve("usb-test-if00").createSymbolicLinkPointingTo(File(target).toPath()).toString()
-
-        assertEquals(targetGroup, detectSerialGroup(link))
-    }
 }

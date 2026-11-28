@@ -17,10 +17,10 @@
 package org.meshtastic.core.repository
 
 import co.touchlab.kermit.Severity
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.service.TracerouteResponse
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.MeshPacket
+import org.meshtastic.sdk.ConnectionState
 
 /**
  * Write-side interface for service state mutations.
@@ -30,7 +30,7 @@ import org.meshtastic.proto.MeshPacket
  * [NeighborInfoResponseProvider].
  */
 interface ServiceStateWriter {
-    /** Updates the canonical app-level connection state. Only [MeshConnectionManager] should call this. */
+    /** Publishes the connection state. Only the radio service writes it. */
     fun setConnectionState(connectionState: ConnectionState)
 
     /** Sets the current client notification. */
@@ -44,9 +44,6 @@ interface ServiceStateWriter {
 
     /** Clears the current error message. */
     fun clearErrorMessage()
-
-    /** Sets the connection progress message. */
-    fun setConnectionProgress(text: String)
 
     /** Emits a mesh packet into the shared flow. */
     suspend fun emitMeshPacket(packet: MeshPacket)

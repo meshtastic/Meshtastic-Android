@@ -117,30 +117,6 @@ class ChannelOptionTest {
         assertEquals(manual, manual.normalizeCodingRateOverride())
     }
 
-    // Firmware bwCodeToKHz: eleven codes stand for a fractional bandwidth, and any other is the code in kHz.
-    @Test
-    fun a_bandwidth_code_maps_to_the_megahertz_the_slot_math_uses() {
-        val special =
-            mapOf(
-                8 to .0078f,
-                10 to .0104f,
-                16 to .0156f,
-                21 to .0208f,
-                31 to .03125f,
-                42 to .0417f,
-                62 to .0625f,
-                200 to .203125f,
-                400 to .40625f,
-                800 to .8125f,
-                1600 to 1.625f,
-            )
-        for ((code, megahertz) in special) {
-            assertEquals(megahertz, loraBandwidthMegahertz(code), "bandwidth code $code")
-        }
-        assertEquals(.25f, loraBandwidthMegahertz(250))
-        assertEquals(.125f, loraBandwidthMegahertz(125))
-    }
-
     private fun presetConfig(preset: ModemPreset, codingRate: Int) = LoRaConfig.Builder()
         .also { wb ->
             wb.use_preset = true

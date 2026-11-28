@@ -32,12 +32,12 @@ import okio.BufferedSource
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.database.DatabaseBackupOperations
 import org.meshtastic.core.database.RestoreStageResult
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.core.testing.FakeRadioPrefs
 import org.meshtastic.core.ui.util.AlertManager
+import org.meshtastic.sdk.ConnectionState
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -162,7 +162,13 @@ class DatabaseBackupViewModelTest {
 
     @Test
     fun `a sleeping or connecting radio asks to disconnect before proceeding`() {
-        for (state in listOf(ConnectionState.DeviceSleep, ConnectionState.Connecting)) {
+        for (
+        state in
+        listOf(
+            ConnectionState.DeviceSleeping(kotlin.time.Instant.fromEpochMilliseconds(0), expectedWakeSeconds = 300),
+            ConnectionState.Connecting(attempt = 1),
+        )
+        ) {
             alertManager.dismissAlert()
             radioController.setConnectionState(state)
 
