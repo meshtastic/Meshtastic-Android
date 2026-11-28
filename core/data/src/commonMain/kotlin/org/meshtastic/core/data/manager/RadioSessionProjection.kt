@@ -186,11 +186,11 @@ class RadioSessionProjection(
     }
 
     fun onDisplayFrame(frame: DisplayMirrorFrame, session: RadioSessionContext) {
-        radioInterfaceService.runIfSessionActive(session) { displayMirrorManager.value.handleFrame(frame) }
+        if (radioInterfaceService.isSessionActive(session)) displayMirrorManager.value.handleFrame(frame)
     }
 
     fun onDisplayPalette(palette: DisplayPalette, session: RadioSessionContext) {
-        radioInterfaceService.runIfSessionActive(session) { displayMirrorManager.value.handlePalette(palette) }
+        if (radioInterfaceService.isSessionActive(session)) displayMirrorManager.value.handlePalette(palette)
     }
 
     /**
