@@ -22,6 +22,14 @@ private const val EMOJI_PRESENTATION = 0xFE0F
 private const val FIRST_SKIN_TONE = 0x1F3FB
 private const val LAST_SKIN_TONE = 0x1F3FF
 private const val FIRST_PICTOGRAPH = 0x1F000
+
+/** The end of Symbols and Pictographs Extended-A, the last emoji block. */
+private const val LAST_PICTOGRAPH = 0x1FAFF
+private const val FIRST_TAG = 0xE0020
+private const val LAST_TAG = 0xE007F
+
+/** Tab, line feed, vertical tab, form feed, carriage return and next line. */
+private val CONTROL_SPACES = setOf(0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x85)
 private const val FIRST_SYMBOL = 0x2600
 private const val LAST_DINGBAT = 0x27BF
 private const val FIRST_ARROW_SYMBOL = 0x2B00
@@ -76,17 +84,22 @@ internal fun List<Int>.codePointsToString(): String = buildString {
     }
 }
 
-/** Labeltastic's test for which characters draw from the emoji font. */
-internal fun isLabelEmoji(codePoint: Int): Boolean = codePoint >= FIRST_PICTOGRAPH ||
+/**
+ * Which characters draw from the emoji font: labeltastic's ranges, with its open-ended `>= U+1F000` narrowed to the
+ * emoji blocks and the tags of subdivision flags, so ideographs from U+20000 on stay text.
+ */
+internal fun isLabelEmoji(codePoint: Int): Boolean = codePoint in FIRST_PICTOGRAPH..LAST_PICTOGRAPH ||
+    codePoint in FIRST_TAG..LAST_TAG ||
     codePoint in FIRST_SYMBOL..LAST_DINGBAT ||
     codePoint in FIRST_ARROW_SYMBOL..LAST_ARROW_SYMBOL
 
 /**
  * Drops what prints as stray boxes in one color (joiners, variation selectors, skin tones, control characters) and
- * collapses whitespace.
+ * collapses whitespace. Line breaks and tabs become spaces first, so they still part words.
  */
 internal fun cleanLabelText(text: String): String = text
     .codePointList()
+    .map { point -> if (point in CONTROL_SPACES) ' '.code else point }
     .filterNot { point ->
         point == ZERO_WIDTH_JOINER ||
             point == TEXT_PRESENTATION ||
@@ -96,7 +109,7 @@ internal fun cleanLabelText(text: String): String = text
             point in DELETE..LAST_C1_CONTROL
     }
     .codePointsToString()
-    .split(' ', '\t', '\n', '\r', ' ')
+    .split(' ', ' ')
     .filter { it.isNotEmpty() }
     .joinToString(" ")
 
