@@ -210,6 +210,7 @@ class SdkTcpRoomTest {
                 }
                 assertEquals(listOf(SdkRoomReplayTest.file), ingress.files.first())
                 assertEquals(SdkRoomReplayTest.regionPresets, ingress.regionPresets.first())
+                assertEquals(SdkRoomReplayTest.deviceUiConfig, ingress.deviceUi.first())
                 val readySession = assertNotNull(radio.activeSession.value)
                 assertEquals(session.address, readySession.address)
                 // A session the radio rebooted out of before any event never reached the app; the client's next one
@@ -346,6 +347,7 @@ class SdkTcpRoomTest {
                         ConfigStore<LocalModuleConfig>(LocalModuleConfig.Builder().build()),
                         CoreModuleConfigDataStore {},
                 ),
+                radio,
             )
         private val installer =
             MeshConfigFlowManagerImpl(
@@ -451,6 +453,7 @@ class SdkTcpRoomTest {
         val lockdownState = state.lockdownState
         val files = config.fileManifestFlow
         val regionPresets = config.loraRegionPresetMapFlow
+        val deviceUi = config.deviceUIConfigFlow
         val lockdown =
             LockdownCoordinatorImpl(
                 state,

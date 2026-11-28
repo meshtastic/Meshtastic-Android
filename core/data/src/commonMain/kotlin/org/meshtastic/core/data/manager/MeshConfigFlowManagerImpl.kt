@@ -101,9 +101,7 @@ class MeshConfigFlowManagerImpl(
                 ready.channels.orEmpty().forEach { updateChannelSettings(it) }
                 bundle?.configs.orEmpty().forEach { setLocalConfig(it) }
                 moduleConfigs.forEach { setLocalModuleConfig(it) }
-                bundle?.deviceUIConfig?.let { setDeviceUIConfig(it) }
                 ready.files.forEach { addFileInfo(it) }
-                ready.regionPresets?.let { setLoraRegionPresetMap(it) }
             }
             metadata?.let { nodeRepository.insertMetadata(info.myNodeNum, it) }
             // Before the node install, which persists the local node with its status.
@@ -131,8 +129,6 @@ class MeshConfigFlowManagerImpl(
             with(radioConfigRepository) {
                 bundle.configs.forEach { setLocalConfig(it) }
                 bundle.moduleConfigs.forEach { setLocalModuleConfig(it) }
-                bundle.deviceUIConfig?.let { setDeviceUIConfig(it) }
-                bundle.regionPresets?.let { setLoraRegionPresetMap(it) }
             }
             val myNodeNum = installedSnapshot.value?.takeIf { it.session == session }?.myNode?.myNodeNum
             if (myNodeNum != null) {
@@ -223,11 +219,7 @@ class MeshConfigFlowManagerImpl(
         if (!isCurrent()) return
         radioConfigRepository.clearLocalModuleConfig()
         if (!isCurrent()) return
-        radioConfigRepository.clearDeviceUIConfig()
-        if (!isCurrent()) return
         radioConfigRepository.clearFileManifest()
-        if (!isCurrent()) return
-        radioConfigRepository.clearLoraRegionPresetMap()
     }
 
     override fun handleFileInfo(info: FileInfo, session: RadioSessionContext): Boolean {

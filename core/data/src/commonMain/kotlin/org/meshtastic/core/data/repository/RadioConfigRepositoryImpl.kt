@@ -17,10 +17,15 @@
 package org.meshtastic.core.data.repository
 
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import org.koin.core.annotation.Single
 import org.meshtastic.core.data.datasource.SwitchingChannelSetDataSource
@@ -29,6 +34,7 @@ import org.meshtastic.core.datastore.ModuleConfigDataSource
 import org.meshtastic.core.model.util.getChannelUrl
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
@@ -40,6 +46,7 @@ import org.meshtastic.proto.LoRaRegionPresetMap
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.ModuleConfig
+import org.meshtastic.sdk.ConfigBundle
 
 /**
  * Class responsible for radio configuration data. Combines access to [nodeDB], [ChannelSet], [LocalConfig] &
@@ -54,6 +61,7 @@ open class RadioConfigRepositoryImpl(
     private val channelSetDataSource: SwitchingChannelSetDataSource,
     private val localConfigDataSource: LocalConfigDataSource,
     private val moduleConfigDataSource: ModuleConfigDataSource,
+    private val radioInterfaceService: RadioInterfaceService,
 ) : RadioConfigRepository {
 
     /** Flow representing the [ChannelSet] data store. */
@@ -121,17 +129,18 @@ open class RadioConfigRepositoryImpl(
         moduleConfigDataSource.setLocalModuleConfig(config)
     }
 
-    // DeviceUIConfig is session-scoped data received fresh in every handshake — no persistence needed.
-    private val _deviceUIConfigFlow = MutableStateFlow<DeviceUIConfig?>(null)
-    override val deviceUIConfigFlow: Flow<DeviceUIConfig?> = _deviceUIConfigFlow.asStateFlow()
+    // The SDK client's config bundle follows the active session; with no session or no bundle yet both flows are null.
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val sessionConfigBundle: Flow<ConfigBundle?> =
+        radioInterfaceService.activeSession.flatMapLatest { session ->
+            session?.let(radioInterfaceService::clientForSession)?.configBundle ?: flowOf(null)
+        }
 
-    override suspend fun setDeviceUIConfig(config: DeviceUIConfig) {
-        _deviceUIConfigFlow.value = config
-    }
+    override val deviceUIConfigFlow: Flow<DeviceUIConfig?> =
+        sessionConfigBundle.map { it?.deviceUIConfig }.distinctUntilChanged()
 
-    override suspend fun clearDeviceUIConfig() {
-        _deviceUIConfigFlow.value = null
-    }
+    override val loraRegionPresetMapFlow: Flow<LoRaRegionPresetMap?> =
+        sessionConfigBundle.map { it?.regionPresets }.distinctUntilChanged()
 
     // FileInfo manifest is session-scoped: accumulated during STATE_SEND_FILEMANIFEST, cleared on each new handshake.
     private val _fileManifestFlow = MutableStateFlow<List<FileInfo>>(emptyList())
@@ -163,18 +172,6 @@ open class RadioConfigRepositoryImpl(
 
     override suspend fun clearFileManifest() {
         _fileManifestFlow.value = emptyList()
-    }
-
-    // Region→preset compatibility map is session-scoped: delivered once per handshake, cleared on each new handshake.
-    private val _loraRegionPresetMapFlow = MutableStateFlow<LoRaRegionPresetMap?>(null)
-    override val loraRegionPresetMapFlow: Flow<LoRaRegionPresetMap?> = _loraRegionPresetMapFlow.asStateFlow()
-
-    override suspend fun setLoraRegionPresetMap(map: LoRaRegionPresetMap) {
-        _loraRegionPresetMapFlow.value = map
-    }
-
-    override suspend fun clearLoraRegionPresetMap() {
-        _loraRegionPresetMapFlow.value = null
     }
 
     /** Flow representing the combined [DeviceProfile] protobuf. */
