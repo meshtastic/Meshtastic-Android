@@ -29,8 +29,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
@@ -67,7 +65,6 @@ class FakeRadioInterfaceService(val serviceScope: CoroutineScope = MainScope()) 
     private var sessionAdmissionOpen = false
     private var admittedSessionOperations = 0
     private var sessionDrainWaiter: CompletableDeferred<Unit>? = null
-    private val sessionOperationMutex = Mutex()
 
     /** Number of lease-release invariant violations observed by this fake. Finally paths record rather than throw. */
     private var sessionLeaseInvariantViolationsState: Int = 0
@@ -105,12 +102,6 @@ class FakeRadioInterfaceService(val serviceScope: CoroutineScope = MainScope()) 
             releaseSessionOperation(admittedSession)
         }
     }
-
-    override suspend fun runWhileSessionActive(
-        session: RadioSessionContext,
-        label: String,
-        block: suspend () -> Unit,
-    ): Boolean = sessionOperationMutex.withLock { runWithSessionLease(session) { block() } }
 
     private val _meshActivity = MutableSharedFlow<MeshActivity>()
     override val meshActivity: Flow<MeshActivity> = _meshActivity.asFlow()

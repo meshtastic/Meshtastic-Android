@@ -154,19 +154,6 @@ class RadioControllerImplTest {
             activeSession
                 ?: MutableStateFlow(deviceAddress.value?.let { RadioSessionContext(sessionGeneration.value, it) })
         every { radioInterfaceService.activeSession } returns resolvedActiveSession
-        everySuspend { radioInterfaceService.runWhileSessionActive(any(), any(), any()) } calls
-            {
-                val session = it.args[0] as RadioSessionContext
-
-                @Suppress("UNCHECKED_CAST")
-                val block = it.args[2] as (suspend () -> Unit)
-                if (resolvedActiveSession.value == session) {
-                    block()
-                    true
-                } else {
-                    false
-                }
-            }
         everySuspend { radioInterfaceService.runWithSessionLease(any(), any()) } calls
             {
                 val session = it.args[0] as RadioSessionContext

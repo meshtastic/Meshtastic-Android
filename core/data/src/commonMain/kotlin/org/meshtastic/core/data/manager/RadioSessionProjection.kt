@@ -384,9 +384,8 @@ class RadioSessionProjection(
     )
 
     private suspend fun runForSession(session: RadioSessionContext, label: String, block: suspend () -> Unit) {
-        if (!radioInterfaceService.runWhileSessionActive(session, "SDK $label", block)) {
-            Logger.d { "Dropping SDK $label from stale transport session gen=${session.generation}" }
-        }
+        val admitted = radioInterfaceService.runWithSessionLease(session) { withHandlerTimeout("SDK $label", block) }
+        if (!admitted) Logger.d { "Dropping SDK $label from stale transport session gen=${session.generation}" }
     }
 
     private fun insertMeshLog(log: MeshLog, session: RadioSessionContext): Job =

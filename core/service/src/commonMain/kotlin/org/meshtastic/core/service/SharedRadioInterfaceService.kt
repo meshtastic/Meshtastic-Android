@@ -28,13 +28,10 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -55,7 +52,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
 import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.Named
@@ -239,9 +235,6 @@ class SharedRadioInterfaceService(
     /** Per-generation operation ownership, guarded by [sessionCallbackLock]. */
     private val sessionOperationStates = mutableMapOf<Long, SessionOperationState>()
 
-    /** Preserves FIFO ordering for handshake work without blocking independently leased packet side effects. */
-    private val sessionOperationMutex = Mutex()
-
     private val activeLink = MutableStateFlow<ActiveLink?>(null)
 
     /** Serializes publication of the link's state with the link changing. */
@@ -271,15 +264,6 @@ class SharedRadioInterfaceService(
     private val connectionErrorReasons = Channel<TransportDisconnectReason>(Channel.UNLIMITED)
 
     companion object {
-        /**
-         * Ceiling on a single [runWhileSessionActive] handler. The block holds [sessionOperationMutex] — the whole
-         * inbound pipeline — so a handler that suspends indefinitely wedges packet processing, backs up the SDK session
-         * stream, and deadlocks teardown's lease drain (a Connected-looking zombie only a force-stop clears; observed
-         * in the field as multi-hour "receive queue at capacity" sessions). 2 minutes is far above any legitimate
-         * handler (large-mesh config DB installs run seconds) while still bounding the wedge.
-         */
-        private const val SESSION_HANDLER_TIMEOUT_MILLIS = 2 * 60 * 1000L
-
         /** How often [revokeSession] reports a lease drain that has not completed. */
         private const val DRAIN_WAIT_LOG_INTERVAL_MILLIS = 15 * 1000L
 
@@ -342,28 +326,6 @@ class SharedRadioInterfaceService(
             return true
         } finally {
             releaseSessionOperation(admittedSession)
-        }
-    }
-
-    override suspend fun runWhileSessionActive(
-        session: RadioSessionContext,
-        label: String,
-        block: suspend () -> Unit,
-    ): Boolean = sessionOperationMutex.withLock {
-        runWithSessionLease(session) {
-            // Bound the handler: it holds sessionOperationMutex (the whole inbound pipeline) and an admitted
-            // lease (which teardown's drain awaits), so an indefinite suspension here is a total wedge, not a
-            // slow packet. Cancelling the block releases both. Only OUR timeout is swallowed — ensureActive()
-            // rethrows if the surrounding scope was cancelled concurrently.
-            try {
-                withTimeout(SESSION_HANDLER_TIMEOUT_MILLIS) { block() }
-            } catch (timeout: TimeoutCancellationException) {
-                currentCoroutineContext().ensureActive()
-                Logger.e(timeout) {
-                    "Session handler exceeded ${SESSION_HANDLER_TIMEOUT_MILLIS}ms and was cancelled; " +
-                        "dropping its packet to keep the receive pipeline alive (handler=$label)"
-                }
-            }
         }
     }
 
