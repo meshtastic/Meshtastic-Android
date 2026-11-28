@@ -749,6 +749,8 @@
     <string name="key_verification_final_title">密钥验证完成</string>
     <string name="key_verification_request_title">密钥验证请求</string>
     <string name="key_verification_title">密钥验证</string>
+    <!-- LABEL -->
+    <string name="label_print_print">打印</string>
     <string name="last_heard_filter_label">按最后听到时间筛选：%1$s</string>
     <string name="last_position_update">最后位置更新</string>
     <string name="latest_alpha_firmware">最新测试版</string>
@@ -1518,6 +1520,7 @@
     <string name="translation_failed">无法翻译消息</string>
     <string name="translation_model_download_failed">翻译模型下载失败</string>
     <string name="translation_not_required">该消息已经是您所使用的语言</string>
+    <!-- TRANSPARENT -->
     <!-- TRANSPORT -->
     <string name="transport">传输方式</string>
     <string name="transport_api">应用程序编程接口</string>

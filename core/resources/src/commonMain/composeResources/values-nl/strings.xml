@@ -182,6 +182,7 @@
     <string name="ip_address">IP-adres:</string>
     <string name="ip_port">Poort:</string>
     <!-- KEY -->
+    <!-- LABEL -->
     <string name="latitude">Breedtegraad</string>
     <!-- LAYER -->
     <string name="legacy_admin_channel">Legacy Admin kanaal</string>
@@ -410,6 +411,7 @@
     <string name="traceroute_log">Traceroute</string>
     <!-- TRAFFIC -->
     <!-- TRANSLATION -->
+    <!-- TRANSPARENT -->
     <!-- TRANSPORT -->
     <string name="transport_lora">LoRa</string>
     <string name="transport_mqtt">MQTT</string>

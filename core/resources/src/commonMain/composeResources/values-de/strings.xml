@@ -668,6 +668,8 @@
     <string name="key_verification_final_title">Schlüsselprüfung abgeschlossen</string>
     <string name="key_verification_request_title">Anfrage zur Schlüsselprüfung</string>
     <string name="key_verification_title">Schlüsselprüfung</string>
+    <!-- LABEL -->
+    <string name="label_print_print">Drucken</string>
     <string name="last_heard_filter_label">Filtern nach letztem Empfang: %1$s</string>
     <string name="last_position_update">Letzte Standortaktualisierung</string>
     <string name="latest_alpha_firmware">Neueste Alpha Version</string>
@@ -1399,6 +1401,7 @@
     <string name="translation_download_title">Übersetzungsmodell herunterladen?</string>
     <string name="translation_failed">Nachricht konnte nicht übersetzt werden</string>
     <string name="translation_not_required">Nachricht ist schon in deiner Sprache</string>
+    <!-- TRANSPARENT -->
     <!-- TRANSPORT -->
     <string name="transport">Transport</string>
     <string name="transport_api">API</string>

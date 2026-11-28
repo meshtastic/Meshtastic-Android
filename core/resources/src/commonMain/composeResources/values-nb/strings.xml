@@ -122,6 +122,7 @@
     <string name="intro_show">Vis introduksjon</string>
     <string name="ip_address">IP-adresse:</string>
     <!-- KEY -->
+    <!-- LABEL -->
     <!-- LAYER -->
     <!-- LICENSED -->
     <!-- LIVE -->
@@ -291,6 +292,7 @@
     <string name="traceroute_log">Traceroute</string>
     <!-- TRAFFIC -->
     <!-- TRANSLATION -->
+    <!-- TRANSPARENT -->
     <!-- TRANSPORT -->
     <string name="twenty_four_hours">24t</string>
     <string name="two_days">48 Timer</string>

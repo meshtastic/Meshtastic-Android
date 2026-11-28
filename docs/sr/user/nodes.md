@@ -1,7 +1,7 @@
 ---
 title: Чворови
 nav_order: 4
-last_updated: 2026-11-20
+last_updated: 2026-11-27
 description: Browse, filter, and sort mesh nodes — view details, signal quality, roles, and quick actions.
 aliases:
   - node-list
@@ -128,6 +128,14 @@ Touch & hold **your own node** instead and you get a menu of its own, with only 
 On a node's detail screen, tap **Share Contact** to produce a link and a QR code for that node. From the same dialog, **Share link** opens the Android share sheet (on desktop it copies the link instead), **Write to NFC tag** saves it to a writable NFC tag, and **Copy** puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved.
 
 Sharing your own contact this way marks it as verified in person, so whoever imports it sees the **Verified contact** icon rather than the signed one. Relaying someone else's contact passes on only what your app had already recorded about them.
+
+### Printing a name tag
+
+On an Android phone with Bluetooth, **Print label** in the same dialog prints the contact as a name tag on a Niimbot D110 label printer loaded with 12 mm die-cut labels. The tag carries the contact's QR code, its short and long name, and its node ID. A short name that is a single emoji sits on the right like a pin, and the long name becomes the big line.
+
+The print sheet shows the label as it will print. Pick **Label length**, 30 mm or 40 mm, to match the roll; a 40 mm label adds a header band. Turn the printer on, close the Niimbot app if it is open, and tap the printer when it appears under **Printer**, then tap **Print**. The app remembers the length and the printer, and connects to that printer again the next time it is on and the sheet is open. The printer has its own Bluetooth connection, so your node stays connected.
+
+A long name that would make the QR code too dense to scan is shortened inside the code only, not on the label. A name too long to fit the label is cut with an ellipsis (…). When the printer stops, the sheet says why, such as an open cover or no labels.
 
 To add someone else's contact, use the import button on the node list and choose **Scan Shared Contact QR Code**, **Scan Shared Contact NFC**, or **Input Shared Contact URL**. The app asks you to confirm with **Import Shared Contact?**, and warns you when the contact is one you already have.
 

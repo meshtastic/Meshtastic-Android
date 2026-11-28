@@ -305,6 +305,8 @@
     <string name="ip_address">IP cím:</string>
     <string name="ip_port">Port:</string>
     <!-- KEY -->
+    <!-- LABEL -->
+    <string name="label_print_print">Nyomtatás</string>
     <string name="last_heard_filter_label">Szűrés az utolsó észlelés ideje szerint: %1$s</string>
     <string name="last_position_update">Utolsó pozíciófrissítés</string>
     <string name="latest_alpha_firmware">Legújabb alpha</string>
@@ -723,6 +725,7 @@
     <string name="track_point">nyomvonalpont</string>
     <!-- TRAFFIC -->
     <!-- TRANSLATION -->
+    <!-- TRANSPARENT -->
     <!-- TRANSPORT -->
     <string name="transport_lora">LoRa</string>
     <string name="transport_mqtt">MQTT</string>

@@ -1022,6 +1022,8 @@
     <string name="key_verification_final_title">Проверка ключа завершена</string>
     <string name="key_verification_request_title">Запрос проверки ключа</string>
     <string name="key_verification_title">Проверка ключа</string>
+    <!-- LABEL -->
+    <string name="label_print_print">Печать</string>
     <string name="label_with_unit">%1$s (%2$s)</string>
     <string name="last_heard_filter_label">Фильтр по времени последнего сообщения: %1$s</string>
     <string name="last_position_update">Обновление последнего местоположения</string>
@@ -2345,6 +2347,7 @@
     <string name="translation_not_required">Сообщение уже на вашем языке</string>
     <string name="transmit_disabled">Передача отключена</string>
     <string name="transmit_disabled_summary">Это устройство может принимать данные, но ничего не отправляет через LoRa.</string>
+    <!-- TRANSPARENT -->
     <!-- TRANSPORT -->
     <string name="transport">Транспорт</string>
     <string name="transport_api">API</string>

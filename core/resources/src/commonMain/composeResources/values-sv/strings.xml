@@ -526,6 +526,8 @@
     <string name="ip_port">Port:</string>
     <string name="jump_to_latest_from">%1$s</string>
     <!-- KEY -->
+    <!-- LABEL -->
+    <string name="label_print_print">Skriv ut</string>
     <string name="last_heard_filter_label">Filtrera på senaste kontakt: %1$s</string>
     <string name="last_position_update">Senaste positionsuppdatering</string>
     <string name="latest_alpha_firmware">Senaste alfa</string>
@@ -1143,6 +1145,7 @@
     <string name="traffic_management_enabled">Modul aktiverad</string>
     <string name="translate">Översätt</string>
     <!-- TRANSLATION -->
+    <!-- TRANSPARENT -->
     <!-- TRANSPORT -->
     <string name="transport">Transport</string>
     <string name="transport_api">API</string>

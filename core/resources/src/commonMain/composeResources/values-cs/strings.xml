@@ -838,6 +838,7 @@
     <string name="key_verification_final_title">Ověření klíče dokončeno</string>
     <string name="key_verification_request_title">Požadavek na ověření klíče</string>
     <string name="key_verification_title">Ověření klíče</string>
+    <!-- LABEL -->
     <string name="last_heard_filter_label">Filtrovat podle času posledního slyšení: %1$s</string>
     <string name="last_position_update">Poslední aktualizace pozice</string>
     <string name="latest_alpha_firmware">Poslední alfa</string>
@@ -1753,6 +1754,7 @@
     <string name="translation_not_required">Zpráva je již ve vašem jazyce</string>
     <string name="transmit_disabled">Vysílání je vypnuté</string>
     <string name="transmit_disabled_summary">Toto zařízení může přijímat, ale přes LoRa nebude nic vysílat.</string>
+    <!-- TRANSPARENT -->
     <!-- TRANSPORT -->
     <string name="transport">Přenos</string>
     <string name="transport_api">API</string>

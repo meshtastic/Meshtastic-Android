@@ -297,6 +297,7 @@
     <string name="ip_address">Endereço IP:</string>
     <string name="ip_port">Porta:</string>
     <!-- KEY -->
+    <!-- LABEL -->
     <string name="last_position_update">Atualização da última posição</string>
     <string name="latest_alpha_firmware">Último alfa</string>
     <string name="latest_stable_firmware">Último estável</string>
@@ -635,6 +636,7 @@
     <string name="track_point">ponto de rastreamento</string>
     <!-- TRAFFIC -->
     <!-- TRANSLATION -->
+    <!-- TRANSPARENT -->
     <!-- TRANSPORT -->
     <string name="transport_lora">LoRa</string>
     <string name="transport_mqtt">MQTT</string>

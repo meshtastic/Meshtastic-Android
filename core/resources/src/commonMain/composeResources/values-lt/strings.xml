@@ -121,6 +121,7 @@
     <string name="intro_show">Rodyti įvadą</string>
     <string name="ip_address">IP adresas:</string>
     <!-- KEY -->
+    <!-- LABEL -->
     <!-- LAYER -->
     <!-- LICENSED -->
     <!-- LIVE -->
@@ -292,6 +293,7 @@
     <string name="traceroute_log">Žinutės kelias</string>
     <!-- TRAFFIC -->
     <!-- TRANSLATION -->
+    <!-- TRANSPARENT -->
     <!-- TRANSPORT -->
     <string name="twenty_four_hours">24 val</string>
     <string name="two_days">48 Valandos</string>

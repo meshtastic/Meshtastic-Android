@@ -100,6 +100,7 @@
     <string name="ip_address">‏כתובת IP:</string>
     <string name="ip_port">פורט:</string>
     <!-- KEY -->
+    <!-- LABEL -->
     <!-- LAYER -->
     <!-- LICENSED -->
     <!-- LIVE -->
@@ -229,6 +230,7 @@
     <string name="traceroute_log">בדיקת מסלול</string>
     <!-- TRAFFIC -->
     <!-- TRANSLATION -->
+    <!-- TRANSPARENT -->
     <!-- TRANSPORT -->
     <!-- UNITS -->
     <string name="units_follow_system">ברירות מחדל</string>

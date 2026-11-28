@@ -690,6 +690,8 @@
     <string name="key_verification_final_title">Vérification de la clé terminée</string>
     <string name="key_verification_request_title">Requête de vérification de clé</string>
     <string name="key_verification_title">Vérification de la clé</string>
+    <!-- LABEL -->
+    <string name="label_print_print">Imprimer</string>
     <string name="last_heard_filter_label">Filtrer par la dernière écoute : %1$s</string>
     <string name="last_position_update">Dernière mise à jour de position</string>
     <string name="latest_alpha_firmware">Dernière version alpha</string>
@@ -1318,6 +1320,7 @@
     <string name="traffic_management_router_preserve_hops">Conserver les sauts du Routeur</string>
     <string name="traffic_management_unknown_packet_threshold">Seuil de paquets inconnu</string>
     <!-- TRANSLATION -->
+    <!-- TRANSPARENT -->
     <!-- TRANSPORT -->
     <string name="transport_ble">BLE</string>
     <string name="transport_lora">LoRa</string>
