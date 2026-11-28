@@ -92,6 +92,7 @@ import org.meshtastic.core.ui.component.QrDialog
 import org.meshtastic.core.ui.icon.ChevronRight
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Share
+import org.meshtastic.core.ui.label.channelLabelSpec
 import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
 import org.meshtastic.core.ui.util.rememberShowToastResource
 import org.meshtastic.feature.settings.channel.ChannelViewModel
@@ -315,13 +316,15 @@ internal fun ChannelShareDialog(
     modemPresetName: String,
     onDismiss: () -> Unit,
 ) {
+    val uriString = shareState.uriString(channelSet)
     QrDialog(
         title = stringResource(Res.string.share_channels),
-        uriString = shareState.uriString(channelSet),
+        uriString = uriString,
         onDismiss = onDismiss,
         subtitle = channelSet.settings.joinToString(", ") { it.name.ifEmpty { modemPresetName } },
         shareSubject = stringResource(Res.string.share_channels_subject),
         options = { ChannelShareModeSelector(shareState) },
+        label = channelLabelSpec(channelSet, uriString, shareState.shouldAdd, modemPresetName),
     )
 }
 

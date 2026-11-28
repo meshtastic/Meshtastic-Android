@@ -26,6 +26,7 @@ import org.meshtastic.core.model.util.toSharedContact
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.share_contact
 import org.meshtastic.core.resources.share_contact_subject
+import org.meshtastic.core.ui.label.nameTagSpec
 
 /**
  * Displays a dialog with the contact's information as a QR code and URI.
@@ -48,5 +49,6 @@ fun ShareContactDialog(contact: Node?, onDismiss: () -> Unit, isOwnContact: Bool
         onDismiss = onDismiss,
         subtitle = contact.user.long_name,
         shareSubject = stringResource(Res.string.share_contact_subject),
+        label = nameTagSpec(contact, contactToShare),
     )
 }

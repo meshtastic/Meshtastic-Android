@@ -28,4 +28,10 @@ interface BleConnectionFactory {
      * @return A new [BleConnection] instance.
      */
     fun create(scope: CoroutineScope, tag: String): BleConnection
+
+    /**
+     * Creates a [BleConnection] to a second device, such as a label printer, that never registers as the app's active
+     * radio connection.
+     */
+    fun createAuxiliary(scope: CoroutineScope, tag: String): BleConnection = create(scope, tag)
 }

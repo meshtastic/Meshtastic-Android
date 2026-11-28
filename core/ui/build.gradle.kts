@@ -33,6 +33,8 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            // The label print sheet drives a Niimbot printer through core:ble.
+            implementation(projects.core.ble)
             implementation(projects.core.common)
             implementation(projects.core.model)
             implementation(projects.core.navigation)
