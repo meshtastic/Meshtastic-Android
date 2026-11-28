@@ -122,13 +122,11 @@ fun ScannedQrCodeDialog(
     viewModel: ScannedQrCodeViewModel = koinViewModel(),
 ) {
     val channels by viewModel.channels.collectAsStateWithLifecycle()
-    val maxChannels by viewModel.maxChannels.collectAsStateWithLifecycle()
 
     ScannedQrCodeDialog(
         channels = channels,
         incoming = incoming,
         onDismiss = onDismiss,
-        maxChannels = maxChannels,
         onConfirm = viewModel::setChannels,
     )
 }
@@ -148,20 +146,15 @@ fun ScannedQrCodeDialog(
 ) {
     var shouldReplace by rememberSaveable { mutableStateOf(incoming.lora_config != null) }
 
-    // Freeze the channel limit for the dialog's lifetime so a late myNodeInfo emission (which updates
-    // viewModel.maxChannels from the DEFAULT_MAX_CHANNELS seed to the real device value) cannot rebuild
-    // addPreview/channelSelections and silently wipe the user's checkbox toggles.
-    val effectiveMaxChannels = rememberSaveable { maxChannels }
-
     // Filtered ADD-mode preview: existing channels plus only the unique incoming channels. Duplicate incoming channels
     // are omitted entirely. REPLACE mode ignores this and uses the raw incoming set.
     val addPreview =
-        remember(channels.settings, incoming.settings, channels.lora_config, effectiveMaxChannels) {
+        remember(channels.settings, incoming.settings, channels.lora_config, maxChannels) {
             getChannelPreviewForAdd(
                 existing = channels.settings,
                 incoming = incoming.settings,
                 loraConfig = channels.lora_config ?: Channel.default.loraConfig,
-                maxChannels = effectiveMaxChannels,
+                maxChannels = maxChannels,
             )
         }
 
@@ -305,7 +298,7 @@ fun ScannedQrCodeDialog(
                             (existingCount until channelSelections.size).any { !channelSelections[it] }
                         AddCapacitySummary(
                             selectedCount = selectedChannelSet.settings.size,
-                            maxChannels = effectiveMaxChannels,
+                            maxChannels = maxChannels,
                             alreadyOnRadio = addPreview.alreadyOnRadio,
                             incomingLeftOut = incomingLeftOut,
                             canDropExisting = addPreview.canDropExisting,
@@ -343,7 +336,7 @@ fun ScannedQrCodeDialog(
                     onDismiss()
                     onConfirm(selectedChannelSet)
                 },
-                enabled = radioChannelsLoaded && selectedChannelSet.settings.size in 1..effectiveMaxChannels,
+                enabled = radioChannelsLoaded && selectedChannelSet.settings.size in 1..maxChannels,
                 colors =
                 ButtonDefaults.textButtonColors(
                     contentColor =

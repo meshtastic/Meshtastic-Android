@@ -552,15 +552,8 @@ class NodeManagerImpl(
             hasGPS = (myNode?.position?.latitude_i ?: 0) != 0,
             model = mi.model ?: myNode?.user?.hw_model?.name,
             firmwareVersion = mi.firmwareVersion,
-            couldUpdate = mi.couldUpdate,
-            shouldUpdate = mi.shouldUpdate,
-            currentPacketId = mi.currentPacketId,
-            messageTimeoutMsec = mi.messageTimeoutMsec,
             minAppVersion = mi.minAppVersion,
-            maxChannels = mi.maxChannels,
             hasWifi = mi.hasWifi,
-            channelUtilization = 0f,
-            airUtilTx = 0f,
             deviceId = mi.deviceId ?: myNode?.user?.id,
         )
     }

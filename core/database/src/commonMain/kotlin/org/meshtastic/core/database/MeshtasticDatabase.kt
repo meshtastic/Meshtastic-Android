@@ -164,8 +164,9 @@ import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
         AutoMigration(from = 66, to = 67),
         // 67 -> 68 is the manual MIGRATION_67_68 (log indexes added in place), applied via configureCommon().
         AutoMigration(from = 68, to = 69),
+        AutoMigration(from = 69, to = 70, spec = AutoMigration69to70::class),
     ],
-    version = 69,
+    version = 70,
     exportSchema = true,
 )
 @androidx.room3.ConstructedBy(MeshtasticDatabaseConstructor::class)
@@ -326,3 +327,14 @@ object AutoMigration34to35 : AutoMigrationSpec
 /** Device links moved from the bundled `urls.json` to the resolved API; `original_url` is no longer stored. */
 @DeleteColumn(tableName = "device_link", columnName = "original_url")
 object AutoMigration42to43 : AutoMigrationSpec
+
+/**
+ * `my_node` keeps only what the app reads; the update flags, packet counter, message timeout and channel count had
+ * none.
+ */
+@DeleteColumn(tableName = "my_node", columnName = "couldUpdate")
+@DeleteColumn(tableName = "my_node", columnName = "shouldUpdate")
+@DeleteColumn(tableName = "my_node", columnName = "currentPacketId")
+@DeleteColumn(tableName = "my_node", columnName = "messageTimeoutMsec")
+@DeleteColumn(tableName = "my_node", columnName = "maxChannels")
+object AutoMigration69to70 : AutoMigrationSpec

@@ -24,7 +24,6 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioConfigRepository
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.core.ui.util.SnackbarManager
@@ -60,8 +59,7 @@ class ScannedQrCodeViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun viewModel() =
-        ScannedQrCodeViewModel(radioConfigRepository, radioController, FakeNodeRepository(), snackbarManager)
+    private fun viewModel() = ScannedQrCodeViewModel(radioConfigRepository, radioController, snackbarManager)
 
     @Test
     fun a_failed_import_offers_a_retry_that_imports_the_same_channels() = runTest(dispatcher) {

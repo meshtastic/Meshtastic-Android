@@ -225,12 +225,7 @@ class DatabaseManagerPendingRouteRecoveryJvmTest {
         myNodeNum = num,
         model = null,
         firmwareVersion = null,
-        couldUpdate = false,
-        shouldUpdate = false,
-        currentPacketId = 0L,
-        messageTimeoutMsec = 0,
         minAppVersion = 0,
-        maxChannels = 0,
         hasWifi = false,
     )
 

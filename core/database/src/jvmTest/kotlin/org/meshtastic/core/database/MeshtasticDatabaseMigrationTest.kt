@@ -799,6 +799,32 @@ class MeshtasticDatabaseMigrationTest {
         }
     }
 
+    /**
+     * 69 → 70 drops five unused `my_node` columns. [migrateAll] validates the schema from an empty database only; this
+     * proves an existing install's row survives the table copy, so the next connect still finds its `myNodeNum` and
+     * `PacketDao`'s `(SELECT myNodeNum FROM my_node)` filters keep the conversation list.
+     */
+    @Test
+    fun myNodeDropsUnusedColumnsAndKeepsItsRow() = runTest {
+        helper.createDatabase(MY_NODE_COLUMNS_FROM_VERSION).use { connection ->
+            connection.execSQL(
+                "INSERT INTO my_node (myNodeNum, model, firmwareVersion, couldUpdate, shouldUpdate, currentPacketId, " +
+                    "messageTimeoutMsec, minAppVersion, maxChannels, hasWifi, deviceId, pioEnv) " +
+                    "VALUES (42, 'tbeam', '2.7.0', 0, 1, 99, 300000, 30000, 8, 1, 'abcd', 'tbeam')",
+            )
+        }
+
+        helper.runMigrationsAndValidate(MY_NODE_COLUMNS_TO_VERSION, emptyList()).use { connection ->
+            assertEquals(listOf("42"), queryColumn(connection, "SELECT myNodeNum FROM my_node"))
+            assertEquals(listOf("tbeam"), queryColumn(connection, "SELECT model FROM my_node"))
+            assertEquals(listOf("2.7.0"), queryColumn(connection, "SELECT firmwareVersion FROM my_node"))
+            assertEquals(listOf("30000"), queryColumn(connection, "SELECT minAppVersion FROM my_node"))
+            assertEquals(listOf("1"), queryColumn(connection, "SELECT hasWifi FROM my_node"))
+            assertEquals(listOf("abcd"), queryColumn(connection, "SELECT deviceId FROM my_node"))
+            assertEquals(listOf("tbeam"), queryColumn(connection, "SELECT pioEnv FROM my_node"))
+        }
+    }
+
     /** The `detail` column of `EXPLAIN QUERY PLAN` for [sql], one entry per plan step. */
     private fun queryPlan(connection: SQLiteConnection, sql: String): List<String> =
         connection.prepare("EXPLAIN QUERY PLAN $sql").use { statement ->
@@ -856,6 +882,8 @@ class MeshtasticDatabaseMigrationTest {
         const val LOG_INDEXES_TO_VERSION = 68
         const val SIGNAL_SAMPLE_FROM_VERSION = 68
         const val SIGNAL_SAMPLE_TO_VERSION = 69
+        const val MY_NODE_COLUMNS_FROM_VERSION = 69
+        const val MY_NODE_COLUMNS_TO_VERSION = 70
         const val QUERY_PLAN_DETAIL_COLUMN = 3
 
         /** Every hand-written migration, which a walk across 52→53, 63→64 or 67→68 must be given. */

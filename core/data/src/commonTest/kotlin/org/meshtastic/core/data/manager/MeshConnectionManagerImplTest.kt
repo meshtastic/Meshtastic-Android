@@ -354,7 +354,7 @@ class MeshConnectionManagerImplTest {
         every { locationManager.start(any(), any()) } calls { sendPosition = it.arg(1) }
         every { nodeManager.myNodeNum } returns MutableStateFlow(123)
         manager = createManager(backgroundScope)
-        nodeRepository.setMyNodeInfo(MyNodeInfo(123, true, null, null, false, false, 0L, 0, 0, 8, false, 0f, 0f, null))
+        nodeRepository.setMyNodeInfo(MyNodeInfo(123, true, null, null, 0, false, null))
         runCurrent()
         val sdk = sdkClientFixture(123)
         sessionClient = { sdk.client }

@@ -470,8 +470,8 @@ open class RadioConfigViewModel(
         if (dest == myNodeNum) nodeRestartTracker.expectRestart()
     }
 
-    val maxChannels
-        get() = myNodeInfo.value?.maxChannels ?: 8
+    /** Channel slots on the radio: firmware's `ChannelFile.channels` holds 8. */
+    val maxChannels = 8
 
     val hasPaFan: Boolean
         get() =

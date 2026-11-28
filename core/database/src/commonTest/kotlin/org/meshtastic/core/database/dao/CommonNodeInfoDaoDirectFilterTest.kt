@@ -50,12 +50,7 @@ abstract class CommonNodeInfoDaoDirectFilterTest {
                 myNodeNum = myNodeNum,
                 model = "TBEAM",
                 firmwareVersion = "2.8.0",
-                couldUpdate = false,
-                shouldUpdate = false,
-                currentPacketId = 1L,
-                messageTimeoutMsec = 300000,
                 minAppVersion = 1,
-                maxChannels = 8,
                 hasWifi = false,
             ),
         )

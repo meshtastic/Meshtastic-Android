@@ -22,17 +22,11 @@ import androidx.room3.PrimaryKey
 import org.meshtastic.core.model.MyNodeInfo
 
 @Entity(tableName = "my_node")
-@Suppress("LongParameterList")
 open class MyNodeEntity(
     @PrimaryKey(autoGenerate = false) val myNodeNum: Int,
     val model: String?,
     val firmwareVersion: String?,
-    val couldUpdate: Boolean, // this application contains a software load we _could_ install if you want
-    val shouldUpdate: Boolean, // this device has old firmware
-    val currentPacketId: Long,
-    val messageTimeoutMsec: Int,
     val minAppVersion: Int,
-    val maxChannels: Int,
     val hasWifi: Boolean,
     val deviceId: String? = DEVICE_ID_UNKNOWN,
     val pioEnv: String? = null,
@@ -52,15 +46,8 @@ open class MyNodeEntity(
         hasGPS = false,
         model = model,
         firmwareVersion = firmwareVersion,
-        couldUpdate = couldUpdate,
-        shouldUpdate = shouldUpdate,
-        currentPacketId = currentPacketId,
-        messageTimeoutMsec = messageTimeoutMsec,
         minAppVersion = minAppVersion,
-        maxChannels = maxChannels,
         hasWifi = hasWifi,
-        channelUtilization = 0f,
-        airUtilTx = 0f,
         deviceId = deviceId,
         pioEnv = pioEnv,
     )
