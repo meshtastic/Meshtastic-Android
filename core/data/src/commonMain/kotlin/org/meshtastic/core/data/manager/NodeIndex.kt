@@ -87,26 +87,26 @@ internal data class NodeIndex(
     }
 
     /**
-     * Once the index exceeds [maxNodes] entries, shrinks it to [lowWater] entries, never removing anything in
-     * [keep]. At or under [maxNodes] it returns the receiver unchanged.
+     * Once the index exceeds [maxNodes] entries, shrinks it to [lowWater] entries, never removing anything in [keep].
+     * At or under [maxNodes] it returns the receiver unchanged.
      *
-     * `packet.from` is untrusted and unthrottled, so without this every novel value allocates a permanent [Node]
-     * and the index grows until the process dies. Only `core:data` reads this index — for correlation,
-     * notifications, channel lookup and staging DB writes — and every one of those readers already tolerates a
-     * miss, so dropping a cold entry degrades correlation rather than losing user-visible data. The node list and
-     * map read Room, not this index, so eviction is not visible in the UI.
+     * `packet.from` is untrusted and unthrottled, so without this every novel value allocates a permanent [Node] and
+     * the index grows until the process dies. Only `core:data` reads this index — for correlation, notifications,
+     * channel lookup and staging DB writes — and every one of those readers already tolerates a miss, so dropping a
+     * cold entry degrades correlation rather than losing user-visible data. The node list and map read Room, not this
+     * index, so eviction is not visible in the UI.
      *
-     * Eviction order is least-valuable-first: bare-packet placeholders before nodes that have sent a real NodeInfo,
-     * and within each group the least recently heard. Nodes the user has marked (favourite, ignored, verified) are
-     * never evicted, since that is user data rather than observed mesh state.
+     * Eviction order is least-valuable-first: bare-packet placeholders before nodes that have sent a real NodeInfo, and
+     * within each group the least recently heard. Nodes the user has marked (favourite, ignored, verified) are never
+     * evicted, since that is user data rather than observed mesh state.
      *
      * The cap is therefore best-effort rather than absolute: if protected entries alone exceed [maxNodes] the index
-     * stays above it. That is deliberate — these marks are set only by the local user, so no remote party can
-     * inflate them, and silently discarding user data to satisfy a memory bound would be the worse trade.
+     * stays above it. That is deliberate — these marks are set only by the local user, so no remote party can inflate
+     * them, and silently discarding user data to satisfy a memory bound would be the worse trade.
      *
-     * Evicting down to [lowWater] rather than to [maxNodes] amortizes the sort: under a flood of novel numbers it
-     * runs once per `maxNodes - lowWater` inserts instead of on every one. Protected entries above [lowWater]
-     * shrink that batch, and once they fill [maxNodes] every insert past it pays for the filter and sort again.
+     * Evicting down to [lowWater] rather than to [maxNodes] amortizes the sort: under a flood of novel numbers it runs
+     * once per `maxNodes - lowWater` inserts instead of on every one. Protected entries above [lowWater] shrink that
+     * batch, and once they fill [maxNodes] every insert past it pays for the filter and sort again.
      */
     fun evictedToFit(maxNodes: Int, lowWater: Int, keep: Set<Int>): NodeIndex {
         require(lowWater < maxNodes) { "lowWater $lowWater must be below maxNodes $maxNodes" }
@@ -164,11 +164,7 @@ internal data class NodeIndex(
          * Selects a deterministic representative number from [candidates] sharing one user ID. If [preferredNum] is
          * present it wins; otherwise an established key/hardware identity wins, then the lower node number.
          */
-        internal fun chooseRepresentativeNum(
-            candidates: Set<Int>,
-            nodes: Map<Int, Node>,
-            preferredNum: Int?,
-        ): Int? {
+        internal fun chooseRepresentativeNum(candidates: Set<Int>, nodes: Map<Int, Node>, preferredNum: Int?): Int? {
             if (preferredNum != null && preferredNum in candidates) return preferredNum
             return candidates.minWithOrNull(
                 compareByDescending<Int> { num ->

@@ -76,7 +76,13 @@ class HistoryManagerImplTest {
 
         assertFailsWith<LocalNodeUnavailableException> {
             HistoryManagerImpl(FakeMeshPrefs(), fixture.radio)
-                .requestHistoryReplay("test", myNodeNum = LOCAL_NODE, config, "BLE", fixture.radio.activeSession.value!!)
+                .requestHistoryReplay(
+                    "test",
+                    myNodeNum = LOCAL_NODE,
+                    config,
+                    "BLE",
+                    fixture.radio.activeSession.value!!,
+                )
         }
 
         assertTrue(fixture.storeForwardPackets().isEmpty())

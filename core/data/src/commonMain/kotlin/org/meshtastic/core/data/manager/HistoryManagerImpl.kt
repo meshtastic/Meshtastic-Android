@@ -29,10 +29,8 @@ import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.sdk.MeshtasticException
 
 @Single
-class HistoryManagerImpl(
-    private val meshPrefs: MeshPrefs,
-    private val radioInterfaceService: RadioInterfaceService,
-) : HistoryManager {
+class HistoryManagerImpl(private val meshPrefs: MeshPrefs, private val radioInterfaceService: RadioInterfaceService) :
+    HistoryManager {
 
     companion object {
         private const val HISTORY_TAG = "HistoryReplay"

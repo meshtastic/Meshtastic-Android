@@ -32,8 +32,7 @@ internal fun shouldPreserveExistingUser(existing: User, incoming: User): Boolean
         existing.id != incoming.id ||
             existing.long_name != incoming.long_name ||
             existing.short_name != incoming.short_name
-    val hasExistingUser =
-        existing.id.isNotEmpty() && (existing.hw_model != HardwareModel.UNSET || hasCustomIdentity)
+    val hasExistingUser = existing.id.isNotEmpty() && (existing.hw_model != HardwareModel.UNSET || hasCustomIdentity)
     return hasExistingUser && isDefaultName && isDefaultHwModel
 }
 
@@ -57,9 +56,9 @@ internal enum class ReceivedUserDecision {
 }
 
 /**
- * Result of classifying one [User] packet against an in-memory [NodeIndex] snapshot. The reducer is pure: it only
- * reads [before] and the packet fields, and produces the next index plus the side effects to apply once the CAS
- * commits. Safe to re-evaluate on every retry.
+ * Result of classifying one [User] packet against an in-memory [NodeIndex] snapshot. The reducer is pure: it only reads
+ * [before] and the packet fields, and produces the next index plus the side effects to apply once the CAS commits. Safe
+ * to re-evaluate on every retry.
  */
 internal data class ReceivedUserTransition(
     val after: NodeIndex,
@@ -73,9 +72,8 @@ internal data class ReceivedUserTransition(
 )
 
 /**
- * Pure reducer that classifies an incoming [User] packet against the [before] snapshot and returns the next index
- * plus queued side effects. No logging, no DB calls, no coroutine launches — deterministic and safe to re-run on
- * CAS retry.
+ * Pure reducer that classifies an incoming [User] packet against the [before] snapshot and returns the next index plus
+ * queued side effects. No logging, no DB calls, no coroutine launches — deterministic and safe to re-run on CAS retry.
  *
  * A validated public key is only an in-memory correlation hint. It can choose/suppress duplicate presentations but
  * cannot authorize repository deletion, metadata removal, DM remapping, or durable node-number migration. Those
@@ -227,8 +225,7 @@ internal fun reduceReceivedUser(
         if (canonicalNum in otherSameKeyNums) {
             // A stale remote presentation yields only when its own slot already carries the same validated hint.
             // An absent slot, no-key telemetry/position placeholder, or different identity is preserved.
-            val after =
-                if (existingKey == resolvedKey) before.remove(fromNum, preferredNum = canonicalNum) else before
+            val after = if (existingKey == resolvedKey) before.remove(fromNum, preferredNum = canonicalNum) else before
             return ReceivedUserTransition(
                 after = after,
                 upsertNode = null,
@@ -325,9 +322,7 @@ internal fun createDefaultNode(num: Int, channel: Int): Node {
     )
 }
 
-/**
- * Pure transform of an existing [node] under an incoming [User] packet (extracted from the legacy updateNode path).
- */
+/** Pure transform of an existing [node] under an incoming [User] packet (extracted from the legacy updateNode path). */
 internal fun transformUserNode(node: Node, p: User, channel: Int, manuallyVerified: Boolean): Node {
     val shouldPreserve = shouldPreserveExistingUser(node.user, p)
     // A mesh NodeInfo carries no verification, so it never clears one an import set.

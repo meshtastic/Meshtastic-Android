@@ -284,7 +284,8 @@ class SharedRadioInterfaceService(
                 linkMutex.withLock {
                     if (activeLink.value !== active) return@withLock
                     ignoreExceptionSuspend { closeLinkLocked() }
-                    idleState.value = ConnectionState.Failed(MeshtasticException.HandshakeTimeout(SNAPSHOT_INSTALL_STAGE))
+                    idleState.value =
+                        ConnectionState.Failed(MeshtasticException.HandshakeTimeout(SNAPSHOT_INSTALL_STAGE))
                     connectionErrorReasons.trySend(TransportDisconnectReason.HandshakeRecoveryExhausted)
                 }
             }
