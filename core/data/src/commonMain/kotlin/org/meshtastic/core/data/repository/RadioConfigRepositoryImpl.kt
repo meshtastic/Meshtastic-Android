@@ -61,7 +61,7 @@ open class RadioConfigRepositoryImpl(
     private val channelSetDataSource: SwitchingChannelSetDataSource,
     private val localConfigDataSource: LocalConfigDataSource,
     private val moduleConfigDataSource: ModuleConfigDataSource,
-    private val radioInterfaceService: RadioInterfaceService,
+    radioInterfaceService: RadioInterfaceService,
 ) : RadioConfigRepository {
 
     /** Flow representing the [ChannelSet] data store. */
