@@ -134,7 +134,7 @@ On an Android phone with Bluetooth, **Print label** in the same dialog prints th
 
 The print sheet shows the label as it will print. Pick **Label length**, 30 mm or 40 mm, to match the roll; a 40 mm label adds a header band. Turn the printer on, close the Niimbot app if it is open, and tap the printer when it appears under **Printer**, then tap **Print**. The app remembers the length and the printer, and connects to that printer again the next time it is on and the sheet is open. The printer has its own Bluetooth connection, so your node stays connected.
 
-A long name that would make the QR code too dense to scan is shortened inside the code only; the printed name stays whole. When the printer stops, the sheet says why, such as an open cover or no labels.
+A long name that would make the QR code too dense to scan is shortened inside the code only, not on the label. A name too long to fit the label is cut with an ellipsis (…). When the printer stops, the sheet says why, such as an open cover or no labels.
 
 To add someone else's contact, use the import button on the node list and choose **Scan Shared Contact QR Code**, **Scan Shared Contact NFC**, or **Input Shared Contact URL**. The app asks you to confirm with **Import Shared Contact?**, and warns you when the contact is one you already have.
 

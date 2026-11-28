@@ -38,7 +38,7 @@ A scanned code that isn't a Meshtastic connect code, or one with an address the 
 
 To make a connect code for the node you are connected to, tap **Print label** on the connection card. It prints a connect label on a Niimbot D110 label printer, the same way a [contact prints as a name tag](nodes#printing-a-name-tag), with the node's names and ID beside the code. The button appears on an Android phone with Bluetooth, for a node connected over Bluetooth or the network; a USB connection has no code to share.
 
-> 🔒 **Security:** When the node pairs with a fixed PIN, the code carries that PIN, and anyone who scans the label can pair with the node. Turn off **Include the pairing PIN** in the print sheet to print the address alone. The PIN is never printed as text, and the app never sets or changes it. A node that pairs with a random PIN or none gets a code with no PIN.
+> 🔒 **Security:** When the node is connected over Bluetooth and pairs with a fixed PIN from 100000 to 999999, the code carries that PIN, and anyone who scans the label can pair with the node. Turn off **Include the pairing PIN** in the print sheet to print the address alone. The PIN is never printed as text, and the app never sets or changes it. A node connected over the network, or one that pairs with a random PIN or none, gets a code with no PIN.
 
 To change the pairing method, or to turn Bluetooth on for a node that ships with it off, open **Settings → Device configuration → Bluetooth**. See [Settings — Radio & User](settings-radio-user). For more information, see [Bluetooth configuration](https://meshtastic.org/docs/configuration/radio/bluetooth) on meshtastic.org.
 
