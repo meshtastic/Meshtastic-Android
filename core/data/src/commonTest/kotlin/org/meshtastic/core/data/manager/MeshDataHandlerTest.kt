@@ -58,7 +58,6 @@ import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
-import org.meshtastic.core.repository.RadioSessionLease
 import org.meshtastic.core.repository.RemoteShellHandler
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.StoreForwardPacketHandler
@@ -108,12 +107,6 @@ class MeshDataHandlerTest {
     private val remoteShellHandler: RemoteShellHandler = mock(MockMode.autofill)
     private val radioInterfaceService: RadioInterfaceService = mock(MockMode.autofill)
     private val session = RadioSessionContext(generation = 7L, address = "tcp:test")
-
-    private fun testLease(session: RadioSessionContext): RadioSessionLease = object : RadioSessionLease {
-        override val session: RadioSessionContext = session
-
-        override fun isCurrent(): Boolean = true
-    }
 
     private fun MeshDataHandlerImpl.handleReceivedData(packet: MeshPacket, myNodeNum: Int) {
         handleReceivedData(packet, myNodeNum, session)
@@ -183,15 +176,7 @@ class MeshDataHandlerTest {
                 scope = testScope.asServiceScope(),
             )
 
-        everySuspend { radioInterfaceService.runWithSessionLease(any(), any()) } calls
-            {
-                val requestedSession = it.args[0] as RadioSessionContext
-
-                @Suppress("UNCHECKED_CAST")
-                val block = it.args[1] as (suspend (RadioSessionLease) -> Unit)
-                block(testLease(requestedSession))
-                true
-            }
+        every { radioInterfaceService.sessionScope(any()) } returns testScope.backgroundScope
         // Default: mapper returns null for empty packets, which is the safe default
         every { dataMapper.toDataPacket(any()) } returns null
         // Stub commonly accessed properties to avoid NPE from autofill
@@ -788,7 +773,7 @@ class MeshDataHandlerTest {
 
     @Test
     fun `routing ack from a retired generation cannot update the replacement database`() = testScope.runTest {
-        everySuspend { radioInterfaceService.runWithSessionLease(session, any()) } returns false
+        every { radioInterfaceService.sessionScope(session) } returns null
 
         handler.handleRoutingReport(routingReport(Routing.Error.NONE), session)
         advanceUntilIdle()
@@ -962,7 +947,7 @@ class MeshDataHandlerTest {
                 dataType = PortNum.TEXT_MESSAGE_APP.value,
             )
         every { dataMapper.toDataPacket(packet) } returns dataPacket
-        everySuspend { radioInterfaceService.runWithSessionLease(session, any()) } returns false
+        every { radioInterfaceService.sessionScope(session) } returns null
 
         handler.handleReceivedData(packet, 123)
         advanceUntilIdle()

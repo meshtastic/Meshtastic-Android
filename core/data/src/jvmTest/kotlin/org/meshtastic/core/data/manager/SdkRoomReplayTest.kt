@@ -64,7 +64,6 @@ import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
-import org.meshtastic.core.repository.RadioSessionLease
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeNotificationPrefs
 import org.meshtastic.proto.ChannelSet
@@ -254,7 +253,7 @@ class SdkRoomReplayTest {
         private val projection: RadioSessionProjection
 
         init {
-            bindSessionAdmission()
+            bindSessionAdmission(scope)
             everySuspend {
                 notificationManager.updateMessageNotification(any(), any(), any(), any(), any(), any())
             } calls
@@ -303,26 +302,10 @@ class SdkRoomReplayTest {
                 )
         }
 
-        private fun bindSessionAdmission() {
+        private fun bindSessionAdmission(scope: CoroutineScope) {
             every { radio.reportReceiveActivity() } calls { receiveActivityReports++ }
             every { radio.isSessionActive(any()) } calls { selectedSession.value == it.args[0] }
-            everySuspend { radio.runWithSessionLease(any(), any()) } calls
-                {
-                    val requested = it.args[0] as RadioSessionContext
-                    val admitted = selectedSession.value == requested
-                    if (admitted) {
-                        @Suppress("UNCHECKED_CAST")
-                        val block = it.args[1] as suspend (RadioSessionLease) -> Unit
-                        block(
-                            object : RadioSessionLease {
-                                override val session = requested
-
-                                override fun isCurrent() = selectedSession.value == requested
-                            },
-                        )
-                    }
-                    admitted
-                }
+            every { radio.sessionScope(any()) } calls { if (selectedSession.value == it.args[0]) scope else null }
         }
 
         fun select(database: MeshtasticDatabase, session: RadioSessionContext) {

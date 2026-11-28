@@ -20,7 +20,6 @@ import dev.mokkery.MockMode
 import dev.mokkery.answering.calls
 import dev.mokkery.answering.returns
 import dev.mokkery.every
-import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
@@ -41,7 +40,6 @@ import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
-import org.meshtastic.core.repository.RadioSessionLease
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.DeviceMetrics
 import org.meshtastic.proto.EnvironmentMetrics
@@ -71,24 +69,12 @@ class TelemetryPacketHandlerImplTest {
     private val myNodeNum = 12345
     private val remoteNodeNum = 99999
     private val radioSession = RadioSessionContext(generation = 1L, address = "test:telemetry")
-    private val sessionLease =
-        object : RadioSessionLease {
-            override val session: RadioSessionContext = radioSession
-
-            override fun isCurrent(): Boolean = true
-        }
 
     @BeforeTest
     fun setUp() {
         every { nodeManager.nodeDBbyNodeNum } returns
             mapOf(myNodeNum to Node(num = myNodeNum), remoteNodeNum to Node(num = remoteNodeNum))
-        everySuspend { radioInterfaceService.runWithSessionLease(radioSession, any()) } calls
-            {
-                @Suppress("UNCHECKED_CAST")
-                val block = it.args[1] as suspend (RadioSessionLease) -> Unit
-                block(sessionLease)
-                true
-            }
+        every { radioInterfaceService.sessionScope(radioSession) } returns testScope.backgroundScope
         handler =
             TelemetryPacketHandlerImpl(
                 nodeManager = nodeManager,

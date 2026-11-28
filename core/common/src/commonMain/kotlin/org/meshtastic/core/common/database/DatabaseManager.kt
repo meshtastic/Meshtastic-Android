@@ -50,9 +50,9 @@ interface DatabaseManager {
      * changes firmware 2.8 introduced (`my_node_num = crc32(public_key)` renumbers on upgrade, erase, and re-key);
      * [nodeNum] remains the fallback claim for hardware without a device id and for claims made by older app versions.
      *
-     * The caller must hold a transport-session lifecycle lease for the full call. [isSessionActive] must represent that
-     * lease, not merely whether new work may still be admitted, so association rollover cannot overlap the destination
-     * transaction commit.
+     * The caller must run the full call as work of its radio session, which teardown joins before the session ends.
+     * [isSessionActive] must stay true until that join, not merely while new work may still be admitted, so association
+     * rollover cannot overlap the destination transaction commit.
      */
     suspend fun associateDevice(address: String, nodeNum: Int, deviceId: String?, isSessionActive: () -> Boolean)
 

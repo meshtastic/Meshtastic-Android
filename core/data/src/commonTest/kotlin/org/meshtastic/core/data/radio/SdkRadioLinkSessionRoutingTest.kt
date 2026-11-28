@@ -20,7 +20,10 @@ import dev.mokkery.MockMode
 import dev.mokkery.answering.calls
 import dev.mokkery.every
 import dev.mokkery.everySuspend
+import dev.mokkery.matcher.any
 import dev.mokkery.mock
+import dev.mokkery.verify
+import dev.mokkery.verify.VerifyMode
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -337,6 +340,20 @@ class SdkRadioLinkSessionRoutingTest {
         send(events, lockdown(1), RadioSessionEvent.Ended(1))
 
         assertEquals(listOf("open 1", "lockdown-connect", "close 1", "lockdown-disconnect"), rig.log)
+    }
+
+    // Regression: a Lockdown event for a session whose admission closed reached the lockdown coordinator.
+    @Test
+    fun `a Lockdown event for a session whose admission closed is not handled`() = runTest {
+        val rig = Rig(this)
+        val events = MutableSharedFlow<RadioSessionEvent>()
+        pump(rig, rig.link(), events)
+
+        send(events, lockdown(1))
+        rig.radio.disconnect()
+        send(events, lockdown(1))
+
+        verify(VerifyMode.exactly(1)) { rig.lockdown.handleLockdownStatus(any()) }
     }
 
     // Regression: one try block around both readiness callbacks skipped onNodeDbReady when onRadioConfigLoaded threw.

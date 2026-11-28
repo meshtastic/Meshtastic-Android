@@ -99,7 +99,7 @@ class NodeManagerImpl(
         nodePersistenceLanes[(nodeNum.toLong() and Int.MAX_VALUE.toLong()).toInt() % nodePersistenceLanes.size]
 
     // A persist not yet in its lane writes the latest node once it gets there, so one per node and session is enough.
-    // Each holds a session lease that teardown drains, so a slow database must not collect one per packet.
+    // Each is session work that teardown joins, so a slow database must not collect one per packet.
     private val pendingPersists = atomic(emptyMap<Pair<Int, RadioSessionContext?>, Any>())
 
     private fun schedulePersistence(nodeNum: Int, session: RadioSessionContext?) {
@@ -379,7 +379,7 @@ class NodeManagerImpl(
         reportsHeardOnCurrentLora.value = supported
         // Normalize in the database, not just in nodeState: the node list renders from the repository flows, which
         // read rows directly and would otherwise still see a false written by a radio whose firmware could report it.
-        // Bound to the originating session lease: a delayed write from a superseded session would otherwise resolve
+        // Bound to the originating session's scope: a delayed write from a superseded session would otherwise resolve
         // the next session's database and clear flags that session had legitimately set.
         if (!supported) {
             radioInterfaceService.launchSessionWork(scope, session) { nodeRepository.markAllHeardOnCurrentLora() }

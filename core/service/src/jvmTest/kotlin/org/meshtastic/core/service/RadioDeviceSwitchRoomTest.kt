@@ -27,18 +27,22 @@ import dev.mokkery.mock
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.withContext
 import okio.FileSystem
 import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.common.state.RadioOperationLock
@@ -52,6 +56,7 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.network.repository.NetworkRepository
 import org.meshtastic.core.network.repository.SerialDevicePresence
 import org.meshtastic.core.repository.NodeManager
+import org.meshtastic.core.repository.runInSession
 import org.meshtastic.core.testing.FakeBluetoothRepository
 import org.meshtastic.core.testing.FakeMeshPrefs
 import org.meshtastic.core.testing.FakeRadioPrefs
@@ -62,6 +67,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNotSame
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.uuid.Uuid
 
@@ -100,15 +106,19 @@ class RadioDeviceSwitchRoomTest {
 
             val admitted = CompletableDeferred<Unit>()
             val release = CompletableDeferred<Unit>()
-            val firstWrite = async {
-                radio.runWithSessionLease(firstSession) { lease ->
-                    admitted.complete(Unit)
-                    release.await()
-                    assertTrue(lease.isCurrent())
-                    // Enter Room only after the switch has begun. The radio lease must protect even this writer.
-                    databases.withDb { it.nodeInfoDao().upsert(NodeEntity(num = 101)) }
+            var firstWriteDone = false
+            var firstWriteSessionCurrent = false
+            val firstWrite =
+                assertNotNull(radio.sessionScope(firstSession)).launch(start = CoroutineStart.UNDISPATCHED) {
+                    withContext(NonCancellable) {
+                        admitted.complete(Unit)
+                        release.await()
+                        firstWriteSessionCurrent = radio.activeSession.value == firstSession
+                        // Enter Room only after the switch has begun. Teardown's join must protect even this writer.
+                        databases.withDb { it.nodeInfoDao().upsert(NodeEntity(num = 101)) }
+                        firstWriteDone = true
+                    }
                 }
-            }
             admitted.await()
 
             val switch = async { controller.setDeviceAddress(SECOND_ADDRESS) }
@@ -123,7 +133,9 @@ class RadioDeviceSwitchRoomTest {
                 release.complete(Unit)
             }
 
-            assertTrue(firstWrite.await())
+            firstWrite.join()
+            assertTrue(firstWriteDone)
+            assertTrue(firstWriteSessionCurrent)
             switch.await()
             runCurrent()
             assertNotNull(links.opened.last().host.openSession())
@@ -133,9 +145,9 @@ class RadioDeviceSwitchRoomTest {
             assertTrue(secondSession.generation > firstSession.generation)
             val secondDatabase = databases.currentDb.value
             assertNotSame(firstDatabase, secondDatabase)
-            assertFalse(radio.runWithSessionLease(firstSession) { error("stale session admitted a Room write") })
+            assertNull(radio.sessionScope(firstSession))
             assertTrue(
-                radio.runWithSessionLease(secondSession) {
+                radio.runInSession(secondSession) {
                     databases.withDb { it.nodeInfoDao().upsert(NodeEntity(num = 202)) }
                 },
             )

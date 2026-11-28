@@ -16,9 +16,15 @@
  */
 package org.meshtastic.core.repository
 
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.isActive
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.MeshActivity
@@ -31,41 +37,47 @@ import org.meshtastic.sdk.NodeId
 import org.meshtastic.sdk.PacedMessageHandle
 import org.meshtastic.sdk.RadioClient
 
-/** A lifecycle lease held by one already-admitted operation for [session]. */
-interface RadioSessionLease {
-    val session: RadioSessionContext
-
-    /** True until this admitted operation releases the session and rollover may complete. */
-    fun isCurrent(): Boolean
-}
-
 /** Owns admission and revocation for work bound to one transport session. */
 interface RadioSessionAuthority {
-    /**
-     * The transport session that still owns lifecycle completion, or null after teardown drains every admitted
-     * operation. Implementations close admission before teardown, so [isSessionActive] and the run helpers reject new
-     * work immediately even while this flow temporarily retains the draining session.
-     */
+    /** The transport session that still owns lifecycle completion, or null once teardown has joined its work. */
     val activeSession: StateFlow<RadioSessionContext?>
 
-    /**
-     * Returns whether [session] still owns transport admission. Implementations must make this reflect the admission
-     * gate, not only [activeSession], because the draining session may remain published after new work is rejected.
-     */
+    /** Whether [session] still owns admission; false once teardown starts, while [activeSession] still holds it. */
     fun isSessionActive(session: RadioSessionContext): Boolean
 
-    /** Runs [block] only while [session] owns admission. The check and the block are not atomic with teardown. */
-    fun runIfSessionActive(session: RadioSessionContext, block: () -> Unit): Boolean
-
     /**
-     * Acquires a lifecycle lease for suspend [block]. Once admitted, teardown closes admission to later work and waits
-     * for this block to finish before publishing session completion or starting a replacement transport. [block] may
-     * use [RadioSessionLease.isCurrent] for transaction-bound checks that must remain valid through commit even after
-     * teardown has closed new admission. The block runs to completion under teardown's drain: it is not cancelled when
-     * the session closes, and a cancellation thrown by the block itself while the session is open propagates to the
-     * caller. Callers must keep the block bounded and must not invoke transport lifecycle methods from inside it.
+     * The scope [session]'s work runs in while it owns admission, else null. Teardown cancels this scope and joins its
+     * children before [activeSession] clears or a replacement session is admitted; a child that needs to finish (a
+     * persistence unit) runs its body under `NonCancellable`.
      */
-    suspend fun runWithSessionLease(session: RadioSessionContext, block: suspend (RadioSessionLease) -> Unit): Boolean
+    fun sessionScope(session: RadioSessionContext): CoroutineScope?
+}
+
+/**
+ * Runs [block] as a child of [session]'s scope and returns true, or false when the session is closed or closes first.
+ * Teardown cancels [block]; the caller's cancellation cancels it too. A failure in [block] reaches the caller.
+ */
+@OptIn(ExperimentalCoroutinesApi::class)
+suspend fun RadioSessionAuthority.runInSession(session: RadioSessionContext, block: suspend () -> Unit): Boolean {
+    val scope = sessionScope(session) ?: return false
+    val work =
+        scope.async(start = CoroutineStart.UNDISPATCHED) {
+            if (!isActive) return@async false
+            block()
+            true
+        }
+    // join, not a catch: detekt's SuspendFunSwallowedCancellation rejects returning from a CancellationException catch.
+    try {
+        work.join() // throws only for a cancelled caller
+    } finally {
+        work.cancel() // no-op once complete; a cancelled caller cancels the block
+    }
+    val failure = work.getCompletionExceptionOrNull()
+    // The session closed under a caller that is still running: report it. A cancellation or failure the block raised
+    // while the session is open reaches the caller.
+    if (failure is CancellationException && !scope.isActive) return false
+    if (failure != null) throw failure
+    return work.await()
 }
 
 /**
@@ -137,8 +149,8 @@ interface RadioInterfaceService : RadioSessionAuthority {
     fun connect()
 
     /**
-     * Revokes app session admission and disconnects the selected radio's client after its leases drain. Safe to call
-     * with nothing connected. Suspends until teardown completes.
+     * Revokes app session admission and disconnects the selected radio's client after its session work drains. Safe to
+     * call with nothing connected. Suspends until teardown completes.
      */
     suspend fun disconnect()
 

@@ -54,10 +54,6 @@ class SessionHandlerTimeoutTest {
 
     @Test
     fun `a handler that never returns is cancelled at two minutes and logged with its label`() = runTest {
-        val radio = FakeRadioInterfaceService(backgroundScope)
-        radio.setDeviceAddress("ble:a")
-        radio.connect()
-        val session = assertNotNull(radio.activeSession.value)
         val never = CompletableDeferred<Unit>()
         var ranToEnd = false
         var afterTimeout = false
@@ -65,13 +61,11 @@ class SessionHandlerTimeoutTest {
         val logs = CapturingLogWriter.install()
         try {
             val job = launch {
-                radio.runWithSessionLease(session) {
-                    withHandlerTimeout("FromRadio packet TEXT_MESSAGE_APP") {
-                        never.await()
-                        ranToEnd = true
-                    }
-                    afterTimeout = true
+                withHandlerTimeout("FromRadio packet TEXT_MESSAGE_APP") {
+                    never.await()
+                    ranToEnd = true
                 }
+                afterTimeout = true
             }
             runCurrent()
             advanceTimeBy(119_000L)
@@ -99,18 +93,18 @@ class SessionHandlerTimeoutTest {
         radio.connect()
         val session = assertNotNull(radio.activeSession.value)
         val never = CompletableDeferred<Unit>()
-        launch { radio.runWithSessionLease(session) { withHandlerTimeout("wedged") { never.await() } } }
+        radio.launchSessionWork(backgroundScope, session) { withHandlerTimeout("wedged") { never.await() } }
         runCurrent()
 
         val disconnect = launch { radio.disconnect() }
         runCurrent()
-        assertFalse(disconnect.isCompleted, "disconnect must wait while the lease is admitted")
+        assertFalse(disconnect.isCompleted, "disconnect must wait while the session work is running")
 
         advanceTimeBy(121_000L)
         runCurrent()
 
         assertTrue(disconnect.isCompleted)
-        assertNull(radio.activeSession.value, "teardown must complete once the timed-out lease is released")
+        assertNull(radio.activeSession.value, "teardown must complete once the timed-out work is released")
         never.complete(Unit)
     }
 

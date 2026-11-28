@@ -175,7 +175,7 @@ internal class SdkRadioLink(
             safeCatching {
                 when (event) {
                     is RadioSessionEvent.Lockdown ->
-                        host.runWithSessionLease(session) { pipeline.lockdown.handleLockdownStatus(event.status) }
+                        if (host.isSessionActive(session)) pipeline.lockdown.handleLockdownStatus(event.status)
 
                     is RadioSessionEvent.Ready -> install(event, session, host)
 
@@ -199,12 +199,11 @@ internal class SdkRadioLink(
             return
         }
         Logger.i { "SDK session snapshot installed for app session ${session.generation}" }
-        host.runWithSessionLease(session) {
-            safeCatching { pipeline.connections.onRadioConfigLoaded() }
-                .onFailure { e -> Logger.w(e) { "App radio-config readiness callback failed" } }
-            safeCatching { pipeline.connections.onNodeDbReady() }
-                .onFailure { e -> Logger.w(e) { "App node-db readiness callback failed" } }
-        }
+        if (!host.isSessionActive(session)) return
+        safeCatching { pipeline.connections.onRadioConfigLoaded() }
+            .onFailure { e -> Logger.w(e) { "App radio-config readiness callback failed" } }
+        safeCatching { pipeline.connections.onNodeDbReady() }
+            .onFailure { e -> Logger.w(e) { "App node-db readiness callback failed" } }
     }
 
     private suspend fun openSession(host: RadioSessionHost, sdkId: Long): Slot? {

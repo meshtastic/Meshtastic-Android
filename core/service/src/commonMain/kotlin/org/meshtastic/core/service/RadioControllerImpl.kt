@@ -58,6 +58,7 @@ import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.TracerouteHandler
 import org.meshtastic.core.repository.UiPrefs
+import org.meshtastic.core.repository.runInSession
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Config
@@ -206,9 +207,10 @@ internal class RadioControllerImpl(
         // not depend on delivery order between independent StateFlows. The selected address is checked again at the
         // point of association to discard a session that became stale while queued for collection.
         //
-        // Collect the nullable identity together with both active-session coordinates. The admitted lifecycle lease
-        // closes new work on teardown but delays session rollover until association and any destination transaction
-        // commit return. collectLatest still cancels work whose identity or selected address changes independently.
+        // Collect the nullable identity together with both active-session coordinates. Association runs in the
+        // session's scope: teardown joins it, and its predicate stays true until that join, so session rollover cannot
+        // overlap a destination commit. collectLatest still cancels work whose identity or selected address changes
+        // independently.
         // CancellationException preserves structured cancellation; recoverable Exceptions are logged, and fatal
         // Errors propagate.
         @Suppress("TooGenericExceptionCaught")
@@ -240,13 +242,14 @@ internal class RadioControllerImpl(
                     }
                     try {
                         val admitted =
-                            radioInterfaceService.runWithSessionLease(authorizingSession) { lease ->
+                            radioInterfaceService.runInSession(authorizingSession) {
                                 databaseManager.associateDevice(
                                     identity.address,
                                     identity.nodeNum,
                                     identity.deviceId,
-                                    lease::isCurrent,
-                                )
+                                ) {
+                                    radioInterfaceService.activeSession.value == authorizingSession
+                                }
                             }
                         if (!admitted) {
                             Logger.d { "[DeviceAssociation] skip revoked-session node=${identity.nodeNum}" }

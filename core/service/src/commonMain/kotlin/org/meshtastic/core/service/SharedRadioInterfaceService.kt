@@ -22,14 +22,11 @@ import co.touchlab.kermit.Logger
 import kotlinx.atomicfu.atomic
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.channels.BufferOverflow
@@ -83,7 +80,6 @@ import org.meshtastic.core.repository.RadioLinks
 import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.RadioSessionHost
-import org.meshtastic.core.repository.RadioSessionLease
 import org.meshtastic.core.repository.ServiceStateWriter
 import org.meshtastic.core.repository.TransportDisconnectReason
 import org.meshtastic.core.resources.Res
@@ -292,42 +288,7 @@ class SharedRadioInterfaceService(
 
     override fun isSessionActive(session: RadioSessionContext): Boolean = openFor(session) != null
 
-    override fun runIfSessionActive(session: RadioSessionContext, block: () -> Unit): Boolean {
-        if (openFor(session) == null) return false
-        block()
-        return true
-    }
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    override suspend fun runWithSessionLease(
-        session: RadioSessionContext,
-        block: suspend (RadioSessionLease) -> Unit,
-    ): Boolean {
-        val open = openFor(session) ?: return false
-        val lease =
-            object : RadioSessionLease {
-                override val session: RadioSessionContext = session
-
-                override fun isCurrent(): Boolean = activeRadioSession === open
-            }
-        // A child of the session scope, so revokeSession joins it; NonCancellable so teardown waits for the block.
-        var ran = false
-        val work =
-            open.scope.async(start = CoroutineStart.UNDISPATCHED) {
-                if (isActive) {
-                    withContext(NonCancellable) {
-                        block(lease)
-                        ran = true
-                    }
-                }
-            }
-        // join throws only for a cancelled caller. Teardown's cancellation of the child hides its outcome; a failure or
-        // cancellation the block raised while the session is open reaches the caller.
-        work.join()
-        val failure = work.getCompletionExceptionOrNull()
-        if (failure != null && !(failure is CancellationException && (ran || !open.scope.isActive))) throw failure
-        return ran
-    }
+    override fun sessionScope(session: RadioSessionContext): CoroutineScope? = openFor(session)?.scope
 
     /** Admits a new session for [active], or null once [active] is no longer the selected radio's open link. */
     private fun admitSession(active: ActiveLink): RadioSessionContext? {

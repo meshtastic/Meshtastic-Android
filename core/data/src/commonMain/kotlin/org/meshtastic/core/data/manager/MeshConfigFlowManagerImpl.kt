@@ -56,19 +56,26 @@ class MeshConfigFlowManagerImpl(
 
     private val installedSnapshot = atomic<InstalledSnapshot?>(null)
 
-    private fun runForSession(session: RadioSessionContext, block: () -> Unit): Boolean =
-        radioInterfaceService.runIfSessionActive(session, block)
+    private fun runForSession(session: RadioSessionContext, block: () -> Unit): Boolean {
+        if (!isActiveSession(session)) return false
+        block()
+        return true
+    }
 
     private suspend fun runWhileForSession(
         session: RadioSessionContext,
         label: String,
         block: suspend () -> Unit,
-    ): Boolean = radioInterfaceService.runWithSessionLease(session) { withHandlerTimeout(label, block) }
+    ): Boolean {
+        if (!isActiveSession(session)) return false
+        withHandlerTimeout(label, block)
+        return true
+    }
 
     private fun isActiveSession(session: RadioSessionContext): Boolean = radioInterfaceService.isSessionActive(session)
 
     /**
-     * Installs the SDK handshake snapshot under the app's current session lease. The session waits for this call to
+     * Installs the SDK handshake snapshot for the app's current session. The session waits for this call to
      * return true before delivering retained packets. False when the session closed first or the snapshot carries no
      * my_info.
      */
@@ -110,7 +117,7 @@ class MeshConfigFlowManagerImpl(
         return installed
     }
 
-    /** Applies a complete nodes-only SDK download under the same session lease as the initial snapshot. */
+    /** Applies a complete nodes-only SDK download for the same session as the initial snapshot. */
     internal suspend fun installRefreshedNodes(session: RadioSessionContext, nodes: List<NodeInfo>) {
         runWhileForSession(session, "SDK NodeDB refresh") {
             val installed = installedSnapshot.value ?: return@runWhileForSession

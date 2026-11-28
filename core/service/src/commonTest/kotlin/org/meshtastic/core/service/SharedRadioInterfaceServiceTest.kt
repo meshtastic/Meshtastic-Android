@@ -25,8 +25,11 @@ import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.mock
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -35,6 +38,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.withContext
 import org.meshtastic.core.common.state.RadioOperation
 import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.di.CoroutineDispatchers
@@ -42,7 +46,9 @@ import org.meshtastic.core.network.repository.NetworkRepository
 import org.meshtastic.core.network.repository.SerialDevicePresence
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioPrefs
+import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.TransportDisconnectReason
+import org.meshtastic.core.repository.runInSession
 import org.meshtastic.core.testing.FakeBluetoothRepository
 import org.meshtastic.core.testing.FakeRadioPrefs
 import org.meshtastic.core.testing.FakeServiceRepository
@@ -191,7 +197,7 @@ class SharedRadioInterfaceServiceTest {
             val drop = ConnectionState.Reconnecting(MeshtasticException.Transport("lost"), attempt = 1)
 
             link.connection.value = drop
-            // The install was still running under the session's lease when the link dropped.
+            // The install was still running in the session's scope when the link dropped.
             serviceRepository.setConnectionState(ConnectionState.Connected)
             link.host.closeSession(session)
 
@@ -205,17 +211,18 @@ class SharedRadioInterfaceServiceTest {
         val session = assertNotNull(service.activeSession.value)
         val release = CompletableDeferred<Unit>()
         var workFinished = false
-        var leaseWasCurrent = false
-        val work = launch {
-            service.runWithSessionLease(session) { lease ->
-                release.await()
-                workFinished = true
-                leaseWasCurrent = lease.isCurrent()
+        var sessionWasCurrent = false
+        val work =
+            assertNotNull(service.sessionScope(session)).launch(start = CoroutineStart.UNDISPATCHED) {
+                withContext(NonCancellable) {
+                    release.await()
+                    workFinished = true
+                    sessionWasCurrent = service.activeSession.value == session
+                }
             }
-        }
 
         val disconnect = launch { service.disconnect() }
-        assertFalse(disconnect.isCompleted, "disconnect waits for the admitted lease")
+        assertFalse(disconnect.isCompleted, "disconnect waits for the session work")
         assertEquals(0, link.disconnects, "the client stays up until the session's work has drained")
         assertFalse(service.isSessionActive(session), "teardown rejects new work at once")
 
@@ -223,8 +230,8 @@ class SharedRadioInterfaceServiceTest {
         work.join()
         disconnect.join()
 
-        assertTrue(workFinished, "the drain waits for the admitted block to run to its end, not cancel it")
-        assertTrue(leaseWasCurrent, "the lease stays current until the block returns")
+        assertTrue(workFinished, "the drain waits for the session work to run to its end, not cancel it")
+        assertTrue(sessionWasCurrent, "the session stays published until the work returns")
         assertEquals(1, link.disconnects)
         assertTrue(link.closed)
         assertNull(service.activeSession.value)
@@ -232,16 +239,17 @@ class SharedRadioInterfaceServiceTest {
     }
 
     @Test
-    fun `a lease requested while teardown drains is rejected and never runs`() = runTest(testDispatcher) {
+    fun `work requested while teardown drains is rejected and never runs`() = runTest(testDispatcher) {
         // Regression: admission still open during the drain would let new work start under a closing session.
         val (service, _) = connectedService()
         val session = assertNotNull(service.activeSession.value)
         val release = CompletableDeferred<Unit>()
-        val work = launch { service.runWithSessionLease(session) { release.await() } }
+        val work = holdSessionWork(service, session, release)
         val disconnect = launch { service.disconnect() }
         var ran = false
 
-        assertFalse(service.runWithSessionLease(session) { ran = true })
+        assertNull(service.sessionScope(session))
+        assertFalse(service.runInSession(session) { ran = true })
         assertFalse(ran)
 
         release.complete(Unit)
@@ -256,7 +264,7 @@ class SharedRadioInterfaceServiceTest {
             val (service, link) = connectedService()
             val session = assertNotNull(service.activeSession.value)
             val release = CompletableDeferred<Unit>()
-            val work = launch { service.runWithSessionLease(session) { release.await() } }
+            val work = holdSessionWork(service, session, release)
             val close = launch { link.host.closeSession(session) }
 
             assertFailsWith<IllegalStateException> { link.host.openSession() }
@@ -268,21 +276,12 @@ class SharedRadioInterfaceServiceTest {
             assertEquals(session.generation + 1, link.host.openSession()?.generation)
         }
 
-    @Test
-    fun `a lease that teardown overlaps still reports that it ran`() = runTest(testDispatcher) {
-        // Regression: returning the child's await() throws once teardown cancels it, so the caller never saw true.
-        val (service, _) = connectedService()
-        val session = assertNotNull(service.activeSession.value)
-        val release = CompletableDeferred<Unit>()
-        var returned: Boolean? = null
-        val work = launch { returned = service.runWithSessionLease(session) { release.await() } }
-        val disconnect = launch { service.disconnect() }
-
-        release.complete(Unit)
-        disconnect.join()
-        work.join()
-
-        assertEquals(true, returned, "a lease whose block ran returns true even when teardown overlapped it")
+    private fun holdSessionWork(
+        service: SharedRadioInterfaceService,
+        session: RadioSessionContext,
+        release: CompletableDeferred<Unit>,
+    ): Job = assertNotNull(service.sessionScope(session)).launch(start = CoroutineStart.UNDISPATCHED) {
+        withContext(NonCancellable) { release.await() }
     }
 
     @Test

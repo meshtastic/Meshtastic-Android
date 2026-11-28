@@ -17,13 +17,10 @@
 package org.meshtastic.core.testing
 
 import kotlinx.atomicfu.atomic
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -38,7 +35,6 @@ import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.MeshActivity
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
-import org.meshtastic.core.repository.RadioSessionLease
 import org.meshtastic.proto.LockdownAuth
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.MqttClientProxyMessage
@@ -75,39 +71,7 @@ class FakeRadioInterfaceService(val serviceScope: CoroutineScope = MainScope()) 
 
     override fun isSessionActive(session: RadioSessionContext): Boolean = openFor(session) != null
 
-    override fun runIfSessionActive(session: RadioSessionContext, block: () -> Unit): Boolean {
-        if (openFor(session) == null) return false
-        block()
-        return true
-    }
-
-    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
-    override suspend fun runWithSessionLease(
-        session: RadioSessionContext,
-        block: suspend (RadioSessionLease) -> Unit,
-    ): Boolean {
-        val admitted = openFor(session) ?: return false
-        val lease =
-            object : RadioSessionLease {
-                override val session: RadioSessionContext = session
-
-                override fun isCurrent(): Boolean = open === admitted
-            }
-        var ran = false
-        val work =
-            admitted.scope.async(start = CoroutineStart.UNDISPATCHED) {
-                if (isActive) {
-                    withContext(NonCancellable) {
-                        block(lease)
-                        ran = true
-                    }
-                }
-            }
-        work.join()
-        val failure = work.getCompletionExceptionOrNull()
-        if (failure != null && !(failure is CancellationException && (ran || !admitted.scope.isActive))) throw failure
-        return ran
-    }
+    override fun sessionScope(session: RadioSessionContext): CoroutineScope? = openFor(session)?.scope
 
     private val _meshActivity = MutableSharedFlow<MeshActivity>()
     override val meshActivity: Flow<MeshActivity> = _meshActivity.asFlow()

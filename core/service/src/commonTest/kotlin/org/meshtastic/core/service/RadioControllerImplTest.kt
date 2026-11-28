@@ -70,7 +70,6 @@ import org.meshtastic.core.repository.REMOTE_READ_TIMEOUT
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
-import org.meshtastic.core.repository.RadioSessionLease
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.proto.AdminMessage
@@ -154,25 +153,9 @@ class RadioControllerImplTest {
             activeSession
                 ?: MutableStateFlow(deviceAddress.value?.let { RadioSessionContext(sessionGeneration.value, it) })
         every { radioInterfaceService.activeSession } returns resolvedActiveSession
-        everySuspend { radioInterfaceService.runWithSessionLease(any(), any()) } calls
-            {
-                val session = it.args[0] as RadioSessionContext
-
-                @Suppress("UNCHECKED_CAST")
-                val block = it.args[1] as (suspend (RadioSessionLease) -> Unit)
-                if (resolvedActiveSession.value == session) {
-                    block(
-                        object : RadioSessionLease {
-                            override val session: RadioSessionContext = session
-
-                            override fun isCurrent(): Boolean = resolvedActiveSession.value == session
-                        },
-                    )
-                    true
-                } else {
-                    false
-                }
-            }
+        every { radioInterfaceService.isSessionActive(any()) } calls { resolvedActiveSession.value == it.args[0] }
+        every { radioInterfaceService.sessionScope(any()) } calls
+            { if (resolvedActiveSession.value == it.args[0]) scope else null }
         every { meshPrefs.deviceAddress } returns deviceAddress
         every { radioInterfaceService.getDeviceAddress() } returns deviceAddress.value
         return RadioControllerImpl(
