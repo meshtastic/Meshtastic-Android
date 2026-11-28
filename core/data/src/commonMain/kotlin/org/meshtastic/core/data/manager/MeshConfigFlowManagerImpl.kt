@@ -99,7 +99,6 @@ class MeshConfigFlowManagerImpl(
                 ready.channels.orEmpty().forEach { updateChannelSettings(it) }
                 bundle?.configs.orEmpty().forEach { setLocalConfig(it) }
                 moduleConfigs.forEach { setLocalModuleConfig(it) }
-                ready.files.forEach { addFileInfo(it) }
             }
             metadata?.let { nodeRepository.insertMetadata(info.myNodeNum, it) }
             // Before the node install, which persists the local node with its status.
@@ -215,8 +214,6 @@ class MeshConfigFlowManagerImpl(
         radioConfigRepository.clearLocalConfig()
         if (!isCurrent()) return
         radioConfigRepository.clearLocalModuleConfig()
-        if (!isCurrent()) return
-        radioConfigRepository.clearFileManifest()
     }
 
     override fun refreshNodeInfo(): Boolean {

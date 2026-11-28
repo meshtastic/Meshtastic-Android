@@ -16,17 +16,13 @@
  */
 package org.meshtastic.core.data.repository
 
-import co.touchlab.kermit.Logger
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.update
 import org.koin.core.annotation.Single
 import org.meshtastic.core.data.datasource.SwitchingChannelSetDataSource
 import org.meshtastic.core.datastore.LocalConfigDataSource
@@ -52,8 +48,6 @@ import org.meshtastic.sdk.ConfigBundle
  * Class responsible for radio configuration data. Combines access to [nodeDB], [ChannelSet], [LocalConfig] &
  * [LocalModuleConfig].
  */
-private const val MAX_FILE_MANIFEST_ENTRIES = 4096
-
 @Single
 @Suppress("TooManyFunctions") // All functions mandated by RadioConfigRepository interface; logically grouped by concern
 open class RadioConfigRepositoryImpl(
@@ -142,37 +136,12 @@ open class RadioConfigRepositoryImpl(
     override val loraRegionPresetMapFlow: Flow<LoRaRegionPresetMap?> =
         sessionConfigBundle.map { it?.regionPresets }.distinctUntilChanged()
 
-    // FileInfo manifest is session-scoped: accumulated during STATE_SEND_FILEMANIFEST, cleared on each new handshake.
-    private val _fileManifestFlow = MutableStateFlow<List<FileInfo>>(emptyList())
-    override val fileManifestFlow: Flow<List<FileInfo>> = _fileManifestFlow.asStateFlow()
-
-    override suspend fun addFileInfo(info: FileInfo) {
-        // A real device's manifest is bounded by its flash storage (realistically a handful to a few
-        // hundred entries). A rogue/adversarial peer, however, can emit FileInfo packets in a tight loop
-        // for the lifetime of a session -- clearFileManifest only runs on the *next* handshake, so nothing
-        // else bounds this accumulator in between. Cap it defensively.
-        //
-        // handleFileInfo dispatches each packet on its own scope.handledLaunch, so addFileInfo calls can
-        // run concurrently -- a plain read-then-write would race (lost updates, or two callers both seeing
-        // size-1 and bypassing the cap). update{} makes the read/cap/append atomic (CAS retry loop).
-        var capped = false
-        _fileManifestFlow.update { current ->
-            if (current.size >= MAX_FILE_MANIFEST_ENTRIES) {
-                capped = true
-                current
-            } else {
-                capped = false
-                current + info
-            }
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override val fileManifestFlow: Flow<List<FileInfo>> =
+        radioInterfaceService.activeSession.flatMapLatest { session ->
+            session?.let(radioInterfaceService::clientForSession)?.fileManifest ?: flowOf(emptyList())
         }
-        if (capped) {
-            Logger.w { "File manifest capped at $MAX_FILE_MANIFEST_ENTRIES entries, dropping further FileInfo" }
-        }
-    }
 
-    override suspend fun clearFileManifest() {
-        _fileManifestFlow.value = emptyList()
-    }
 
     /** Flow representing the combined [DeviceProfile] protobuf. */
     override val deviceProfileFlow: Flow<DeviceProfile> =

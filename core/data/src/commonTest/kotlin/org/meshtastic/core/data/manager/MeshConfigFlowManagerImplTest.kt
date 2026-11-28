@@ -40,7 +40,6 @@ import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.proto.DeviceMetadata
-import org.meshtastic.proto.FileInfo
 import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.NodeInfo
@@ -122,7 +121,6 @@ class MeshConfigFlowManagerImplTest {
     private fun snapshot(
         nodes: List<NodeInfo> = emptyList(),
         moduleConfigs: List<ModuleConfig> = emptyList(),
-        files: List<FileInfo> = emptyList(),
         myInfo: ProtoMyNodeInfo? = protoMyNodeInfo,
     ) = RadioSessionEvent.Ready(
         sessionId = 1L,
@@ -136,7 +134,6 @@ class MeshConfigFlowManagerImplTest {
         ),
         channels = emptyList(),
         nodes = nodes.associateBy { NodeId(it.num) },
-        files = files,
     )
 
     @Test
@@ -148,23 +145,6 @@ class MeshConfigFlowManagerImplTest {
         verify { notificationPrefs.applyEventFirmwareNodeEventDefault(false) }
         verifySuspend { nodeRepository.insertMetadata(myNodeNum, metadata) }
         verify { nodeManager.setNodeDbReady(true) }
-    }
-
-    @Test
-    fun `SDK snapshot installs the manifest after clearing the old one`() = testScope.runTest {
-        val file = FileInfo.Builder().also { it.file_name = "firmware.bin" }.build()
-        val calls = mutableListOf<String>()
-        everySuspend { radioConfigRepository.clearFileManifest() } calls
-            {
-                calls.add("clear files")
-            }
-        everySuspend { radioConfigRepository.addFileInfo(file) } calls
-            {
-                calls.add("install file")
-            }
-
-        assertTrue(manager.installRadioSnapshot(activeSession, snapshot(files = listOf(file))))
-        assertEquals(listOf("clear files", "install file"), calls)
     }
 
     @Test
