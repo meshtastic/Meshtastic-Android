@@ -129,8 +129,8 @@ disconnects the client, and calls `retryNow()` to end a backoff early when Bluet
 selected USB device comes back. A firmware-maintenance `RadioOperation` closes the link and its end
 reopens it. A post-update GATT refresh goes to the next BLE link through `refreshGattCacheOnNextConnect()`.
 
-Every SDK session becomes an app session, with a generation that keys the session leases database writes
-hold; teardown drains those leases before the next session is admitted.
+Every SDK session becomes an app session with a generation and its own coroutine scope. Database writes run as
+work in that scope, and teardown waits for it before the next session is admitted.
 
 UI code observes `ConnectionStateProvider.connectionState`, which is the SDK's own `ConnectionState`:
 `Connecting` and `Configuring` while a session comes up, `Connected`, `Reconnecting` with its cause and
