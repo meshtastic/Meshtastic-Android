@@ -2450,8 +2450,8 @@ class NodeManagerImplTest {
                     ),
             )
 
-        val index12 = NodeManagerImpl.NodeIndex.fromByNum(nodes12)
-        val index21 = NodeManagerImpl.NodeIndex.fromByNum(nodes21)
+        val index12 = NodeIndex.fromByNum(nodes12)
+        val index21 = NodeIndex.fromByNum(nodes21)
 
         // Both should produce the same byId representative (node2, non-placeholder)
         assertEquals(index12.byId[userId]!!.num, index21.byId[userId]!!.num)
@@ -2867,7 +2867,7 @@ class NodeManagerImplTest {
         val keyB = ByteArray(32) { 12 }.toByteString()
         val sharedId = "!shared"
         val replacementId = "!replacement"
-        var index = NodeManagerImpl.NodeIndex()
+        var index = NodeIndex()
         index =
             index.put(
                 1,

@@ -24,7 +24,6 @@ import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
@@ -40,12 +39,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.job
@@ -54,47 +50,26 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
-import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
-import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.common.di.PROCESS_LIFECYCLE
 import org.meshtastic.core.common.state.RadioOperation
 import org.meshtastic.core.common.state.RadioOperationLock
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.ignoreExceptionSuspend
 import org.meshtastic.core.common.util.safeCatching
-import org.meshtastic.core.common.util.safeCatchingAll
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.model.DeviceAddress
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.MeshActivity
 import org.meshtastic.core.model.util.anonymize
-import org.meshtastic.core.network.repository.NetworkRepository
-import org.meshtastic.core.network.repository.SerialDevicePresence
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioInterfaceService
-import org.meshtastic.core.repository.RadioLink
-import org.meshtastic.core.repository.RadioLinks
 import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.RadioSessionHost
 import org.meshtastic.core.repository.ServiceStateWriter
 import org.meshtastic.core.repository.TransportDisconnectReason
-import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.error_recovery_exhausted
-import org.meshtastic.core.resources.firmware_too_old
-import org.meshtastic.core.resources.getStringSuspend
-import org.meshtastic.core.resources.serial_permission_denied
-import org.meshtastic.core.resources.usb_permission_denied
-import org.meshtastic.core.resources.websocket_connect_failed
-import org.meshtastic.core.resources.websocket_handshake_rejected
-import org.meshtastic.core.resources.websocket_message_too_big
-import org.meshtastic.core.resources.websocket_not_supported
-import org.meshtastic.core.resources.websocket_replaced_by_another_client
-import org.meshtastic.core.resources.websocket_slot_contested
-import org.meshtastic.core.resources.websocket_tls_failed
 import org.meshtastic.proto.LockdownAuth
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.MqttClientProxyMessage
@@ -108,79 +83,9 @@ import org.meshtastic.sdk.RadioClient
 import kotlin.concurrent.Volatile
 
 /**
- * Immutable per-session identity. [generation] is bumped for every app session, one per SDK session of the selected
- * radio, so consumers can discard state retained from a previous session even when the selected address is unchanged.
- */
-data class ActiveRadioSession(val generation: Long, val address: String) {
-    /** Immutable context carried with every frame admitted by this session. */
-    val context = RadioSessionContext(generation = generation, address = address)
-
-    /** Prevent accidental disclosure of the raw transport address in diagnostic interpolation. */
-    override fun toString(): String = "ActiveRadioSession(generation=$generation, address=...)"
-}
-
-/**
  * The admitted app session and the scope its work runs in. Cancelling the scope closes admission; joining it drains.
  */
 private class OpenSession(val active: ActiveRadioSession, val scope: CoroutineScope)
-
-/** The selected radio's open link. Each one gets its own scope, cancelled when the link closes. */
-private class ActiveLink(val address: String, val link: RadioLink, val scope: CoroutineScope) {
-    /** Set when teardown starts, so the link's pipeline cannot open another session. */
-    @Volatile var closing = false
-
-    var connect: Job? = null
-
-    /** The link's session pipeline; teardown waits for it so the last session's end is written before it returns. */
-    var pipeline: Job? = null
-
-    /** Whether this link has reached [ConnectionState.Connected]; failures before that name a connect problem. */
-    @Volatile var connected = false
-
-    /** The reason last shown for this link, so an attempt that fails the same way stays quiet. */
-    @Volatile var shownReason: TransportDisconnectReason? = null
-}
-
-/** The user-facing text for [reason]. Lookup fails only outside a full resource runtime; the name beats silence. */
-internal suspend fun connectionErrorText(reason: TransportDisconnectReason): String = safeCatchingAll {
-    getStringSuspend(reason.toConnectionErrorMessage())
-}
-    .getOrDefault(reason.name)
-
-internal fun TransportDisconnectReason.toConnectionErrorMessage(): StringResource = when (this) {
-    TransportDisconnectReason.ReplacedByAnotherClient -> Res.string.websocket_replaced_by_another_client
-    TransportDisconnectReason.WebSocketConnectFailed -> Res.string.websocket_connect_failed
-    TransportDisconnectReason.WebSocketHandshakeRejected -> Res.string.websocket_handshake_rejected
-    TransportDisconnectReason.WebSocketNotSupported -> Res.string.websocket_not_supported
-    TransportDisconnectReason.WebSocketTlsFailed -> Res.string.websocket_tls_failed
-    TransportDisconnectReason.WebSocketMessageTooBig -> Res.string.websocket_message_too_big
-    TransportDisconnectReason.WebSocketSlotContested -> Res.string.websocket_slot_contested
-    TransportDisconnectReason.HandshakeRecoveryExhausted -> Res.string.error_recovery_exhausted
-    TransportDisconnectReason.FirmwareTooOld -> Res.string.firmware_too_old
-    TransportDisconnectReason.UsbPermissionDenied -> Res.string.usb_permission_denied
-    TransportDisconnectReason.SerialPermissionDenied -> Res.string.serial_permission_denied
-}
-
-/**
- * What a connection state's failure means to the user. A reconnect that follows a working connection says nothing: the
- * state itself shows the retry.
- */
-private fun ActiveLink.failureReason(state: ConnectionState): TransportDisconnectReason? = when (state) {
-    is ConnectionState.Failed ->
-        when (state.cause) {
-            is MeshtasticException.FirmwareTooOld -> TransportDisconnectReason.FirmwareTooOld
-
-            is MeshtasticException.HandshakeTimeout,
-            is MeshtasticException.Protocol,
-            -> TransportDisconnectReason.HandshakeRecoveryExhausted
-
-            else -> link.failureReason(state.cause)
-        }
-
-    is ConnectionState.Reconnecting -> if (connected) null else link.failureReason(state.cause)
-
-    else -> null
-}
 
 /**
  * The selected radio's SDK client and the app sessions it carries.
@@ -191,13 +96,11 @@ private fun ActiveLink.failureReason(state: ConnectionState): TransportDisconnec
  * [ConnectionState] to [ServiceStateWriter]. [ConnectionState.Connected] shows only once the app holds the session's
  * config and nodes.
  */
-@Suppress("LargeClass", "LongParameterList", "TooManyFunctions")
+@Suppress("LongParameterList", "TooManyFunctions")
 @Single
 class SharedRadioInterfaceService(
     private val dispatchers: CoroutineDispatchers,
-    private val bluetoothRepository: BluetoothRepository,
-    private val networkRepository: NetworkRepository,
-    private val serialDevicePresence: SerialDevicePresence,
+    private val environment: LinkEnvironmentObserver,
     @Named(PROCESS_LIFECYCLE) private val processLifecycle: Lifecycle,
     private val radioPrefs: RadioPrefs,
     private val links: RadioLinks,
@@ -247,8 +150,6 @@ class SharedRadioInterfaceService(
     /** A firmware update asked for the next Bluetooth link to refresh its GATT cache. */
     private val gattRefreshPending = atomic(false)
 
-    private val listenersInitialized = atomic(false)
-    private val initLock = Mutex()
     private val linkMutex = Mutex()
 
     private val _meshActivity =
@@ -469,58 +370,15 @@ class SharedRadioInterfaceService(
     }
 
     private fun initStateListeners() {
-        if (listenersInitialized.value) return
-        processLifecycle.coroutineScope.launch {
-            initLock.withLock {
-                if (listenersInitialized.value) return@withLock
-                listenersInitialized.value = true
-
-                // The client waits for Bluetooth, a network or the USB device by itself; these end a backoff early.
-                bluetoothRepository.state
-                    .map { it.enabled }
-                    .distinctUntilChanged()
-                    .filter { it }
-                    .onEach { retryNow() }
-                    .catch { Logger.e(it) { "bluetoothRepository.state flow crashed" } }
-                    .launchIn(processLifecycle.coroutineScope)
-
-                networkRepository.networkAvailable
-                    .distinctUntilChanged()
-                    .filter { it }
-                    .onEach { retryNow() }
-                    .catch { Logger.e(it) { "networkRepository.networkAvailable flow crashed" } }
-                    .launchIn(processLifecycle.coroutineScope)
-
-                combine(currentDeviceAddressFlow, serialDevicePresence.deviceKeys, ::selectedSerialPresent)
-                    .distinctUntilChanged()
-                    .drop(1)
-                    .filter { it }
-                    .onEach { retryNow() }
-                    .catch { Logger.e(it) { "serialDevicePresence flow crashed" } }
-                    .launchIn(processLifecycle.coroutineScope)
-
-                observeRadioOperations()
-            }
-        }
-    }
-
-    /** A firmware-maintenance operation owns the port: the link closes for it and reopens when it ends. */
-    private fun observeRadioOperations() {
-        radioOperationLock.holders
-            .map { holders -> holders.values.any(RadioOperation::suppressesTransport) }
-            .distinctUntilChanged()
-            .drop(1)
-            .onEach { suppressed ->
-                linkMutex.withLock {
-                    if (suppressed) {
-                        ignoreExceptionSuspend { closeLinkLocked() }
-                    } else if (connectionRequested) {
-                        openLinkLocked()
-                    }
+        environment.start(currentDeviceAddressFlow, ::retryNow) { suppressed ->
+            linkMutex.withLock {
+                if (suppressed) {
+                    ignoreExceptionSuspend { closeLinkLocked() }
+                } else if (connectionRequested) {
+                    openLinkLocked()
                 }
             }
-            .catch { Logger.e(it) { "radioOperationLock flow crashed" } }
-            .launchIn(processLifecycle.coroutineScope)
+        }
     }
 
     override fun connect() {
@@ -656,16 +514,4 @@ class SharedRadioInterfaceService(
     override fun reportReceiveActivity() {
         _meshActivity.tryEmit(MeshActivity.Receive)
     }
-}
-
-/** Whether the selected radio is a USB serial device that is attached now. */
-private fun selectedSerialPresent(address: String?, keys: Set<String>): Boolean {
-    val key =
-        DeviceAddress.parse(address)
-            ?.takeIf { it.interfaceId == InterfaceId.SERIAL }
-            ?.identity
-            ?.takeIf {
-                it.isNotEmpty()
-            }
-    return key != null && key in keys
 }

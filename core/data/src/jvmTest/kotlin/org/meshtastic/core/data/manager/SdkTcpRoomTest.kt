@@ -90,6 +90,7 @@ import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.RadioSessionHost
 import org.meshtastic.core.repository.ServiceStateWriter
 import org.meshtastic.core.repository.StoredPassphrase
+import org.meshtastic.core.service.LinkEnvironmentObserver
 import org.meshtastic.core.service.ServiceRepositoryImpl
 import org.meshtastic.core.service.SharedRadioInterfaceService
 import org.meshtastic.core.testing.FakeBluetoothRepository
@@ -633,19 +634,25 @@ class SdkTcpRoomTest {
 
                 override fun open(address: String, scope: CoroutineScope): RadioLink = openLink(scope)
             }
+        val lock = RadioOperationLock()
         return SharedRadioInterfaceService(
             dispatchers = dispatchers,
-            bluetoothRepository = FakeBluetoothRepository(),
-            networkRepository = network,
-            serialDevicePresence =
-            object : SerialDevicePresence {
-                override val deviceKeys = MutableStateFlow(emptySet<String>())
-            },
+            environment =
+            LinkEnvironmentObserver(
+                bluetoothRepository = FakeBluetoothRepository(),
+                networkRepository = network,
+                serialDevicePresence =
+                object : SerialDevicePresence {
+                    override val deviceKeys = MutableStateFlow(emptySet<String>())
+                },
+                radioOperationLock = lock,
+                processLifecycle = lifecycle,
+            ),
             processLifecycle = lifecycle,
             radioPrefs = FakeRadioPrefs().apply { setDevAddr(address) },
             links = links,
             analytics = mock(MockMode.autofill),
-            radioOperationLock = RadioOperationLock(),
+            radioOperationLock = lock,
             serviceStateWriter = stateWriter,
         )
     }
