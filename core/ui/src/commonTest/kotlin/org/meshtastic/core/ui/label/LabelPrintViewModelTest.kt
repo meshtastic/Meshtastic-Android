@@ -163,6 +163,51 @@ class LabelPrintViewModelTest {
         assertEquals(LabelPrinterStatus.READY to false, state.status to state.printed)
     }
 
+    @Test
+    fun `a step the printer refuses is shown as refused and the printer stays ready`() = runTest(dispatcher) {
+        prefs.printerAddress.value = mine.address
+        scanner.emitDevice(mine)
+        // Every request gets its own reply carrying 00, which the density and label type replies use for failure.
+        connection.service.beforeWrite = { _, bytes ->
+            val type = bytes[2].toInt() and 0xFF
+            val offset = if (type in setOf(0x21, 0x23, 0xA3, 0xA5)) 16 else 1
+            connection.service.emitNotification(channel, NiimbotPacket(type + offset, byteArrayOf(0)).toBytes())
+        }
+        val viewModel = viewModel().apply { start() }
+
+        viewModel.print(LabelBitmap(width = 96, height = 1))
+        advanceUntilIdle()
+
+        val state = viewModel.state.value
+        assertEquals(LabelPrintError.Rejected, state.error)
+        assertEquals(LabelPrinterStatus.READY to false, state.status to state.printed)
+    }
+
+    // A write that fails ends the print as lost while the fake's connection still reads as connected, as when
+    // notifications stop with the GATT link up: no drop is ever reported for it.
+    @Test
+    fun `a print that loses the link lets go of the printer and looks for it again`() = runTest(dispatcher) {
+        val viewModel = readyOnSilentPrinter()
+        connection.service.writeException = IllegalStateException("write failed")
+
+        viewModel.print(LabelBitmap(width = 96, height = 1))
+
+        val state = viewModel.state.value
+        assertEquals(LabelPrinterStatus.READY to LabelPrintError.NoResponse, state.status to state.error)
+        assertEquals(1 to 2, connection.disconnectCalls to connection.connectAndAwaitCalls)
+    }
+
+    @Test
+    fun `a second lost link is not searched for again until the user asks`() = runTest(dispatcher) {
+        val viewModel = readyOnSilentPrinter()
+        connection.service.writeException = IllegalStateException("write failed")
+        viewModel.print(LabelBitmap(width = 96, height = 1))
+
+        viewModel.print(LabelBitmap(width = 96, height = 1))
+
+        assertEquals(LabelPrinterStatus.IDLE to 2, viewModel.state.value.status to connection.connectAndAwaitCalls)
+    }
+
     // The printer here never answers, so a print runs into its reply timeouts: 2 s each for the heartbeat, the status
     // data and the density request, failing at 6 s unless something ends it first.
     private fun readyOnSilentPrinter(): LabelPrintViewModel {
@@ -263,17 +308,18 @@ class LabelPrintViewModelTest {
         }
 
     /**
-     * A connection whose first connect never completes and whose disconnects take time: 5 s for the first, which is the
-     * canceled connect cleaning up after itself, and 1 s for the rest.
+     * A connection whose disconnects take time, 5 s for the first and 1 s for the rest, and whose first connect never
+     * completes when [firstConnectHangs].
      */
-    private class SlowToLetGo(private val inner: FakeBleConnection) : BleConnection by inner {
+    private class SlowToLetGo(private val inner: FakeBleConnection, private val firstConnectHangs: Boolean = true) :
+        BleConnection by inner {
         var connects = 0
         var disconnectsInFlight = 0
         var connectedDuringDisconnect = false
         private var disconnects = 0
 
         override suspend fun connectAndAwait(device: BleDevice, timeout: Duration): BleConnectionState {
-            if (connects++ == 0) awaitCancellation()
+            if (connects++ == 0 && firstConnectHangs) awaitCancellation()
             connectedDuringDisconnect = connectedDuringDisconnect || disconnectsInFlight > 0
             return inner.connectAndAwait(device, timeout)
         }
@@ -306,4 +352,27 @@ class LabelPrintViewModelTest {
             assertEquals(2 to false, slow.connects to slow.connectedDuringDisconnect)
             assertEquals(LabelPrinterStatus.READY, viewModel.state.value.status)
         }
+
+    // The second close's disconnect takes 1 s and the first's 5 s, so a connect that waited out only the latest would
+    // land while the first still runs, and that one would then drop the new connection.
+    @Test
+    fun `a reopened sheet waits out every earlier disconnect before it connects`() = runTest(dispatcher) {
+        prefs.printerAddress.value = mine.address
+        scanner.emitDevice(mine)
+        val slow = SlowToLetGo(connection, firstConnectHangs = false)
+        val factory =
+            object : BleConnectionFactory {
+                override fun create(scope: CoroutineScope, tag: String): BleConnection = slow
+            }
+        val viewModel = LabelPrintViewModel(NiimbotPrinterFactory(scanner, factory), prefs)
+        viewModel.start()
+
+        viewModel.stop()
+        viewModel.stop()
+        viewModel.start()
+        advanceTimeBy(20.seconds)
+
+        assertEquals(2 to false, slow.connects to slow.connectedDuringDisconnect)
+        assertEquals(LabelPrinterStatus.READY, viewModel.state.value.status)
+    }
 }

@@ -88,7 +88,7 @@ class LabelPrintViewModel(printerFactory: NiimbotPrinterFactory, private val pre
     /** The connect or print in flight. It is canceled before another starts, so only the latest writes state. */
     private var work: Job? = null
 
-    /** The disconnect [stop] started, which the next connect waits out. */
+    /** The latest disconnect, which waits out the ones before it and which the next connect waits out. */
     private var closing: Job? = null
 
     /**
@@ -121,7 +121,7 @@ class LabelPrintViewModel(printerFactory: NiimbotPrinterFactory, private val pre
         search?.cancel()
         work?.cancel()
         _state.value = LabelPrintState()
-        closing = viewModelScope.launch { printer.disconnect() }
+        disconnectPrinter()
     }
 
     /** Connects to the printer the user picked. */
@@ -137,6 +137,11 @@ class LabelPrintViewModel(printerFactory: NiimbotPrinterFactory, private val pre
         work = viewModelScope.launch {
             val result = safeCatching { printer.print(bitmap) }
             ensureActive()
+            if (result.exceptionOrNull() is NiimbotException.LinkLost) {
+                // Its notifications or writes failed while Bluetooth may still hold the link, so no drop is reported.
+                onPrinterDropped(release = true)
+                return@launch
+            }
             if (result.isSuccess) searchedAfterDrop = false
             _state.update { state ->
                 state.copy(
@@ -172,16 +177,28 @@ class LabelPrintViewModel(printerFactory: NiimbotPrinterFactory, private val pre
         }
     }
 
-    /** The printer went away (auto power-off, out of range): its print is over, and it is looked for once. */
-    private fun onPrinterDropped() {
+    /**
+     * The printer went away (auto power-off, out of range): its print is over, and it is looked for once. [release]
+     * also disconnects a link the printer stopped answering on; the sheet is out of READY first, so the drop that
+     * disconnect reports is not handled twice.
+     */
+    private fun onPrinterDropped(release: Boolean = false) {
         val wasPrinting = _state.value.status == LabelPrinterStatus.PRINTING
         work?.cancel()
         if (wasPrinting) _state.update { it.copy(error = LabelPrintError.NoResponse) }
-        if (searchedAfterDrop) {
-            _state.update { it.copy(status = LabelPrinterStatus.IDLE, printerName = null) }
-        } else {
+        _state.update { it.copy(status = LabelPrinterStatus.IDLE, printerName = null) }
+        if (release) disconnectPrinter()
+        if (!searchedAfterDrop) {
             searchedAfterDrop = true
             startSearch()
+        }
+    }
+
+    private fun disconnectPrinter() {
+        val previous = closing
+        closing = viewModelScope.launch {
+            previous?.join()
+            printer.disconnect()
         }
     }
 
